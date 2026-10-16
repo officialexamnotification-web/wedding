@@ -17,6 +17,7 @@ import {
   BrandKit,
   AudioTrack,
   DrawBrushSettings,
+  SavedProject,
 } from './types/editor';
 import { INITIAL_TEMPLATES } from './data/templates';
 import { generateQrDataUrl } from './utils/qrHelper';
@@ -59,6 +60,51 @@ export default function App() {
     strokeWidth: 4,
     opacity: 1,
   });
+
+  // Saved Projects in localStorage
+  const [savedProjects, setSavedProjects] = useState<SavedProject[]>(() => {
+    try {
+      const raw = localStorage.getItem('imantran_saved_projects');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const handleSaveProject = () => {
+    const newProj: SavedProject = {
+      id: `proj-${Date.now()}`,
+      title: title || 'Untitled Royal Invitation',
+      updatedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      aspectRatio,
+      pages,
+    };
+    const next = [newProj, ...savedProjects.slice(0, 14)];
+    setSavedProjects(next);
+    try {
+      localStorage.setItem('imantran_saved_projects', JSON.stringify(next));
+    } catch {
+      // ignore storage quota errors
+    }
+  };
+
+  const handleLoadProject = (proj: SavedProject) => {
+    setTitle(proj.title);
+    setAspectRatio(proj.aspectRatio);
+    setCurrentPageIndex(0);
+    setSelectedElementId(null);
+    commitPages(proj.pages);
+  };
+
+  const handleDeleteProject = (id: string) => {
+    const next = savedProjects.filter((p) => p.id !== id);
+    setSavedProjects(next);
+    try {
+      localStorage.setItem('imantran_saved_projects', JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  };
 
   // Undo / Redo history
   const [history, setHistory] = useState<CardPage[][]>([INITIAL_TEMPLATES[0].pages]);
@@ -269,6 +315,7 @@ export default function App() {
         fontFamily: t.fontFamily,
         fontSize: t.fontSize,
         color: t.color,
+        gradientText: t.gradientText,
         fontWeight: t.fontWeight,
         fontStyle: t.fontStyle,
         letterSpacing: t.letterSpacing,
@@ -352,6 +399,294 @@ export default function App() {
         }),
       };
     });
+    commitPages(updated);
+  };
+
+  // Canva Find & Replace Text Across All Slides
+  const handleFindAndReplaceText = (findStr: string, replaceStr: string): number => {
+    let matches = 0;
+    const regex = new RegExp(findStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const updated = pages.map((page) => ({
+      ...page,
+      elements: page.elements.map((el) => {
+        if (el.type === 'text') {
+          const t = el as TextElement;
+          if (regex.test(t.text)) {
+            matches += 1;
+            return { ...t, text: t.text.replace(regex, replaceStr) };
+          }
+        }
+        return el;
+      }),
+    }));
+    if (matches > 0) {
+      commitPages(updated);
+    }
+    return matches;
+  };
+
+  // Canva Magic Translate Card Text
+  const handleTranslateCard = (targetLang: 'hindi' | 'english' | 'hinglish' | 'sanskrit') => {
+    const dictionary: Record<string, Record<string, string>> = {
+      hindi: {
+        'SHUBH VIVAH': '॥ शुभ विवाह ॥',
+        'SAVE THE DATE': 'मांगलिक तिथि स्मरण',
+        'Together with their families': 'दोनों परिवारों के स्नेहिल आशीर्वाद सहित',
+        'weds': 'संग',
+        'GRAND RECEPTION': 'भव्य स्वागत समारोह',
+        'SANGEET & MEHENDI': 'संगीत एवं मेहंदी उत्सव',
+      },
+      english: {
+        '॥ शुभ विवाह ॥': 'SHUBH VIVAH',
+        'मांगलिक तिथि स्मरण': 'SAVE THE DATE',
+        'संग': 'weds',
+        'भव्य स्वागत समारोह': 'GRAND RECEPTION',
+      },
+      sanskrit: {
+        'SHUBH VIVAH': '॥ शुभम् पाणिग्रहण संस्कारः ॥',
+        'SAVE THE DATE': 'मंगल मुहूर्त आमंत्रणम्',
+        'weds': 'परिणय सूत्रे',
+      },
+      hinglish: {
+        'SHUBH VIVAH': 'Royal Shaadi Celebration ✨',
+        'SAVE THE DATE': 'Block The Dates! 🗓️',
+        'weds': 'Ki Shaadi With',
+      },
+    };
+
+    const mapToUse = dictionary[targetLang] || {};
+    const updated = pages.map((p, idx) => {
+      if (idx !== currentPageIndex) return p;
+      return {
+        ...p,
+        elements: p.elements.map((el) => {
+          if (el.type !== 'text') return el;
+          const t = el as TextElement;
+          let nextText = t.text;
+          Object.entries(mapToUse).forEach(([k, v]) => {
+            nextText = nextText.replace(new RegExp(k, 'gi'), v);
+          });
+          return {
+            ...t,
+            text: nextText,
+            fontFamily:
+              targetLang === 'hindi' || targetLang === 'sanskrit'
+                ? "'Tiro Devanagari Hindi', serif"
+                : t.fontFamily,
+          };
+        }),
+      };
+    });
+    commitPages(updated);
+  };
+
+  // Canva Space Evenly / Smart Tidy Up Elements on Current Page
+  const handleDistributeElements = (axis: 'horizontal' | 'vertical' | 'tidy') => {
+    const dim = CANVAS_SIZES[aspectRatio];
+    const updated = pages.map((p, idx) => {
+      if (idx !== currentPageIndex) return p;
+      const unlocked = p.elements.filter((e) => !e.locked && e.type !== 'shape');
+      if (unlocked.length < 2) return p;
+      const sorted = [...unlocked].sort((a, b) => (axis === 'horizontal' ? a.x - b.x : a.y - b.y));
+      const minY = 60;
+      const maxY = dim.height - 120;
+      const stepY = (maxY - minY) / Math.max(1, sorted.length - 1);
+
+      const posMap = new Map<string, { x: number; y: number }>();
+      sorted.forEach((el, i) => {
+        if (axis === 'tidy' || axis === 'vertical') {
+          posMap.set(el.id, {
+            x: axis === 'tidy' ? Math.round((dim.width - el.width) / 2) : el.x,
+            y: Math.round(minY + i * stepY),
+          });
+        } else {
+          posMap.set(el.id, {
+            x: Math.round((dim.width - el.width) / 2),
+            y: el.y,
+          });
+        }
+      });
+
+      return {
+        ...p,
+        elements: p.elements.map((el) => {
+          const nextPos = posMap.get(el.id);
+          return nextPos ? { ...el, ...nextPos } : el;
+        }),
+      };
+    });
+    commitPages(updated);
+  };
+
+  // Canva Smart Page Layouts
+  const handleApplyPageLayout = (layoutId: string) => {
+    const dim = CANVAS_SIZES[aspectRatio];
+    let newElements: CanvasItem[] = [];
+
+    if (layoutId === 'royal-cover') {
+      newElements = [
+        {
+          id: `frame-${Date.now()}`,
+          type: 'shape',
+          shapeType: 'gold-frame',
+          x: 20,
+          y: 20,
+          width: dim.width - 40,
+          height: dim.height - 40,
+          rotation: 0,
+          opacity: 0.9,
+          zIndex: 1,
+          strokeColor: '#D4AF37',
+          strokeWidth: 2,
+        },
+        {
+          id: `shloka-${Date.now()}`,
+          type: 'text',
+          text: '॥ श्री गणेशाय नमः ॥',
+          fontFamily: "'Tiro Devanagari Hindi', serif",
+          fontSize: 16,
+          color: '#FFEAA7',
+          fontWeight: 'bold',
+          fontStyle: 'normal',
+          textAlign: 'center',
+          letterSpacing: 2,
+          lineHeight: 1.2,
+          x: 40,
+          y: 45,
+          width: dim.width - 80,
+          height: 36,
+          rotation: 0,
+          opacity: 1,
+          zIndex: 3,
+        },
+        {
+          id: `photo-${Date.now()}`,
+          type: 'image',
+          src: '/images/wedding_couple_1791965341379.jpg',
+          mask: 'arch',
+          borderWidth: 3,
+          borderColor: '#D4AF37',
+          x: Math.round((dim.width - 210) / 2),
+          y: 95,
+          width: 210,
+          height: 250,
+          rotation: 0,
+          opacity: 1,
+          zIndex: 4,
+        },
+        {
+          id: `couple-${Date.now()}`,
+          type: 'text',
+          text: 'Siddharth & Ananya',
+          fontFamily: "'Alex Brush', cursive",
+          fontSize: 40,
+          color: '#FFF2C6',
+          fontWeight: 'normal',
+          fontStyle: 'normal',
+          textAlign: 'center',
+          letterSpacing: 1,
+          lineHeight: 1.2,
+          x: 30,
+          y: 370,
+          width: dim.width - 60,
+          height: 60,
+          rotation: 0,
+          opacity: 1,
+          zIndex: 5,
+        },
+        {
+          id: `date-${Date.now()}`,
+          type: 'text',
+          text: '18 DECEMBER 2026 • UDAIPUR PALACE',
+          fontFamily: "'Cinzel', serif",
+          fontSize: 14,
+          color: '#D4AF37',
+          fontWeight: 'bold',
+          fontStyle: 'normal',
+          textAlign: 'center',
+          letterSpacing: 3,
+          lineHeight: 1.3,
+          x: 30,
+          y: 445,
+          width: dim.width - 60,
+          height: 40,
+          rotation: 0,
+          opacity: 1,
+          zIndex: 6,
+        },
+      ];
+    } else if (layoutId === '3-events-schedule') {
+      newElements = [
+        {
+          id: `frame-${Date.now()}`,
+          type: 'shape',
+          shapeType: 'ornate-border',
+          x: 20,
+          y: 20,
+          width: dim.width - 40,
+          height: dim.height - 40,
+          rotation: 0,
+          opacity: 0.9,
+          zIndex: 1,
+          strokeColor: '#D4AF37',
+          strokeWidth: 3,
+        },
+        {
+          id: `head-${Date.now()}`,
+          type: 'text',
+          text: 'WEDDING CELEBRATION ITINERARY',
+          fontFamily: "'Cinzel', serif",
+          fontSize: 20,
+          color: '#FFEAA7',
+          fontWeight: 'bold',
+          fontStyle: 'normal',
+          textAlign: 'center',
+          letterSpacing: 2.5,
+          lineHeight: 1.2,
+          x: 40,
+          y: 60,
+          width: dim.width - 80,
+          height: 45,
+          rotation: 0,
+          opacity: 1,
+          zIndex: 3,
+        },
+        {
+          id: `tbl-${Date.now()}`,
+          type: 'table',
+          rows: [
+            ['CEREMONY', 'TIMING', 'PALACE VENUE'],
+            ['Haldi & Mehendi', '10:30 AM', 'Lotus Courtyard'],
+            ['Royal Sangeet', '07:30 PM', 'Grand Ballroom'],
+            ['Shubh Vivah', '11:15 PM', 'Royal Mandap'],
+            ['Reception Dinner', '08:00 PM', 'Palace Lawns'],
+          ],
+          headerBgColor: '#630c1d',
+          headerTextColor: '#FFEAA7',
+          cellBgColor: 'rgba(20,5,10,0.85)',
+          altRowBgColor: 'rgba(45,10,20,0.75)',
+          textColor: '#FFF2C6',
+          borderColor: '#D4AF37',
+          borderWidth: 1,
+          fontSize: 11,
+          fontFamily: "'Cinzel', serif",
+          borderRadius: 12,
+          x: 35,
+          y: 140,
+          width: dim.width - 70,
+          height: 220,
+          rotation: 0,
+          opacity: 1,
+          zIndex: 5,
+        },
+      ];
+    } else {
+      return;
+    }
+
+    const updated = pages.map((p, idx) =>
+      idx === currentPageIndex ? { ...p, elements: newElements } : p
+    );
     commitPages(updated);
   };
 
@@ -663,11 +998,17 @@ export default function App() {
         onDeletePage={handleDeletePage}
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        showRulers={showRulers}
+        onToggleRulers={() => setShowRulers((r) => !r)}
+        showSafeZones={showSafeZones}
+        onToggleSafeZones={() => setShowSafeZones((s) => !s)}
+        onSaveProject={handleSaveProject}
+        onTranslateCard={handleTranslateCard}
       />
 
       {/* Main Workspace Body */}
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Responsive Customization Studio (Desktop Left Rail + Flyout Drawer, Mobile Bottom Dock + Bottom Sheet) */}
+        {/* Responsive Customization Studio (Desktop 12-Tab Left Rail + Flyout Drawer, Mobile Bottom Dock + Sheet) */}
         <Sidebar
           aspectRatio={aspectRatio}
           onSelectTemplate={handleSelectTemplate}
@@ -695,6 +1036,13 @@ export default function App() {
           onApplyBrandKit={handleApplyBrandKit}
           activeAudioTrackId={activeAudioTrack.id}
           onSelectAudioTrack={setActiveAudioTrack}
+          savedProjects={savedProjects}
+          onSaveProject={handleSaveProject}
+          onLoadProject={handleLoadProject}
+          onDeleteProject={handleDeleteProject}
+          onFindAndReplaceText={handleFindAndReplaceText}
+          onTranslateCard={handleTranslateCard}
+          onApplyPageLayout={handleApplyPageLayout}
         />
 
         {/* Center Canvas Area + Contextual Properties Toolbar + Bottom Filmstrip */}
@@ -722,6 +1070,7 @@ export default function App() {
             onToggleSafeZones={() => setShowSafeZones((s) => !s)}
             drawBrush={drawBrush}
             onExitDrawMode={() => setDrawBrush((prev) => ({ ...prev, isEnabled: false }))}
+            onDistributeElements={handleDistributeElements}
           />
 
           <Canvas

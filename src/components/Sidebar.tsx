@@ -36,6 +36,19 @@ import {
   Volume2,
   CreditCard,
   Frame,
+  Table2,
+  BarChart3,
+  LayoutGrid,
+  Clock,
+  Barcode,
+  FolderKanban,
+  Languages,
+  Replace,
+  Wifi,
+  Calendar,
+  Save,
+  FolderOpen,
+  RotateCcw,
 } from 'lucide-react';
 import {
   CardTemplate,
@@ -45,6 +58,11 @@ import {
   StickerElement,
   QrElement,
   ShapeElement,
+  TableElement,
+  ChartElement,
+  GridElement,
+  CountdownElement,
+  BarcodeElement,
   CardPage,
   AspectRatioType,
   CANVAS_SIZES,
@@ -53,6 +71,9 @@ import {
   BrandKit,
   AudioTrack,
   DrawBrushSettings,
+  SavedProject,
+  ChartVariant,
+  GridLayoutVariant,
 } from '../types/editor';
 import { TEMPLATE_CATEGORIES, INITIAL_TEMPLATES } from '../data/templates';
 import { STICKER_CATEGORIES, STICKERS, StickerDefinition } from '../data/stickers';
@@ -66,9 +87,10 @@ export type SidebarTab =
   | 'brand'
   | 'photos'
   | 'draw'
+  | 'projects'
+  | 'apps'
   | 'audio'
   | 'backgrounds'
-  | 'qr'
   | 'layers'
   | 'slides';
 
@@ -99,21 +121,31 @@ interface SidebarProps {
   onApplyBrandKit?: (kit: BrandKit) => void;
   activeAudioTrackId?: string;
   onSelectAudioTrack?: (track: AudioTrack) => void;
+  savedProjects?: SavedProject[];
+  onSaveProject?: () => void;
+  onLoadProject?: (proj: SavedProject) => void;
+  onDeleteProject?: (id: string) => void;
+  onFindAndReplaceText?: (findStr: string, replaceStr: string) => number;
+  onTranslateCard?: (targetLang: 'hindi' | 'english' | 'hinglish' | 'sanskrit') => void;
+  onApplyPageLayout?: (layoutId: string) => void;
 }
 
-const SHAPE_PRESETS: {
+export const SHAPE_PRESETS: {
   shapeType: ShapeVariant;
   label: string;
   desc: string;
+  category: 'frames' | 'shapes' | 'lines' | 'badges';
   width: number;
   height: number;
   strokeWidth: number;
   fillColor?: string;
+  innerText?: string;
 }[] = [
   {
     shapeType: 'gold-frame',
     label: 'Royal Corner Frame',
     desc: 'Full card gold border',
+    category: 'frames',
     width: 410,
     height: 760,
     strokeWidth: 2,
@@ -122,6 +154,7 @@ const SHAPE_PRESETS: {
     shapeType: 'ornate-border',
     label: 'Double Ornate Border',
     desc: 'Double line palace frame',
+    category: 'frames',
     width: 390,
     height: 740,
     strokeWidth: 3,
@@ -130,66 +163,156 @@ const SHAPE_PRESETS: {
     shapeType: 'arch-frame',
     label: 'Jharokha Arch Frame',
     desc: 'Rajasthani arch outline',
+    category: 'frames',
     width: 220,
     height: 280,
+    strokeWidth: 2,
+  },
+  {
+    shapeType: 'octagon-frame',
+    label: 'Octagon Jali Frame',
+    desc: '8-corner heritage plaque',
+    category: 'frames',
+    width: 220,
+    height: 220,
+    strokeWidth: 2,
+  },
+  {
+    shapeType: 'mandala-ring',
+    label: 'Sacred Mandala Ring',
+    desc: 'Intricate concentric ring',
+    category: 'frames',
+    width: 180,
+    height: 180,
     strokeWidth: 2,
   },
   {
     shapeType: 'royal-badge',
     label: 'Royal Seal Medallion',
     desc: 'Starburst wedding seal',
-    width: 140,
-    height: 140,
+    category: 'badges',
+    width: 150,
+    height: 150,
     strokeWidth: 2,
-    fillColor: 'rgba(212, 175, 55, 0.14)',
+    fillColor: 'rgba(212, 175, 55, 0.16)',
+    innerText: 'SHUBH VIVAH',
   },
   {
     shapeType: 'scallop-badge',
     label: 'Lotus Scallop Seal',
     desc: '12-petal royal emblem',
+    category: 'badges',
     width: 150,
     height: 150,
     strokeWidth: 2,
-    fillColor: 'rgba(196, 30, 58, 0.25)',
+    fillColor: 'rgba(196, 30, 58, 0.28)',
+    innerText: 'SAVE THE DATE',
   },
   {
     shapeType: 'ribbon-banner',
     label: 'Royal Ribbon Banner',
     desc: 'Ceremony title scroll',
+    category: 'badges',
     width: 280,
     height: 54,
     strokeWidth: 2,
-    fillColor: 'rgba(99, 12, 29, 0.85)',
-  },
-  {
-    shapeType: 'mandala-ring',
-    label: 'Sacred Mandala Ring',
-    desc: 'Intricate concentric ring',
-    width: 180,
-    height: 180,
-    strokeWidth: 2,
+    fillColor: 'rgba(99, 12, 29, 0.9)',
+    innerText: 'GRAND RECEPTION',
   },
   {
     shapeType: 'pill-banner',
     label: 'Event Pill Banner',
     desc: 'Tag for dates & hashtags',
+    category: 'badges',
     width: 240,
     height: 44,
     strokeWidth: 2,
-    fillColor: 'rgba(26, 4, 8, 0.78)',
+    fillColor: 'rgba(26, 4, 8, 0.85)',
+    innerText: '#SidKiAnanya',
+  },
+  {
+    shapeType: 'shield-crest',
+    label: 'Royal Crest Shield',
+    desc: 'Heritage family coat of arms',
+    category: 'badges',
+    width: 140,
+    height: 160,
+    strokeWidth: 2,
+    fillColor: 'rgba(212, 175, 55, 0.15)',
+    innerText: 'S & A',
+  },
+  {
+    shapeType: 'speech-bubble',
+    label: 'Callout Quote Bubble',
+    desc: 'Host message callout',
+    category: 'badges',
+    width: 200,
+    height: 110,
+    strokeWidth: 2,
+    fillColor: 'rgba(45, 6, 16, 0.85)',
+    innerText: 'Padharo Mhare Des!',
+  },
+  {
+    shapeType: 'cloud-badge',
+    label: 'Cloud Blessing Tag',
+    desc: 'Soft scalloped cloud',
+    category: 'badges',
+    width: 190,
+    height: 110,
+    strokeWidth: 2,
+    fillColor: 'rgba(212, 175, 55, 0.14)',
   },
   {
     shapeType: 'divider-line',
     label: 'Diamond Divider Line',
     desc: 'Section ornament rule',
+    category: 'lines',
     width: 280,
     height: 24,
     strokeWidth: 2,
   },
   {
+    shapeType: 'line-floral',
+    label: 'Lotus Floral Divider',
+    desc: 'Royal center motif rule',
+    category: 'lines',
+    width: 290,
+    height: 28,
+    strokeWidth: 2,
+  },
+  {
+    shapeType: 'line-arrow-both',
+    label: 'Double Arrow Connector',
+    desc: 'Canva pointer line',
+    category: 'lines',
+    width: 260,
+    height: 24,
+    strokeWidth: 2,
+  },
+  {
+    shapeType: 'line-dashed',
+    label: 'Dashed Cut / Fold Line',
+    desc: 'Coupon / RSVP tear line',
+    category: 'lines',
+    width: 280,
+    height: 20,
+    strokeWidth: 2,
+  },
+  {
+    shapeType: 'arrow-right',
+    label: 'Directional Pointer Arrow',
+    desc: 'Venue route arrow',
+    category: 'lines',
+    width: 160,
+    height: 55,
+    strokeWidth: 2,
+    fillColor: 'rgba(212, 175, 55, 0.25)',
+  },
+  {
     shapeType: 'rectangle',
     label: 'Gold Card Box',
     desc: 'Backdrop box for text',
+    category: 'shapes',
     width: 320,
     height: 160,
     strokeWidth: 2,
@@ -199,14 +322,16 @@ const SHAPE_PRESETS: {
     shapeType: 'circle',
     label: 'Sacred Circle Ring',
     desc: 'Monogram / couple ring',
+    category: 'shapes',
     width: 150,
     height: 150,
     strokeWidth: 2,
   },
   {
     shapeType: 'diamond',
-    label: 'Royal Diamond Frame',
+    label: 'Royal Diamond Gem',
     desc: 'Rotated geometric gem',
+    category: 'shapes',
     width: 150,
     height: 150,
     strokeWidth: 2,
@@ -214,7 +339,8 @@ const SHAPE_PRESETS: {
   {
     shapeType: 'star',
     label: 'Auspicious Starburst',
-    desc: '8-point festive star',
+    desc: '5-point festive star',
+    category: 'shapes',
     width: 130,
     height: 130,
     strokeWidth: 2,
@@ -224,25 +350,65 @@ const SHAPE_PRESETS: {
     shapeType: 'hexagon',
     label: 'Palace Hexagon',
     desc: '6-sided geometric badge',
+    category: 'shapes',
     width: 140,
     height: 140,
+    strokeWidth: 2,
+  },
+  {
+    shapeType: 'pentagon',
+    label: 'Royal Pentagon',
+    desc: '5-sided crest polygon',
+    category: 'shapes',
+    width: 140,
+    height: 140,
+    strokeWidth: 2,
+  },
+  {
+    shapeType: 'triangle',
+    label: 'Sacred Pyramid Triangle',
+    desc: 'Geometric triangle',
+    category: 'shapes',
+    width: 140,
+    height: 130,
     strokeWidth: 2,
   },
   {
     shapeType: 'heart-shape',
     label: 'Wedding Couple Heart',
     desc: 'Romantic outline badge',
+    category: 'shapes',
     width: 140,
     height: 130,
     strokeWidth: 2,
-    fillColor: 'rgba(196, 30, 58, 0.2)',
+    fillColor: 'rgba(196, 30, 58, 0.25)',
   },
   {
-    shapeType: 'octagon-frame',
-    label: 'Octagon Jali Frame',
-    desc: '8-corner heritage plaque',
+    shapeType: 'parallelogram',
+    label: 'Modern Slant Tag',
+    desc: 'Angled banner box',
+    category: 'shapes',
+    width: 200,
+    height: 70,
+    strokeWidth: 2,
+    fillColor: 'rgba(212, 175, 55, 0.15)',
+  },
+  {
+    shapeType: 'trapezoid',
+    label: 'Mandap Stage Trapezoid',
+    desc: 'Architectural base shape',
+    category: 'shapes',
     width: 220,
-    height: 220,
+    height: 80,
+    strokeWidth: 2,
+  },
+  {
+    shapeType: 'cross-plus',
+    label: 'Auspicious Plus Emblem',
+    desc: 'Symmetric cross symbol',
+    category: 'shapes',
+    width: 110,
+    height: 110,
     strokeWidth: 2,
   },
 ];
@@ -288,6 +454,14 @@ export const BRAND_KITS: BrandKit[] = [
     subheadingFont: "'Alex Brush', cursive",
     bodyFont: "'Cormorant Garamond', serif",
   },
+  {
+    id: 'mysore-ivory',
+    name: 'Mysore Silk Ivory & Temple Gold',
+    primaryColors: ['#2C1810', '#5C2E14', '#D4AF37', '#FFFDF7', '#F5E6C8'],
+    headingFont: "'Cinzel', serif",
+    subheadingFont: "'Great Vibes', cursive",
+    bodyFont: "'Playfair Display', serif",
+  },
 ];
 
 export const AUDIO_TRACKS: AudioTrack[] = [
@@ -331,6 +505,14 @@ export const AUDIO_TRACKS: AudioTrack[] = [
     tempo: 1.6,
     description: 'Spiritual temple bells and Vedic resonance',
   },
+  {
+    id: 'bollywood-royal',
+    name: 'Jashn-e-Bahara Orchestra Strings',
+    category: 'bollywood',
+    ragaNotes: [261.63, 329.63, 392.0, 493.88, 523.25, 659.25],
+    tempo: 1.1,
+    description: 'Romantic royal bridal entry symphony',
+  },
 ];
 
 const CANVA_FONT_COMBINATIONS = [
@@ -366,6 +548,14 @@ const CANVA_FONT_COMBINATIONS = [
     subFont: "'Cormorant Garamond', serif",
     color: '#F5D77F',
   },
+  {
+    title: '॥ शुभ गृह प्रवेश ॥',
+    subtitle: 'नूतन गृह एवं वास्तु शांति पूजन',
+    caption: 'शर्मा परिवार आपका हार्दिक स्वागत करता है',
+    titleFont: "'Rozha One', serif",
+    subFont: "'Kalam', cursive",
+    color: '#FDE047',
+  },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -394,8 +584,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onApplyBrandKit,
   activeAudioTrackId = 'royal-shehnai',
   onSelectAudioTrack,
+  savedProjects = [],
+  onSaveProject,
+  onLoadProject,
+  onDeleteProject,
+  onFindAndReplaceText,
+  onTranslateCard,
+  onApplyPageLayout,
 }) => {
   const [activeTab, setActiveTab] = useState<SidebarTab>('templates');
+  const [designSubTab, setDesignSubTab] = useState<'templates' | 'layouts' | 'styles'>('templates');
+  const [elementSubTab, setElementSubTab] = useState<
+    'all' | 'shapes' | 'frames' | 'grids' | 'tables' | 'charts' | 'stickers'
+  >('all');
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [templateCategory, setTemplateCategory] = useState<string>('all');
   const [stickerCategory, setStickerCategory] = useState<string>('all');
@@ -403,6 +604,48 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+
+  // Apps State
+  const [qrType, setQrType] = useState<'maps' | 'rsvp' | 'custom' | 'upi' | 'wifi' | 'calendar'>(
+    'maps'
+  );
+  const [mapsLocation, setMapsLocation] = useState<string>(
+    'The Leela Palace, Chanakyapuri, New Delhi'
+  );
+  const [rsvpPhone, setRsvpPhone] = useState<string>('+91 98765 43210');
+  const [rsvpMessage, setRsvpMessage] = useState<string>(
+    'Attending the wedding! Count us in for 2 guests.'
+  );
+  const [customQrUrl, setCustomQrUrl] = useState<string>('https://invitationbazaar.com');
+  const [upiId, setUpiId] = useState<string>('sharmafamily@okicici');
+  const [upiPayee, setUpiPayee] = useState<string>('Sharma Family Wedding Shagun');
+  const [wifiSsid, setWifiSsid] = useState<string>('RoyalPalace_Guest_WiFi');
+  const [wifiPass, setWifiPass] = useState<string>('ShubhVivah2026');
+  const [qrColor, setQrColor] = useState<string>('#1a0408');
+  const [qrBgColor, setQrBgColor] = useState<string>('#FFF4D6');
+
+  // Find & Replace State
+  const [findText, setFindText] = useState<string>('');
+  const [replaceText, setReplaceText] = useState<string>('');
+  const [replaceFeedback, setReplaceFeedback] = useState<string>('');
+
+  // Barcode / Pass State
+  const [barcodeCode, setBarcodeCode] = useState<string>('VIP-VIVAH-2026-089');
+  const [barcodeLabel, setBarcodeLabel] = useState<string>('ROYAL ENTRY PASS • GATE 1');
+
+  // Countdown State
+  const [countdownDate, setCountdownDate] = useState<string>('2026-12-18T19:00');
+  const [countdownLabel, setCountdownLabel] = useState<string>('COUNTDOWN TO SHUBH MUHURAT');
+
+  // Brand Kit Custom Builder State
+  const [customBrandName, setCustomBrandName] = useState<string>('My Family Royal Kit');
+  const [customBrandColor1, setCustomBrandColor1] = useState<string>('#3d0510');
+  const [customBrandColor2, setCustomBrandColor2] = useState<string>('#D4AF37');
+  const [customBrandColor3, setCustomBrandColor3] = useState<string>('#FFEAA7');
+
+  // Photo URL / Upload
+  const [customPhotoUrl, setCustomPhotoUrl] = useState<string>('');
+  const [customSolidBg, setCustomSolidBg] = useState<string>('#3d0510');
 
   const currentPage = pages[currentPageIndex] || pages[0];
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
@@ -422,25 +665,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const totalDuration = pages
     .reduce((sum, p) => sum + (p.duration || 4.5), 0)
     .toFixed(1);
-
-  // QR state
-  const [qrType, setQrType] = useState<'maps' | 'rsvp' | 'custom' | 'upi'>('maps');
-  const [mapsLocation, setMapsLocation] = useState<string>(
-    'The Leela Palace, Chanakyapuri, New Delhi'
-  );
-  const [rsvpPhone, setRsvpPhone] = useState<string>('+91 98765 43210');
-  const [rsvpMessage, setRsvpMessage] = useState<string>(
-    'Attending the wedding! Count us in for 2 guests.'
-  );
-  const [customQrUrl, setCustomQrUrl] = useState<string>('https://invitationbazaar.com');
-  const [upiId, setUpiId] = useState<string>('sharmafamily@okicici');
-  const [upiPayee, setUpiPayee] = useState<string>('Sharma Family Wedding Shagun');
-  const [qrColor, setQrColor] = useState<string>('#1a0408');
-  const [qrBgColor, setQrBgColor] = useState<string>('#FFF4D6');
-
-  // Photo URL / Upload
-  const [customPhotoUrl, setCustomPhotoUrl] = useState<string>('');
-  const [customSolidBg, setCustomSolidBg] = useState<string>('#3d0510');
 
   const handleTabClick = (tab: SidebarTab) => {
     if (activeTab === tab && isDrawerOpen) {
@@ -512,6 +736,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         upiPayee
       )}&cu=INR`;
       label = 'Scan for Blessing / Shagun';
+    } else if (qrType === 'wifi') {
+      target = `WIFI:T:WPA;S:${wifiSsid};P:${wifiPass};;`;
+      label = `Wi-Fi: ${wifiSsid}`;
+    } else if (qrType === 'calendar') {
+      target = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+        'Royal Wedding Celebration'
+      )}&location=${encodeURIComponent(mapsLocation)}`;
+      label = 'Scan to Save Event in Calendar';
     } else {
       target = customQrUrl || 'https://example.com';
       label = 'Scan QR Code';
@@ -546,7 +778,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     fontFamily: string,
     fontSize: number,
     fontWeight: 'normal' | 'bold' | '600' | '700' | '900' = 'normal',
-    color = '#F5D77F'
+    color = '#F5D77F',
+    extra?: Partial<TextElement>
   ) => {
     const width = Math.min(dimensions.width - 60, 360);
     const newText: TextElement = {
@@ -564,10 +797,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       x: Math.round((dimensions.width - width) / 2),
       y: Math.round(dimensions.height * 0.35),
       width,
-      height: Math.max(42, Math.round(fontSize * 2.2)),
+      height: Math.max(46, Math.round(fontSize * 2.2)),
       rotation: 0,
       opacity: 1,
       zIndex: (currentPage?.elements.length || 5) + 5,
+      ...extra,
     };
     onAddElement(newText);
   };
@@ -596,6 +830,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       strokeColor: '#D4AF37',
       strokeWidth: preset.strokeWidth,
       fillColor: preset.fillColor || 'transparent',
+      innerText: preset.innerText || '',
+      innerTextColor: '#FFEAA7',
+      innerFontSize: 13,
+      innerFontFamily: "'Cinzel', serif",
       x: Math.round((dimensions.width - w) / 2),
       y:
         preset.shapeType === 'gold-frame' || preset.shapeType === 'ornate-border'
@@ -635,24 +873,196 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   // Add photo helper
-  const handleAddPhoto = (url: string, mask: PhotoMask = 'arch') => {
+  const handleAddPhoto = (url: string, mask: PhotoMask = 'arch', caption?: string) => {
     const newImg: ImageElement = {
       id: `img-${Date.now()}`,
       type: 'image',
       src: url,
       mask,
+      caption,
       borderWidth: 2,
       borderColor: '#D4AF37',
       borderRadius: mask === 'rounded' ? 16 : 0,
       x: Math.round((dimensions.width - 190) / 2),
       y: Math.round(dimensions.height * 0.25),
       width: 190,
-      height: 210,
+      height: 220,
       rotation: 0,
       opacity: 1,
       zIndex: (currentPage?.elements.length || 5) + 4,
     };
     onAddElement(newImg);
+  };
+
+  // Add Canva Table Element (Wedding Itinerary / Menu / Seating)
+  const handleAddTable = (presetType: 'itinerary' | 'menu' | 'seating') => {
+    let rows: string[][] = [];
+    if (presetType === 'itinerary') {
+      rows = [
+        ['CEREMONY', 'TIME', 'VENUE HALL'],
+        ['Haldi & Mehendi', '10:00 AM', 'Poolside Lawn'],
+        ['Royal Sangeet', '07:30 PM', 'Durbar Ballroom'],
+        ['Shubh Muhurat', '11:15 PM', 'Lotus Mandap'],
+        ['Grand Reception', '08:00 PM', 'Royal Gardens'],
+      ];
+    } else if (presetType === 'menu') {
+      rows = [
+        ['ROYAL DAAWAT', 'SPECIALTY', 'COUNTER'],
+        ['Welcome Drinks', 'Kesar Thandai', 'Foyer'],
+        ['Royal Main Course', 'Rajasthani Thali', 'East Wing'],
+        ['Mithai Mahal', 'Ghevar & Rabri', 'Dessert Lounge'],
+      ];
+    } else {
+      rows = [
+        ['TABLE NO.', 'FAMILY / GROUP', 'ZONE'],
+        ['Table #01', 'Bride & Groom Family', 'Stage Front'],
+        ['Table #02', 'Close Relatives', 'VIP Royal'],
+        ['Table #03', 'Friends & Colleagues', 'Central Hall'],
+      ];
+    }
+
+    const w = Math.min(dimensions.width - 44, 380);
+    const h = rows.length * 36 + 12;
+    const newTable: TableElement = {
+      id: `table-${Date.now()}`,
+      type: 'table',
+      rows,
+      headerBgColor: '#630c1d',
+      headerTextColor: '#FFEAA7',
+      cellBgColor: 'rgba(20, 5, 10, 0.85)',
+      altRowBgColor: 'rgba(45, 10, 20, 0.75)',
+      textColor: '#FFF2C6',
+      borderColor: '#D4AF37',
+      borderWidth: 1,
+      fontSize: 11,
+      fontFamily: "'Cinzel', serif",
+      borderRadius: 10,
+      cellPadding: 6,
+      x: Math.round((dimensions.width - w) / 2),
+      y: Math.round((dimensions.height - h) / 2),
+      width: w,
+      height: h,
+      rotation: 0,
+      opacity: 1,
+      zIndex: (currentPage?.elements.length || 5) + 6,
+    };
+    onAddElement(newTable);
+  };
+
+  // Add Canva Chart / Infographic Element
+  const handleAddChart = (chartType: ChartVariant) => {
+    const w = Math.min(dimensions.width - 60, 330);
+    const h = 210;
+    const newChart: ChartElement = {
+      id: `chart-${Date.now()}`,
+      type: 'chart',
+      chartType,
+      title:
+        chartType === 'progress-rings'
+          ? 'GUEST RSVP CONFIRMATION'
+          : 'CELEBRATION EVENTS TIMELINE',
+      data: [
+        { label: 'Haldi', value: 85, color: '#F59E0B' },
+        { label: 'Sangeet', value: 95, color: '#EC4899' },
+        { label: 'Vivah', value: 100, color: '#D4AF37' },
+        { label: 'Reception', value: 90, color: '#10B981' },
+      ],
+      showLegend: true,
+      showValues: true,
+      textColor: '#FFEAA7',
+      backgroundColor: 'rgba(20, 5, 10, 0.82)',
+      borderColor: '#D4AF37',
+      x: Math.round((dimensions.width - w) / 2),
+      y: Math.round((dimensions.height - h) / 2),
+      width: w,
+      height: h,
+      rotation: 0,
+      opacity: 1,
+      zIndex: (currentPage?.elements.length || 5) + 6,
+    };
+    onAddElement(newChart);
+  };
+
+  // Add Canva Photo Collage Grid Element
+  const handleAddGrid = (gridLayout: GridLayoutVariant) => {
+    const w = Math.min(dimensions.width - 50, 340);
+    const h = 250;
+    const defaultImgs = [
+      '/images/wedding_couple_1791965341379.jpg',
+      '/images/sangeet_haldi_1791965342768.jpg',
+      '/images/royal_mandap_cover.webp',
+      '/images/royal_vivah_peacocks.webp',
+    ];
+    const newGrid: GridElement = {
+      id: `grid-${Date.now()}`,
+      type: 'grid',
+      gridLayout,
+      images: defaultImgs,
+      gap: 6,
+      borderRadius: 12,
+      borderColor: '#D4AF37',
+      borderWidth: 2,
+      backgroundColor: 'rgba(212, 175, 55, 0.12)',
+      x: Math.round((dimensions.width - w) / 2),
+      y: Math.round((dimensions.height - h) / 2),
+      width: w,
+      height: h,
+      rotation: 0,
+      opacity: 1,
+      zIndex: (currentPage?.elements.length || 5) + 5,
+    };
+    onAddElement(newGrid);
+  };
+
+  // Add Canva Live Countdown Timer Element
+  const handleAddCountdown = (
+    styleVariant: CountdownElement['styleVariant'] = 'royal-gold'
+  ) => {
+    const w = Math.min(dimensions.width - 50, 340);
+    const h = 96;
+    const newCountdown: CountdownElement = {
+      id: `countdown-${Date.now()}`,
+      type: 'countdown',
+      targetDate: countdownDate || '2026-12-18T19:00',
+      eventLabel: countdownLabel || 'SHUBH VIVAH MUHURAT IN',
+      styleVariant,
+      primaryColor: '#FFEAA7',
+      backgroundColor: 'rgba(45, 6, 16, 0.88)',
+      borderColor: '#D4AF37',
+      showSeconds: true,
+      x: Math.round((dimensions.width - w) / 2),
+      y: Math.round(dimensions.height * 0.72),
+      width: w,
+      height: h,
+      rotation: 0,
+      opacity: 1,
+      zIndex: (currentPage?.elements.length || 5) + 6,
+    };
+    onAddElement(newCountdown);
+  };
+
+  // Add Canva Barcode / Royal Entry Pass Element
+  const handleAddBarcode = () => {
+    const w = 260;
+    const h = 84;
+    const newBarcode: BarcodeElement = {
+      id: `barcode-${Date.now()}`,
+      type: 'barcode',
+      codeValue: barcodeCode || 'VIP-VIVAH-2026-089',
+      label: barcodeLabel || 'ROYAL VENUE ENTRY PASS',
+      color: '#1a0408',
+      backgroundColor: '#FFF4D6',
+      borderColor: '#D4AF37',
+      showText: true,
+      x: Math.round((dimensions.width - w) / 2),
+      y: Math.round(dimensions.height * 0.75),
+      width: w,
+      height: h,
+      rotation: 0,
+      opacity: 1,
+      zIndex: (currentPage?.elements.length || 5) + 6,
+    };
+    onAddElement(newBarcode);
   };
 
   // Filter templates
@@ -671,12 +1081,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'templates' as SidebarTab, label: 'Design', icon: LayoutTemplate },
     { id: 'elements' as SidebarTab, label: 'Elements', icon: Shapes },
     { id: 'text' as SidebarTab, label: 'Text', icon: Type },
-    { id: 'brand' as SidebarTab, label: 'Brand Kit', icon: Crown },
+    { id: 'brand' as SidebarTab, label: 'Brand', icon: Crown },
     { id: 'photos' as SidebarTab, label: 'Uploads', icon: ImageIcon },
     { id: 'draw' as SidebarTab, label: 'Draw', icon: PenTool },
+    { id: 'projects' as SidebarTab, label: 'Projects', icon: FolderKanban },
+    { id: 'apps' as SidebarTab, label: 'Apps', icon: QrCode },
     { id: 'audio' as SidebarTab, label: 'Audio', icon: Music },
     { id: 'backgrounds' as SidebarTab, label: 'Bg / Paper', icon: Palette },
-    { id: 'qr' as SidebarTab, label: 'QR & Apps', icon: QrCode },
     { id: 'layers' as SidebarTab, label: 'Position', icon: Layers },
     { id: 'slides' as SidebarTab, label: 'Pages', icon: Film },
   ];
@@ -689,6 +1100,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (el.type === 'qr') return `QR: ${(el as QrElement).label}`;
     if (el.type === 'shape') return `Shape: ${(el as ShapeElement).shapeType}`;
     if (el.type === 'drawing') return 'Freehand Brush Stroke';
+    if (el.type === 'table') return `Table (${(el as TableElement).rows.length} rows)`;
+    if (el.type === 'chart') return `Chart: ${(el as ChartElement).title}`;
+    if (el.type === 'grid') return `Collage Grid (${(el as GridElement).gridLayout})`;
+    if (el.type === 'countdown') return `Countdown: ${(el as CountdownElement).eventLabel}`;
+    if (el.type === 'barcode') return `Entry Pass: ${(el as BarcodeElement).codeValue}`;
     return 'Element';
   };
 
@@ -696,7 +1112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <>
       {/* ================= DESKTOP DOCK & FLYOUT DRAWER (md:flex) ================= */}
       <div className="hidden md:flex h-full select-none shrink-0 z-40 relative">
-        {/* Far-Left Activity Rail (Canva Pro 11-Tab Dock) */}
+        {/* Far-Left Activity Rail (Canva Pro 12-Tab Dock) */}
         <div className="w-18 bg-neutral-950 border-r border-neutral-800/80 flex flex-col items-center py-2 gap-1 z-20 shrink-0 overflow-y-auto no-scrollbar">
           {TABS_CONFIG.map((tab) => {
             const Icon = tab.icon;
@@ -727,7 +1143,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Expandable Content Drawer */}
         {isDrawerOpen && (
-          <aside className="w-80 sm:w-84 bg-neutral-900 border-r border-neutral-800 flex flex-col h-full shadow-2xl relative shrink-0">
+          <aside className="w-80 sm:w-86 bg-neutral-900 border-r border-neutral-800 flex flex-col h-full shadow-2xl relative shrink-0">
             {/* Drawer Header */}
             <div className="h-11 border-b border-neutral-800/80 px-4 flex items-center justify-between bg-neutral-950/60 shrink-0">
               <span className="text-xs font-bold text-amber-200 uppercase tracking-wider flex items-center gap-1.5">
@@ -816,222 +1232,484 @@ export const Sidebar: React.FC<SidebarProps> = ({
   function renderTabContent() {
     return (
       <>
-        {/* ================= 1. DESIGN / TEMPLATES TAB ================= */}
+        {/* ================= 1. DESIGN (TEMPLATES, LAYOUTS & STYLES) TAB ================= */}
         {activeTab === 'templates' && (
           <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-semibold text-neutral-100">Canva Royal Templates</h3>
-              <p className="text-xs text-neutral-400">
-                Click any design to load all multi-page slides in editor
-              </p>
-            </div>
-
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
-              {TEMPLATE_CATEGORIES.map((cat) => (
+            {/* Canva 3 Sub-Tabs: Templates | Layouts | Styles */}
+            <div className="grid grid-cols-3 rounded-xl bg-neutral-950 p-1 border border-neutral-800 text-xs">
+              {(
+                [
+                  { id: 'templates', label: 'Templates' },
+                  { id: 'layouts', label: 'Layouts' },
+                  { id: 'styles', label: 'Styles' },
+                ] as const
+              ).map((st) => (
                 <button
-                  key={cat.id}
-                  onClick={() => setTemplateCategory(cat.id)}
-                  className={`text-[11px] whitespace-nowrap px-2.5 py-1 rounded-lg font-medium transition ${
-                    templateCategory === cat.id
-                      ? 'bg-amber-500 text-neutral-950 font-bold'
-                      : 'bg-neutral-800 text-neutral-400 hover:text-neutral-200'
+                  key={st.id}
+                  onClick={() => setDesignSubTab(st.id)}
+                  className={`py-1.5 rounded-lg font-semibold transition ${
+                    designSubTab === st.id
+                      ? 'bg-amber-500 text-neutral-950 shadow'
+                      : 'text-neutral-400 hover:text-neutral-200'
                   }`}
                 >
-                  {cat.label}
+                  {st.label}
                 </button>
               ))}
             </div>
 
-            <div className="space-y-3">
-              {filteredTemplates.map((template) => {
-                const firstPage = template.pages[0];
-                return (
-                  <div
-                    key={template.id}
-                    onClick={() => onSelectTemplate(template)}
-                    className="group cursor-pointer rounded-xl overflow-hidden border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/80 hover:bg-neutral-800 transition duration-200 shadow-md flex flex-col"
-                  >
-                    <div
-                      className="h-28 w-full p-2 relative flex flex-col justify-between overflow-hidden"
-                      style={{ background: firstPage?.backgroundValue }}
+            {designSubTab === 'templates' && (
+              <>
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+                  {TEMPLATE_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setTemplateCategory(cat.id)}
+                      className={`text-[11px] whitespace-nowrap px-2.5 py-1 rounded-lg font-medium transition ${
+                        templateCategory === cat.id
+                          ? 'bg-amber-500 text-neutral-950 font-bold'
+                          : 'bg-neutral-800 text-neutral-400 hover:text-neutral-200'
+                      }`}
                     >
-                      {(() => {
-                        const img = firstPage?.elements.find((e) => e.type === 'image') as any;
-                        if (!img?.src) return null;
-                        return (
-                          <img
-                            src={img.src}
-                            alt=""
-                            referrerPolicy="no-referrer"
-                            loading="lazy"
-                            className="absolute inset-0 w-full h-full object-cover opacity-65 group-hover:scale-105 transition duration-300"
-                          />
-                        );
-                      })()}
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
 
-                      <div className="flex items-center justify-between text-[10px] text-amber-200 z-10 font-mono">
-                        <span className="bg-black/60 px-1.5 py-0.5 rounded backdrop-blur-xs">
-                          {template.aspectRatio}
-                        </span>
-                        <span className="bg-black/60 px-1.5 py-0.5 rounded capitalize">
-                          {template.category}
-                        </span>
-                      </div>
+                <div className="space-y-3">
+                  {filteredTemplates.map((template) => {
+                    const firstPage = template.pages[0];
+                    return (
+                      <div
+                        key={template.id}
+                        onClick={() => onSelectTemplate(template)}
+                        className="group cursor-pointer rounded-xl overflow-hidden border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/80 hover:bg-neutral-800 transition duration-200 shadow-md flex flex-col"
+                      >
+                        <div
+                          className="h-28 w-full p-2 relative flex flex-col justify-between overflow-hidden"
+                          style={{ background: firstPage?.backgroundValue }}
+                        >
+                          {(() => {
+                            const img = firstPage?.elements.find((e) => e.type === 'image') as any;
+                            if (!img?.src) return null;
+                            return (
+                              <img
+                                src={img.src}
+                                alt=""
+                                referrerPolicy="no-referrer"
+                                loading="lazy"
+                                className="absolute inset-0 w-full h-full object-cover opacity-65 group-hover:scale-105 transition duration-300"
+                              />
+                            );
+                          })()}
 
-                      <div className="text-center z-10 px-1">
-                        <p className="font-tiro text-amber-200 text-xs drop-shadow font-semibold">
-                          {template.title}
-                        </p>
-                      </div>
+                          <div className="flex items-center justify-between text-[10px] text-amber-200 z-10 font-mono">
+                            <span className="bg-black/60 px-1.5 py-0.5 rounded backdrop-blur-xs">
+                              {template.aspectRatio}
+                            </span>
+                            <span className="bg-black/60 px-1.5 py-0.5 rounded capitalize">
+                              {template.category}
+                            </span>
+                          </div>
 
-                      <div className="text-right z-10">
-                        <span className="text-[9px] text-amber-300/80 bg-black/60 px-1.5 py-0.5 rounded">
-                          {template.pages.length} Pages
-                        </span>
+                          <div className="text-center z-10 px-1">
+                            <p className="font-tiro text-amber-200 text-xs drop-shadow font-semibold">
+                              {template.title}
+                            </p>
+                          </div>
+
+                          <div className="text-right z-10">
+                            <span className="text-[9px] text-amber-300/80 bg-black/60 px-1.5 py-0.5 rounded">
+                              {template.pages.length} Pages
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-2.5 flex items-center justify-between bg-neutral-900/90">
+                          <span className="text-xs font-medium text-neutral-200 truncate flex-1 pr-2">
+                            {template.title}
+                          </span>
+                          <span className="text-[11px] text-amber-400 font-semibold group-hover:underline shrink-0">
+                            Apply All →
+                          </span>
+                        </div>
                       </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {designSubTab === 'layouts' && (
+              <div className="space-y-3">
+                <p className="text-xs text-neutral-400">
+                  Canva Smart Page Layouts — restructure your current slide with 1 click:
+                </p>
+                {[
+                  {
+                    id: 'royal-cover',
+                    name: 'Royal Cover Arch + Couple Title',
+                    desc: 'Centered Jharokha portrait with गणेश वंदना & names',
+                  },
+                  {
+                    id: '3-events-schedule',
+                    name: '3-Function Wedding Itinerary',
+                    desc: 'Structured Haldi, Sangeet & Reception timeline blocks',
+                  },
+                  {
+                    id: 'rsvp-qr-venue',
+                    name: 'Venue GPS QR + RSVP Card',
+                    desc: 'Large scannable Google Maps QR with family hosts list',
+                  },
+                  {
+                    id: 'couple-story-quote',
+                    name: 'Shloka & Couple Monogram Seal',
+                    desc: 'Sacred Sanskrit verse with ornate gold border & badge',
+                  },
+                ].map((lay) => (
+                  <button
+                    key={lay.id}
+                    onClick={() => onApplyPageLayout && onApplyPageLayout(lay.id)}
+                    className="w-full p-3 rounded-xl border border-neutral-700 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 text-left transition space-y-1 group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-amber-200 group-hover:text-amber-300">
+                        {lay.name}
+                      </span>
+                      <span className="text-[10px] text-amber-400 font-semibold">+ Apply</span>
                     </div>
+                    <p className="text-[11px] text-neutral-400">{lay.desc}</p>
+                  </button>
+                ))}
+              </div>
+            )}
 
-                    <div className="p-2.5 flex items-center justify-between bg-neutral-900/90">
-                      <span className="text-xs font-medium text-neutral-200 truncate flex-1 pr-2">
-                        {template.title}
-                      </span>
-                      <span className="text-[11px] text-amber-400 font-semibold group-hover:underline shrink-0">
-                        Apply All →
-                      </span>
+            {designSubTab === 'styles' && (
+              <div className="space-y-3">
+                <p className="text-xs text-neutral-400">
+                  Canva 1-Click Color & Font Pairings — shuffle your card palette instantly:
+                </p>
+                {BRAND_KITS.map((kit) => (
+                  <div
+                    key={kit.id}
+                    onClick={() => onApplyBrandKit && onApplyBrandKit(kit)}
+                    className="p-3 rounded-xl border border-neutral-700 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 cursor-pointer transition space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-amber-200">{kit.name}</span>
+                      <Shuffle className="w-3.5 h-3.5 text-amber-400" />
+                    </div>
+                    <div className="flex h-6 rounded-lg overflow-hidden border border-neutral-700">
+                      {kit.primaryColors.map((c, idx) => (
+                        <div key={idx} className="flex-1 h-full" style={{ backgroundColor: c }} />
+                      ))}
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {/* ================= 2. ELEMENTS (SHAPES, PHOTO FRAMES & MOTIFS) TAB ================= */}
+        {/* ================= 2. ELEMENTS (SHAPES, FRAMES, GRIDS, TABLES, CHARTS, STICKERS) TAB ================= */}
         {activeTab === 'elements' && (
-          <div className="space-y-5">
-            {/* Canva Smart Photo Frames (Drop-Ready) */}
-            <div className="space-y-2.5">
-              <div>
-                <h3 className="text-sm font-semibold text-neutral-100 flex items-center gap-1.5">
-                  <Frame className="w-4 h-4 text-amber-400" />
-                  <span>Canva Photo Frames (फ़ोटो फ़्रेम)</span>
-                </h3>
-                <p className="text-xs text-neutral-400">
-                  Insert royal masked frames & replace photo in 1 click
-                </p>
-              </div>
+          <div className="space-y-4">
+            {/* Category Pills inside Elements */}
+            <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar">
+              {(
+                [
+                  { id: 'all', label: 'All' },
+                  { id: 'shapes', label: 'Shapes & Lines' },
+                  { id: 'frames', label: 'Frames' },
+                  { id: 'grids', label: 'Grids' },
+                  { id: 'tables', label: 'Tables' },
+                  { id: 'charts', label: 'Charts' },
+                  { id: 'stickers', label: 'Motifs' },
+                ] as const
+              ).map((pill) => (
+                <button
+                  key={pill.id}
+                  onClick={() => setElementSubTab(pill.id)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition ${
+                    elementSubTab === pill.id
+                      ? 'bg-amber-500 text-neutral-950 shadow'
+                      : 'bg-neutral-800 text-neutral-400 hover:text-neutral-200'
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              ))}
+            </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                {(
-                  [
-                    { mask: 'arch', label: 'Royal Arch' },
-                    { mask: 'circle', label: 'Circle Frame' },
-                    { mask: 'heart', label: 'Couple Heart' },
-                    { mask: 'lotus', label: 'Lotus Frame' },
-                    { mask: 'star', label: 'Star Badge' },
-                    { mask: 'diamond', label: 'Diamond' },
-                  ] as { mask: PhotoMask; label: string }[]
-                ).map((item) => (
+            {/* 2A. CANVA PHOTO FRAMES & MOCKUPS */}
+            {(elementSubTab === 'all' || elementSubTab === 'frames') && (
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <Frame className="w-3.5 h-3.5" />
+                    <span>Canva Photo Frames & Mockups</span>
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {(
+                    [
+                      { mask: 'arch', label: 'Royal Arch' },
+                      { mask: 'circle', label: 'Circle Ring' },
+                      { mask: 'heart', label: 'Couple Heart' },
+                      { mask: 'lotus', label: 'Lotus Petal' },
+                      { mask: 'star', label: 'Star Badge' },
+                      { mask: 'diamond', label: 'Diamond Gem' },
+                      { mask: 'octagon', label: 'Octagon Jali' },
+                      { mask: 'polaroid', label: 'Polaroid Card' },
+                      { mask: 'phone-mockup', label: 'Phone Mockup' },
+                    ] as { mask: PhotoMask; label: string }[]
+                  ).map((item) => (
+                    <button
+                      key={item.mask}
+                      onClick={() =>
+                        handleAddPhoto(
+                          '/images/wedding_couple_1791965341379.jpg',
+                          item.mask,
+                          item.mask === 'polaroid' ? 'Siddharth & Ananya ❤️' : undefined
+                        )
+                      }
+                      className="p-2 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 flex flex-col items-center gap-1.5 transition group"
+                    >
+                      <div className="w-11 h-11 bg-gradient-to-br from-amber-500/30 to-rose-900/50 border border-amber-400/60 flex items-center justify-center text-[9px] font-bold text-amber-200 rounded-lg group-hover:scale-105 transition text-center px-1">
+                        {item.label.split(' ')[0]}
+                      </div>
+                      <span className="text-[10px] text-neutral-300 font-medium truncate w-full text-center">
+                        {item.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 2B. CANVA PHOTO COLLAGE GRIDS */}
+            {(elementSubTab === 'all' || elementSubTab === 'grids') && (
+              <div className="space-y-2.5 pt-3 border-t border-neutral-800">
+                <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span>Canva Collage Grids (Multi-Photo)</span>
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {(
+                    [
+                      { id: '2-col', label: '2-Column Side-by-Side', desc: 'Couple + Venue split' },
+                      { id: '2-row', label: '2-Row Vertical Split', desc: 'Top & bottom collage' },
+                      { id: '3-collage', label: '3-Photo Asymmetric', desc: '1 Hero + 2 side photos' },
+                      { id: '4-quad', label: '4-Photo Royal Grid', desc: '2×2 Pre-wedding gallery' },
+                      { id: 'polaroid-trio', label: '3 Polaroid Memories', desc: 'Framed story strip' },
+                      { id: 'hero-split', label: 'Palace Banner Grid', desc: 'Wide top + 2 bottom' },
+                    ] as { id: GridLayoutVariant; label: string; desc: string }[]
+                  ).map((g) => (
+                    <button
+                      key={g.id}
+                      onClick={() => handleAddGrid(g.id)}
+                      className="p-2.5 rounded-xl border border-neutral-700 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 text-left transition flex flex-col justify-between"
+                    >
+                      <span className="text-xs font-semibold text-amber-200">+ {g.label}</span>
+                      <span className="text-[10px] text-neutral-400 mt-0.5">{g.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 2C. CANVA TABLES (ITINERARY / MENU / SEATING) */}
+            {(elementSubTab === 'all' || elementSubTab === 'tables') && (
+              <div className="space-y-2.5 pt-3 border-t border-neutral-800">
+                <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Table2 className="w-3.5 h-3.5" />
+                  <span>Canva Tables & Schedules</span>
+                </h3>
+                <p className="text-[11px] text-neutral-400">
+                  Insert editable tables for wedding ceremonies, dining menu, or guest seating:
+                </p>
+                <div className="space-y-2">
                   <button
-                    key={item.mask}
-                    onClick={() =>
-                      handleAddPhoto('/images/wedding_couple_1791965341379.jpg', item.mask)
-                    }
-                    className="p-2 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 flex flex-col items-center gap-1.5 transition group"
+                    onClick={() => handleAddTable('itinerary')}
+                    className="w-full p-2.5 rounded-xl border border-neutral-700 hover:border-amber-400 bg-neutral-800/80 hover:bg-neutral-800 text-left flex items-center justify-between transition"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500/30 to-rose-900/50 border border-amber-400/60 flex items-center justify-center text-[10px] text-amber-200 rounded-lg group-hover:scale-105 transition">
-                      {item.mask.toUpperCase()}
+                    <div>
+                      <div className="text-xs font-bold text-amber-200">
+                        + Wedding Events Schedule Table
+                      </div>
+                      <div className="text-[10px] text-neutral-400">
+                        5×3 Grid: Ceremony, Time & Venue Hall
+                      </div>
                     </div>
-                    <span className="text-[10px] text-neutral-300 font-medium">{item.label}</span>
+                    <Table2 className="w-4 h-4 text-amber-400" />
                   </button>
-                ))}
+                  <button
+                    onClick={() => handleAddTable('menu')}
+                    className="w-full p-2.5 rounded-xl border border-neutral-700 hover:border-amber-400 bg-neutral-800/80 hover:bg-neutral-800 text-left flex items-center justify-between transition"
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-amber-200">
+                        + Royal Feast / Daawat Menu Table
+                      </div>
+                      <div className="text-[10px] text-neutral-400">
+                        4×3 Grid: Course, Specialty & Lounge
+                      </div>
+                    </div>
+                    <Table2 className="w-4 h-4 text-amber-400" />
+                  </button>
+                  <button
+                    onClick={() => handleAddTable('seating')}
+                    className="w-full p-2.5 rounded-xl border border-neutral-700 hover:border-amber-400 bg-neutral-800/80 hover:bg-neutral-800 text-left flex items-center justify-between transition"
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-amber-200">
+                        + VIP Guest Seating Chart Table
+                      </div>
+                      <div className="text-[10px] text-neutral-400">
+                        4×3 Grid: Table No., Family & Zone
+                      </div>
+                    </div>
+                    <Table2 className="w-4 h-4 text-amber-400" />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Shapes, Borders & Seals Section */}
-            <div className="space-y-2.5 pt-3 border-t border-neutral-800">
-              <div>
-                <h3 className="text-sm font-semibold text-neutral-100">
-                  Canva Shapes, Borders & Seals (16+)
+            {/* 2D. CANVA CHARTS & LIVE COUNTDOWN */}
+            {(elementSubTab === 'all' || elementSubTab === 'charts') && (
+              <div className="space-y-2.5 pt-3 border-t border-neutral-800">
+                <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <BarChart3 className="w-3.5 h-3.5" />
+                  <span>Canva Charts & Live Countdown</span>
                 </h3>
-                <p className="text-xs text-neutral-400">
-                  Add royal borders, arches, ribbons, mandalas & dividers
-                </p>
-              </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {(
+                    [
+                      { id: 'bar', label: 'Vertical Bar Chart' },
+                      { id: 'horizontal-bar', label: 'Horizontal Bars' },
+                      { id: 'donut', label: 'Donut Ring Chart' },
+                      { id: 'pie', label: 'Pie Breakdown' },
+                      { id: 'line', label: 'Timeline Trend' },
+                      { id: 'progress-rings', label: 'Radial Progress' },
+                    ] as { id: ChartVariant; label: string }[]
+                  ).map((ch) => (
+                    <button
+                      key={ch.id}
+                      onClick={() => handleAddChart(ch.id)}
+                      className="p-2.5 rounded-xl border border-neutral-700 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 text-left text-xs font-semibold text-amber-200 transition"
+                    >
+                      + {ch.label}
+                    </button>
+                  ))}
+                </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                {SHAPE_PRESETS.map((preset) => (
-                  <button
-                    key={preset.shapeType}
-                    onClick={() => handleAddShape(preset)}
-                    className="p-2.5 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 text-left transition flex flex-col justify-between group"
-                  >
-                    <span className="text-xs font-semibold text-amber-300 group-hover:text-amber-200">
-                      + {preset.label}
-                    </span>
-                    <span className="text-[10px] text-neutral-400 mt-0.5">{preset.desc}</span>
-                  </button>
-                ))}
+                {/* Live Countdown Widget Quick Insert */}
+                <button
+                  onClick={() => handleAddCountdown('royal-gold')}
+                  className="w-full p-2.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-rose-900/30 border border-amber-400/50 hover:border-amber-400 text-left flex items-center justify-between transition"
+                >
+                  <div>
+                    <div className="text-xs font-bold text-amber-200">
+                      + Live Wedding Countdown Timer
+                    </div>
+                    <div className="text-[10px] text-neutral-300">
+                      Days • Hours • Mins • Secs Stamp
+                    </div>
+                  </div>
+                  <Clock className="w-4 h-4 text-amber-400" />
+                </button>
               </div>
-            </div>
+            )}
 
-            {/* Traditional Indian Motifs & Stickers */}
-            <div className="space-y-3 pt-3 border-t border-neutral-800">
-              <div>
-                <h3 className="text-sm font-semibold text-neutral-100">
-                  Indian Royal Motifs & Stickers
-                </h3>
-                <p className="text-xs text-neutral-400">
-                  Ganesha, Kalash, Dhol, Shehnai, Lotus & Mandap
-                </p>
-              </div>
+            {/* 2E. SHAPES, LINES, BORDERS & SEALS (28+ Presets) */}
+            {(elementSubTab === 'all' || elementSubTab === 'shapes') && (
+              <div className="space-y-2.5 pt-3 border-t border-neutral-800">
+                <div>
+                  <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider">
+                    Canva Shapes, Lines, Banners & Seals (28+)
+                  </h3>
+                  <p className="text-[11px] text-neutral-400">
+                    Double-click any shape or banner on canvas to type text inside it!
+                  </p>
+                </div>
 
-              <div className="relative">
-                <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-2.5" />
-                <input
-                  type="text"
-                  value={stickerSearch}
-                  onChange={(e) => setStickerSearch(e.target.value)}
-                  placeholder="Search Ganesha, Kalash, Diya, Lotus..."
-                  className="w-full bg-neutral-800 text-xs pl-9 pr-3 py-2 rounded-lg border border-neutral-700 focus:border-amber-500 outline-none text-neutral-200 placeholder:text-neutral-500"
-                />
+                <div className="grid grid-cols-2 gap-2">
+                  {SHAPE_PRESETS.map((preset) => (
+                    <button
+                      key={preset.shapeType}
+                      onClick={() => handleAddShape(preset)}
+                      className="p-2.5 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 text-left transition flex flex-col justify-between group"
+                    >
+                      <span className="text-xs font-semibold text-amber-300 group-hover:text-amber-200">
+                        + {preset.label}
+                      </span>
+                      <span className="text-[10px] text-neutral-400 mt-0.5">{preset.desc}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
+            )}
 
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
-                {STICKER_CATEGORIES.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setStickerCategory(cat.id)}
-                    className={`text-[11px] whitespace-nowrap px-2.5 py-1 rounded-lg font-medium transition ${
-                      stickerCategory === cat.id
-                        ? 'bg-amber-500 text-neutral-950 font-bold'
-                        : 'bg-neutral-800 text-neutral-400 hover:text-neutral-200'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
+            {/* 2F. TRADITIONAL INDIAN MOTIFS & STICKERS */}
+            {(elementSubTab === 'all' || elementSubTab === 'stickers') && (
+              <div className="space-y-3 pt-3 border-t border-neutral-800">
+                <div>
+                  <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider">
+                    Indian Royal Motifs & Stickers
+                  </h3>
+                  <p className="text-[11px] text-neutral-400">
+                    Ganesha, Kalash, Dhol, Shehnai, Lotus & Mandap
+                  </p>
+                </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                {filteredStickers.map((sticker) => (
-                  <button
-                    key={sticker.id}
-                    onClick={() => handleAddSticker(sticker)}
-                    className="p-2.5 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/80 hover:bg-neutral-800 flex flex-col items-center justify-center gap-1.5 group transition"
-                    title={`Add ${sticker.name}`}
-                  >
-                    <div
-                      className="w-10 h-10 flex items-center justify-center text-amber-300 group-hover:scale-110 transition-transform [&>svg]:w-full [&>svg]:h-full"
-                      dangerouslySetInnerHTML={{ __html: sticker.svg }}
-                    />
-                    <span className="text-[10px] text-neutral-300 text-center truncate w-full">
-                      {sticker.name}
-                    </span>
-                  </button>
-                ))}
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    value={stickerSearch}
+                    onChange={(e) => setStickerSearch(e.target.value)}
+                    placeholder="Search Ganesha, Kalash, Diya, Lotus..."
+                    className="w-full bg-neutral-800 text-xs pl-9 pr-3 py-2 rounded-lg border border-neutral-700 focus:border-amber-500 outline-none text-neutral-200 placeholder:text-neutral-500"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+                  {STICKER_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setStickerCategory(cat.id)}
+                      className={`text-[11px] whitespace-nowrap px-2.5 py-1 rounded-lg font-medium transition ${
+                        stickerCategory === cat.id
+                          ? 'bg-amber-500 text-neutral-950 font-bold'
+                          : 'bg-neutral-800 text-neutral-400 hover:text-neutral-200'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {filteredStickers.map((sticker) => (
+                    <button
+                      key={sticker.id}
+                      onClick={() => handleAddSticker(sticker)}
+                      className="p-2.5 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/80 hover:bg-neutral-800 flex flex-col items-center justify-center gap-1.5 group transition"
+                      title={`Add ${sticker.name}`}
+                    >
+                      <div
+                        className="w-10 h-10 flex items-center justify-center text-amber-300 group-hover:scale-110 transition-transform [&>svg]:w-full [&>svg]:h-full"
+                        dangerouslySetInnerHTML={{ __html: sticker.svg }}
+                      />
+                      <span className="text-[10px] text-neutral-300 text-center truncate w-full">
+                        {sticker.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
@@ -1043,7 +1721,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 Canva Typography & Magic Write
               </h3>
               <p className="text-xs text-neutral-400">
-                Add headings, curved badges, font pairings & Sanskrit shlokas
+                Add headings, curved badges, metallic gold text & Sanskrit shlokas
               </p>
             </div>
 
@@ -1088,6 +1766,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 + Add Body Text / Venue Details
               </button>
+
+              {/* Quick Curved Arch Text & Neon Glow Text Presets */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  onClick={() =>
+                    handleAddText('SHUBH VIVAH CEREMONY', "'Cinzel', serif", 18, 'bold', '#FFEAA7', {
+                      curveRadius: 55,
+                    })
+                  }
+                  className="p-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-750 border border-neutral-700 hover:border-amber-400 text-xs font-semibold text-amber-300 text-center"
+                >
+                  ⌒ Curved Arch Text
+                </button>
+                <button
+                  onClick={() =>
+                    handleAddText('ROYAL CELEBRATION', "'Cinzel', serif", 20, 'bold', '#FFF9DB', {
+                      effectType: 'neon',
+                      shadow: { color: '#FFD700', blur: 16, offsetX: 0, offsetY: 0 },
+                    })
+                  }
+                  className="p-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-750 border border-neutral-700 hover:border-amber-400 text-xs font-semibold text-amber-200 text-center"
+                >
+                  ✨ Gold Neon Text
+                </button>
+              </div>
             </div>
 
             {/* Canva Curated Font Combinations */}
@@ -1172,17 +1875,79 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* ================= 4. CANVA BRAND KIT & COLOR STYLES TAB ================= */}
+        {/* ================= 4. CANVA BRAND HUB & CUSTOM PALETTE BUILDER TAB ================= */}
         {activeTab === 'brand' && (
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-semibold text-neutral-100 flex items-center gap-1.5">
                 <Crown className="w-4 h-4 text-amber-400" />
-                <span>Canva Pro Brand Kit & Styles</span>
+                <span>Canva Brand Hub & Custom Kit</span>
               </h3>
               <p className="text-xs text-neutral-400">
-                1-click restyle your entire invitation card with royal color & font palettes
+                1-click restyle your entire invitation card or create your family wedding monogram kit
               </p>
+            </div>
+
+            {/* Custom Family Brand Kit Builder */}
+            <div className="p-3 rounded-xl bg-neutral-800/80 border border-amber-500/30 space-y-2.5 text-xs">
+              <div className="font-bold text-amber-300 text-[11px] uppercase tracking-wider">
+                Create Custom Family Brand Kit
+              </div>
+              <input
+                type="text"
+                value={customBrandName}
+                onChange={(e) => setCustomBrandName(e.target.value)}
+                placeholder="Family Brand Kit Name..."
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-2.5 py-1.5 text-neutral-200 outline-none"
+              />
+              <div className="flex items-center justify-between gap-2">
+                <label className="text-[11px] text-neutral-400">Colors:</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={customBrandColor1}
+                    onChange={(e) => setCustomBrandColor1(e.target.value)}
+                    className="w-6 h-6 rounded border-0 bg-transparent cursor-pointer"
+                    title="Primary Background"
+                  />
+                  <input
+                    type="color"
+                    value={customBrandColor2}
+                    onChange={(e) => setCustomBrandColor2(e.target.value)}
+                    className="w-6 h-6 rounded border-0 bg-transparent cursor-pointer"
+                    title="Gold / Border Accent"
+                  />
+                  <input
+                    type="color"
+                    value={customBrandColor3}
+                    onChange={(e) => setCustomBrandColor3(e.target.value)}
+                    className="w-6 h-6 rounded border-0 bg-transparent cursor-pointer"
+                    title="Heading Text Color"
+                  />
+                </div>
+                <button
+                  onClick={() =>
+                    onApplyBrandKit &&
+                    onApplyBrandKit({
+                      id: `custom-${Date.now()}`,
+                      name: customBrandName,
+                      primaryColors: [
+                        customBrandColor1,
+                        customBrandColor1,
+                        customBrandColor2,
+                        customBrandColor3,
+                        '#FFFFFF',
+                      ],
+                      headingFont: "'Cinzel', serif",
+                      subheadingFont: "'Alex Brush', cursive",
+                      bodyFont: "'Playfair Display', serif",
+                    })
+                  }
+                  className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold rounded-lg text-[11px]"
+                >
+                  Apply Custom
+                </button>
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -1214,8 +1979,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
 
                   <div className="flex items-center justify-between text-[10px] text-neutral-400">
-                    <span style={{ fontFamily: kit.headingFont }}>Heading: {kit.headingFont.split(',')[0]}</span>
-                    <span style={{ fontFamily: kit.subheadingFont }}>Script: {kit.subheadingFont.split(',')[0]}</span>
+                    <span style={{ fontFamily: kit.headingFont }}>
+                      Heading: {kit.headingFont.split(',')[0]}
+                    </span>
+                    <span style={{ fontFamily: kit.subheadingFont }}>
+                      Script: {kit.subheadingFont.split(',')[0]}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -1229,7 +1998,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <h3 className="text-sm font-semibold text-neutral-100">Uploads & Celebration Photos</h3>
               <p className="text-xs text-neutral-400">
-                Upload from device or add with royal arch, heart, or circle frames
+                Upload from device or add with royal arch, heart, polaroid or circle frames
               </p>
             </div>
 
@@ -1499,7 +2268,377 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* ================= 7. CANVA AUDIO & WEDDING MUSIC TAB ================= */}
+        {/* ================= 7. CANVA PROJECTS (SAVED DESIGNS & WORKSPACE) TAB ================= */}
+        {activeTab === 'projects' && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold text-neutral-100 flex items-center gap-1.5">
+                <FolderKanban className="w-4 h-4 text-amber-400" />
+                <span>Canva Projects & Saved Designs</span>
+              </h3>
+              <p className="text-xs text-neutral-400">
+                Save snapshots of your invitation cards locally and switch between versions anytime
+              </p>
+            </div>
+
+            {onSaveProject && (
+              <button
+                onClick={onSaveProject}
+                className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-500 to-amber-400 hover:brightness-110 text-neutral-950 font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save Current Card to My Projects</span>
+              </button>
+            )}
+
+            <div className="space-y-2.5">
+              {savedProjects.length === 0 ? (
+                <div className="p-6 rounded-xl bg-neutral-800/50 border border-neutral-800 text-center space-y-2">
+                  <FolderOpen className="w-7 h-7 text-neutral-500 mx-auto" />
+                  <p className="text-xs text-neutral-300 font-medium">No Saved Projects Yet</p>
+                  <p className="text-[11px] text-neutral-500">
+                    Click "Save Current Card to My Projects" above to store your work in browser storage.
+                  </p>
+                </div>
+              ) : (
+                savedProjects.map((proj) => (
+                  <div
+                    key={proj.id}
+                    className="p-3 rounded-xl bg-neutral-800/80 border border-neutral-700 hover:border-amber-400/60 transition space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-bold text-amber-200">{proj.title}</div>
+                        <div className="text-[10px] text-neutral-400 font-mono">
+                          {proj.pages.length} Slides • {proj.aspectRatio} • {proj.updatedAt}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {onLoadProject && (
+                          <button
+                            onClick={() => onLoadProject(proj)}
+                            className="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold rounded-lg text-[11px]"
+                          >
+                            Open
+                          </button>
+                        )}
+                        {onDeleteProject && (
+                          <button
+                            onClick={() => onDeleteProject(proj.id)}
+                            className="p-1.5 bg-neutral-900 hover:bg-rose-950 text-rose-400 rounded-lg"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ================= 8. CANVA APPS & MAGIC STUDIO TAB ================= */}
+        {activeTab === 'apps' && (
+          <div className="space-y-5">
+            <div>
+              <h3 className="text-sm font-semibold text-neutral-100">
+                Canva Apps, QR, Translate & Widgets
+              </h3>
+              <p className="text-xs text-neutral-400">
+                Smart wedding tools: QR Generator, Magic Translate, Find & Replace, Countdown & Entry Pass
+              </p>
+            </div>
+
+            {/* APP 1: SMART QR CODE GENERATOR (6 Modes) */}
+            <div className="p-3 rounded-xl bg-neutral-800/70 border border-neutral-700 space-y-3">
+              <div className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                <QrCode className="w-3.5 h-3.5" />
+                <span>1. Smart QR Code Generator (6 Modes)</span>
+              </div>
+
+              <div className="grid grid-cols-3 rounded-lg bg-neutral-900 p-1 border border-neutral-700 gap-1">
+                {(
+                  [
+                    { id: 'maps', label: 'Maps', icon: MapPin },
+                    { id: 'rsvp', label: 'RSVP', icon: MessageSquare },
+                    { id: 'upi', label: 'Shagun', icon: CreditCard },
+                    { id: 'wifi', label: 'Wi-Fi', icon: Wifi },
+                    { id: 'calendar', label: 'Calendar', icon: Calendar },
+                    { id: 'custom', label: 'URL', icon: QrCode },
+                  ] as const
+                ).map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setQrType(item.id)}
+                      className={`py-1.5 rounded-md text-[10px] font-medium flex items-center justify-center gap-1 transition ${
+                        qrType === item.id
+                          ? 'bg-amber-500 text-neutral-950 font-bold shadow'
+                          : 'text-neutral-400 hover:text-neutral-200'
+                      }`}
+                    >
+                      <Icon className="w-3 h-3" />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {qrType === 'maps' && (
+                <input
+                  type="text"
+                  value={mapsLocation}
+                  onChange={(e) => setMapsLocation(e.target.value)}
+                  placeholder="Venue Name or Google Maps Link..."
+                  className="w-full bg-neutral-900 text-xs px-3 py-2 rounded-lg border border-neutral-700 text-neutral-200"
+                />
+              )}
+
+              {qrType === 'rsvp' && (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={rsvpPhone}
+                    onChange={(e) => setRsvpPhone(e.target.value)}
+                    placeholder="WhatsApp Number (+91...)"
+                    className="w-full bg-neutral-900 text-xs px-3 py-2 rounded-lg border border-neutral-700 text-neutral-200"
+                  />
+                  <input
+                    type="text"
+                    value={rsvpMessage}
+                    onChange={(e) => setRsvpMessage(e.target.value)}
+                    placeholder="RSVP pre-filled message..."
+                    className="w-full bg-neutral-900 text-xs px-3 py-2 rounded-lg border border-neutral-700 text-neutral-200"
+                  />
+                </div>
+              )}
+
+              {qrType === 'upi' && (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={upiId}
+                    onChange={(e) => setUpiId(e.target.value)}
+                    placeholder="UPI ID (e.g. family@okicici)"
+                    className="w-full bg-neutral-900 text-xs px-3 py-2 rounded-lg border border-neutral-700 text-neutral-200"
+                  />
+                  <input
+                    type="text"
+                    value={upiPayee}
+                    onChange={(e) => setUpiPayee(e.target.value)}
+                    placeholder="Payee Family Name"
+                    className="w-full bg-neutral-900 text-xs px-3 py-2 rounded-lg border border-neutral-700 text-neutral-200"
+                  />
+                </div>
+              )}
+
+              {qrType === 'wifi' && (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={wifiSsid}
+                    onChange={(e) => setWifiSsid(e.target.value)}
+                    placeholder="Venue Wi-Fi Network Name (SSID)"
+                    className="w-full bg-neutral-900 text-xs px-3 py-2 rounded-lg border border-neutral-700 text-neutral-200"
+                  />
+                  <input
+                    type="text"
+                    value={wifiPass}
+                    onChange={(e) => setWifiPass(e.target.value)}
+                    placeholder="Wi-Fi Password"
+                    className="w-full bg-neutral-900 text-xs px-3 py-2 rounded-lg border border-neutral-700 text-neutral-200"
+                  />
+                </div>
+              )}
+
+              {qrType === 'calendar' && (
+                <input
+                  type="text"
+                  value={mapsLocation}
+                  onChange={(e) => setMapsLocation(e.target.value)}
+                  placeholder="Event Venue for Google Calendar..."
+                  className="w-full bg-neutral-900 text-xs px-3 py-2 rounded-lg border border-neutral-700 text-neutral-200"
+                />
+              )}
+
+              {qrType === 'custom' && (
+                <input
+                  type="text"
+                  value={customQrUrl}
+                  onChange={(e) => setCustomQrUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full bg-neutral-900 text-xs px-3 py-2 rounded-lg border border-neutral-700 text-neutral-200"
+                />
+              )}
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] text-neutral-400">Ink:</span>
+                  <input
+                    type="color"
+                    value={qrColor}
+                    onChange={(e) => setQrColor(e.target.value)}
+                    className="w-6 h-6 rounded border-0 bg-transparent cursor-pointer"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] text-neutral-400">Card:</span>
+                  <input
+                    type="color"
+                    value={qrBgColor}
+                    onChange={(e) => setQrBgColor(e.target.value)}
+                    className="w-6 h-6 rounded border-0 bg-transparent cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleAddQr}
+                className="w-full py-2 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-neutral-950 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5"
+              >
+                <QrCode className="w-3.5 h-3.5" />
+                <span>Generate & Insert QR Code</span>
+              </button>
+            </div>
+
+            {/* APP 2: CANVA MAGIC TRANSLATE (1-Click Language Switcher) */}
+            {onTranslateCard && (
+              <div className="p-3 rounded-xl bg-neutral-800/70 border border-neutral-700 space-y-2.5">
+                <div className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Languages className="w-3.5 h-3.5" />
+                  <span>2. Canva Magic Translate™ (Card Language)</span>
+                </div>
+                <p className="text-[11px] text-neutral-400">
+                  Translate common wedding phrases on the current slide into Hindi, English, or Sanskrit:
+                </p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    onClick={() => onTranslateCard('hindi')}
+                    className="py-1.5 px-2 bg-neutral-900 hover:bg-amber-500 hover:text-neutral-950 text-amber-200 border border-neutral-700 rounded-lg text-xs font-semibold transition"
+                  >
+                    🇮🇳 शुद्ध हिंदी (Hindi)
+                  </button>
+                  <button
+                    onClick={() => onTranslateCard('english')}
+                    className="py-1.5 px-2 bg-neutral-900 hover:bg-amber-500 hover:text-neutral-950 text-amber-200 border border-neutral-700 rounded-lg text-xs font-semibold transition"
+                  >
+                    🇬🇧 Royal English
+                  </button>
+                  <button
+                    onClick={() => onTranslateCard('sanskrit')}
+                    className="py-1.5 px-2 bg-neutral-900 hover:bg-amber-500 hover:text-neutral-950 text-amber-200 border border-neutral-700 rounded-lg text-xs font-semibold transition"
+                  >
+                    🕉️ वैदिक संस्कृत
+                  </button>
+                  <button
+                    onClick={() => onTranslateCard('hinglish')}
+                    className="py-1.5 px-2 bg-neutral-900 hover:bg-amber-500 hover:text-neutral-950 text-amber-200 border border-neutral-700 rounded-lg text-xs font-semibold transition"
+                  >
+                    ✨ Modern Hinglish
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* APP 3: CANVA FIND & REPLACE TEXT ACROSS ALL SLIDES */}
+            {onFindAndReplaceText && (
+              <div className="p-3 rounded-xl bg-neutral-800/70 border border-neutral-700 space-y-2.5">
+                <div className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Replace className="w-3.5 h-3.5" />
+                  <span>3. Find & Replace Text (All Slides)</span>
+                </div>
+                <input
+                  type="text"
+                  value={findText}
+                  onChange={(e) => setFindText(e.target.value)}
+                  placeholder="Find name/word (e.g. Vikramaditya)..."
+                  className="w-full bg-neutral-900 text-xs px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-200"
+                />
+                <input
+                  type="text"
+                  value={replaceText}
+                  onChange={(e) => setReplaceText(e.target.value)}
+                  placeholder="Replace with (e.g. Siddharth)..."
+                  className="w-full bg-neutral-900 text-xs px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-200"
+                />
+                <button
+                  onClick={() => {
+                    if (!findText.trim()) return;
+                    const count = onFindAndReplaceText(findText, replaceText);
+                    setReplaceFeedback(`Updated ${count} text element(s) across all slides!`);
+                    setTimeout(() => setReplaceFeedback(''), 3500);
+                  }}
+                  className="w-full py-1.5 px-3 bg-neutral-900 hover:bg-amber-500 text-amber-300 hover:text-neutral-950 font-bold text-xs rounded-lg border border-amber-500/40 transition"
+                >
+                  Replace All Across {pages.length} Slides
+                </button>
+                {replaceFeedback && (
+                  <p className="text-[11px] text-emerald-400 font-medium">{replaceFeedback}</p>
+                )}
+              </div>
+            )}
+
+            {/* APP 4: LIVE EVENT COUNTDOWN WIDGET */}
+            <div className="p-3 rounded-xl bg-neutral-800/70 border border-neutral-700 space-y-2.5">
+              <div className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5" />
+                <span>4. Live Muhurat Countdown Clock</span>
+              </div>
+              <input
+                type="text"
+                value={countdownLabel}
+                onChange={(e) => setCountdownLabel(e.target.value)}
+                placeholder="Countdown Header Label..."
+                className="w-full bg-neutral-900 text-xs px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-200"
+              />
+              <input
+                type="datetime-local"
+                value={countdownDate}
+                onChange={(e) => setCountdownDate(e.target.value)}
+                className="w-full bg-neutral-900 text-xs px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-200"
+              />
+              <button
+                onClick={() => handleAddCountdown('royal-gold')}
+                className="w-full py-2 px-3 bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-neutral-950 font-bold text-xs rounded-lg border border-amber-500/40 transition"
+              >
+                + Insert Countdown Clock on Card
+              </button>
+            </div>
+
+            {/* APP 5: BARCODE / VIP VENUE PASS GENERATOR */}
+            <div className="p-3 rounded-xl bg-neutral-800/70 border border-neutral-700 space-y-2.5">
+              <div className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                <Barcode className="w-3.5 h-3.5" />
+                <span>5. Royal Venue Entry Pass Barcode</span>
+              </div>
+              <input
+                type="text"
+                value={barcodeCode}
+                onChange={(e) => setBarcodeCode(e.target.value)}
+                placeholder="Pass Code (e.g. VIP-VIVAH-2026)"
+                className="w-full bg-neutral-900 text-xs px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-200"
+              />
+              <input
+                type="text"
+                value={barcodeLabel}
+                onChange={(e) => setBarcodeLabel(e.target.value)}
+                placeholder="Gate / Pass Label"
+                className="w-full bg-neutral-900 text-xs px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-200"
+              />
+              <button
+                onClick={handleAddBarcode}
+                className="w-full py-2 px-3 bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-neutral-950 font-bold text-xs rounded-lg border border-amber-500/40 transition"
+              >
+                + Insert Scannable Venue Pass Barcode
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ================= 9. CANVA AUDIO & WEDDING MUSIC TAB ================= */}
         {activeTab === 'audio' && (
           <div className="space-y-4">
             <div>
@@ -1559,7 +2698,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* ================= 8. BACKGROUNDS & PAPER TAB ================= */}
+        {/* ================= 10. BACKGROUNDS & PAPER TAB ================= */}
         {activeTab === 'backgrounds' && (
           <div className="space-y-4">
             <div>
@@ -1641,7 +2780,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* ================= 9. CANVA LAYERS & POSITION TAB ================= */}
+        {/* ================= 11. CANVA LAYERS & POSITION TAB ================= */}
         {activeTab === 'layers' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -1762,184 +2901,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* ================= 10. QR CODES & SMART APPS TAB ================= */}
-        {activeTab === 'qr' && (
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-semibold text-neutral-100">
-                Canva Apps: QR & Smart Widgets
-              </h3>
-              <p className="text-xs text-neutral-400">
-                Generate Google Maps Venue, WhatsApp RSVP, UPI Shagun or Website QR
-              </p>
-            </div>
-
-            <div className="grid grid-cols-4 rounded-lg bg-neutral-800 p-1 border border-neutral-700 gap-1">
-              <button
-                onClick={() => setQrType('maps')}
-                className={`py-1.5 rounded-md text-[10px] font-medium flex items-center justify-center gap-1 transition ${
-                  qrType === 'maps'
-                    ? 'bg-amber-500 text-neutral-950 font-bold shadow'
-                    : 'text-neutral-400 hover:text-neutral-200'
-                }`}
-              >
-                <MapPin className="w-3 h-3" />
-                <span>Maps</span>
-              </button>
-              <button
-                onClick={() => setQrType('rsvp')}
-                className={`py-1.5 rounded-md text-[10px] font-medium flex items-center justify-center gap-1 transition ${
-                  qrType === 'rsvp'
-                    ? 'bg-amber-500 text-neutral-950 font-bold shadow'
-                    : 'text-neutral-400 hover:text-neutral-200'
-                }`}
-              >
-                <MessageSquare className="w-3 h-3" />
-                <span>RSVP</span>
-              </button>
-              <button
-                onClick={() => setQrType('upi')}
-                className={`py-1.5 rounded-md text-[10px] font-medium flex items-center justify-center gap-1 transition ${
-                  qrType === 'upi'
-                    ? 'bg-amber-500 text-neutral-950 font-bold shadow'
-                    : 'text-neutral-400 hover:text-neutral-200'
-                }`}
-              >
-                <CreditCard className="w-3 h-3" />
-                <span>Shagun</span>
-              </button>
-              <button
-                onClick={() => setQrType('custom')}
-                className={`py-1.5 rounded-md text-[10px] font-medium flex items-center justify-center gap-1 transition ${
-                  qrType === 'custom'
-                    ? 'bg-amber-500 text-neutral-950 font-bold shadow'
-                    : 'text-neutral-400 hover:text-neutral-200'
-                }`}
-              >
-                <QrCode className="w-3 h-3" />
-                <span>Link</span>
-              </button>
-            </div>
-
-            {qrType === 'maps' && (
-              <div className="space-y-2">
-                <label className="text-xs text-neutral-300 font-medium">
-                  Venue Name or Google Maps Link:
-                </label>
-                <input
-                  type="text"
-                  value={mapsLocation}
-                  onChange={(e) => setMapsLocation(e.target.value)}
-                  placeholder="e.g. The Taj Mahal Palace, Mumbai"
-                  className="w-full bg-neutral-800 text-xs px-3 py-2 rounded-lg border border-neutral-700 focus:border-amber-500 outline-none text-neutral-200"
-                />
-              </div>
-            )}
-
-            {qrType === 'rsvp' && (
-              <div className="space-y-2">
-                <div>
-                  <label className="text-xs text-neutral-300 font-medium">
-                    WhatsApp Number (with Country Code):
-                  </label>
-                  <input
-                    type="text"
-                    value={rsvpPhone}
-                    onChange={(e) => setRsvpPhone(e.target.value)}
-                    placeholder="+91 98765 43210"
-                    className="w-full bg-neutral-800 text-xs px-3 py-2 rounded-lg border border-neutral-700 focus:border-amber-500 outline-none text-neutral-200"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-neutral-300 font-medium">RSVP Message:</label>
-                  <textarea
-                    rows={2}
-                    value={rsvpMessage}
-                    onChange={(e) => setRsvpMessage(e.target.value)}
-                    className="w-full bg-neutral-800 text-xs px-3 py-2 rounded-lg border border-neutral-700 focus:border-amber-500 outline-none text-neutral-200"
-                  />
-                </div>
-              </div>
-            )}
-
-            {qrType === 'upi' && (
-              <div className="space-y-2">
-                <div>
-                  <label className="text-xs text-neutral-300 font-medium">
-                    UPI ID (GPay / PhonePe / Paytm):
-                  </label>
-                  <input
-                    type="text"
-                    value={upiId}
-                    onChange={(e) => setUpiId(e.target.value)}
-                    placeholder="username@okicici"
-                    className="w-full bg-neutral-800 text-xs px-3 py-2 rounded-lg border border-neutral-700 focus:border-amber-500 outline-none text-neutral-200"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-neutral-300 font-medium">Family / Payee Name:</label>
-                  <input
-                    type="text"
-                    value={upiPayee}
-                    onChange={(e) => setUpiPayee(e.target.value)}
-                    className="w-full bg-neutral-800 text-xs px-3 py-2 rounded-lg border border-neutral-700 focus:border-amber-500 outline-none text-neutral-200"
-                  />
-                </div>
-              </div>
-            )}
-
-            {qrType === 'custom' && (
-              <div className="space-y-2">
-                <label className="text-xs text-neutral-300 font-medium">Website / Video Link:</label>
-                <input
-                  type="text"
-                  value={customQrUrl}
-                  onChange={(e) => setCustomQrUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full bg-neutral-800 text-xs px-3 py-2 rounded-lg border border-neutral-700 focus:border-amber-500 outline-none text-neutral-200"
-                />
-              </div>
-            )}
-
-            <div className="flex items-center justify-between pt-1">
-              <div>
-                <label className="text-[11px] text-neutral-400 block mb-1">QR Color:</label>
-                <div className="flex items-center gap-1.5">
-                  <input
-                    type="color"
-                    value={qrColor}
-                    onChange={(e) => setQrColor(e.target.value)}
-                    className="w-7 h-7 rounded border border-neutral-700 cursor-pointer bg-transparent"
-                  />
-                  <span className="text-xs font-mono text-neutral-300">{qrColor}</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[11px] text-neutral-400 block mb-1">Background:</label>
-                <div className="flex items-center gap-1.5">
-                  <input
-                    type="color"
-                    value={qrBgColor}
-                    onChange={(e) => setQrBgColor(e.target.value)}
-                    className="w-7 h-7 rounded border border-neutral-700 cursor-pointer bg-transparent"
-                  />
-                  <span className="text-xs font-mono text-neutral-300">{qrBgColor}</span>
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={handleAddQr}
-              className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold text-xs rounded-lg shadow-md transition-all flex items-center justify-center gap-2"
-            >
-              <QrCode className="w-4 h-4" />
-              Generate & Insert QR Code
-            </button>
-          </div>
-        )}
-
-        {/* ================= 11. VIDEO SLIDES TIMELINE TAB ================= */}
+        {/* ================= 12. VIDEO SLIDES TIMELINE TAB ================= */}
         {activeTab === 'slides' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">

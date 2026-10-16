@@ -10,12 +10,22 @@ import {
   TextElement,
   QrElement,
   DrawingElement,
+  TableElement,
+  ChartElement,
+  GridElement,
+  CountdownElement,
+  BarcodeElement,
 } from '../types/editor';
 import {
   getImageCssFilter,
   getImageMaskStyle,
   renderShapeVisual,
   renderTextVisual,
+  renderTableVisual,
+  renderChartVisual,
+  renderGridVisual,
+  renderCountdownVisual,
+  renderBarcodeVisual,
 } from './Canvas';
 
 interface PreviewModalProps {
@@ -171,6 +181,12 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                               />
                             )}
                             {elem.type === 'shape' && renderShapeVisual(elem as ShapeElement)}
+                            {elem.type === 'table' && renderTableVisual(elem as TableElement)}
+                            {elem.type === 'chart' && renderChartVisual(elem as ChartElement)}
+                            {elem.type === 'grid' && renderGridVisual(elem as GridElement)}
+                            {elem.type === 'countdown' &&
+                              renderCountdownVisual(elem as CountdownElement)}
+                            {elem.type === 'barcode' && renderBarcodeVisual(elem as BarcodeElement)}
                             {elem.type === 'drawing' && (
                               <svg
                                 viewBox={`0 0 ${

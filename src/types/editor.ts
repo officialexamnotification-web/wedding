@@ -1,4 +1,10 @@
-export type AspectRatioType = 'portrait-story' | 'square' | 'portrait-classic' | 'landscape';
+export type AspectRatioType =
+  | 'portrait-story'
+  | 'square'
+  | 'portrait-classic'
+  | 'landscape'
+  | 'a4-print'
+  | 'whatsapp-banner';
 
 export interface CanvasDimensions {
   width: number;
@@ -37,9 +43,34 @@ export const CANVAS_SIZES: Record<AspectRatioType, CanvasDimensions> = {
     ratioLabel: '7:5',
     recommendedFor: 'Horizontal Folded Cards, Email Invites',
   },
+  'a4-print': {
+    width: 520,
+    height: 735,
+    name: 'A4 Royal Print',
+    ratioLabel: 'A4',
+    recommendedFor: '300 DPI Press Print, Boxed Wedding Invitations',
+  },
+  'whatsapp-banner': {
+    width: 720,
+    height: 405,
+    name: 'YouTube / Wide Video',
+    ratioLabel: '16:9',
+    recommendedFor: 'TV Screens, LED Reception Walls, YouTube Invites',
+  },
 };
 
-export type ElementType = 'text' | 'image' | 'sticker' | 'qr' | 'shape' | 'drawing';
+export type ElementType =
+  | 'text'
+  | 'image'
+  | 'sticker'
+  | 'qr'
+  | 'shape'
+  | 'drawing'
+  | 'table'
+  | 'chart'
+  | 'grid'
+  | 'countdown'
+  | 'barcode';
 
 export type ElementAnimationType =
   | 'none'
@@ -51,7 +82,14 @@ export type ElementAnimationType =
   | 'drift'
   | 'tumble'
   | 'neon-pulse'
-  | 'typewriter';
+  | 'typewriter'
+  | 'stomp'
+  | 'tectonic'
+  | 'baseline'
+  | 'scrapbook';
+
+export type AnimationTimingMode = 'both' | 'enter' | 'exit';
+export type AnimationDirectionMode = 'up' | 'down' | 'left' | 'right';
 
 export type BlendModeType =
   | 'normal'
@@ -59,7 +97,9 @@ export type BlendModeType =
   | 'screen'
   | 'overlay'
   | 'lighten'
-  | 'color-dodge';
+  | 'color-dodge'
+  | 'difference'
+  | 'soft-light';
 
 export interface BaseElement {
   id: string;
@@ -72,13 +112,25 @@ export interface BaseElement {
   opacity: number;
   zIndex: number;
   locked?: boolean;
+  ratioLocked?: boolean;
   hidden?: boolean;
   flipX?: boolean;
   flipY?: boolean;
   animation?: ElementAnimationType;
   animationSpeed?: number; // 0.5x to 2x
+  animationTiming?: AnimationTimingMode;
+  animationDirection?: AnimationDirectionMode;
   blendMode?: BlendModeType;
   linkUrl?: string;
+  altText?: string;
+  groupId?: string;
+  dropShadow?: {
+    enabled: boolean;
+    color: string;
+    blur: number;
+    offsetX: number;
+    offsetY: number;
+  };
 }
 
 export type TextEffectType =
@@ -101,10 +153,12 @@ export interface TextElement extends BaseElement {
   fontFamily: string;
   fontSize: number;
   color: string;
+  gradientText?: string; // CSS gradient for metallic gold / rose gold text
   fontWeight: 'normal' | '500' | '600' | '700' | '900' | 'bold';
   fontStyle: 'normal' | 'italic';
   textDecoration?: 'none' | 'underline' | 'line-through';
   textAlign: 'left' | 'center' | 'right' | 'justify';
+  verticalAlign?: 'top' | 'middle' | 'bottom';
   letterSpacing: number;
   lineHeight: number;
   textTransform?: 'none' | 'uppercase' | 'capitalize' | 'lowercase';
@@ -136,7 +190,10 @@ export type PhotoMask =
   | 'star'
   | 'hexagon'
   | 'scallop'
-  | 'lotus';
+  | 'lotus'
+  | 'polaroid'
+  | 'phone-mockup'
+  | 'envelope-mockup';
 
 export type ObjectFitType = 'cover' | 'contain' | 'fill';
 
@@ -161,6 +218,7 @@ export interface ImageElement extends BaseElement {
   mask: PhotoMask;
   borderWidth?: number;
   borderColor?: string;
+  borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double';
   borderRadius?: number;
   filter?: string;
   filterPreset?: PhotoFilterPreset;
@@ -179,6 +237,7 @@ export interface ImageElement extends BaseElement {
   offsetY?: number; // Pan vertical percentage (-50 to 50)
   rotationInside?: number; // Rotate image inside frame (-180 to 180)
   bgRemoved?: boolean; // Simulated Magic BG Remover studio effect
+  caption?: string; // For polaroid mockup
 }
 
 export interface StickerElement extends BaseElement {
@@ -194,7 +253,7 @@ export interface StickerElement extends BaseElement {
 
 export interface QrElement extends BaseElement {
   type: 'qr';
-  qrType: 'maps' | 'rsvp' | 'custom' | 'upi';
+  qrType: 'maps' | 'rsvp' | 'custom' | 'upi' | 'wifi' | 'calendar';
   dataUrl: string;
   targetValue: string;
   label: string;
@@ -222,7 +281,17 @@ export type ShapeVariant =
   | 'ribbon-banner'
   | 'mandala-ring'
   | 'arrow-right'
-  | 'octagon-frame';
+  | 'octagon-frame'
+  | 'line-arrow-both'
+  | 'line-dashed'
+  | 'line-floral'
+  | 'speech-bubble'
+  | 'cloud-badge'
+  | 'shield-crest'
+  | 'pentagon'
+  | 'cross-plus'
+  | 'parallelogram'
+  | 'trapezoid';
 
 export interface ShapeElement extends BaseElement {
   type: 'shape';
@@ -233,6 +302,12 @@ export interface ShapeElement extends BaseElement {
   gradientFill?: string;
   borderRadius?: number;
   borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double';
+  innerText?: string;
+  innerTextColor?: string;
+  innerFontSize?: number;
+  innerFontFamily?: string;
+  lineStartCap?: 'none' | 'arrow' | 'circle' | 'diamond';
+  lineEndCap?: 'none' | 'arrow' | 'circle' | 'diamond';
 }
 
 export interface DrawingElement extends BaseElement {
@@ -248,19 +323,117 @@ export interface DrawingElement extends BaseElement {
   viewBoxHeight: number;
 }
 
+// CANVA TABLE ELEMENT (Event Schedule / Itinerary / Guest Seating / Menu)
+export interface TableElement extends BaseElement {
+  type: 'table';
+  rows: string[][];
+  headerBgColor: string;
+  headerTextColor: string;
+  cellBgColor: string;
+  altRowBgColor?: string;
+  textColor: string;
+  borderColor: string;
+  borderWidth: number;
+  fontSize: number;
+  fontFamily: string;
+  borderRadius?: number;
+  cellPadding?: number;
+}
+
+// CANVA CHART & INFOGRAPHIC ELEMENT (RSVP Stats / Event Timeline / Budget / Seating)
+export type ChartVariant = 'bar' | 'horizontal-bar' | 'donut' | 'pie' | 'line' | 'progress-rings';
+
+export interface ChartDataPoint {
+  label: string;
+  value: number;
+  color: string;
+}
+
+export interface ChartElement extends BaseElement {
+  type: 'chart';
+  chartType: ChartVariant;
+  title: string;
+  data: ChartDataPoint[];
+  showLegend: boolean;
+  showValues: boolean;
+  textColor: string;
+  backgroundColor?: string;
+  borderColor?: string;
+}
+
+// CANVA PHOTO COLLAGE GRID ELEMENT
+export type GridLayoutVariant =
+  | '2-col'
+  | '2-row'
+  | '3-collage'
+  | '4-quad'
+  | 'polaroid-trio'
+  | 'hero-split';
+
+export interface GridElement extends BaseElement {
+  type: 'grid';
+  gridLayout: GridLayoutVariant;
+  images: string[];
+  gap: number;
+  borderRadius: number;
+  borderColor: string;
+  borderWidth: number;
+  backgroundColor?: string;
+}
+
+// CANVA LIVE EVENT COUNTDOWN / DATE STAMP ELEMENT
+export interface CountdownElement extends BaseElement {
+  type: 'countdown';
+  targetDate: string; // ISO or YYYY-MM-DDTHH:mm
+  eventLabel: string;
+  styleVariant: 'royal-gold' | 'modern-glass' | 'minimal-serif' | 'festive-pill';
+  primaryColor: string;
+  backgroundColor: string;
+  borderColor: string;
+  showSeconds?: boolean;
+}
+
+// CANVA BARCODE / VENUE PASS TICKET ELEMENT
+export interface BarcodeElement extends BaseElement {
+  type: 'barcode';
+  codeValue: string;
+  label: string;
+  subLabel?: string;
+  color: string;
+  backgroundColor: string;
+  borderColor?: string;
+  showText: boolean;
+}
+
 export type CanvasItem =
   | TextElement
   | ImageElement
   | StickerElement
   | QrElement
   | ShapeElement
-  | DrawingElement;
+  | DrawingElement
+  | TableElement
+  | ChartElement
+  | GridElement
+  | CountdownElement
+  | BarcodeElement;
 
-export type PageTransitionType = 'none' | 'fade' | 'slide' | 'zoom' | 'royal-curtain' | 'sparkle';
+export type PageTransitionType =
+  | 'none'
+  | 'fade'
+  | 'slide'
+  | 'zoom'
+  | 'royal-curtain'
+  | 'sparkle'
+  | 'stack'
+  | 'chop'
+  | 'match-move';
 
 export interface CardPage {
   id: string;
   title: string;
+  locked?: boolean;
+  hidden?: boolean;
   backgroundType: 'color' | 'gradient' | 'pattern' | 'image';
   backgroundValue: string;
   duration?: number; // Slide duration in seconds (default 4.5)
@@ -276,6 +449,7 @@ export interface BrandKit {
   headingFont: string;
   subheadingFont: string;
   bodyFont: string;
+  logoUrl?: string;
 }
 
 export interface AudioTrack {
@@ -295,10 +469,30 @@ export interface DrawBrushSettings {
   opacity: number;
 }
 
+export interface SavedProject {
+  id: string;
+  title: string;
+  updatedAt: string;
+  aspectRatio: AspectRatioType;
+  pages: CardPage[];
+}
+
+export interface CustomGuide {
+  id: string;
+  orientation: 'horizontal' | 'vertical';
+  position: number; // px on artboard
+}
+
 export interface CardTemplate {
   id: string;
   title: string;
-  category: 'wedding' | 'housewarming' | 'birthday' | 'baby-shower' | 'sangeet-mehendi' | 'anniversary';
+  category:
+    | 'wedding'
+    | 'housewarming'
+    | 'birthday'
+    | 'baby-shower'
+    | 'sangeet-mehendi'
+    | 'anniversary';
   aspectRatio: AspectRatioType;
   tags: string[];
   thumbnailGradient: string;

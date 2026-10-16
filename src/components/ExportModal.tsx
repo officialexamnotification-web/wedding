@@ -21,6 +21,11 @@ import {
   QrElement,
   ShapeElement,
   DrawingElement,
+  TableElement,
+  ChartElement,
+  GridElement,
+  CountdownElement,
+  BarcodeElement,
 } from '../types/editor';
 
 interface ExportModalProps {
@@ -324,6 +329,63 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         } catch (e) {
           console.warn('Image draw err', e);
         }
+      }
+
+      // TABLE ELEMENT
+      else if (elem.type === 'table') {
+        const tb = elem as TableElement;
+        const rowCount = Math.max(1, tb.rows.length);
+        const colCount = Math.max(1, tb.rows[0]?.length || 3);
+        const rowH = tb.height / rowCount;
+        const colW = tb.width / colCount;
+        tb.rows.forEach((row, rIdx) => {
+          ctx.fillStyle =
+            rIdx === 0
+              ? tb.headerBgColor || '#630c1d'
+              : rIdx % 2 === 1
+              ? tb.cellBgColor || 'rgba(20,5,10,0.85)'
+              : tb.altRowBgColor || 'rgba(45,10,20,0.75)';
+          ctx.fillRect(tb.x, tb.y + rIdx * rowH, tb.width, rowH);
+          ctx.fillStyle = rIdx === 0 ? tb.headerTextColor || '#FFEAA7' : tb.textColor || '#FFF2C6';
+          ctx.font = `${rIdx === 0 ? 'bold ' : ''}${tb.fontSize || 11}px Cinzel, serif`;
+          ctx.textAlign = 'center';
+          row.forEach((cell, cIdx) => {
+            ctx.fillText(
+              cell,
+              tb.x + cIdx * colW + colW / 2,
+              tb.y + rIdx * rowH + rowH / 2 + 4
+            );
+          });
+        });
+        ctx.strokeStyle = tb.borderColor || '#D4AF37';
+        ctx.lineWidth = tb.borderWidth || 1;
+        ctx.strokeRect(tb.x, tb.y, tb.width, tb.height);
+      }
+
+      // CHART / COUNTDOWN / BARCODE / GRID ELEMENT
+      else if (
+        elem.type === 'chart' ||
+        elem.type === 'countdown' ||
+        elem.type === 'barcode' ||
+        elem.type === 'grid'
+      ) {
+        ctx.fillStyle = 'rgba(20, 5, 10, 0.85)';
+        ctx.fillRect(elem.x, elem.y, elem.width, elem.height);
+        ctx.strokeStyle = '#D4AF37';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(elem.x, elem.y, elem.width, elem.height);
+        ctx.fillStyle = '#FFEAA7';
+        ctx.font = 'bold 12px Cinzel, serif';
+        ctx.textAlign = 'center';
+        const label =
+          elem.type === 'chart'
+            ? (elem as ChartElement).title
+            : elem.type === 'countdown'
+            ? (elem as CountdownElement).eventLabel
+            : elem.type === 'barcode'
+            ? (elem as BarcodeElement).codeValue
+            : 'PHOTO COLLAGE GRID';
+        ctx.fillText(label, elem.x + elem.width / 2, elem.y + elem.height / 2 + 4);
       }
 
       ctx.restore();

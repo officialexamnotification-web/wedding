@@ -48,6 +48,9 @@ export const Homepage: React.FC<HomepageProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [previewTemplate, setPreviewTemplate] = useState<CardTemplate | null>(null);
+  const [newsletterEmail, setNewsletterEmail] = useState<string>('');
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState<boolean>(false);
+  const [footerLang, setFooterLang] = useState<string>('English & हिंदी (India)');
 
   // Circular Categories with real event photography
   const HOME_CATEGORIES = [
@@ -958,87 +961,428 @@ export const Homepage: React.FC<HomepageProps> = ({
         </div>
       </section>
 
-      {/* 10. ULTRA-LUXURY ROYAL FOOTER */}
-      <footer className="mt-auto bg-gradient-to-b from-neutral-950 via-neutral-950 to-black border-t border-amber-500/30 text-neutral-400 text-xs py-16 px-4 sm:px-6 relative overflow-hidden">
-        {/* Subtle top golden light flare */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-amber-500/10 blur-[100px] pointer-events-none rounded-full" />
+      {/* 10. ULTRA-LUXURY ROYAL PALACE FOOTER */}
+      <footer className="mt-auto bg-gradient-to-b from-neutral-950 via-[#0d0306] to-black border-t-2 border-amber-500/40 text-neutral-400 text-xs relative overflow-hidden">
+        {/* Top Ornamental Gold Shimmer Ribbon */}
+        <div className="h-1 w-full bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-80" />
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-12 relative z-10">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl gold-shimmer flex items-center justify-center text-neutral-950 font-black font-cinzel text-xl shadow-lg shadow-amber-500/30 border border-amber-300/50">
-                नि
+        {/* Ambient Royal Palace Glow */}
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-4/5 h-64 bg-amber-500/10 blur-[130px] pointer-events-none rounded-full" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-rose-900/10 blur-[140px] pointer-events-none rounded-full" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-12 relative z-10 space-y-12">
+          {/* TIER 1: ROYAL VIP NEWSLETTER & INSTANT STUDIO BANNER */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#24060d] via-neutral-900/95 to-[#24060d] border border-amber-500/40 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div className="absolute inset-1.5 border border-dashed border-amber-400/20 rounded-2xl pointer-events-none" />
+
+            <div className="space-y-2 text-center lg:text-left max-w-xl relative z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-[11px] font-bold tracking-wider uppercase">
+                <Crown className="w-3.5 h-3.5 text-amber-400" />
+                <span>Royal Muhurat & Invitation Inspiration Club</span>
               </div>
-              <div>
-                <span className="font-cinzel font-bold text-amber-200 text-base tracking-wider block">
-                  IMANTRAN CARD
+              <h3 className="font-cinzel text-xl sm:text-2xl font-extrabold text-amber-100 tracking-wide">
+                Get 50+ Exclusive 2026–2027 Royal Wedding Templates Free
+              </h3>
+              <p className="text-xs text-neutral-300 leading-relaxed">
+                Receive auspicious Vivah Muhurat calendars, Sanskrit shloka booklets, and new palace invitation releases directly in your inbox.
+              </p>
+            </div>
+
+            <div className="w-full lg:w-auto flex flex-col sm:flex-row items-center gap-2.5 relative z-10">
+              {newsletterSubscribed ? (
+                <div className="px-5 py-3 rounded-xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 font-bold text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>धन्यवाद! Welcome to the Royal Invitation Club ✨</span>
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    placeholder="Enter your email or WhatsApp number..."
+                    className="w-full sm:w-72 bg-neutral-950/90 text-neutral-100 px-4 py-3 rounded-xl border border-amber-500/40 focus:border-amber-400 outline-none text-xs placeholder:text-neutral-500"
+                  />
+                  <button
+                    onClick={() => {
+                      if (newsletterEmail.trim()) {
+                        setNewsletterSubscribed(true);
+                        setNewsletterEmail('');
+                      }
+                    }}
+                    className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-110 text-neutral-950 font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                  >
+                    <Sparkles className="w-4 h-4 fill-neutral-950" />
+                    <span>Join VIP List</span>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* TIER 2: 4-PILLAR TRUST & HERITAGE GUARANTEE STRIP */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                icon: ShieldCheck,
+                title: '100% Watermark-Free',
+                sub: 'Zero branding on your sacred invitations',
+                badge: 'Guaranteed',
+              },
+              {
+                icon: Printer,
+                title: '300 DPI Print & 4K Digital',
+                sub: 'Crystal clear PDF, PNG & WhatsApp HD',
+                badge: 'Press Ready',
+              },
+              {
+                icon: QrCode,
+                title: 'Smart Google Maps GPS QR',
+                sub: 'Live turn-by-turn venue directions',
+                badge: 'Built-In App',
+              },
+              {
+                icon: Heart,
+                title: '250,000+ Indian Families',
+                sub: '4.9★ Rated across India, USA, UK & UAE',
+                badge: 'Trusted #1',
+              },
+            ].map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={idx}
+                  className="p-4 rounded-2xl bg-neutral-900/70 border border-neutral-800/90 hover:border-amber-500/40 transition flex items-start gap-3.5 group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-110 transition-transform">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-[9px] font-mono uppercase text-amber-400 font-bold">
+                      {item.badge}
+                    </span>
+                    <h4 className="text-xs font-bold text-neutral-100">{item.title}</h4>
+                    <p className="text-[11px] text-neutral-400 leading-snug">{item.sub}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* TIER 3: 6-COLUMN GRAND DIRECTORY */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8 pt-4 border-t border-neutral-800/80">
+            {/* Column 1 & 2: Brand Heritage Story & Contact Concierge */}
+            <div className="lg:col-span-2 space-y-4 pr-2">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl gold-shimmer flex items-center justify-center text-neutral-950 font-black font-cinzel text-2xl shadow-lg shadow-amber-500/30 border border-amber-300/60">
+                  नि
+                </div>
+                <div>
+                  <span className="font-cinzel font-black text-amber-200 text-lg tracking-wider block">
+                    IMANTRAN CARD
+                  </span>
+                  <span className="text-[10px] text-amber-400 font-semibold tracking-widest uppercase">
+                    Royal Indian Canva Studio • Est. 2026
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-xs leading-relaxed text-neutral-300">
+                भारत का सर्वश्रेष्ठ डिजिटल निमंत्रण एवं वीडियो कार्ड स्टूडियो। Handcrafted for Shubh Vivah, Griha Pravesh, Sangeet, Mehendi, Haldi, Baby Showers & Milestone Anniversaries with full Canva-grade design tools.
+              </p>
+
+              {/* Cultural Blessing Box */}
+              <div className="p-3 rounded-xl bg-neutral-900/90 border border-amber-500/25 space-y-1">
+                <div className="font-tiro text-amber-300 text-xs font-semibold">
+                  ॥ मंगलम् भगवान विष्णुः मंगलम् गरुड़ध्वजः ॥
+                </div>
+                <p className="text-[10px] text-neutral-400">
+                  Every template is crafted with authentic Vedic symbols, Devanagari calligraphy & palace aesthetics.
+                </p>
+              </div>
+
+              {/* Quick Studio Launch Buttons */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <button
+                  onClick={onOpenBlankEditor}
+                  className="px-4 py-2.5 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-110 text-neutral-950 font-black rounded-xl transition text-xs shadow-md shadow-amber-500/20 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Palette className="w-3.5 h-3.5" />
+                  <span>Open Canva Studio</span>
+                </button>
+                <button
+                  onClick={() => onOpenVideoCard(INITIAL_TEMPLATES[0])}
+                  className="px-3.5 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-amber-500/40 text-amber-200 rounded-xl transition text-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Play className="w-3 h-3 fill-amber-300 text-amber-300" />
+                  <span>5-Slide Video Demo</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Column 3: Celebration Categories */}
+            <div>
+              <h4 className="font-cinzel text-xs font-bold text-amber-200 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                Celebrations
+              </h4>
+              <ul className="space-y-2.5 text-xs">
+                <li>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('wedding');
+                      document.getElementById('template-catalog')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="hover:text-amber-300 transition flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>💍</span> Royal Shubh Vivah
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('housewarming');
+                      document.getElementById('template-catalog')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="hover:text-amber-300 transition flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>🪔</span> Griha Pravesh Puja
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('sangeet-mehendi');
+                      document.getElementById('template-catalog')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="hover:text-amber-300 transition flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>🪘</span> Sangeet, Haldi & Mehendi
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('birthday');
+                      document.getElementById('template-catalog')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="hover:text-amber-300 transition flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>🎂</span> 1st Birthday (जन्मदिन)
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('baby-shower');
+                      document.getElementById('template-catalog')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="hover:text-amber-300 transition flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>👶</span> Godh Bharai / Baby Shower
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('anniversary');
+                      document.getElementById('template-catalog')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="hover:text-amber-300 transition flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>✨</span> 25th / 50th Anniversary
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 4: Canva Studio Pro Tools */}
+            <div>
+              <h4 className="font-cinzel text-xs font-bold text-amber-200 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                Canva Studio Tools
+              </h4>
+              <ul className="space-y-2.5 text-xs">
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition flex items-center gap-1.5 cursor-pointer">
+                    <span className="text-amber-400">✦</span> Curved Arch Text & Neon
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition flex items-center gap-1.5 cursor-pointer">
+                    <span className="text-amber-400">✦</span> Magic Cutout Photo Studio
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition flex items-center gap-1.5 cursor-pointer">
+                    <span className="text-amber-400">✦</span> Itinerary Tables & Charts
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition flex items-center gap-1.5 cursor-pointer">
+                    <span className="text-amber-400">✦</span> Multi-Photo Collage Grids
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition flex items-center gap-1.5 cursor-pointer">
+                    <span className="text-amber-400">✦</span> Freehand Gold Brush Draw
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition flex items-center gap-1.5 cursor-pointer">
+                    <span className="text-amber-400">✦</span> Brand Hub 1-Click Restyle
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 5: Regional & Cultural Traditions */}
+            <div>
+              <h4 className="font-cinzel text-xs font-bold text-amber-200 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                Indian Traditions
+              </h4>
+              <ul className="space-y-2.5 text-xs text-neutral-300">
+                <li>
+                  <button onClick={() => onOpenEditorWithTemplate(INITIAL_TEMPLATES[0])} className="hover:text-amber-300 transition cursor-pointer">
+                    🏰 Rajasthani Rajwada Vivah
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => onOpenEditorWithTemplate(INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0])} className="hover:text-amber-300 transition cursor-pointer">
+                    🕌 Punjabi Anand Karaj & Dhol
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition cursor-pointer">
+                    🌴 South Indian Kanjeevaram
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition cursor-pointer">
+                    🌺 Gujarati & Marwari Lagna
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition cursor-pointer">
+                    🐚 Bengali Subho Bibaho
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition cursor-pointer">
+                    🌙 Royal Nikah & Walima
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 6: Smart Apps, Export & Architecture */}
+            <div>
+              <h4 className="font-cinzel text-xs font-bold text-amber-200 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                Smart Apps & Export
+              </h4>
+              <ul className="space-y-2.5 text-xs text-neutral-300">
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition cursor-pointer">
+                    📍 Google Maps Venue QR
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition cursor-pointer">
+                    💬 WhatsApp RSVP & UPI Shagun
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition cursor-pointer">
+                    ⏳ Live Muhurat Countdown
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition cursor-pointer">
+                    🎟️ VIP Venue Entry Barcode
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition cursor-pointer">
+                    🇮🇳 Magic Hindi / Sanskrit Translate
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenAnalysis} className="text-amber-300 hover:underline font-semibold transition cursor-pointer">
+                    ⚡ Studio Architecture Audit →
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* TIER 4: POPULAR SEO QUICK-TAGS & ASPECT RATIO BADGES */}
+          <div className="pt-6 border-t border-neutral-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mr-1">
+                Supported Formats:
+              </span>
+              {[
+                '9:16 WhatsApp Story HD',
+                '5:7 Classic Print Card',
+                '1:1 Instagram Square',
+                '7:5 Landscape Envelope',
+                'A4 300 DPI Press PDF',
+                '16:9 YouTube / LED Wall Video',
+              ].map((tag, i) => (
+                <span
+                  key={i}
+                  onClick={onOpenBlankEditor}
+                  className="px-2.5 py-1 rounded-full bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-amber-500/40 text-[10px] text-neutral-300 cursor-pointer transition"
+                >
+                  {tag}
                 </span>
-                <span className="text-[10px] text-amber-400 font-medium tracking-widest uppercase">Digital Cards & Video Studio</span>
-              </div>
+              ))}
             </div>
 
-            <p className="text-xs leading-relaxed text-neutral-300">
-              India's premier digital invitation studio for Shubh Vivah, Griha Pravesh, Sangeet, Birthdays, and cultural celebrations.
-            </p>
-
-            <div className="inline-flex items-center gap-2 text-[11px] text-amber-300 bg-amber-500/15 px-3 py-1.5 rounded-full border border-amber-500/30 font-semibold shadow-inner">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>100% Watermark Free Always</span>
+            {/* Language & Region Selector */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-[11px] text-neutral-500">Language:</span>
+              <select
+                value={footerLang}
+                onChange={(e) => setFooterLang(e.target.value)}
+                className="bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 text-amber-200 text-xs rounded-lg px-2.5 py-1.5 outline-none cursor-pointer"
+              >
+                <option value="English & हिंदी (India)">🇮🇳 English & हिंदी (India)</option>
+                <option value="श्रीमद् संस्कृत एवं हिंदी">🕉️ संस्कृत एवं शुद्ध हिंदी</option>
+                <option value="Global NRI Edition (US/UK/UAE)">🌍 Global NRI Edition (USD/GBP)</option>
+              </select>
             </div>
           </div>
 
-          <div>
-            <h4 className="font-cinzel text-xs font-bold text-amber-200 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              Celebration Categories
-            </h4>
-            <ul className="space-y-2.5 text-xs">
-              <li><button onClick={() => setSelectedCategory('wedding')} className="hover:text-amber-300 transition flex items-center gap-1.5"><span>💍</span> Wedding Invitations (शुभ विवाह)</button></li>
-              <li><button onClick={() => setSelectedCategory('housewarming')} className="hover:text-amber-300 transition flex items-center gap-1.5"><span>🪔</span> Griha Pravesh (गृह प्रवेश)</button></li>
-              <li><button onClick={() => setSelectedCategory('sangeet-mehendi')} className="hover:text-amber-300 transition flex items-center gap-1.5"><span>🎶</span> Sangeet & Haldi Ceremony</button></li>
-              <li><button onClick={() => setSelectedCategory('birthday')} className="hover:text-amber-300 transition flex items-center gap-1.5"><span>🎂</span> Birthday Invitations (जन्मदिन)</button></li>
-              <li><button onClick={() => setSelectedCategory('anniversary')} className="hover:text-amber-300 transition flex items-center gap-1.5"><span>✨</span> Anniversary Celebrations</button></li>
-            </ul>
-          </div>
+          {/* TIER 5: BOTTOM COPYRIGHT, SOCIAL LINKS & MADE IN INDIA BADGE */}
+          <div className="pt-6 border-t border-neutral-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+              <span className="text-neutral-300 font-semibold">
+                © {new Date().getFullYear()} IMANTRAN CARD Studio.
+              </span>
+              <span>All rights reserved.</span>
+              <span className="hidden sm:inline">•</span>
+              <span className="text-amber-400/90 font-medium">
+                Crafted with ❤️ for Indian Celebrations Worldwide
+              </span>
+            </div>
 
-          <div>
-            <h4 className="font-cinzel text-xs font-bold text-amber-200 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              Signature Capabilities
-            </h4>
-            <ul className="space-y-2.5 text-xs text-neutral-300">
-              <li className="flex items-center gap-2"><span className="text-amber-400">✦</span> Google Maps Venue QR Generator</li>
-              <li className="flex items-center gap-2"><span className="text-amber-400">✦</span> 5-Slide Video Story Sequences</li>
-              <li className="flex items-center gap-2"><span className="text-amber-400">✦</span> Traditional Sanskrit & Hindi Fonts</li>
-              <li className="flex items-center gap-2"><span className="text-amber-400">✦</span> 300 DPI High-Resolution PDF</li>
-              <li className="flex items-center gap-2"><span className="text-amber-400">✦</span> Instant 1-Tap WhatsApp Sharing</li>
-            </ul>
+            <div className="flex items-center gap-4 text-[11px] text-neutral-400">
+              <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition cursor-pointer">
+                Privacy & Zero-Tracking
+              </button>
+              <span>•</span>
+              <button onClick={onOpenBlankEditor} className="hover:text-amber-300 transition cursor-pointer">
+                100% Free License
+              </button>
+              <span>•</span>
+              <button onClick={onOpenAnalysis} className="hover:text-amber-300 transition cursor-pointer">
+                System Status: ● Online
+              </button>
+            </div>
           </div>
-
-          <div className="space-y-3">
-            <h4 className="font-cinzel text-xs font-bold text-amber-200 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              Start Designing
-            </h4>
-            <button
-              onClick={onOpenBlankEditor}
-              className="w-full py-3 px-4 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-110 text-neutral-950 font-black rounded-xl transition text-xs shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2"
-            >
-              <Palette className="w-4 h-4" />
-              <span>Launch Studio Editor →</span>
-            </button>
-            <button
-              onClick={() => onOpenVideoCard(INITIAL_TEMPLATES[0])}
-              className="w-full py-2.5 px-4 bg-neutral-900 hover:bg-neutral-800 border border-amber-500/40 text-amber-200 hover:text-amber-100 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-md"
-            >
-              <Play className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
-              <span>Watch Video Card Sample</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto pt-8 border-t border-neutral-900 text-center text-xs text-neutral-500 relative z-10">
-          <div>© {new Date().getFullYear()} IMANTRAN CARD Studio. All rights reserved.</div>
         </div>
       </footer>
 

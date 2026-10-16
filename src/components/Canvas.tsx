@@ -7,10 +7,16 @@ import {
   QrElement,
   ShapeElement,
   DrawingElement,
+  TableElement,
+  ChartElement,
+  GridElement,
+  CountdownElement,
+  BarcodeElement,
   AspectRatioType,
   CANVAS_SIZES,
   PhotoFilterPreset,
   DrawBrushSettings,
+  CustomGuide,
 } from '../types/editor';
 import {
   Maximize2,
@@ -27,6 +33,8 @@ import {
   Crop,
   PaintRoller,
   Layers,
+  AlignCenter,
+  Link2,
 } from 'lucide-react';
 
 interface CanvasProps {
@@ -139,9 +147,29 @@ export function renderShapeVisual(elem: ShapeElement) {
   const fillColor = elem.fillColor || 'transparent';
   const borderStyle = elem.borderStyle || 'solid';
 
+  const innerTextOverlay = elem.innerText ? (
+    <div
+      className="absolute inset-0 flex items-center justify-center p-2 text-center pointer-events-none select-none font-bold tracking-wider"
+      style={{
+        color: elem.innerTextColor || '#FFEAA7',
+        fontSize: `${elem.innerFontSize || 13}px`,
+        fontFamily: elem.innerFontFamily || "'Cinzel', serif",
+      }}
+    >
+      {elem.innerText}
+    </div>
+  ) : null;
+
+  const wrapWithInnerText = (node: React.ReactNode) => (
+    <div className="w-full h-full relative pointer-events-none">
+      {node}
+      {innerTextOverlay}
+    </div>
+  );
+
   switch (elem.shapeType) {
     case 'gold-frame':
-      return (
+      return wrapWithInnerText(
         <div
           className="w-full h-full relative pointer-events-none"
           style={{
@@ -178,7 +206,7 @@ export function renderShapeVisual(elem: ShapeElement) {
       );
 
     case 'ornate-border':
-      return (
+      return wrapWithInnerText(
         <div
           className="w-full h-full relative pointer-events-none"
           style={{
@@ -230,8 +258,47 @@ export function renderShapeVisual(elem: ShapeElement) {
         </div>
       );
 
-    case 'circle':
+    case 'line-floral':
       return (
+        <div className="w-full h-full flex items-center justify-center pointer-events-none">
+          <div className="w-full flex items-center gap-2">
+            <div className="flex-1 h-0.5" style={{ backgroundColor: strokeColor }} />
+            <span style={{ color: strokeColor }} className="text-sm leading-none">
+              ❈ ❁ ❈
+            </span>
+            <div className="flex-1 h-0.5" style={{ backgroundColor: strokeColor }} />
+          </div>
+        </div>
+      );
+
+    case 'line-arrow-both':
+      return (
+        <svg viewBox="0 0 260 28" className="w-full h-full pointer-events-none">
+          <polygon points="4,14 18,5 18,23" fill={strokeColor} />
+          <line
+            x1="18"
+            y1="14"
+            x2="242"
+            y2="14"
+            stroke={strokeColor}
+            strokeWidth={Math.max(2, strokeWidth)}
+          />
+          <polygon points="256,14 242,5 242,23" fill={strokeColor} />
+        </svg>
+      );
+
+    case 'line-dashed':
+      return (
+        <div className="w-full h-full flex items-center justify-center pointer-events-none">
+          <div
+            className="w-full border-t-2 border-dashed"
+            style={{ borderColor: strokeColor, borderTopWidth: `${Math.max(2, strokeWidth)}px` }}
+          />
+        </div>
+      );
+
+    case 'circle':
+      return wrapWithInnerText(
         <div
           className="w-full h-full rounded-full pointer-events-none"
           style={{
@@ -242,7 +309,7 @@ export function renderShapeVisual(elem: ShapeElement) {
       );
 
     case 'arch-frame':
-      return (
+      return wrapWithInnerText(
         <div
           className="w-full h-full pointer-events-none"
           style={{
@@ -254,7 +321,7 @@ export function renderShapeVisual(elem: ShapeElement) {
       );
 
     case 'pill-banner':
-      return (
+      return wrapWithInnerText(
         <div
           className="w-full h-full rounded-full pointer-events-none flex items-center justify-center"
           style={{
@@ -265,7 +332,7 @@ export function renderShapeVisual(elem: ShapeElement) {
       );
 
     case 'diamond':
-      return (
+      return wrapWithInnerText(
         <div className="w-full h-full flex items-center justify-center pointer-events-none">
           <div
             className="w-[75%] h-[75%] rotate-45"
@@ -278,7 +345,7 @@ export function renderShapeVisual(elem: ShapeElement) {
       );
 
     case 'royal-badge':
-      return (
+      return wrapWithInnerText(
         <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
           <polygon
             points="100,6 126,25 158,20 169,50 194,69 184,100 194,131 169,150 158,180 126,175 100,194 74,175 42,180 31,150 6,131 16,100 6,69 31,50 42,20 74,25"
@@ -299,7 +366,7 @@ export function renderShapeVisual(elem: ShapeElement) {
       );
 
     case 'scallop-badge':
-      return (
+      return wrapWithInnerText(
         <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
           <path
             d="M100,10 C115,10 125,22 140,18 C155,14 162,28 175,35 C188,42 182,58 190,72 C198,86 188,100 190,115 C192,130 180,142 175,156 C170,170 155,172 140,182 C125,192 115,185 100,190 C85,185 75,192 60,182 C45,172 30,170 25,156 C20,142 8,130 10,115 C12,100 2,86 10,72 C18,58 12,42 25,35 C38,28 45,14 60,18 C75,22 85,10 100,10 Z"
@@ -319,7 +386,7 @@ export function renderShapeVisual(elem: ShapeElement) {
       );
 
     case 'ribbon-banner':
-      return (
+      return wrapWithInnerText(
         <svg
           viewBox="0 0 300 70"
           preserveAspectRatio="none"
@@ -351,7 +418,7 @@ export function renderShapeVisual(elem: ShapeElement) {
       );
 
     case 'mandala-ring':
-      return (
+      return wrapWithInnerText(
         <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
           <circle
             cx="100"
@@ -382,8 +449,44 @@ export function renderShapeVisual(elem: ShapeElement) {
         </svg>
       );
 
+    case 'shield-crest':
+      return wrapWithInnerText(
+        <svg viewBox="0 0 200 220" className="w-full h-full pointer-events-none">
+          <path
+            d="M100,10 L185,40 L185,115 C185,165 145,198 100,212 C55,198 15,165 15,115 L15,40 Z"
+            fill={fillColor === 'transparent' ? 'rgba(212,175,55,0.14)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+        </svg>
+      );
+
+    case 'speech-bubble':
+      return wrapWithInnerText(
+        <svg viewBox="0 0 220 130" className="w-full h-full pointer-events-none">
+          <path
+            d="M20,10 H200 A12,12 0 0 1 212,22 V85 A12,12 0 0 1 200,97 H95 L60,124 L68,97 H20 A12,12 0 0 1 8,85 V22 A12,12 0 0 1 20,10 Z"
+            fill={fillColor === 'transparent' ? 'rgba(45,6,16,0.85)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 1.8}
+          />
+        </svg>
+      );
+
+    case 'cloud-badge':
+      return wrapWithInnerText(
+        <svg viewBox="0 0 220 130" className="w-full h-full pointer-events-none">
+          <path
+            d="M55,105 H170 A32,32 0 0 0 175,42 A42,42 0 0 0 98,25 A36,36 0 0 0 42,52 A28,28 0 0 0 55,105 Z"
+            fill={fillColor === 'transparent' ? 'rgba(212,175,55,0.15)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+        </svg>
+      );
+
     case 'star':
-      return (
+      return wrapWithInnerText(
         <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
           <polygon
             points="100,8 123,68 188,68 136,107 156,170 100,132 44,170 64,107 12,68 77,68"
@@ -395,7 +498,7 @@ export function renderShapeVisual(elem: ShapeElement) {
       );
 
     case 'hexagon':
-      return (
+      return wrapWithInnerText(
         <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
           <polygon
             points="50,12 150,12 192,100 150,188 50,188 8,100"
@@ -406,8 +509,20 @@ export function renderShapeVisual(elem: ShapeElement) {
         </svg>
       );
 
+    case 'pentagon':
+      return wrapWithInnerText(
+        <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
+          <polygon
+            points="100,10 190,78 156,188 44,188 10,78"
+            fill={fillColor === 'transparent' ? 'rgba(212,175,55,0.12)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+        </svg>
+      );
+
     case 'triangle':
-      return (
+      return wrapWithInnerText(
         <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
           <polygon
             points="100,12 190,185 10,185"
@@ -419,7 +534,7 @@ export function renderShapeVisual(elem: ShapeElement) {
       );
 
     case 'heart-shape':
-      return (
+      return wrapWithInnerText(
         <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
           <path
             d="M100,178 C100,178 18,122 18,65 C18,34 42,14 70,14 C86,14 100,24 100,38 C100,24 114,14 130,14 C158,14 182,34 182,65 C182,122 100,178 100,178 Z"
@@ -431,7 +546,7 @@ export function renderShapeVisual(elem: ShapeElement) {
       );
 
     case 'octagon-frame':
-      return (
+      return wrapWithInnerText(
         <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
           <polygon
             points="60,8 140,8 192,60 192,140 140,192 60,192 8,140 8,60"
@@ -449,8 +564,44 @@ export function renderShapeVisual(elem: ShapeElement) {
         </svg>
       );
 
+    case 'parallelogram':
+      return wrapWithInnerText(
+        <svg viewBox="0 0 220 90" preserveAspectRatio="none" className="w-full h-full pointer-events-none">
+          <polygon
+            points="28,6 214,6 192,84 6,84"
+            fill={fillColor === 'transparent' ? 'rgba(212,175,55,0.15)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+        </svg>
+      );
+
+    case 'trapezoid':
+      return wrapWithInnerText(
+        <svg viewBox="0 0 220 90" preserveAspectRatio="none" className="w-full h-full pointer-events-none">
+          <polygon
+            points="36,8 184,8 214,82 6,82"
+            fill={fillColor === 'transparent' ? 'rgba(212,175,55,0.15)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+        </svg>
+      );
+
+    case 'cross-plus':
+      return wrapWithInnerText(
+        <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
+          <polygon
+            points="70,12 130,12 130,70 188,70 188,130 130,130 130,188 70,188 70,130 12,130 12,70 70,70"
+            fill={fillColor === 'transparent' ? 'rgba(212,175,55,0.14)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+        </svg>
+      );
+
     case 'arrow-right':
-      return (
+      return wrapWithInnerText(
         <svg viewBox="0 0 200 100" className="w-full h-full pointer-events-none">
           <polygon
             points="10,35 135,35 135,12 190,50 135,88 135,65 10,65"
@@ -463,7 +614,7 @@ export function renderShapeVisual(elem: ShapeElement) {
 
     case 'rectangle':
     default:
-      return (
+      return wrapWithInnerText(
         <div
           className="w-full h-full pointer-events-none"
           style={{
@@ -522,7 +673,9 @@ export function renderTextVisual(t: TextElement) {
       style={{
         fontFamily: t.fontFamily,
         fontSize: `${t.fontSize}px`,
-        color: isHollow ? 'transparent' : t.color,
+        color: isHollow ? 'transparent' : t.gradientText ? 'transparent' : t.color,
+        backgroundImage: t.gradientText || undefined,
+        WebkitBackgroundClip: t.gradientText ? 'text' : undefined,
         textAlign: t.textAlign,
         fontWeight: t.fontWeight,
         fontStyle: t.fontStyle,
@@ -543,6 +696,405 @@ export function renderTextVisual(t: TextElement) {
       }}
     >
       {t.text}
+    </div>
+  );
+}
+
+// Render Canva Table Element
+export function renderTableVisual(tb: TableElement) {
+  return (
+    <div
+      className="w-full h-full overflow-hidden flex flex-col pointer-events-none select-none shadow-lg"
+      style={{
+        borderRadius: `${tb.borderRadius ?? 10}px`,
+        border: `${tb.borderWidth || 1}px solid ${tb.borderColor || '#D4AF37'}`,
+        fontFamily: tb.fontFamily || "'Cinzel', serif",
+        fontSize: `${tb.fontSize || 11}px`,
+      }}
+    >
+      {tb.rows.map((row, rIdx) => {
+        const isHeader = rIdx === 0;
+        const bg = isHeader
+          ? tb.headerBgColor || '#630c1d'
+          : rIdx % 2 === 1
+          ? tb.cellBgColor || 'rgba(20,5,10,0.85)'
+          : tb.altRowBgColor || 'rgba(45,10,20,0.75)';
+        const color = isHeader ? tb.headerTextColor || '#FFEAA7' : tb.textColor || '#FFF2C6';
+
+        return (
+          <div
+            key={rIdx}
+            className="flex-1 grid items-center"
+            style={{
+              gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))`,
+              backgroundColor: bg,
+              color,
+              borderBottom:
+                rIdx < tb.rows.length - 1
+                  ? `1px solid ${tb.borderColor || 'rgba(212,175,55,0.4)'}`
+                  : 'none',
+            }}
+          >
+            {row.map((cell, cIdx) => (
+              <div
+                key={cIdx}
+                className={`px-2 py-1 text-center truncate ${isHeader ? 'font-bold tracking-wider' : ''}`}
+                style={{
+                  borderRight:
+                    cIdx < row.length - 1
+                      ? `1px solid ${tb.borderColor || 'rgba(212,175,55,0.25)'}`
+                      : 'none',
+                }}
+              >
+                {cell}
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Render Canva Chart / Infographic Element
+export function renderChartVisual(ch: ChartElement) {
+  const maxVal = Math.max(1, ...ch.data.map((d) => d.value));
+  const totalVal = Math.max(
+    1,
+    ch.data.reduce((s, d) => s + d.value, 0)
+  );
+
+  return (
+    <div
+      className="w-full h-full p-3 rounded-xl flex flex-col justify-between pointer-events-none select-none shadow-lg"
+      style={{
+        backgroundColor: ch.backgroundColor || 'rgba(20, 5, 10, 0.85)',
+        border: `1.5px solid ${ch.borderColor || '#D4AF37'}`,
+        color: ch.textColor || '#FFEAA7',
+      }}
+    >
+      <div className="text-[11px] font-cinzel font-bold text-center tracking-wider uppercase truncate border-b border-amber-500/20 pb-1">
+        {ch.title}
+      </div>
+
+      {/* VERTICAL BAR CHART */}
+      {ch.chartType === 'bar' && (
+        <div className="flex-1 flex items-end justify-around gap-2 pt-3 pb-1 px-2">
+          {ch.data.map((dp, i) => {
+            const hPct = Math.round((dp.value / maxVal) * 100);
+            return (
+              <div key={i} className="flex-1 flex flex-col items-center h-full justify-end gap-1">
+                {ch.showValues && (
+                  <span className="text-[9px] font-mono opacity-90">{dp.value}%</span>
+                )}
+                <div
+                  className="w-full rounded-t-md transition-all"
+                  style={{
+                    height: `${Math.max(12, hPct * 0.72)}%`,
+                    backgroundColor: dp.color,
+                  }}
+                />
+                <span className="text-[9px] truncate max-w-full">{dp.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* HORIZONTAL BAR CHART */}
+      {ch.chartType === 'horizontal-bar' && (
+        <div className="flex-1 flex flex-col justify-around py-1 space-y-1">
+          {ch.data.map((dp, i) => {
+            const wPct = Math.round((dp.value / maxVal) * 100);
+            return (
+              <div key={i} className="space-y-0.5">
+                <div className="flex justify-between text-[9px]">
+                  <span>{dp.label}</span>
+                  <span className="font-mono">{dp.value}%</span>
+                </div>
+                <div className="w-full h-2.5 bg-neutral-900 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${wPct}%`, backgroundColor: dp.color }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* DONUT / PIE / PROGRESS RINGS */}
+      {(ch.chartType === 'donut' ||
+        ch.chartType === 'pie' ||
+        ch.chartType === 'progress-rings' ||
+        ch.chartType === 'line') && (
+        <div className="flex-1 flex items-center justify-around gap-2 py-1">
+          <svg viewBox="0 0 100 100" className="w-24 h-24 shrink-0">
+            {ch.chartType === 'line' ? (
+              <>
+                <polyline
+                  fill="none"
+                  stroke="#D4AF37"
+                  strokeWidth="3"
+                  points={ch.data
+                    .map((d, idx) => {
+                      const x = 12 + (idx / Math.max(1, ch.data.length - 1)) * 76;
+                      const y = 85 - (d.value / maxVal) * 68;
+                      return `${x},${y}`;
+                    })
+                    .join(' ')}
+                />
+                {ch.data.map((d, idx) => {
+                  const x = 12 + (idx / Math.max(1, ch.data.length - 1)) * 76;
+                  const y = 85 - (d.value / maxVal) * 68;
+                  return <circle key={idx} cx={x} cy={y} r="4.5" fill={d.color} />;
+                })}
+              </>
+            ) : (
+              (() => {
+                let cumulative = 0;
+                return ch.data.map((d, idx) => {
+                  const pct = (d.value / totalVal) * 100;
+                  const dashArray = `${pct} ${100 - pct}`;
+                  const dashOffset = 25 - cumulative;
+                  cumulative += pct;
+                  return (
+                    <circle
+                      key={idx}
+                      cx="50"
+                      cy="50"
+                      r={ch.chartType === 'pie' ? '25' : '34'}
+                      fill="transparent"
+                      stroke={d.color}
+                      strokeWidth={ch.chartType === 'pie' ? '50' : '14'}
+                      strokeDasharray={dashArray}
+                      strokeDashoffset={dashOffset}
+                      pathLength={100}
+                    />
+                  );
+                });
+              })()
+            )}
+          </svg>
+
+          <div className="space-y-1 text-[10px]">
+            {ch.data.map((d, idx) => (
+              <div key={idx} className="flex items-center gap-1.5">
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: d.color }}
+                />
+                <span className="truncate">{d.label}:</span>
+                <span className="font-mono font-bold">{d.value}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Render Canva Multi-Photo Collage Grid Element
+export function renderGridVisual(gr: GridElement) {
+  const imgs = gr.images || [];
+  const gap = `${gr.gap ?? 6}px`;
+  const radius = `${gr.borderRadius ?? 12}px`;
+  const border = `${gr.borderWidth ?? 2}px solid ${gr.borderColor || '#D4AF37'}`;
+
+  if (gr.gridLayout === '2-col') {
+    return (
+      <div
+        className="w-full h-full grid grid-cols-2 p-1.5 pointer-events-none"
+        style={{ gap, borderRadius: radius, border, backgroundColor: gr.backgroundColor }}
+      >
+        {[0, 1].map((i) => (
+          <img
+            key={i}
+            src={imgs[i] || imgs[0]}
+            alt=""
+            className="w-full h-full object-cover rounded-lg"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (gr.gridLayout === '2-row') {
+    return (
+      <div
+        className="w-full h-full grid grid-rows-2 p-1.5 pointer-events-none"
+        style={{ gap, borderRadius: radius, border, backgroundColor: gr.backgroundColor }}
+      >
+        {[0, 1].map((i) => (
+          <img
+            key={i}
+            src={imgs[i] || imgs[0]}
+            alt=""
+            className="w-full h-full object-cover rounded-lg"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (gr.gridLayout === '3-collage') {
+    return (
+      <div
+        className="w-full h-full grid grid-cols-2 grid-rows-2 p-1.5 pointer-events-none"
+        style={{ gap, borderRadius: radius, border, backgroundColor: gr.backgroundColor }}
+      >
+        <img
+          src={imgs[0]}
+          alt=""
+          className="w-full h-full object-cover rounded-lg row-span-2"
+        />
+        <img src={imgs[1] || imgs[0]} alt="" className="w-full h-full object-cover rounded-lg" />
+        <img src={imgs[2] || imgs[0]} alt="" className="w-full h-full object-cover rounded-lg" />
+      </div>
+    );
+  }
+
+  if (gr.gridLayout === 'polaroid-trio') {
+    return (
+      <div
+        className="w-full h-full grid grid-cols-3 p-2 pointer-events-none items-center"
+        style={{ gap, borderRadius: radius, border, backgroundColor: gr.backgroundColor }}
+      >
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="h-full bg-[#FFFDF9] p-1 pb-3 rounded shadow-md flex flex-col"
+          >
+            <img
+              src={imgs[i] || imgs[0]}
+              alt=""
+              className="w-full flex-1 object-cover rounded-xs"
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (gr.gridLayout === 'hero-split') {
+    return (
+      <div
+        className="w-full h-full grid grid-cols-2 grid-rows-2 p-1.5 pointer-events-none"
+        style={{ gap, borderRadius: radius, border, backgroundColor: gr.backgroundColor }}
+      >
+        <img
+          src={imgs[0]}
+          alt=""
+          className="w-full h-full object-cover rounded-lg col-span-2"
+        />
+        <img src={imgs[1] || imgs[0]} alt="" className="w-full h-full object-cover rounded-lg" />
+        <img src={imgs[2] || imgs[0]} alt="" className="w-full h-full object-cover rounded-lg" />
+      </div>
+    );
+  }
+
+  // Default 4-quad
+  return (
+    <div
+      className="w-full h-full grid grid-cols-2 grid-rows-2 p-1.5 pointer-events-none"
+      style={{ gap, borderRadius: radius, border, backgroundColor: gr.backgroundColor }}
+    >
+      {[0, 1, 2, 3].map((i) => (
+        <img
+          key={i}
+          src={imgs[i] || imgs[0]}
+          alt=""
+          className="w-full h-full object-cover rounded-lg"
+        />
+      ))}
+    </div>
+  );
+}
+
+// Render Canva Live Countdown Timer Element
+export function renderCountdownVisual(cd: CountdownElement) {
+  const targetMs = new Date(cd.targetDate || '2026-12-18T19:00:00').getTime();
+  const nowMs = Date.now();
+  const diff = Math.max(0, targetMs - nowMs);
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const mins = Math.floor((diff / 1000 / 60) % 60);
+  const secs = Math.floor((diff / 1000) % 60);
+
+  return (
+    <div
+      className="w-full h-full rounded-2xl p-2.5 flex flex-col items-center justify-between pointer-events-none select-none shadow-lg"
+      style={{
+        backgroundColor: cd.backgroundColor || 'rgba(45, 6, 16, 0.88)',
+        border: `1.5px solid ${cd.borderColor || '#D4AF37'}`,
+        color: cd.primaryColor || '#FFEAA7',
+      }}
+    >
+      <div className="text-[10px] font-cinzel font-bold tracking-widest uppercase">
+        ⏳ {cd.eventLabel || 'SHUBH VIVAH MUHURAT IN'}
+      </div>
+
+      <div className="grid grid-cols-4 gap-2 w-full">
+        {[
+          { val: String(days).padStart(2, '0'), unit: 'DAYS' },
+          { val: String(hours).padStart(2, '0'), unit: 'HRS' },
+          { val: String(mins).padStart(2, '0'), unit: 'MINS' },
+          { val: String(secs).padStart(2, '0'), unit: 'SECS' },
+        ].map((box, i) => (
+          <div
+            key={i}
+            className="bg-black/45 border border-amber-400/40 rounded-lg py-1 flex flex-col items-center justify-center"
+          >
+            <span className="font-cinzel font-extrabold text-sm sm:text-base leading-none">
+              {box.val}
+            </span>
+            <span className="text-[8px] opacity-80 font-mono mt-0.5">{box.unit}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Render Canva Barcode / Royal Entry Pass Element
+export function renderBarcodeVisual(bc: BarcodeElement) {
+  // Deterministic bar pattern from codeValue
+  const chars = (bc.codeValue || 'VIP-2026').split('');
+  return (
+    <div
+      className="w-full h-full rounded-xl p-2 flex flex-col items-center justify-between pointer-events-none select-none shadow-md"
+      style={{
+        backgroundColor: bc.backgroundColor || '#FFF4D6',
+        border: `1.5px solid ${bc.borderColor || '#D4AF37'}`,
+        color: bc.color || '#1a0408',
+      }}
+    >
+      <div className="text-[9px] font-cinzel font-bold tracking-widest uppercase">
+        {bc.label || 'ROYAL ENTRY PASS'}
+      </div>
+      <div className="w-full flex-1 flex items-center justify-center gap-[2px] px-2 my-0.5 overflow-hidden">
+        {Array.from({ length: 38 }).map((_, idx) => {
+          const chCode = chars[idx % chars.length].charCodeAt(0);
+          const w = (chCode + idx) % 3 === 0 ? 3 : (chCode + idx) % 2 === 0 ? 2 : 1;
+          return (
+            <div
+              key={idx}
+              className="h-full"
+              style={{
+                width: `${w}px`,
+                backgroundColor: bc.color || '#1a0408',
+              }}
+            />
+          );
+        })}
+      </div>
+      {bc.showText && (
+        <div className="text-[9px] font-mono tracking-widest font-bold">
+          {bc.codeValue}
+        </div>
+      )}
     </div>
   );
 }
@@ -600,6 +1152,9 @@ export const Canvas: React.FC<CanvasProps> = ({
   const [isDrawingStroke, setIsDrawingStroke] = useState(false);
   const [currentDrawPoints, setCurrentDrawPoints] = useState<{ x: number; y: number }[]>([]);
 
+  // Custom Ruler Guides State (Click top/left ruler to add custom cyan guide lines!)
+  const [customGuides, setCustomGuides] = useState<CustomGuide[]>([]);
+
   // Right-click Canva Context Menu
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -614,6 +1169,7 @@ export const Canvas: React.FC<CanvasProps> = ({
   }>({ vertical: [], horizontal: [] });
 
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const [editingShapeTextId, setEditingShapeTextId] = useState<string | null>(null);
   const didModifyRef = useRef<boolean>(false);
 
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
@@ -667,7 +1223,6 @@ export const Canvas: React.FC<CanvasProps> = ({
     e.stopPropagation();
     const pt = getCanvasPoint(e.clientX, e.clientY);
 
-    // If eraser tool is active, delete top drawing element near click
     if (drawBrush.brushType === 'eraser') {
       const drawingElems = elements.filter((el) => el.type === 'drawing');
       if (drawingElems.length > 0 && onDeleteElement) {
@@ -731,6 +1286,7 @@ export const Canvas: React.FC<CanvasProps> = ({
     if (e.target === canvasRef.current || e.target === containerRef.current) {
       onSelectElement(null);
       setEditingTextId(null);
+      setEditingShapeTextId(null);
     }
   };
 
@@ -749,7 +1305,7 @@ export const Canvas: React.FC<CanvasProps> = ({
 
     onSelectElement(elem.id);
 
-    if (editingTextId === elem.id || elem.locked) return;
+    if (editingTextId === elem.id || editingShapeTextId === elem.id || elem.locked) return;
 
     didModifyRef.current = false;
     setIsDragging(true);
@@ -770,7 +1326,7 @@ export const Canvas: React.FC<CanvasProps> = ({
     e.stopPropagation();
     onSelectElement(elem.id);
 
-    if (editingTextId === elem.id || elem.locked) return;
+    if (editingTextId === elem.id || editingShapeTextId === elem.id || elem.locked) return;
 
     if (e.touches.length === 1) {
       const touch = e.touches[0];
@@ -978,6 +1534,11 @@ export const Canvas: React.FC<CanvasProps> = ({
           }
         }
 
+        if (currentElem.ratioLocked) {
+          const ratio = elemInitialPos.height / Math.max(1, elemInitialPos.width);
+          newHeight = Math.round(newWidth * ratio);
+        }
+
         const updates: Partial<CanvasItem> = {
           width: Math.round(newWidth),
           height: Math.round(newHeight),
@@ -1111,7 +1672,7 @@ export const Canvas: React.FC<CanvasProps> = ({
         e.target instanceof HTMLTextAreaElement ||
         e.target instanceof HTMLSelectElement;
 
-      if (!selectedElementId || editingTextId || isInput) return;
+      if (!selectedElementId || editingTextId || editingShapeTextId || isInput) return;
 
       const currentElem = elements.find((item) => item.id === selectedElementId);
       if (!currentElem) return;
@@ -1139,6 +1700,7 @@ export const Canvas: React.FC<CanvasProps> = ({
       } else if (e.key === 'Escape') {
         onSelectElement(null);
         setEditingTextId(null);
+        setEditingShapeTextId(null);
         setContextMenu(null);
       }
     };
@@ -1148,6 +1710,7 @@ export const Canvas: React.FC<CanvasProps> = ({
   }, [
     selectedElementId,
     editingTextId,
+    editingShapeTextId,
     elements,
     onUpdateElement,
     onSelectElement,
@@ -1160,7 +1723,7 @@ export const Canvas: React.FC<CanvasProps> = ({
     if (elem.hidden) return null;
 
     const isSelected = selectedElementId === elem.id;
-    const isEditing = editingTextId === elem.id;
+    const isEditing = editingTextId === elem.id || editingShapeTextId === elem.id;
     const isLocked = !!elem.locked;
 
     const flipTransform = `${elem.flipX ? ' scaleX(-1)' : ''}${elem.flipY ? ' scaleY(-1)' : ''}`;
@@ -1172,6 +1735,10 @@ export const Canvas: React.FC<CanvasProps> = ({
         ? 'drop-shadow-[0_0_12px_rgba(255,215,0,0.8)]'
         : '';
 
+    const dropShadowFilter = elem.dropShadow?.enabled
+      ? `drop-shadow(${elem.dropShadow.offsetX}px ${elem.dropShadow.offsetY}px ${elem.dropShadow.blur}px ${elem.dropShadow.color})`
+      : undefined;
+
     const baseStyle: React.CSSProperties = {
       position: 'absolute',
       left: `${elem.x}px`,
@@ -1182,6 +1749,7 @@ export const Canvas: React.FC<CanvasProps> = ({
       opacity: elem.opacity,
       zIndex: elem.zIndex,
       mixBlendMode: elem.blendMode || 'normal',
+      filter: dropShadowFilter,
       cursor: drawBrush?.isEnabled
         ? 'crosshair'
         : copiedStyle
@@ -1194,6 +1762,15 @@ export const Canvas: React.FC<CanvasProps> = ({
       userSelect: isEditing ? 'auto' : 'none',
       touchAction: 'none',
     };
+
+    const vAlign =
+      elem.type === 'text'
+        ? (elem as TextElement).verticalAlign === 'top'
+          ? 'justify-start'
+          : (elem as TextElement).verticalAlign === 'bottom'
+          ? 'justify-end'
+          : 'justify-center'
+        : 'justify-center';
 
     return (
       <div
@@ -1216,6 +1793,8 @@ export const Canvas: React.FC<CanvasProps> = ({
           if (isLocked || drawBrush?.isEnabled) return;
           if (elem.type === 'text') {
             setEditingTextId(elem.id);
+          } else if (elem.type === 'shape') {
+            setEditingShapeTextId(elem.id);
           } else if (elem.type === 'image' && onOpenPhotoAdjust) {
             onOpenPhotoAdjust(elem as ImageElement);
           }
@@ -1232,8 +1811,8 @@ export const Canvas: React.FC<CanvasProps> = ({
         <div className="w-full h-full" style={{ transform: flipTransform || undefined }}>
           {/* Render TEXT */}
           {elem.type === 'text' && (
-            <div className="w-full h-full flex flex-col justify-center">
-              {isEditing ? (
+            <div className={`w-full h-full flex flex-col ${vAlign}`}>
+              {editingTextId === elem.id ? (
                 <textarea
                   autoFocus
                   value={(elem as TextElement).text}
@@ -1271,8 +1850,47 @@ export const Canvas: React.FC<CanvasProps> = ({
             />
           )}
 
-          {/* Render SHAPE */}
-          {elem.type === 'shape' && renderShapeVisual(elem as ShapeElement)}
+          {/* Render SHAPE (with double-click inline innerText editing!) */}
+          {elem.type === 'shape' && (
+            <div className="w-full h-full relative">
+              {renderShapeVisual(elem as ShapeElement)}
+              {editingShapeTextId === elem.id && (
+                <input
+                  autoFocus
+                  type="text"
+                  value={(elem as ShapeElement).innerText || ''}
+                  onChange={(e) => onUpdateElement(elem.id, { innerText: e.target.value })}
+                  onBlur={() => {
+                    setEditingShapeTextId(null);
+                    if (onCommitCurrentState) onCommitCurrentState();
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setEditingShapeTextId(null);
+                      if (onCommitCurrentState) onCommitCurrentState();
+                    }
+                  }}
+                  placeholder="Type inside shape..."
+                  className="absolute inset-1 bg-neutral-950/90 text-amber-200 text-center text-xs font-cinzel border border-amber-400 rounded outline-none z-50"
+                />
+              )}
+            </div>
+          )}
+
+          {/* Render TABLE */}
+          {elem.type === 'table' && renderTableVisual(elem as TableElement)}
+
+          {/* Render CHART */}
+          {elem.type === 'chart' && renderChartVisual(elem as ChartElement)}
+
+          {/* Render COLLAGE GRID */}
+          {elem.type === 'grid' && renderGridVisual(elem as GridElement)}
+
+          {/* Render LIVE COUNTDOWN */}
+          {elem.type === 'countdown' && renderCountdownVisual(elem as CountdownElement)}
+
+          {/* Render BARCODE PASS */}
+          {elem.type === 'barcode' && renderBarcodeVisual(elem as BarcodeElement)}
 
           {/* Render FREEHAND DRAWING */}
           {elem.type === 'drawing' && (
@@ -1302,23 +1920,39 @@ export const Canvas: React.FC<CanvasProps> = ({
             </svg>
           )}
 
-          {/* Render IMAGE */}
+          {/* Render IMAGE (Supports Polaroid & Phone Mockup frames!) */}
           {elem.type === 'image' && (
             <div
-              className="w-full h-full overflow-hidden relative"
+              className={`w-full h-full overflow-hidden relative ${
+                (elem as ImageElement).mask === 'polaroid'
+                  ? 'bg-[#FFFDF7] p-2 pb-7 rounded-lg shadow-xl'
+                  : (elem as ImageElement).mask === 'phone-mockup'
+                  ? 'bg-neutral-950 p-2 rounded-[26px] border-4 border-neutral-700 shadow-2xl'
+                  : ''
+              }`}
               style={{
                 ...getImageMaskStyle(elem as ImageElement),
-                borderWidth: `${(elem as ImageElement).borderWidth || 0}px`,
+                borderWidth:
+                  (elem as ImageElement).mask === 'phone-mockup'
+                    ? '4px'
+                    : `${(elem as ImageElement).borderWidth || 0}px`,
                 borderColor: (elem as ImageElement).borderColor || '#D4AF37',
-                borderStyle: (elem as ImageElement).borderWidth ? 'solid' : 'none',
+                borderStyle:
+                  (elem as ImageElement).borderStyle ||
+                  ((elem as ImageElement).borderWidth ? 'solid' : 'none'),
                 filter: getImageCssFilter(elem as ImageElement),
               }}
             >
+              {(elem as ImageElement).mask === 'phone-mockup' && (
+                <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-black rounded-full z-20" />
+              )}
               <img
                 src={(elem as ImageElement).src}
                 alt="Invitation asset"
                 referrerPolicy="no-referrer"
-                className="w-full h-full select-none pointer-events-none"
+                className={`w-full h-full select-none pointer-events-none ${
+                  (elem as ImageElement).mask === 'phone-mockup' ? 'rounded-[18px]' : ''
+                }`}
                 style={{
                   objectFit: (elem as ImageElement).objectFit || 'cover',
                   transform: `scale(${(elem as ImageElement).scale || 1}) translate(${
@@ -1328,6 +1962,11 @@ export const Canvas: React.FC<CanvasProps> = ({
                   }deg)`,
                 }}
               />
+              {(elem as ImageElement).mask === 'polaroid' && (
+                <div className="absolute bottom-1 inset-x-0 text-center text-[10px] font-alex-brush text-neutral-800 font-bold">
+                  {(elem as ImageElement).caption || 'Forever Together ❤️'}
+                </div>
+              )}
               {/* Optional Vignette Overlay */}
               {((elem as ImageElement).vignette || 0) > 0 && (
                 <div
@@ -1357,6 +1996,16 @@ export const Canvas: React.FC<CanvasProps> = ({
           )}
         </div>
 
+        {/* Link badge indicator if element has a URL */}
+        {elem.linkUrl && (
+          <div
+            className="absolute -top-2.5 -right-2.5 w-5 h-5 rounded-full bg-amber-500 text-neutral-950 flex items-center justify-center shadow z-30 pointer-events-none"
+            title={`Link: ${elem.linkUrl}`}
+          >
+            <Link2 className="w-3 h-3" />
+          </div>
+        )}
+
         {/* Floating Quick Action Pill Bar (Canva Style) */}
         {isSelected &&
           !isEditing &&
@@ -1378,6 +2027,15 @@ export const Canvas: React.FC<CanvasProps> = ({
                   <Edit3 className="w-3.5 h-3.5" />
                 </button>
               )}
+              {elem.type === 'shape' && !isLocked && (
+                <button
+                  onClick={() => setEditingShapeTextId(elem.id)}
+                  className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
+                  title="Edit Shape Label (Double Click)"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                </button>
+              )}
               {elem.type === 'image' && !isLocked && onOpenPhotoAdjust && (
                 <button
                   onClick={() => onOpenPhotoAdjust(elem as ImageElement)}
@@ -1385,6 +2043,21 @@ export const Canvas: React.FC<CanvasProps> = ({
                   title="Edit Photo Studio"
                 >
                   <Crop className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {!isLocked && (
+                <button
+                  onClick={() =>
+                    onUpdateElement(
+                      elem.id,
+                      { x: Math.round((dimensions.width - elem.width) / 2) },
+                      true
+                    )
+                  }
+                  className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
+                  title="Center Horizontally on Card"
+                >
+                  <AlignCenter className="w-3.5 h-3.5" />
                 </button>
               )}
               {onCopyStyle && (
@@ -1542,17 +2215,39 @@ export const Canvas: React.FC<CanvasProps> = ({
         backgroundSize: '24px 24px',
       }}
     >
-      {/* Canva Pixel Rulers (Top & Left) */}
+      {/* Canva Interactive Pixel Rulers (Click top/left ruler to drop a cyan guide line!) */}
       {showRulers && (
         <>
-          <div className="absolute top-0 left-0 right-0 h-5 bg-neutral-900/95 border-b border-neutral-800 flex items-end px-8 text-[9px] font-mono text-neutral-500 pointer-events-none z-20 overflow-hidden">
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              const pos = Math.round(dimensions.width / 2);
+              setCustomGuides((prev) => [
+                ...prev,
+                { id: `g-${Date.now()}`, orientation: 'vertical', position: pos },
+              ]);
+            }}
+            title="Click ruler to add a vertical cyan alignment guide"
+            className="absolute top-0 left-0 right-0 h-5 bg-neutral-900/95 hover:bg-neutral-800 border-b border-neutral-800 flex items-end px-8 text-[9px] font-mono text-neutral-400 cursor-pointer z-20 overflow-hidden"
+          >
             {Array.from({ length: 20 }).map((_, idx) => (
               <div key={idx} className="w-20 border-l border-neutral-700 pl-1 shrink-0">
                 {idx * 100}px
               </div>
             ))}
           </div>
-          <div className="absolute top-5 bottom-0 left-0 w-5 bg-neutral-900/95 border-r border-neutral-800 flex flex-col items-end py-8 text-[9px] font-mono text-neutral-500 pointer-events-none z-20 overflow-hidden">
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              const pos = Math.round(dimensions.height / 2);
+              setCustomGuides((prev) => [
+                ...prev,
+                { id: `g-${Date.now()}`, orientation: 'horizontal', position: pos },
+              ]);
+            }}
+            title="Click ruler to add a horizontal cyan alignment guide"
+            className="absolute top-5 bottom-0 left-0 w-5 bg-neutral-900/95 hover:bg-neutral-800 border-r border-neutral-800 flex flex-col items-end py-8 text-[9px] font-mono text-neutral-400 cursor-pointer z-20 overflow-hidden"
+          >
             {Array.from({ length: 16 }).map((_, idx) => (
               <div key={idx} className="h-20 border-t border-neutral-700 pt-0.5 pr-0.5 shrink-0">
                 {idx * 100}
@@ -1595,6 +2290,34 @@ export const Canvas: React.FC<CanvasProps> = ({
                 'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.4) 0%, transparent 60%)',
             }}
           />
+
+          {/* User Custom Ruler Guides (Canva Cyan Lines - Click to remove) */}
+          {showRulers &&
+            customGuides.map((g) =>
+              g.orientation === 'vertical' ? (
+                <div
+                  key={g.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCustomGuides((prev) => prev.filter((item) => item.id !== g.id));
+                  }}
+                  title="Click to remove guide"
+                  className="absolute top-0 bottom-0 w-0.5 bg-cyan-400/80 hover:bg-rose-400 cursor-pointer z-40"
+                  style={{ left: `${g.position}px` }}
+                />
+              ) : (
+                <div
+                  key={g.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCustomGuides((prev) => prev.filter((item) => item.id !== g.id));
+                  }}
+                  title="Click to remove guide"
+                  className="absolute left-0 right-0 h-0.5 bg-cyan-400/80 hover:bg-rose-400 cursor-pointer z-40"
+                  style={{ top: `${g.position}px` }}
+                />
+              )
+            )}
 
           {/* Smart Magnetic Alignment Guides (Canva Pink/Magenta Lines) */}
           {snapGuides.vertical.map((xPos, idx) => (
@@ -1660,7 +2383,7 @@ export const Canvas: React.FC<CanvasProps> = ({
         <div
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={(e) => e.stopPropagation()}
-          className="fixed z-50 w-48 bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-1.5 text-xs text-neutral-200 space-y-0.5 animate-in fade-in zoom-in-95 duration-100"
+          className="fixed z-50 w-52 bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-1.5 text-xs text-neutral-200 space-y-0.5 animate-in fade-in zoom-in-95 duration-100"
         >
           {onDuplicateElement && (
             <button
@@ -1689,6 +2412,25 @@ export const Canvas: React.FC<CanvasProps> = ({
               </span>
             </button>
           )}
+          <button
+            onClick={() => {
+              const target = elements.find((el) => el.id === contextMenu.elementId);
+              if (target) {
+                onUpdateElement(
+                  target.id,
+                  {
+                    x: Math.round((dimensions.width - target.width) / 2),
+                    y: Math.round((dimensions.height - target.height) / 2),
+                  },
+                  true
+                );
+              }
+              setContextMenu(null);
+            }}
+            className="w-full px-2.5 py-1.5 rounded-lg hover:bg-neutral-800 flex items-center gap-2"
+          >
+            <AlignCenter className="w-3.5 h-3.5 text-amber-400" /> Align to Page Center
+          </button>
           {onBringForward && (
             <button
               onClick={() => {
