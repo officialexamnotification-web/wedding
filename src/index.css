@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .font-cinzel {
+    font-family: 'Cinzel', serif;
+  }
+  .font-playfair {
+    font-family: 'Playfair Display', serif;
+  }
+  .font-great-vibes {
+    font-family: 'Great Vibes', cursive;
+  }
+  .font-alex-brush {
+    font-family: 'Alex Brush', cursive;
+  }
+  .font-rozha {
+    font-family: 'Rozha One', serif;
+  }
+  .font-kalam {
+    font-family: 'Kalam', cursive;
+  }
+  .font-tiro {
+    font-family: 'Tiro Devanagari Hindi', serif;
+  }
+  .font-montserrat {
+    font-family: 'Montserrat', sans-serif;
+  }
+  .font-cormorant {
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .font-tangerine {
+    font-family: 'Tangerine', cursive;
+  }
+
+  .gold-shimmer {
+    background: linear-gradient(135deg, #d4af37 0%, #fff3a8 35%, #aa771c 65%, #ffd700 100%);
+  }
+
+  .gold-text-gradient {
+    background: linear-gradient(135deg, #f5d77f 0%, #dfb75c 40%, #edd382 70%, #9e7526 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .ruby-gradient {
+    background: linear-gradient(135deg, #800020 0%, #4a0012 100%);
+  }
+
+  .emerald-gradient {
+    background: linear-gradient(135deg, #0d3826 0%, #051a11 100%);
+  }
+
+  .sapphire-gradient {
+    background: linear-gradient(135deg, #102a43 0%, #08121f 100%);
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #171717;
+}
+::-webkit-scrollbar-thumb {
+  background: #383838;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #525252;
+}
+
+/* Global Performance Optimizations */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button, a, input, select {
+  touch-action: manipulation;
+}
+
+img {
+  content-visibility: auto;
+}
+
+.will-change-transform {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
