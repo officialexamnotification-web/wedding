@@ -64,6 +64,59 @@ interface CanvasProps {
   showSafeZones?: boolean;
 }
 
+export function getElementAnimationStyle(elem: CanvasItem): React.CSSProperties {
+  const anim = elem.animation || 'none';
+  if (anim === 'none') return {};
+
+  const speed = elem.animationSpeed || 1;
+  const baseDuration = 0.85 / speed;
+  const loopDuration = 2.8 / speed;
+  const isForcedLoop = elem.animationTiming === 'loop';
+
+  // Continuous loop animations by nature, or when timing === 'loop'
+  const continuousAnims: Record<string, string> = {
+    breathe: `canva-breathe ${loopDuration}s ease-in-out infinite`,
+    drift: `canva-drift ${loopDuration * 1.1}s ease-in-out infinite`,
+    'neon-pulse': `canva-neon-pulse ${loopDuration * 0.85}s ease-in-out infinite`,
+    scrapbook: `canva-scrapbook ${loopDuration * 0.9}s steps(2, end) infinite`,
+    'photo-flow': `canva-photo-flow ${loopDuration * 1.3}s ease-in-out infinite`,
+    float: `canva-float-up ${loopDuration * 0.9}s ease-in-out infinite`,
+    heartbeat: `canva-heartbeat ${loopDuration * 0.8}s ease-in-out infinite`,
+    'spin-slow': `canva-spin-slow ${loopDuration * 4.5}s linear infinite`,
+  };
+
+  if (continuousAnims[anim]) {
+    return {
+      animation: continuousAnims[anim],
+      willChange: 'transform, filter',
+    };
+  }
+
+  const iter = isForcedLoop ? 'infinite alternate' : '1 both';
+  const entranceAnims: Record<string, string> = {
+    rise: `canva-rise ${baseDuration}s cubic-bezier(0.22, 1, 0.36, 1) ${iter}`,
+    pan: `canva-pan ${baseDuration}s cubic-bezier(0.22, 1, 0.36, 1) ${iter}`,
+    fade: `canva-fade ${baseDuration * 1.1}s ease-out ${iter}`,
+    pop: `canva-pop ${baseDuration * 0.95}s cubic-bezier(0.34, 1.56, 0.64, 1) ${iter}`,
+    wipe: `canva-wipe ${baseDuration * 1.1}s cubic-bezier(0.22, 1, 0.36, 1) ${iter}`,
+    tumble: `canva-tumble ${baseDuration * 1.05}s cubic-bezier(0.34, 1.56, 0.64, 1) ${iter}`,
+    typewriter: `canva-typewriter ${baseDuration * 1.35}s steps(24, end) ${iter}`,
+    stomp: `canva-stomp ${baseDuration * 0.9}s cubic-bezier(0.22, 1, 0.36, 1) ${iter}`,
+    tectonic: `canva-tectonic ${baseDuration}s cubic-bezier(0.22, 1, 0.36, 1) ${iter}`,
+    baseline: `canva-baseline ${baseDuration}s cubic-bezier(0.22, 1, 0.36, 1) ${iter}`,
+    'photo-zoom': `canva-photo-zoom ${baseDuration * 1.25}s cubic-bezier(0.22, 1, 0.36, 1) ${iter}`,
+  };
+
+  if (entranceAnims[anim]) {
+    return {
+      animation: entranceAnims[anim],
+      willChange: 'transform, opacity, clip-path',
+    };
+  }
+
+  return {};
+}
+
 export function getImageCssFilter(elem: ImageElement): string {
   const parts: string[] = [];
   if (elem.filter && elem.filter !== 'none') {
@@ -1727,13 +1780,8 @@ export const Canvas: React.FC<CanvasProps> = ({
     const isLocked = !!elem.locked;
 
     const flipTransform = `${elem.flipX ? ' scaleX(-1)' : ''}${elem.flipY ? ' scaleY(-1)' : ''}`;
-
-    const animClass =
-      elem.animation === 'breathe'
-        ? 'animate-pulse'
-        : elem.animation === 'neon-pulse'
-        ? 'drop-shadow-[0_0_12px_rgba(255,215,0,0.8)]'
-        : '';
+    const animStyle = getElementAnimationStyle(elem);
+    const animReplayKey = `${elem.id}-${elem.animation || 'none'}-${elem.animationSpeed || 1}-${elem.animationTiming || 'both'}`;
 
     const dropShadowFilter = elem.dropShadow?.enabled
       ? `drop-shadow(${elem.dropShadow.offsetX}px ${elem.dropShadow.offsetY}px ${elem.dropShadow.blur}px ${elem.dropShadow.color})`
@@ -1799,7 +1847,7 @@ export const Canvas: React.FC<CanvasProps> = ({
             onOpenPhotoAdjust(elem as ImageElement);
           }
         }}
-        className={`group transition-shadow duration-75 ${animClass} ${
+        className={`group transition-shadow duration-75 ${
           isSelected
             ? isLocked
               ? 'ring-2 ring-rose-400/90 ring-offset-1 ring-offset-transparent'
@@ -1807,8 +1855,15 @@ export const Canvas: React.FC<CanvasProps> = ({
             : 'hover:ring-1 hover:ring-amber-400/50'
         }`}
       >
-        {/* Flipped inner content wrapper */}
-        <div className="w-full h-full" style={{ transform: flipTransform || undefined }}>
+        {/* Flipped + Animated inner content wrapper */}
+        <div
+          key={animReplayKey}
+          className="w-full h-full"
+          style={{
+            transform: flipTransform || undefined,
+            ...animStyle,
+          }}
+        >
           {/* Render TEXT */}
           {elem.type === 'text' && (
             <div className={`w-full h-full flex flex-col ${vAlign}`}>

@@ -78,6 +78,7 @@ export type ElementAnimationType =
   | 'pan'
   | 'fade'
   | 'pop'
+  | 'wipe'
   | 'breathe'
   | 'drift'
   | 'tumble'
@@ -86,9 +87,14 @@ export type ElementAnimationType =
   | 'stomp'
   | 'tectonic'
   | 'baseline'
-  | 'scrapbook';
+  | 'scrapbook'
+  | 'photo-zoom'
+  | 'photo-flow'
+  | 'float'
+  | 'heartbeat'
+  | 'spin-slow';
 
-export type AnimationTimingMode = 'both' | 'enter' | 'exit';
+export type AnimationTimingMode = 'both' | 'enter' | 'exit' | 'loop';
 export type AnimationDirectionMode = 'up' | 'down' | 'left' | 'right';
 
 export type BlendModeType =

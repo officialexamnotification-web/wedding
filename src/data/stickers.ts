@@ -9,678 +9,602 @@ export interface StickerDefinition {
 }
 
 export const STICKER_CATEGORIES = [
-  { id: 'all', label: 'All Motifs' },
-  { id: 'religious', label: 'Sacred & Religious' },
-  { id: 'wedding', label: 'Wedding & Vivah' },
-  { id: 'festive', label: 'Festive & Celebration' },
-  { id: 'borders', label: 'Frames & Borders' },
-  { id: 'dividers', label: 'Dividers & Mandalas' },
+  { id: 'all', label: 'All Graphics' },
+  { id: 'religious', label: 'Sacred & Vedic' },
+  { id: 'wedding', label: 'Shubh Vivah' },
+  { id: 'festive', label: 'Festive & Music' },
+  { id: 'borders', label: 'Frames & Corners' },
+  { id: 'dividers', label: 'Mandalas & Dividers' },
 ] as const;
 
 export const STICKERS: StickerDefinition[] = [
-  // 1. Lord Ganesha (Authentic Indian Wedding Silhouette with Mukut, Tilak, Trunk, Modak)
+  // 1. Shri Ganesha Royal Seal (Detailed Multi-Layered Temple Crest)
   {
     id: 'ganesha-royal',
-    name: 'Lord Ganesha (श्री गणेश)',
+    name: 'Shri Ganesha Crest (श्री गणेश)',
     category: 'religious',
-    defaultWidth: 76,
-    defaultHeight: 82,
+    defaultWidth: 96,
+    defaultHeight: 104,
     defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 110" fill="currentColor" stroke="none">
-      <!-- Ornate Mukut (Crown) -->
-      <path d="M50 4 C48 8 46 14 43 18 L57 18 C54 14 52 8 50 4 Z" />
-      <circle cx="50" cy="3" r="2" />
-      <path d="M38 18 C38 18 43 23 50 23 C57 23 62 18 62 18 L65 24 C59 27 55 27 50 27 C45 27 41 27 35 24 Z" />
-      <!-- Ears & Head Shape -->
-      <!-- Left Ear -->
-      <path d="M37 27 C28 27 18 31 16 42 C14 53 22 61 30 63 C33 63 36 60 38 56 C33 54 26 49 26 42 C26 35 32 30 38 29 Z" />
-      <!-- Right Ear -->
-      <path d="M63 27 C72 27 82 31 84 42 C86 53 78 61 70 63 C67 63 64 60 62 56 C67 54 74 49 74 42 C74 35 68 30 62 29 Z" />
-      <!-- Forehead & Tilak -->
-      <ellipse cx="50" cy="36" rx="12" ry="8" opacity="0.3" />
-      <!-- Sacred Trishul / Tilak -->
-      <path d="M50 26 L50 40 M46 30 Q50 33 54 30" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" />
-      <circle cx="50" cy="27" r="2" />
-      <!-- Eye -->
-      <circle cx="43" cy="39" r="1.8" />
-      <circle cx="57" cy="39" r="1.8" />
-      <!-- Right Tusk (Ekadanta) -->
-      <path d="M60 48 L67 48 L60 52 Z" />
-      <!-- Trunk (Vakratunda) curving gracefully to the left with Modak -->
-      <path d="M52 44 C52 52 50 62 48 72 C46 82 43 90 35 94 C29 97 22 93 21 86 C20 80 25 75 31 77 C35 78 36 82 34 85 C33 87 31 88 29 87 C28 86 28 84 30 83 C29 82 27 84 27 87 C28 90 33 91 36 88 C41 84 43 76 44 68 C46 58 48 49 48 44 Z" />
-      <!-- Modak (Sweet) in Trunk -->
-      <path d="M22 84 C22 80 26 77 29 79 C32 81 31 85 28 86 C25 87 22 86 22 84 Z" opacity="0.9" />
-      <!-- Little Crown & Jewels -->
-      <circle cx="36" cy="48" r="2" />
-      <circle cx="64" cy="48" r="2" />
-      <!-- Lotus Base (Padmasana) -->
-      <path d="M50 94 C42 94 36 97 30 102 C38 104 45 104 50 102 C55 104 62 104 70 102 C64 97 58 94 50 94 Z" />
-      <path d="M50 98 C46 98 42 100 37 105 C44 107 50 107 50 107 C50 107 56 107 63 105 C58 100 54 98 50 98 Z" opacity="0.6" />
+    svg: `<svg viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer Sacred Aura Ring -->
+      <circle cx="60" cy="62" r="52" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.55" />
+      <circle cx="60" cy="62" r="46" stroke="currentColor" stroke-width="1.8" opacity="0.85" />
+      <!-- 8 Aura Petals around Halo -->
+      <path d="M60 4 L64 12 L56 12 Z" fill="currentColor" />
+      <path d="M116 62 L108 66 L108 58 Z" fill="currentColor" />
+      <path d="M4 62 L12 66 L12 58 Z" fill="currentColor" />
+      <!-- Royal Mukut (Three-Tiered Crown) -->
+      <path d="M60 14 L51 30 H69 L60 14 Z" fill="currentColor" />
+      <path d="M46 31 C46 27 74 27 74 31 L77 37 H43 L46 31 Z" fill="currentColor" />
+      <circle cx="60" cy="12" r="2.8" fill="#FFF3A8" />
+      <circle cx="60" cy="24" r="2.2" fill="#800020" />
+      <circle cx="52" cy="34" r="1.8" fill="#FFF3A8" />
+      <circle cx="60" cy="34" r="2.2" fill="#FFF3A8" />
+      <circle cx="68" cy="34" r="1.8" fill="#FFF3A8" />
+      <!-- Auspicious Ears -->
+      <path d="M42 40 C26 38 19 48 22 61 C24 70 34 73 41 68 C36 63 32 56 33 49 C34 43 38 41 42 40 Z" fill="currentColor" opacity="0.92" />
+      <path d="M78 40 C94 38 101 48 98 61 C96 70 86 73 79 68 C84 63 88 56 87 49 C86 43 82 41 78 40 Z" fill="currentColor" opacity="0.92" />
+      <!-- Forehead Tilak & Trishul -->
+      <path d="M52 45 Q60 49 68 45" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      <path d="M54 49 Q60 53 66 49" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      <circle cx="60" cy="43" r="2.5" fill="#C41E3A" />
+      <!-- Serene Eyes -->
+      <path d="M45 54 Q49 51 53 54" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      <path d="M67 54 Q71 51 75 54" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      <!-- Graceful Vakratunda Trunk & Ekadanta Tusk -->
+      <path d="M68 64 L76 62 L69 68 Z" fill="#FFF3A8" />
+      <path d="M55 56 C55 68 53 80 48 90 C44 98 35 100 31 94 C28 89 32 83 38 85 C41 86 41 90 38 91" stroke="currentColor" stroke-width="5.5" stroke-linecap="round" fill="none" />
+      <!-- Golden Laddu / Modak -->
+      <circle cx="35" cy="86" r="4.5" fill="#FFD700" stroke="#800020" stroke-width="1" />
+      <!-- Padmasana Lotus Base -->
+      <path d="M60 102 C53 108 46 114 60 122 C74 114 67 108 60 102 Z" fill="currentColor" />
+      <path d="M58 108 C44 106 34 112 42 120 C48 122 55 121 59 120 Z" fill="currentColor" opacity="0.85" />
+      <path d="M62 108 C76 106 86 112 78 120 C72 122 65 121 61 120 Z" fill="currentColor" opacity="0.85" />
+      <path d="M26 122 Q60 128 94 122" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
     </svg>`,
   },
 
-  // 2. Manglik Kalash (Ceremonial Pot with Coconut, Mango Leaves, Swastik & Kalawa)
+  // 2. Manglik Purnakumbha Kalash (Detailed Brass Pot, Coconut, Mango Leaves & Swastik)
   {
     id: 'manglik-kalash',
     name: 'Manglik Kalash (मंगल कलश)',
     category: 'religious',
-    defaultWidth: 74,
-    defaultHeight: 82,
+    defaultWidth: 88,
+    defaultHeight: 100,
     defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 110" fill="currentColor" stroke="none">
-      <!-- Coconut (Shriphal) on Top -->
-      <path d="M50 8 C44 8 40 16 41 26 C43 32 47 36 50 38 C53 36 57 32 59 26 C60 16 56 8 50 8 Z" />
-      <path d="M50 5 L50 9 M48 8 L52 8" stroke="currentColor" stroke-width="2" />
-      <!-- Mango Leaves (Amra Pallav) Fanning Outward -->
-      <!-- Left Leaf 1 -->
-      <path d="M46 36 C38 30 26 26 14 30 C20 38 32 44 44 41 Z" />
-      <!-- Right Leaf 1 -->
-      <path d="M54 36 C62 30 74 26 86 30 C80 38 68 44 56 41 Z" />
-      <!-- Left Leaf 2 -->
-      <path d="M47 33 C42 22 32 15 22 14 C22 25 32 32 44 36 Z" />
-      <!-- Right Leaf 2 -->
-      <path d="M53 33 C58 22 68 15 78 14 C78 25 68 32 56 36 Z" />
-      <!-- Center Upright Leaf -->
-      <path d="M50 32 C47 22 47 16 50 12 C53 16 53 22 50 32 Z" opacity="0.9" />
-      <!-- Kalash Rim / Mouth with sacred thread Kalawa coiling -->
-      <path d="M30 42 C30 39 70 39 70 42 C70 45 30 45 30 42 Z" />
-      <path d="M34 44 C34 43 66 43 66 44 L64 49 L36 49 Z" opacity="0.8" />
-      <!-- Pot Belly (Round Indian Clay/Brass Lota Shape) -->
-      <path d="M36 49 C26 55 20 68 22 80 C24 92 35 98 50 98 C65 98 76 92 78 80 C80 68 74 55 64 49 Z" />
-      <!-- Sacred Swastik on Kalash Belly -->
-      <g stroke="#1a0408" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-        <path d="M50 63 L50 81" />
-        <path d="M41 72 L59 72" />
-        <path d="M50 63 L59 63" />
-        <path d="M59 72 L59 81" />
-        <path d="M50 81 L41 81" />
-        <path d="M41 72 L41 63" />
+    svg: `<svg viewBox="0 0 110 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Sacred Shriphal Coconut -->
+      <path d="M55 8 C47 12 43 22 45 32 C47 38 51 42 55 44 C59 42 63 38 65 32 C67 22 63 12 55 8 Z" fill="currentColor" />
+      <path d="M55 3 L55 9 M51 6 L59 6" stroke="#FFF3A8" stroke-width="2" stroke-linecap="round" />
+      <!-- 5 Auspicious Mango Leaves (Panch Pallav) -->
+      <path d="M48 39 C36 30 20 26 10 34 C18 44 34 48 47 44 Z" fill="currentColor" opacity="0.9" />
+      <path d="M62 39 C74 30 90 26 100 34 C92 44 76 48 63 44 Z" fill="currentColor" opacity="0.9" />
+      <path d="M50 36 C42 22 30 16 18 18 C22 30 34 38 48 41 Z" fill="currentColor" opacity="0.75" />
+      <path d="M60 36 C68 22 80 16 92 18 C88 30 76 38 62 41 Z" fill="currentColor" opacity="0.75" />
+      <!-- Kalash Neck & Sacred Red Thread (Moli) -->
+      <rect x="35" y="42" width="40" height="6" rx="3" fill="#FFF3A8" stroke="currentColor" stroke-width="1.5" />
+      <path d="M39 48 H71 L68 55 H42 L39 48 Z" fill="#C41E3A" />
+      <!-- Engraved Brass Kalash Body -->
+      <path d="M40 55 C24 62 18 78 22 92 C26 104 38 110 55 110 C72 110 84 104 88 92 C92 78 86 62 70 55 H40 Z" fill="currentColor" />
+      <!-- Decorative Carvings on Pot -->
+      <path d="M25 72 Q55 80 85 72" stroke="#1a0408" stroke-width="1.5" opacity="0.5" />
+      <path d="M25 92 Q55 100 85 92" stroke="#1a0408" stroke-width="1.5" opacity="0.5" />
+      <!-- Auspicious Kumkum Swastik on Belly -->
+      <g stroke="#800020" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M55 72 V92 M45 82 H65" />
+        <path d="M55 72 H65 M65 82 V92 M55 92 H45 M45 82 V72" />
       </g>
-      <!-- Dots in Swastik quadrants -->
-      <circle cx="45" cy="67" r="1.3" fill="#1a0408" />
-      <circle cx="55" cy="67" r="1.3" fill="#1a0408" />
-      <circle cx="45" cy="77" r="1.3" fill="#1a0408" />
-      <circle cx="55" cy="77" r="1.3" fill="#1a0408" />
-      <!-- Pedestal Stand of Kalash -->
-      <path d="M36 98 L64 98 L66 104 L34 104 Z" />
+      <circle cx="50" cy="77" r="1.5" fill="#800020" />
+      <circle cx="60" cy="77" r="1.5" fill="#800020" />
+      <circle cx="50" cy="87" r="1.5" fill="#800020" />
+      <circle cx="60" cy="87" r="1.5" fill="#800020" />
+      <!-- Lotus Pedestal Base -->
+      <path d="M34 110 H76 L80 116 H30 L34 110 Z" fill="#FFF3A8" stroke="currentColor" stroke-width="1.2" />
     </svg>`,
   },
 
-  // 3. Sacred Om (ॐ) with Lotus Base
+  // 3. Sacred Om Mandala Medallion (ॐकार चक्र)
   {
     id: 'sacred-om',
-    name: 'Sacred Om (ॐकार)',
+    name: 'Sacred Om Medallion (ॐकार)',
     category: 'religious',
-    defaultWidth: 70,
-    defaultHeight: 70,
+    defaultWidth: 84,
+    defaultHeight: 84,
     defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="none">
-      <!-- Main Upper Left Curve (3 top) -->
-      <path d="M34 32 C34 22 44 16 54 18 C64 20 68 28 66 36 C64 43 57 48 48 50 C58 52 68 58 68 70 C68 83 55 90 41 88 C30 86 24 76 25 68 C25 64 29 63 32 65 C34 67 35 73 40 76 C46 78 54 77 56 69 C57 62 50 56 42 56 L38 56 L38 50 L43 50 C50 50 55 45 54 38 C53 32 48 28 42 27 C37 26 33 29 33 33 Z" />
-      <!-- Tail Curve Right -->
-      <path d="M51 49 C60 45 74 48 80 58 C84 65 83 75 78 84 C76 87 72 85 73 82 C76 75 77 67 73 62 C69 55 58 53 50 55 Z" />
-      <!-- Upper Crescent (Chandrabindu Crescent) -->
-      <path d="M56 22 C64 18 74 19 82 23 C76 26 64 26 56 22 Z" />
-      <!-- Bindu Dot -->
-      <circle cx="70" cy="12" r="4.5" />
-      <!-- Small Lotus Pedestal Accent -->
-      <path d="M32 94 C38 90 45 92 50 96 C55 92 62 90 68 94 C60 97 40 97 32 94 Z" opacity="0.6" />
+    svg: `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer Sunburst Medallion Ring -->
+      <circle cx="55" cy="55" r="49" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3" />
+      <circle cx="55" cy="55" r="43" stroke="currentColor" stroke-width="2" />
+      <circle cx="55" cy="55" r="39" stroke="currentColor" stroke-width="0.8" opacity="0.6" />
+      <!-- Fine Devanagari Om Calligraphy -->
+      <path d="M38 40 C38 30 47 25 56 27 C64 29 68 36 65 43 C63 49 57 52 50 54 C60 55 69 61 68 72 C67 83 56 89 44 86 C34 84 29 75 31 68 C32 64 36 64 38 67 C40 70 43 76 49 77 C56 78 60 73 60 68 C60 61 53 58 45 58 H42 V52 H46 C53 52 58 48 57 42 C56 36 51 33 45 34 C41 35 38 38 38 40 Z" fill="currentColor" />
+      <path d="M56 53 C65 50 77 53 81 62 C85 70 82 80 76 86 C73 88 70 85 72 82 C76 77 77 69 74 63 C70 57 62 56 55 58 Z" fill="currentColor" />
+      <path d="M56 26 C64 29 73 29 80 24 C74 33 62 33 56 26 Z" fill="currentColor" />
+      <circle cx="69" cy="19" r="4" fill="#FFF3A8" stroke="currentColor" stroke-width="1.5" />
     </svg>`,
   },
 
-  // 4. Shubh Swastik (Vedic Auspicious Swastik)
+  // 4. Shubh Swastik Royal Crest (शुभ स्वस्तिक)
   {
     id: 'sacred-swastik',
-    name: 'Shubh Swastik (शुभ स्वस्तिक)',
+    name: 'Shubh Swastik Seal (शुभ स्वस्तिक)',
     category: 'religious',
-    defaultWidth: 64,
-    defaultHeight: 64,
-    defaultColor: '#C41E3A',
-    svg: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="none">
-      <!-- Main Swastik Cross Bars -->
-      <!-- Vertical Stem -->
-      <rect x="46" y="16" width="8" height="68" rx="2" />
-      <!-- Horizontal Stem -->
-      <rect x="16" y="46" width="68" height="8" rx="2" />
-      <!-- Top-Right Arm -->
-      <rect x="52" y="16" width="30" height="8" rx="2" />
-      <!-- Bottom-Left Arm -->
-      <rect x="18" y="76" width="30" height="8" rx="2" />
-      <!-- Right-Down Arm -->
-      <rect x="76" y="52" width="8" height="30" rx="2" />
-      <!-- Left-Up Arm -->
-      <rect x="16" y="18" width="8" height="30" rx="2" />
-      <!-- 4 Auspicious Dots (Bindus) -->
-      <circle cx="34" cy="34" r="4.5" />
-      <circle cx="66" cy="34" r="4.5" />
-      <circle cx="34" cy="66" r="4.5" />
-      <circle cx="66" cy="66" r="4.5" />
+    defaultWidth: 78,
+    defaultHeight: 78,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Octagonal Gold Frame -->
+      <polygon points="30,6 70,6 94,30 94,70 70,94 30,94 6,70 6,30" stroke="currentColor" stroke-width="2" fill="rgba(212,175,55,0.08)" />
+      <polygon points="33,11 67,11 89,33 89,67 67,89 33,89 11,67 11,33" stroke="currentColor" stroke-width="1" stroke-dasharray="3 2" opacity="0.7" />
+      <!-- Curved Calligraphic Swastik -->
+      <path d="M50 22 V78 M22 50 H78" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" />
+      <path d="M50 22 H76 M78 50 V76 M50 78 H24 M22 50 V24" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" />
+      <!-- 4 Auspicious Bindus -->
+      <circle cx="36" cy="36" r="4" fill="#FFF3A8" />
+      <circle cx="64" cy="36" r="4" fill="#FFF3A8" />
+      <circle cx="36" cy="64" r="4" fill="#FFF3A8" />
+      <circle cx="64" cy="64" r="4" fill="#FFF3A8" />
     </svg>`,
   },
 
-  // 5. Mangal Diya (Deepam with Sacred Flame & Petal Base)
+  // 5. Royal Jharokha Palace Arch (राजस्थानी झरोखा मेहराब)
+  {
+    id: 'royal-arch-frame',
+    name: 'Rajasthani Jharokha Arch (झरोखा)',
+    category: 'borders',
+    defaultWidth: 230,
+    defaultHeight: 300,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 220 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer Palace Frame -->
+      <rect x="6" y="6" width="208" height="278" rx="10" stroke="currentColor" stroke-width="2.5" />
+      <rect x="13" y="13" width="194" height="264" rx="7" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity="0.75" />
+      <!-- Multi-foil Cusped Mughal/Rajput Arch -->
+      <path d="M22 270 V115 C22 92 38 78 52 72 C56 54 74 44 90 40 C98 28 106 20 110 14 C114 20 122 28 130 40 C146 44 164 54 168 72 C182 78 198 92 198 115 V270" stroke="currentColor" stroke-width="3" />
+      <!-- Inner Parallel Arch Line -->
+      <path d="M29 266 V118 C29 98 43 85 57 79 C61 62 77 52 93 48 C100 37 107 30 110 25 C113 30 120 37 127 48 C143 52 159 62 163 79 C177 85 191 98 191 118 V266" stroke="currentColor" stroke-width="1.2" opacity="0.75" />
+      <!-- Carved Spandrel Lotus Rosettes in Top Corners -->
+      <circle cx="42" cy="42" r="12" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="42" cy="42" r="5" fill="currentColor" />
+      <circle cx="178" cy="42" r="12" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="178" cy="42" r="5" fill="currentColor" />
+      <!-- Hanging Jhumka Lanterns from Arch Cusps -->
+      <line x1="110" y1="25" x2="110" y2="48" stroke="currentColor" stroke-width="1.5" />
+      <path d="M104 48 H116 L113 55 H107 Z" fill="currentColor" />
+      <circle cx="110" cy="59" r="2.5" fill="#FFF3A8" />
+      <!-- Pillar Bases -->
+      <rect x="18" y="266" width="16" height="8" rx="2" fill="currentColor" />
+      <rect x="186" y="266" width="16" height="8" rx="2" fill="currentColor" />
+    </svg>`,
+  },
+
+  // 6. Grand Suryavanshi Mandala Medallion (सूर्यवंशी राजसी चक्र)
+  {
+    id: 'ornate-mandala',
+    name: 'Royal Palace Mandala (राजसी चक्र)',
+    category: 'dividers',
+    defaultWidth: 120,
+    defaultHeight: 120,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer Beaded Ring -->
+      <circle cx="70" cy="70" r="64" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 4" />
+      <circle cx="70" cy="70" r="58" stroke="currentColor" stroke-width="2" />
+      <!-- 12 Lotus Petals Ring -->
+      <g stroke="currentColor" stroke-width="1.6" fill="rgba(212,175,55,0.12)">
+        <path d="M70 12 C62 26 62 38 70 46 C78 38 78 26 70 12 Z" />
+        <path d="M70 128 C62 114 62 102 70 94 C78 102 78 114 70 128 Z" />
+        <path d="M12 70 C26 62 38 62 46 70 C38 78 26 78 12 70 Z" />
+        <path d="M128 70 C114 62 102 62 94 70 C102 78 114 78 128 70 Z" />
+        <path d="M29 29 C36 43 44 50 53 53 C50 44 43 36 29 29 Z" />
+        <path d="M111 111 C104 97 96 90 87 87 C90 96 97 104 111 111 Z" />
+        <path d="M111 29 C97 36 90 44 87 53 C96 50 104 43 111 29 Z" />
+        <path d="M29 111 C43 104 50 96 53 87 C44 90 36 97 29 111 Z" />
+      </g>
+      <!-- Inner Filigree Rings -->
+      <circle cx="70" cy="70" r="36" stroke="currentColor" stroke-width="1.8" />
+      <circle cx="70" cy="70" r="28" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" />
+      <circle cx="70" cy="70" r="18" stroke="currentColor" stroke-width="2" fill="rgba(212,175,55,0.2)" />
+      <circle cx="70" cy="70" r="7" fill="currentColor" />
+      <circle cx="70" cy="70" r="3" fill="#FFF3A8" />
+    </svg>`,
+  },
+
+  // 7. Royal Filigree Chandelier Divider (शाही झूमर डिवाइडर)
+  {
+    id: 'gold-divider',
+    name: 'Royal Lotus Divider (शाही डिवाइडर)',
+    category: 'dividers',
+    defaultWidth: 240,
+    defaultHeight: 42,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 260 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Main Horizontal Tapering Lines -->
+      <path d="M6 23 H98 M162 23 H254" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      <path d="M24 18 H90 M170 18 H236" stroke="currentColor" stroke-width="1" opacity="0.65" />
+      <path d="M24 28 H90 M170 28 H236" stroke="currentColor" stroke-width="1" opacity="0.65" />
+      <!-- Center Lotus & Diamond Medallion -->
+      <path d="M130 5 L144 23 L130 41 L116 23 Z" fill="currentColor" />
+      <path d="M130 10 L139 23 L130 36 L121 23 Z" fill="#1a0408" />
+      <circle cx="130" cy="23" r="4" fill="#FFF3A8" />
+      <!-- Side Scroll Curls -->
+      <path d="M114 23 C106 11 94 11 90 19 C87 25 93 30 98 26" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      <path d="M146 23 C154 11 166 11 170 19 C173 25 167 30 162 26" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      <!-- End Finial Diamonds -->
+      <polygon points="6,23 13,18 20,23 13,28" fill="currentColor" />
+      <polygon points="254,23 247,18 240,23 247,28" fill="currentColor" />
+    </svg>`,
+  },
+
+  // 8. Royal Baroque Corner Filigree (शाही कोना नक्काशी)
+  {
+    id: 'floral-corner',
+    name: 'Palace Corner Ornament (शाही कोना)',
+    category: 'borders',
+    defaultWidth: 92,
+    defaultHeight: 92,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer Double Corner Framing Rules -->
+      <path d="M8 102 V8 H102" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+      <path d="M15 90 V15 H90" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3" />
+      <!-- Corner Medallion Jewel -->
+      <polygon points="8,8 26,8 26,26 8,26" fill="currentColor" />
+      <circle cx="17" cy="17" r="4.5" fill="#1a0408" />
+      <!-- Intricate Scrollwork Tendrils -->
+      <path d="M26 17 C46 17 58 28 52 42 C48 50 36 48 36 39 C36 33 43 32 46 36" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+      <path d="M17 26 C17 46 28 58 42 52 C50 48 48 36 39 36" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+      <!-- Diagonal Lotus Petal -->
+      <path d="M26 26 C38 28 48 38 54 54 C38 48 28 38 26 26 Z" fill="currentColor" opacity="0.85" />
+      <!-- Terminal Finials -->
+      <circle cx="8" cy="104" r="3.5" fill="currentColor" />
+      <circle cx="104" cy="8" r="3.5" fill="currentColor" />
+    </svg>`,
+  },
+
+  // 9. Sacred Padma Lotus Bloom (पवित्र कमल पुष्प)
+  {
+    id: 'sacred-lotus',
+    name: 'Padma Lotus Bloom (कमल पुष्प)',
+    category: 'religious',
+    defaultWidth: 92,
+    defaultHeight: 74,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 120 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Back Halo Rays -->
+      <circle cx="60" cy="54" r="36" stroke="currentColor" stroke-width="1" stroke-dasharray="2 3" opacity="0.5" />
+      <!-- Outer Lower Petals -->
+      <path d="M52 68 C26 68 10 56 8 42 C24 40 42 48 54 64 Z" fill="currentColor" opacity="0.7" />
+      <path d="M68 68 C94 68 110 56 112 42 C96 40 78 48 66 64 Z" fill="currentColor" opacity="0.7" />
+      <!-- Mid Layer Petals -->
+      <path d="M55 66 C34 54 24 34 28 18 C44 24 54 42 58 64 Z" fill="currentColor" opacity="0.88" />
+      <path d="M65 66 C86 54 96 34 92 18 C76 24 66 42 62 64 Z" fill="currentColor" opacity="0.88" />
+      <!-- Center Crown Petal -->
+      <path d="M60 8 C46 26 46 50 60 68 C74 50 74 26 60 8 Z" fill="currentColor" stroke="#FFF3A8" stroke-width="1.2" />
+      <!-- Inner Detail Lines on Center Petal -->
+      <path d="M60 16 V62" stroke="#1a0408" stroke-width="1.2" opacity="0.45" />
+      <!-- Base Inverted Calyx & Stem Jewel -->
+      <path d="M36 72 Q60 82 84 72 Q60 76 36 72 Z" fill="#FFF3A8" />
+      <circle cx="60" cy="84" r="3.5" fill="currentColor" />
+    </svg>`,
+  },
+
+  // 10. Royal Morpankh Peacock Crest (राजसी मयूर)
+  {
+    id: 'royal-peacock',
+    name: 'Rajwada Peacock (राजसी मयूर)',
+    category: 'wedding',
+    defaultWidth: 96,
+    defaultHeight: 102,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 120 125" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Ornate Tail Feather Fan -->
+      <path d="M58 58 C82 32 112 42 114 72 C116 98 92 118 62 116" stroke="currentColor" stroke-width="2" fill="rgba(212,175,55,0.12)" />
+      <!-- Feather Eye Spots (Morpankh Chandrika) -->
+      <circle cx="92" cy="58" r="8" stroke="currentColor" stroke-width="1.8" fill="#0d3826" />
+      <circle cx="92" cy="58" r="3.5" fill="currentColor" />
+      <circle cx="98" cy="80" r="8" stroke="currentColor" stroke-width="1.8" fill="#0d3826" />
+      <circle cx="98" cy="80" r="3.5" fill="currentColor" />
+      <circle cx="84" cy="100" r="8" stroke="currentColor" stroke-width="1.8" fill="#0d3826" />
+      <circle cx="84" cy="100" r="3.5" fill="currentColor" />
+      <!--Kalgi Crown Plumes -->
+      <path d="M46 18 L42 8 M50 17 L50 6 M54 18 L58 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      <circle cx="42" cy="7" r="2" fill="#FFF3A8" />
+      <circle cx="50" cy="5" r="2" fill="#FFF3A8" />
+      <circle cx="58" cy="7" r="2" fill="#FFF3A8" />
+      <!-- Graceful Peacock Neck & Body -->
+      <path d="M44 22 C44 17 53 17 55 22 L62 25 L54 28 C50 38 50 48 56 56 C64 66 64 82 52 90 C40 96 26 88 28 74 C30 62 42 54 44 38 C45 30 44 25 44 22 Z" fill="currentColor" />
+      <circle cx="49" cy="22" r="1.6" fill="#1a0408" />
+      <!-- Wing Carvings -->
+      <path d="M36 66 C48 64 54 72 48 84 C40 86 34 78 36 66 Z" fill="#1a0408" opacity="0.35" />
+      <!-- Royal Perch Branch -->
+      <path d="M16 106 H76" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+      <path d="M44 90 V106 M52 90 V106" stroke="currentColor" stroke-width="2.2" />
+    </svg>`,
+  },
+
+  // 11. Royal Gajaraj Ceremonial Elephant (शाही गजराज)
+  {
+    id: 'royal-elephant',
+    name: 'Royal Gajaraj (शाही गजराज)',
+    category: 'wedding',
+    defaultWidth: 106,
+    defaultHeight: 92,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 130 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Royal Howdah Canopy (Ambari) on Back -->
+      <path d="M62 24 C62 12 94 12 94 24 Z" fill="currentColor" />
+      <line x1="66" y1="24" x2="66" y2="38" stroke="currentColor" stroke-width="2.2" />
+      <line x1="90" y1="24" x2="90" y2="38" stroke="currentColor" stroke-width="2.2" />
+      <circle cx="78" cy="10" r="3" fill="#FFF3A8" />
+      <!-- Elephant Body & Raised Blessing Trunk -->
+      <path d="M42 36 C56 30 96 32 108 46 C114 54 114 74 110 94 H96 V72 H64 V94 H50 V62 C44 58 38 50 38 42 Z" fill="currentColor" />
+      <path d="M44 36 C32 34 24 42 22 54 C20 66 12 72 8 64 C6 58 12 54 16 58" stroke="currentColor" stroke-width="7" stroke-linecap="round" />
+      <!-- Ivory Tusk -->
+      <path d="M36 52 Q24 58 20 50" stroke="#FFF3A8" stroke-width="3.5" stroke-linecap="round" />
+      <!-- Embroidered Saddle Caparison (Jhool) -->
+      <rect x="60" y="40" width="38" height="26" rx="4" fill="#800020" stroke="#FFF3A8" stroke-width="1.8" />
+      <circle cx="79" cy="53" r="6" fill="currentColor" />
+      <!-- Ground Pedestal Line -->
+      <line x1="36" y1="95" x2="118" y2="95" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+    </svg>`,
+  },
+
+  // 12. Wedding Shehnai & Marigold Garland (मंगल शहनाई)
+  {
+    id: 'wedding-shehnai',
+    name: 'Mangal ShehnaiPair (शहनाई)',
+    category: 'wedding',
+    defaultWidth: 94,
+    defaultHeight: 86,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 120 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Crossed Twin Royal Shehnais -->
+      <!-- Shehnai 1 (Left to Right) -->
+      <path d="M18 22 L23 17 L82 72 C90 78 98 82 104 80 L86 98 C88 92 84 84 78 76 L18 22 Z" fill="currentColor" />
+      <!-- Shehnai 2 (Right to Left) -->
+      <path d="M102 22 L97 17 L38 72 C30 78 22 82 16 80 L34 98 C32 92 36 84 42 76 L102 22 Z" fill="currentColor" opacity="0.9" />
+      <!-- Center Tied Ribbon & Hanging Jaimala Beads -->
+      <circle cx="60" cy="54" r="8" fill="#800020" stroke="#FFF3A8" stroke-width="2" />
+      <path d="M52 60 Q60 82 68 60" stroke="currentColor" stroke-width="2.5" stroke-dasharray="3 3" />
+      <circle cx="60" cy="76" r="3.5" fill="#FFF3A8" />
+    </svg>`,
+  },
+
+  // 13. Royal Bride Palanquin Doli (शाही डोली)
+  {
+    id: 'royal-doli',
+    name: 'Royal Bridal Doli (शाही डोली)',
+    category: 'wedding',
+    defaultWidth: 112,
+    defaultHeight: 80,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 130 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Curved Bamboo Carrying Poles -->
+      <path d="M4 44 Q24 44 38 40 H92 Q106 44 126 44" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" />
+      <circle cx="4" cy="44" r="4" fill="#FFF3A8" />
+      <circle cx="126" cy="44" r="4" fill="#FFF3A8" />
+      <!-- Mughal Dome Roof -->
+      <path d="M36 40 C36 18 50 10 65 10 C80 10 94 18 94 40 Z" fill="currentColor" />
+      <path d="M65 2 L62 10 H68 L65 2 Z" fill="#FFF3A8" />
+      <!-- Carriage Cabin with Arched Jharokha Window -->
+      <path d="M38 40 H92 L88 74 H42 L38 40 Z" fill="#800020" stroke="currentColor" stroke-width="2.5" />
+      <path d="M52 74 V54 C52 46 78 46 78 54 V74 Z" fill="#1a0408" stroke="#FFF3A8" stroke-width="1.5" />
+      <!-- Hanging Gold Jhumkas under Doli -->
+      <circle cx="46" cy="80" r="2.5" fill="currentColor" />
+      <circle cx="58" cy="82" r="2.5" fill="currentColor" />
+      <circle cx="65" cy="83" r="3" fill="#FFF3A8" />
+      <circle cx="72" cy="82" r="2.5" fill="currentColor" />
+      <circle cx="84" cy="80" r="2.5" fill="currentColor" />
+    </svg>`,
+  },
+
+  // 14. Sangeet Dhol & Taal (संगीत ढोलक)
+  {
+    id: 'sangeet-dholak',
+    name: 'Royal Sangeet Dhol (संगीत ढोल)',
+    category: 'festive',
+    defaultWidth: 96,
+    defaultHeight: 76,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 120 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Barrel Drum Body -->
+      <path d="M24 20 C52 10 68 10 96 20 V70 C68 80 52 80 24 70 V20 Z" fill="#800020" stroke="currentColor" stroke-width="2.5" />
+      <!-- Left & Right Drum Heads -->
+      <ellipse cx="24" cy="45" rx="9" ry="25" fill="#FFF3A8" stroke="currentColor" stroke-width="2.5" />
+      <ellipse cx="96" cy="45" rx="9" ry="25" fill="#FFF3A8" stroke="currentColor" stroke-width="2.5" />
+      <ellipse cx="24" cy="45" rx="4" ry="11" fill="#1a0408" />
+      <ellipse cx="96" cy="45" rx="4" ry="11" fill="#1a0408" />
+      <!-- Golden Criss-Cross Rope Lacing -->
+      <path d="M32 22 L48 68 L64 20 L80 68 L88 22" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
+      <path d="M32 68 L48 22 L64 70 L80 22 L88 68" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
+      <!-- Tuning Rings -->
+      <circle cx="40" cy="45" r="3.5" fill="#FFF3A8" />
+      <circle cx="56" cy="45" r="3.5" fill="#FFF3A8" />
+      <circle cx="72" cy="45" r="3.5" fill="#FFF3A8" />
+    </svg>`,
+  },
+
+  // 15. Sacred Vivah Mandap & Agni (वैदिक विवाह मंडप)
+  {
+    id: 'royal-mandap',
+    name: 'Vedic Vivah Mandap (विवाह मंडप)',
+    category: 'wedding',
+    defaultWidth: 98,
+    defaultHeight: 98,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Palace Chhatri Dome -->
+      <path d="M18 38 C18 18 36 10 55 10 C74 10 92 18 92 38 H18 Z" fill="currentColor" />
+      <path d="M55 2 L51 10 H59 L55 2 Z" fill="#FFF3A8" />
+      <!-- Scalloped Bandhanwar Toran -->
+      <path d="M18 38 Q30 47 42 38 Q55 48 68 38 Q80 47 92 38" stroke="#FFF3A8" stroke-width="2.2" fill="none" />
+      <!-- 4 Carved Pillars -->
+      <rect x="22" y="38" width="6" height="50" rx="2" fill="currentColor" />
+      <rect x="82" y="38" width="6" height="50" rx="2" fill="currentColor" />
+      <rect x="36" y="40" width="4" height="48" fill="currentColor" opacity="0.6" />
+      <rect x="70" y="40" width="4" height="48" fill="currentColor" opacity="0.6" />
+      <!-- Sacred Havan Kund & Vedic Agni -->
+      <path d="M43 80 H67 L63 88 H47 L43 80 Z" fill="#FFF3A8" />
+      <path d="M55 62 C50 69 49 75 55 79 C61 75 60 69 55 62 Z" fill="#F59E0B" />
+      <!-- Pedestal Steps -->
+      <rect x="14" y="88" width="82" height="5" rx="2" fill="currentColor" />
+      <rect x="10" y="94" width="90" height="4" rx="2" fill="currentColor" opacity="0.75" />
+    </svg>`,
+  },
+
+  // 16. Mangal Deepam Diya (मंगल ज्योति दीप)
   {
     id: 'festive-diya',
     name: 'Mangal Deepam (मंगल दीप)',
     category: 'festive',
-    defaultWidth: 70,
-    defaultHeight: 70,
-    defaultColor: '#E6A117',
-    svg: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="none">
-      <!-- Radiant Flame (Jyoti) -->
-      <!-- Outer Flame -->
-      <path d="M50 10 C46 24 38 34 44 48 C47 54 53 54 56 48 C62 34 54 24 50 10 Z" opacity="0.9" />
-      <!-- Inner Glowing Core Flame -->
-      <path d="M50 24 C48 32 44 38 48 46 C50 49 52 49 53 46 C56 38 52 32 50 24 Z" fill="#FFF4D6" />
-      <!-- Diya Clay / Brass Oil Basin -->
-      <path d="M14 56 C20 74 80 74 86 56 C88 51 80 49 50 49 C20 49 12 51 14 56 Z" />
-      <!-- Ornamental Lip & Carving -->
-      <ellipse cx="50" cy="53" rx="34" ry="5" opacity="0.25" />
-      <circle cx="50" cy="48" r="2.5" fill="#FFF4D6" />
-      <!-- Pedestal Stand -->
-      <path d="M42 70 L58 70 L62 82 L38 82 Z" />
-      <!-- Base Plate with Lotus Petals -->
-      <path d="M26 82 C34 79 66 79 74 82 C78 85 74 90 50 90 C26 90 22 85 26 82 Z" />
-      <!-- Little Dangling Beads / Ghungroo -->
-      <circle cx="36" cy="88" r="2" />
-      <circle cx="50" cy="93" r="2.5" />
-      <circle cx="64" cy="88" r="2" />
-    </svg>`,
-  },
-
-  // 6. Royal Doli / Palanquin (शाही डोली)
-  {
-    id: 'royal-doli',
-    name: 'Royal Doli (शाही डोली)',
-    category: 'wedding',
-    defaultWidth: 96,
-    defaultHeight: 70,
-    defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 120 90" fill="currentColor" stroke="none">
-      <!-- Main Horizontal Carrying Poles -->
-      <rect x="4" y="38" width="112" height="5" rx="2.5" />
-      <!-- Pole Finials (Decorative Ornate Ends) -->
-      <circle cx="4" cy="40.5" r="4" />
-      <circle cx="116" cy="40.5" r="4" />
-      <!-- Palanquin Dome (Chhatra / Mughal Arch Roof) -->
-      <path d="M34 38 C34 20 46 12 60 12 C74 12 86 20 86 38 Z" />
-      <!-- Kalash Finial on Doli Roof -->
-      <path d="M58 12 L62 12 L60 4 Z" />
-      <circle cx="60" cy="4" r="2" />
-      <!-- Scalloped Pelmet / Toran Border along roof edge -->
-      <path d="M34 38 Q40 43 46 38 Q52 43 60 38 Q68 43 74 38 Q80 43 86 38" stroke="currentColor" stroke-width="2" fill="none" />
-      <!-- Main Carriage Body -->
-      <path d="M36 43 L38 72 C38 78 46 80 60 80 C74 80 82 78 82 72 L84 43 Z" opacity="0.9" />
-      <!-- Curtains / Window Opening (Arched Screen) -->
-      <path d="M46 45 C46 56 52 62 60 62 C68 62 74 56 74 45 Z" fill="#171717" />
-      <!-- Draped Silk Curtain Swag -->
-      <path d="M46 45 Q53 58 60 47 Q67 58 74 45" stroke="currentColor" stroke-width="2" fill="none" />
-      <!-- Hanging Tassels & Little Bells at Bottom -->
-      <circle cx="44" cy="84" r="2" />
-      <circle cx="52" cy="85" r="2" />
-      <circle cx="60" cy="86" r="2.5" />
-      <circle cx="68" cy="85" r="2" />
-      <circle cx="76" cy="84" r="2" />
-    </svg>`,
-  },
-
-  // 7. Shehnai & Musical Swaras (विवाह शहनाई)
-  {
-    id: 'wedding-shehnai',
-    name: 'Wedding Shehnai (शहनाई)',
-    category: 'wedding',
-    defaultWidth: 78,
-    defaultHeight: 78,
-    defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="none">
-      <!-- Flared Shehnai Pipe -->
-      <!-- Narrow Reed Mouthpiece to Mid Pipe -->
-      <path d="M18 18 L24 14 L56 46 L50 50 Z" />
-      <!-- Widening Pipe Body -->
-      <path d="M50 50 L56 46 L74 64 L68 70 Z" />
-      <!-- Flared Golden Bell / Flare Horn -->
-      <path d="M68 70 L74 64 C80 66 90 76 92 84 C88 92 78 92 70 86 C64 80 66 74 68 70 Z" />
-      <!-- Bell Rim Ellipse -->
-      <ellipse cx="82" cy="82" rx="10" ry="6" transform="rotate(-45 82 82)" opacity="0.3" />
-      <!-- Finger Tone Holes -->
-      <circle cx="36" cy="32" r="1.5" fill="#171717" />
-      <circle cx="44" cy="40" r="1.5" fill="#171717" />
-      <circle cx="52" cy="48" r="1.5" fill="#171717" />
-      <circle cx="60" cy="56" r="1.5" fill="#171717" />
-      <!-- Marigold Garland Ribbon Tied around Pipe -->
-      <path d="M38 28 Q44 38 48 34" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" />
-      <circle cx="46" cy="38" r="3" />
-      <circle cx="40" cy="42" r="2.5" />
-      <!-- Auspicious Musical Swara Notes (Sur & Taal) -->
-      <path d="M66 22 C66 16 74 14 78 18 C82 22 80 28 74 27" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" />
-      <circle cx="75" cy="27" r="3" />
-      <path d="M82 34 C82 30 88 28 92 32 C94 36 92 40 88 39" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" />
-      <circle cx="88" cy="39" r="2.5" />
-    </svg>`,
-  },
-
-  // 8. Sangeet Dholak (ढोलक)
-  {
-    id: 'sangeet-dholak',
-    name: 'Sangeet Dholak (ढोलक)',
-    category: 'wedding',
-    defaultWidth: 86,
-    defaultHeight: 66,
-    defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 110 80" fill="currentColor" stroke="none">
-      <!-- Barrel Shaped Drum Body -->
-      <path d="M22 18 C55 10 65 10 90 18 L90 62 C65 70 55 70 22 62 Z" />
-      <!-- Left Drum Head (Bass Puri) -->
-      <ellipse cx="22" cy="40" rx="9" ry="22" fill="#FFEAA7" stroke="currentColor" stroke-width="2" />
-      <ellipse cx="22" cy="40" rx="4" ry="10" fill="#171717" />
-      <!-- Right Drum Head (Treble Puri) -->
-      <ellipse cx="90" cy="40" rx="9" ry="22" fill="#FFEAA7" stroke="currentColor" stroke-width="2" />
-      <ellipse cx="90" cy="40" rx="4" ry="10" fill="#171717" />
-      <!-- Diagonal Cotton Rope Lacings (Woven V-Pattern) -->
-      <g stroke="#171717" stroke-width="2" fill="none">
-        <path d="M24 22 L45 40 L24 58" />
-        <path d="M45 40 L66 16 L88 34" />
-        <path d="M45 40 L66 64 L88 46" />
-        <path d="M66 16 L66 64" stroke-dasharray="2 2" />
-      </g>
-      <!-- Tuning Metal Rings (Chhalla) on ropes -->
-      <circle cx="45" cy="40" r="3.5" fill="currentColor" />
-      <circle cx="66" cy="30" r="3" fill="currentColor" />
-      <circle cx="66" cy="50" r="3" fill="currentColor" />
-      <!-- Drum Sticks (Danka & Chhadi) -->
-      <line x1="94" y1="18" x2="108" y2="8" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
-      <circle cx="108" cy="8" r="2.5" />
-    </svg>`,
-  },
-
-  // 9. Royal Indian Peacock (राजसी मयूर)
-  {
-    id: 'royal-peacock',
-    name: 'Royal Peacock (राजसी मयूर)',
-    category: 'wedding',
-    defaultWidth: 84,
-    defaultHeight: 90,
-    defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 110" fill="currentColor" stroke="none">
-      <!-- Crest (Kalgi Feather Crown) -->
-      <path d="M54 12 L50 20 M58 10 L54 20 M62 12 L56 21" stroke="currentColor" stroke-width="2" />
-      <circle cx="54" cy="10" r="2" />
-      <circle cx="58" cy="8" r="2" />
-      <circle cx="63" cy="10" r="2" />
-      <!-- Head & Beak -->
-      <path d="M48 20 C48 16 56 16 58 20 C58 24 52 26 50 28 L43 24 Z" />
-      <!-- Eye -->
-      <circle cx="53" cy="20" r="1.5" fill="#171717" />
-      <!-- Graceful S-Curved Neck & Chest -->
-      <path d="M50 28 C46 34 46 42 50 48 C54 54 58 60 56 68 C54 74 46 76 40 74 C36 72 34 66 36 60 C38 52 46 46 48 38 Z" />
-      <!-- Wing with Scalloped Feather Rows -->
-      <path d="M54 52 C62 52 68 58 66 68 C64 78 54 84 46 84 C42 84 44 76 48 70 C52 64 56 58 54 52 Z" opacity="0.9" />
-      <!-- Grand Ornate Feather Plumage (Tail Fan) -->
-      <path d="M60 48 C72 40 84 44 90 56 C96 68 90 84 78 94 C68 102 54 104 42 102 C50 96 60 92 68 84 C76 76 80 66 74 58 C70 52 64 50 60 48 Z" />
-      <!-- Peacock Eye Spots (Chandrika) -->
-      <circle cx="82" cy="62" r="3.5" fill="#171717" />
-      <circle cx="82" cy="62" r="2" fill="#D4AF37" />
-      <circle cx="78" cy="78" r="3.5" fill="#171717" />
-      <circle cx="78" cy="78" r="2" fill="#D4AF37" />
-      <circle cx="64" cy="90" r="3.5" fill="#171717" />
-      <circle cx="64" cy="90" r="2" fill="#D4AF37" />
-      <!-- Feet & Perch -->
-      <path d="M44 84 L42 96 M48 84 L48 96 M38 96 L52 96" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" />
-    </svg>`,
-  },
-
-  // 10. Royal Ceremonial Elephant (शुभ गजराज / ऐरावत)
-  {
-    id: 'royal-elephant',
-    name: 'Royal Elephant (शुभ गजराज)',
-    category: 'wedding',
-    defaultWidth: 92,
+    defaultWidth: 82,
     defaultHeight: 82,
     defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 110 100" fill="currentColor" stroke="none">
-      <!-- Head with Nettipattam (Golden Headplate) -->
-      <path d="M34 26 C42 22 52 24 58 32 C62 38 60 46 54 50 C48 54 38 52 32 46 C28 40 28 32 34 26 Z" />
-      <!-- Eye -->
-      <circle cx="44" cy="34" r="2" fill="#171717" />
-      <!-- Tusk (Ivory Danta) -->
-      <path d="M42 50 C48 54 54 54 60 48 C56 56 46 56 40 52 Z" />
-      <!-- Trunk Raised High in Blessing (Ashtalakshmi Gaja) Holding Lotus -->
-      <path d="M36 44 C34 54 36 64 42 74 C48 84 56 90 64 88 C70 86 72 78 68 74 C64 70 56 72 58 78 C59 80 62 80 62 78 C60 76 64 74 66 76 C66 78 63 82 58 82 C52 82 46 76 42 68 C38 60 38 50 40 44 Z" />
-      <!-- Lotus Flower in Trunk Tip -->
-      <path d="M66 68 C64 64 68 60 72 62 C74 64 74 68 70 70 Z" />
-      <path d="M72 62 C76 60 80 64 78 68 Z" />
-      <!-- Elephant Massive Body -->
-      <path d="M48 34 C60 28 80 28 92 40 C98 46 98 64 96 78 L84 78 L84 64 C80 64 76 64 72 64 L72 78 L58 78 L58 54 C54 50 50 44 48 34 Z" />
-      <!-- Back Leg & Tail -->
-      <path d="M96 52 C100 58 100 68 98 74" stroke="currentColor" stroke-width="2" fill="none" />
-      <circle cx="98" cy="76" r="2" />
-      <!-- Royal Embroidered Saddle Cloth (Jhool) with Fringe -->
-      <path d="M58 36 L88 36 L84 58 L54 58 Z" fill="#171717" stroke="currentColor" stroke-width="2" />
-      <path d="M54 58 Q60 63 66 58 Q72 63 78 58 Q84 63 88 58" stroke="currentColor" stroke-width="2" fill="none" />
-      <!-- Little Howdah Canopy Top -->
-      <path d="M64 26 C64 22 72 18 78 18 C84 18 88 22 88 26 Z" />
-      <circle cx="78" cy="16" r="2.5" />
+    svg: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Radiant Flame Halo -->
+      <circle cx="50" cy="28" r="18" stroke="currentColor" stroke-width="1" stroke-dasharray="2 3" opacity="0.6" />
+      <!-- Outer & InnerJyoti Flame -->
+      <path d="M50 8 C42 20 39 31 50 42 C61 31 58 20 50 8 Z" fill="currentColor" />
+      <path d="M50 18 C46 25 45 32 50 38 C55 32 54 25 50 18 Z" fill="#FFF3A8" />
+      <!-- Carved Brass Diya Bowl -->
+      <path d="M14 50 H86 C82 70 68 80 50 80 C32 80 18 70 14 50 Z" fill="currentColor" />
+      <path d="M10 50 H90" stroke="#FFF3A8" stroke-width="3" stroke-linecap="round" />
+      <!-- Lotus Pedestal Stand -->
+      <path d="M40 80 H60 L66 90 H34 L40 80 Z" fill="currentColor" opacity="0.88" />
     </svg>`,
   },
 
-  // 11. Royal Chhatri Vivah Mandap (विवाह मंडप व पवित्र अग्नि)
+  // 17. Marigold & Mango Leaf Bandhanwar Toran (गेंदा तोरण)
   {
-    id: 'royal-mandap',
-    name: 'Vivah Mandap (विवाह मंडप)',
+    id: 'festive-toran',
+    name: 'Bandhanwar Toran (मंगल तोरण)',
+    category: 'festive',
+    defaultWidth: 260,
+    defaultHeight: 54,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 280 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Top Gold Rod -->
+      <rect x="4" y="4" width="272" height="5" rx="2.5" fill="currentColor" />
+      <!-- 3 Lush Garland Swags -->
+      <path d="M10 9 Q55 38 100 9 Q140 38 180 9 Q225 38 270 9" stroke="currentColor" stroke-width="3" fill="none" />
+      <!-- Marigold Rosettes -->
+      <circle cx="10" cy="11" r="6" fill="#F59E0B" stroke="#FFF3A8" stroke-width="1.5" />
+      <circle cx="55" cy="24" r="6" fill="#C41E3A" stroke="#FFF3A8" stroke-width="1.5" />
+      <circle cx="100" cy="11" r="7" fill="#F59E0B" stroke="#FFF3A8" stroke-width="1.5" />
+      <circle cx="140" cy="24" r="7" fill="#C41E3A" stroke="#FFF3A8" stroke-width="1.5" />
+      <circle cx="180" cy="11" r="7" fill="#F59E0B" stroke="#FFF3A8" stroke-width="1.5" />
+      <circle cx="225" cy="24" r="6" fill="#C41E3A" stroke="#FFF3A8" stroke-width="1.5" />
+      <circle cx="270" cy="11" r="6" fill="#F59E0B" stroke="#FFF3A8" stroke-width="1.5" />
+      <!-- Hanging Temple Bells / Tassels -->
+      <line x1="55" y1="30" x2="55" y2="45" stroke="currentColor" stroke-width="1.8" />
+      <circle cx="55" cy="48" r="3.5" fill="currentColor" />
+      <line x1="140" y1="31" x2="140" y2="48" stroke="currentColor" stroke-width="1.8" />
+      <circle cx="140" cy="51" r="4" fill="#FFF3A8" />
+      <line x1="225" y1="30" x2="225" y2="45" stroke="currentColor" stroke-width="1.8" />
+      <circle cx="225" cy="48" r="3.5" fill="currentColor" />
+    </svg>`,
+  },
+
+  // 18. Temple Hanging Ghanti Bells (स्वर्ण मंदिर घंटियाँ)
+  {
+    id: 'hanging-bells',
+    name: 'Temple Brass Bells (स्वर्ण घंटियाँ)',
+    category: 'festive',
+    defaultWidth: 82,
+    defaultHeight: 98,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 100 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Twin Hanging Chains -->
+      <line x1="34" y1="2" x2="34" y2="38" stroke="currentColor" stroke-width="2.2" stroke-dasharray="4 3" />
+      <line x1="68" y1="2" x2="68" y2="52" stroke="currentColor" stroke-width="2.2" stroke-dasharray="4 3" />
+      <!-- Left Bell -->
+      <path d="M22 58 C22 42 46 42 46 58 L52 70 H16 L22 58 Z" fill="currentColor" />
+      <circle cx="34" cy="75" r="4" fill="#FFF3A8" />
+      <!-- Right Bell -->
+      <path d="M56 72 C56 56 80 56 80 72 L86 84 H50 L56 72 Z" fill="currentColor" />
+      <circle cx="68" cy="89" r="4" fill="#FFF3A8" />
+    </svg>`,
+  },
+
+  // 19. Royal Kalka Paisley Motif (शाही कैरी बूटा)
+  {
+    id: 'royal-paisley',
+    name: 'Kalka Paisley Motif (शाही बूटा)',
+    category: 'dividers',
+    defaultWidth: 82,
+    defaultHeight: 96,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 100 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M52 10 C32 16 18 38 20 62 C22 86 38 102 58 100 C78 98 88 80 84 58 C80 40 66 28 60 16 C58 10 64 6 68 10" stroke="currentColor" stroke-width="3" fill="rgba(212,175,55,0.12)" stroke-linecap="round" />
+      <path d="M52 24 C38 30 28 46 30 62 C32 78 42 90 56 88 C70 86 76 72 72 58 C69 44 58 34 52 24 Z" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" />
+      <circle cx="52" cy="60" r="10" fill="currentColor" />
+      <circle cx="52" cy="60" r="4" fill="#1a0408" />
+    </svg>`,
+  },
+
+  // 20. Royal Couple Hastmelap / Jaimala Seal (हस्तमिलाप एवं वरमाला)
+  {
+    id: 'namaste-welcome',
+    name: 'Royal Swagatam Seal (शुभ स्वागतम)',
     category: 'wedding',
     defaultWidth: 88,
     defaultHeight: 88,
     defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="none">
-      <!-- Ornate Mughal Dome (Chhatra) -->
-      <path d="M18 36 C18 18 34 10 50 10 C66 10 82 18 82 36 Z" />
-      <!-- Dome Finial (Kalash & Kalgi) -->
-      <path d="M48 10 L52 10 L50 2 Z" />
-      <circle cx="50" cy="2" r="2.5" />
-      <!-- Scalloped Toran Garland under Dome -->
-      <path d="M18 36 Q34 44 50 36 Q66 44 82 36" stroke="currentColor" stroke-width="2.5" fill="none" />
-      <!-- 4 Carved Pillars with Flower Garlands -->
-      <!-- Left Outer Pillar -->
-      <rect x="22" y="36" width="5" height="46" rx="1.5" />
-      <!-- Right Outer Pillar -->
-      <rect x="73" y="36" width="5" height="46" rx="1.5" />
-      <!-- Left Inner Pillar -->
-      <rect x="36" y="38" width="3.5" height="44" opacity="0.6" />
-      <!-- Right Inner Pillar -->
-      <rect x="60.5" y="38" width="3.5" height="44" opacity="0.6" />
-      <!-- Sacred Havan Kund (Fire Altar in center) -->
-      <path d="M40 76 L60 76 L56 82 L44 82 Z" fill="#FFEAA7" />
-      <!-- Sacred Agni Flames -->
-      <path d="M50 64 C47 70 44 74 48 76 C52 76 54 70 50 64 Z" fill="#C41E3A" />
-      <path d="M52 66 C55 70 56 74 53 76 Z" fill="#E6A117" />
-      <!-- Base Steps of Mandap -->
-      <rect x="12" y="82" width="76" height="5" rx="2" />
-      <rect x="8" y="87" width="84" height="4" rx="2" opacity="0.8" />
+    svg: `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="55" cy="55" r="48" stroke="currentColor" stroke-width="2" fill="rgba(212,175,55,0.1)" />
+      <circle cx="55" cy="55" r="42" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" />
+      <!-- Folded Anjali Mudra Hands -->
+      <path d="M54 20 C48 34 40 48 38 64 H54 V20 Z" fill="currentColor" />
+      <path d="M56 20 C62 34 70 48 72 64 H56 V20 Z" fill="currentColor" opacity="0.9" />
+      <!-- Chuda Bangles -->
+      <rect x="35" y="67" width="40" height="5" rx="2.5" fill="#C41E3A" stroke="currentColor" stroke-width="1.2" />
+      <rect x="33" y="74" width="44" height="5" rx="2.5" fill="#FFF3A8" />
+      <!-- Lotus Petal Cradle -->
+      <path d="M28 84 Q55 94 82 84" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
     </svg>`,
   },
 
-  // 12. Namaste / Pranam Welcome (शुभ स्वागतम)
+  // 21. Royal Wax Monogram Crest (शाही राजमुद्रा)
   {
-    id: 'namaste-welcome',
-    name: 'Pranam Hands (शुभ स्वागतम)',
+    id: 'royal-wax-crest',
+    name: 'Royal Rajmudra Crest (राजमुद्रा)',
+    category: 'borders',
+    defaultWidth: 96,
+    defaultHeight: 96,
+    defaultColor: '#D4AF37',
+    svg: `<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- 16-Pointed Starburst Seal -->
+      <polygon points="60,4 71,18 88,11 91,29 109,32 102,49 116,60 102,71 109,88 91,91 88,109 71,102 60,116 49,102 32,109 29,91 11,88 18,71 4,60 18,49 11,32 29,29 32,11 49,18" fill="rgba(128,0,32,0.85)" stroke="currentColor" stroke-width="2.5" />
+      <circle cx="60" cy="60" r="38" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" />
+      <circle cx="60" cy="60" r="32" stroke="#FFF3A8" stroke-width="1.2" />
+      <!-- Crown Icon in Center -->
+      <path d="M42 66 L46 48 L54 56 L60 44 L66 56 L74 48 L78 66 Z" fill="currentColor" />
+      <rect x="42" y="69" width="36" height="4" rx="2" fill="#FFF3A8" />
+    </svg>`,
+  },
+
+  // 22. Royal Chhatri Pavilion (राजस्थानी छतरी)
+  {
+    id: 'royal-chhatri-dome',
+    name: 'Palace Chhatri Dome (शाही छतरी)',
     category: 'wedding',
-    defaultWidth: 72,
-    defaultHeight: 76,
-    defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="none">
-      <!-- Folded Palms (Anjali Mudra / Namaste) -->
-      <!-- Left Hand -->
-      <path d="M49 14 C47 24 43 38 38 48 C34 54 30 62 30 70 L48 70 L49 14 Z" />
-      <!-- Right Hand -->
-      <path d="M51 14 C53 24 57 38 62 48 C66 54 70 62 70 70 L52 70 L51 14 Z" />
-      <!-- Thumb Profiles -->
-      <path d="M38 52 C32 56 34 66 38 70 Z" opacity="0.8" />
-      <path d="M62 52 C68 56 66 66 62 70 Z" opacity="0.8" />
-      <!-- Bridal Bangles (Chuda & Kangan) at Wrists -->
-      <rect x="28" y="72" width="44" height="4" rx="2" fill="#C41E3A" stroke="currentColor" stroke-width="1" />
-      <rect x="26" y="78" width="48" height="4" rx="2" fill="currentColor" />
-      <rect x="28" y="84" width="44" height="4" rx="2" fill="#C41E3A" stroke="currentColor" stroke-width="1" />
-      <!-- Floral Garland (Gajra / Mala) draping under hands -->
-      <circle cx="34" cy="92" r="3" />
-      <circle cx="42" cy="94" r="3.5" />
-      <circle cx="50" cy="95" r="4" />
-      <circle cx="58" cy="94" r="3.5" />
-      <circle cx="66" cy="92" r="3" />
-    </svg>`,
-  },
-
-  // 13. Royal Hanging Bells (स्वर्ण घंटियाँ)
-  {
-    id: 'hanging-bells',
-    name: 'Royal Brass Bells (स्वर्ण घंटियाँ)',
-    category: 'festive',
-    defaultWidth: 76,
-    defaultHeight: 86,
-    defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 110" fill="currentColor" stroke="none">
-      <!-- Left Bell Assembly -->
-      <!-- Chain Links -->
-      <line x1="36" y1="4" x2="36" y2="34" stroke="currentColor" stroke-width="2.5" stroke-dasharray="3 3" />
-      <!-- Bell Canopy / Bow Ribbon -->
-      <path d="M30 34 C30 30 42 30 42 34 Z" />
-      <!-- Bell Dome Body -->
-      <path d="M24 54 C24 38 48 38 48 54 C50 62 52 66 54 68 L18 68 C20 66 22 62 24 54 Z" />
-      <!-- Bell Rim -->
-      <ellipse cx="36" cy="68" rx="18" ry="3.5" opacity="0.3" />
-      <!-- Clapper Ball & Tongue -->
-      <line x1="36" y1="68" x2="36" y2="76" stroke="currentColor" stroke-width="2" />
-      <circle cx="36" cy="78" r="3.5" />
-
-      <!-- Right Bell Assembly (Slightly Lower for Dynamic Cascade) -->
-      <!-- Chain Links -->
-      <line x1="68" y1="4" x2="68" y2="46" stroke="currentColor" stroke-width="2.5" stroke-dasharray="3 3" />
-      <!-- Bell Canopy -->
-      <path d="M62 46 C62 42 74 42 74 46 Z" />
-      <!-- Bell Dome Body -->
-      <path d="M56 66 C56 50 80 50 80 66 C82 74 84 78 86 80 L50 80 C52 78 54 74 56 66 Z" />
-      <!-- Bell Rim -->
-      <ellipse cx="68" cy="80" rx="18" ry="3.5" opacity="0.3" />
-      <!-- Clapper Ball & Tongue -->
-      <line x1="68" y1="80" x2="68" y2="88" stroke="currentColor" stroke-width="2" />
-      <circle cx="68" cy="90" r="3.5" />
-    </svg>`,
-  },
-
-  // 14. Marigold Festive Toran (गेंदा पुष्प तोरण)
-  {
-    id: 'festive-toran',
-    name: 'Marigold Toran (गेंदा तोरण)',
-    category: 'festive',
-    defaultWidth: 190,
-    defaultHeight: 46,
-    defaultColor: '#E6A117',
-    svg: `<svg viewBox="0 0 200 48" fill="currentColor" stroke="none">
-      <!-- Main Swag Garland Cord -->
-      <path d="M0 8 Q50 26 100 8 Q150 26 200 8" stroke="currentColor" stroke-width="2.5" fill="none" />
-      <!-- Layered Marigold Blossoms along Swag -->
-      <circle cx="20" cy="15" r="7" />
-      <circle cx="20" cy="15" r="4.5" fill="#C41E3A" />
-      <circle cx="45" cy="20" r="8" />
-      <circle cx="45" cy="20" r="5" fill="#FFEAA7" />
-      <circle cx="75" cy="17" r="7" />
-      <circle cx="75" cy="17" r="4.5" fill="#C41E3A" />
-      <circle cx="100" cy="10" r="9" />
-      <circle cx="100" cy="10" r="6" fill="#FFEAA7" />
-      <circle cx="125" cy="17" r="7" />
-      <circle cx="125" cy="17" r="4.5" fill="#C41E3A" />
-      <circle cx="155" cy="20" r="8" />
-      <circle cx="155" cy="20" r="5" fill="#FFEAA7" />
-      <circle cx="180" cy="15" r="7" />
-      <circle cx="180" cy="15" r="4.5" fill="#C41E3A" />
-      <!-- Mango Leaf Drops with Pointed Tips -->
-      <path d="M45 28 C42 34 45 44 45 46 C45 44 48 34 45 28 Z" fill="#2d6a4f" stroke="currentColor" stroke-width="1" />
-      <path d="M100 19 C97 28 100 40 100 44 C100 40 103 28 100 19 Z" fill="#2d6a4f" stroke="currentColor" stroke-width="1" />
-      <path d="M155 28 C152 34 155 44 155 46 C155 44 158 34 155 28 Z" fill="#2d6a4f" stroke="currentColor" stroke-width="1" />
-    </svg>`,
-  },
-
-  // 15. Ornate Indian Paisley / Kalka (शाही केरी / बूटा)
-  {
-    id: 'royal-paisley',
-    name: 'Royal Paisley (शाही बूटा)',
-    category: 'dividers',
-    defaultWidth: 76,
-    defaultHeight: 90,
-    defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 110" fill="currentColor" stroke="none">
-      <!-- Main Teardrop Paisley Silhouette with Curved Feather Tip -->
-      <path d="M44 14 C32 20 20 36 20 54 C20 74 34 94 54 94 C74 94 84 76 82 58 C80 44 72 32 64 24 C58 18 52 10 50 4 C48 10 46 12 44 14 Z" />
-      <!-- Internal Negative Space / Filigree Carving -->
-      <path d="M46 26 C38 32 30 44 30 56 C30 70 40 84 54 84 C68 84 74 72 72 58 C70 48 64 38 56 32 C54 28 52 22 50 18 C48 22 47 24 46 26 Z" fill="#171717" />
-      <!-- Inner Blooming Lotus Floret inside Paisley -->
-      <path d="M52 48 C48 54 44 64 48 72 C52 76 56 76 60 72 C64 64 60 54 52 48 Z" fill="currentColor" />
-      <circle cx="54" cy="62" r="3" fill="#171717" />
-      <!-- Outer Beaded Perimeter Droplets -->
-      <circle cx="18" cy="50" r="2.5" />
-      <circle cx="22" cy="70" r="2.5" />
-      <circle cx="34" cy="86" r="2.5" />
-      <circle cx="54" cy="98" r="3" />
-      <circle cx="74" cy="86" r="2.5" />
-      <circle cx="84" cy="70" r="2.5" />
-      <circle cx="82" cy="50" r="2.5" />
-    </svg>`,
-  },
-
-  // 16. Grand Sacred Mandala (अल्पना / चक्र रंगोली)
-  {
-    id: 'ornate-mandala',
-    name: 'Sacred Mandala (राजसी चक्र)',
-    category: 'dividers',
     defaultWidth: 94,
-    defaultHeight: 94,
+    defaultHeight: 96,
     defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="none">
-      <!-- Center Core & Bindu -->
-      <circle cx="50" cy="50" r="6" />
-      <circle cx="50" cy="50" r="3" fill="#171717" />
-      <!-- Inner Ring of 8 Lotus Petals -->
-      <!-- 0 deg -->
-      <path d="M50 40 C46 44 46 48 50 50 C54 48 54 44 50 40 Z" />
-      <!-- 180 deg -->
-      <path d="M50 60 C46 56 46 52 50 50 C54 52 54 56 50 60 Z" />
-      <!-- 90 deg -->
-      <path d="M60 50 C56 46 52 46 50 50 C52 54 56 54 60 50 Z" />
-      <!-- 270 deg -->
-      <path d="M40 50 C44 46 48 46 50 50 C48 54 44 54 40 50 Z" />
-      <!-- Middle Ring of Geometric Stars -->
-      <circle cx="50" cy="50" r="22" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="2 3" />
-      <!-- 8 Outer Elaborate Lotus Petals with Pointed Tips -->
-      <path d="M50 14 C44 26 44 32 50 36 C56 32 56 26 50 14 Z" />
-      <path d="M50 86 C44 74 44 68 50 64 C56 68 56 74 50 86 Z" />
-      <path d="M14 50 C26 44 32 44 36 50 C32 56 26 56 14 50 Z" />
-      <path d="M86 50 C74 44 68 44 64 50 C68 56 74 56 86 50 Z" />
-      <!-- Diagonal Petals -->
-      <path d="M24 24 C34 32 36 36 40 40 C36 36 32 34 24 24 Z" />
-      <path d="M76 76 C66 68 64 64 60 60 C64 64 68 66 76 76 Z" />
-      <path d="M76 24 C68 34 64 36 60 40 C64 36 66 32 76 24 Z" />
-      <path d="M24 76 C32 66 36 64 40 60 C36 64 34 68 24 76 Z" />
-      <!-- Outer Beaded Circle -->
-      <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="1.5" fill="none" />
-      <circle cx="50" cy="6" r="2" />
-      <circle cx="50" cy="94" r="2" />
-      <circle cx="6" cy="50" r="2" />
-      <circle cx="94" cy="50" r="2" />
-    </svg>`,
-  },
-
-  // 17. Royal Filigree Divider (शाही स्वर्ण डिवाइडर)
-  {
-    id: 'gold-divider',
-    name: 'Filigree Divider (पुष्प डिवाइडर)',
-    category: 'dividers',
-    defaultWidth: 180,
-    defaultHeight: 34,
-    defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 200 40" fill="currentColor" stroke="none">
-      <!-- Center Royal Lotus Rosette -->
-      <ellipse cx="100" cy="20" rx="8" ry="10" />
-      <circle cx="100" cy="20" r="3.5" fill="#171717" />
-      <!-- Flanking Lotus Petals -->
-      <path d="M92 20 C88 12 84 14 86 20 C84 26 88 28 92 20 Z" />
-      <path d="M108 20 C112 12 116 14 114 20 C116 26 112 28 108 20 Z" />
-      <!-- Left Swirling Acanthus Vine -->
-      <path d="M84 20 C76 12 66 12 58 20 C50 28 42 22 36 18 C32 14 24 16 18 20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" />
-      <!-- Left Leaf Tendrils -->
-      <path d="M72 16 C68 10 60 12 64 18 Z" />
-      <path d="M46 22 C42 28 34 26 38 20 Z" />
-      <circle cx="14" cy="20" r="3.5" />
-
-      <!-- Right Swirling Acanthus Vine -->
-      <path d="M116 20 C124 12 134 12 142 20 C150 28 158 22 164 18 C168 14 176 16 182 20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" />
-      <!-- Right Leaf Tendrils -->
-      <path d="M128 16 C132 10 140 12 136 18 Z" />
-      <path d="M154 22 C158 28 166 26 162 20 Z" />
-      <circle cx="186" cy="20" r="3.5" />
-    </svg>`,
-  },
-
-  // 18. Royal Floral Corner Accent (शाही कोना बॉर्डर)
-  {
-    id: 'floral-corner',
-    name: 'Royal Corner (शाही कोना)',
-    category: 'borders',
-    defaultWidth: 76,
-    defaultHeight: 76,
-    defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 100" fill="currentColor" stroke="none">
-      <!-- Main Corner Floral Knot -->
-      <circle cx="20" cy="20" r="6" />
-      <circle cx="20" cy="20" r="2.5" fill="#171717" />
-      <!-- Outer Framing Right-Angle Guidelines -->
-      <path d="M6 6 L6 88 M6 6 L88 6" stroke="currentColor" stroke-width="2.5" fill="none" />
-      <!-- Inner Thin Parallel Line -->
-      <path d="M14 14 L14 74 M14 14 L74 14" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="2 3" />
-      <!-- Baroque Acanthus Flourish inside Corner -->
-      <path d="M24 24 C36 20 48 24 54 36 C50 36 44 32 38 34 C32 36 32 44 34 50 C24 46 20 36 24 24 Z" />
-      <path d="M24 24 C20 36 24 48 36 54 C36 50 32 44 34 38 C36 32 44 32 50 34 C46 24 36 20 24 24 Z" opacity="0.8" />
-      <!-- Floral Terminal Drops -->
-      <circle cx="6" cy="94" r="3" />
-      <circle cx="94" cy="6" r="3" />
-      <circle cx="36" cy="36" r="4" />
-      <circle cx="36" cy="36" r="1.5" fill="#171717" />
-    </svg>`,
-  },
-
-  // 19. Royal Mughal Arch Frame (शाही मेहराब बॉर्डर)
-  {
-    id: 'royal-arch-frame',
-    name: 'Mughal Arch (मेहराब फ्रेम)',
-    category: 'borders',
-    defaultWidth: 200,
-    defaultHeight: 270,
-    defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 200 280" fill="currentColor" stroke="none">
-      <!-- Outer Double Border Lines -->
-      <rect x="6" y="6" width="188" height="268" rx="6" stroke="currentColor" stroke-width="2" fill="none" />
-      <rect x="14" y="14" width="172" height="252" rx="4" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" fill="none" />
-      <!-- Cusped Royal Mughal Arch Profile -->
-      <path d="M22 100 C22 65 44 48 70 48 C84 48 94 40 100 32 C106 40 116 48 130 48 C156 48 178 65 178 100" stroke="currentColor" stroke-width="3" fill="none" />
-      <!-- Spire Finial above Arch -->
-      <path d="M98 32 L102 32 L100 18 Z" />
-      <circle cx="100" cy="18" r="2.5" />
-      <!-- Scalloped Drops on Arch Archway -->
-      <circle cx="44" cy="68" r="2.5" />
-      <circle cx="70" cy="48" r="3" />
-      <circle cx="100" cy="32" r="3.5" />
-      <circle cx="130" cy="48" r="3" />
-      <circle cx="156" cy="68" r="2.5" />
-      <!-- 4 Corner Rosette Ornaments -->
-      <circle cx="22" cy="22" r="4" />
-      <circle cx="178" cy="22" r="4" />
-      <circle cx="22" cy="258" r="4" />
-      <circle cx="178" cy="258" r="4" />
-    </svg>`,
-  },
-
-  // 20. Sacred Indian Lotus Bloom (पवित्र कमल पुष्प)
-  {
-    id: 'sacred-lotus',
-    name: 'Sacred Lotus (कमल पुष्प)',
-    category: 'religious',
-    defaultWidth: 72,
-    defaultHeight: 62,
-    defaultColor: '#D4AF37',
-    svg: `<svg viewBox="0 0 100 90" fill="currentColor" stroke="none">
-      <!-- Center Upright Petal -->
-      <path d="M50 10 C44 26 44 46 50 64 C56 46 56 26 50 10 Z" />
-      <!-- Inner Left Petal -->
-      <path d="M49 24 C38 34 34 50 44 66 C48 54 48 38 49 24 Z" opacity="0.9" />
-      <!-- Inner Right Petal -->
-      <path d="M51 24 C62 34 66 50 56 66 C52 54 52 38 51 24 Z" opacity="0.9" />
-      <!-- Outer Left Petal -->
-      <path d="M42 36 C24 46 18 62 34 72 C38 62 40 48 42 36 Z" />
-      <!-- Outer Right Petal -->
-      <path d="M58 36 C76 46 82 62 66 72 C62 62 60 48 58 36 Z" />
-      <!-- Base Horizontal Calyx Leaves -->
-      <path d="M30 72 C16 74 12 80 24 82 C34 82 42 76 50 72 Z" opacity="0.8" />
-      <path d="M70 72 C84 74 88 80 76 82 C66 82 58 76 50 72 Z" opacity="0.8" />
-      <!-- Seed Pod Center Accent -->
-      <circle cx="50" cy="54" r="3" fill="#171717" />
+    svg: `<svg viewBox="0 0 110 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Ribbed Rajput Chhatri Dome -->
+      <path d="M16 46 C16 20 35 12 55 12 C75 12 94 20 94 46 Z" fill="currentColor" />
+      <path d="M55 12 V46 M36 16 C32 26 32 36 34 46 M74 16 C78 26 78 36 76 46" stroke="#1a0408" stroke-width="1.4" opacity="0.45" />
+      <!-- Spire Kalash -->
+      <path d="M55 2 L52 12 H58 L55 2 Z" fill="#FFF3A8" />
+      <!-- Eaves Chhajja Overhang -->
+      <path d="M10 46 H100 L94 52 H16 L10 46 Z" fill="#FFF3A8" />
+      <!-- Cusped Arches & Slender Columns -->
+      <path d="M24 52 V96 M44 52 V96 M66 52 V96 M86 52 V96" stroke="currentColor" stroke-width="3" />
+      <path d="M24 66 Q34 56 44 66 Q55 54 66 66 Q76 56 86 66" stroke="currentColor" stroke-width="2" fill="none" />
+      <rect x="14" y="96" width="82" height="6" rx="2" fill="currentColor" />
     </svg>`,
   },
 ];

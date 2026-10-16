@@ -17,6 +17,7 @@ import {
   BarcodeElement,
 } from '../types/editor';
 import {
+  getElementAnimationStyle,
   getImageCssFilter,
   getImageMaskStyle,
   renderShapeVisual,
@@ -153,7 +154,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                         }`;
                         return (
                           <div
-                            key={elem.id}
+                            key={`${elem.id}-${activePageIndex}`}
                             style={{
                               position: 'absolute',
                               left: `${elem.x}px`,
@@ -166,6 +167,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                               mixBlendMode: elem.blendMode || 'normal',
                             }}
                           >
+                            <div className="w-full h-full" style={getElementAnimationStyle(elem)}>
                             {elem.type === 'text' && (
                               <div className="w-full h-full flex flex-col justify-center">
                                 {renderTextVisual(elem as TextElement)}
@@ -252,6 +254,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                                 ) : null}
                               </div>
                             )}
+                            </div>
                           </div>
                         );
                       })}

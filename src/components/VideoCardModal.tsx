@@ -29,6 +29,7 @@ import {
   AudioTrack,
 } from '../types/editor';
 import {
+  getElementAnimationStyle,
   getImageCssFilter,
   getImageMaskStyle,
   renderShapeVisual,
@@ -288,7 +289,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                           }`;
                           return (
                             <div
-                              key={elem.id}
+                              key={`${elem.id}-${currentIndex}`}
                               style={{
                                 position: 'absolute',
                                 left: `${elem.x}px`,
@@ -301,6 +302,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                                 mixBlendMode: elem.blendMode || 'normal',
                               }}
                             >
+                              <div className="w-full h-full" style={getElementAnimationStyle(elem)}>
                               {elem.type === 'text' && (
                                 <div className="w-full h-full flex flex-col justify-center select-none">
                                   {renderTextVisual(elem as TextElement)}
@@ -389,6 +391,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                                   ) : null}
                                 </div>
                               )}
+                              </div>
                             </div>
                           );
                         })}

@@ -92,6 +92,7 @@ interface ToolbarProps {
   drawBrush?: DrawBrushSettings;
   onExitDrawMode?: () => void;
   onDistributeElements?: (axis: 'horizontal' | 'vertical' | 'tidy') => void;
+  onAnimateAllPageElements?: (anim: ElementAnimationType, speed?: number) => void;
 }
 
 export const FONT_OPTIONS = [
@@ -237,20 +238,33 @@ export const ANIMATION_PRESETS: {
   id: ElementAnimationType;
   label: string;
   desc: string;
+  category: 'entrance' | 'continuous' | 'photo' | 'text';
   badge?: string;
 }[] = [
-  { id: 'none', label: 'None', desc: 'Static element' },
-  { id: 'rise', label: 'Rise', desc: 'Smooth upward entrance', badge: 'Popular' },
-  { id: 'pan', label: 'Pan', desc: 'Graceful horizontal slide' },
-  { id: 'fade', label: 'Fade', desc: 'Gentle opacity reveal' },
-  { id: 'pop', label: 'Pop', desc: 'Energetic spring bounce', badge: 'Fun' },
-  { id: 'breathe', label: 'Breathe', desc: 'Continuous subtle zoom pulse', badge: 'Royal' },
-  { id: 'drift', label: 'Drift', desc: 'Floating cinematic motion' },
-  { id: 'tumble', label: 'Tumble', desc: 'Playful spin & entrance' },
-  { id: 'neon-pulse', label: 'Golden Pulse', desc: 'Shimmering aura pulse', badge: 'Pro' },
-  { id: 'typewriter', label: 'Typewriter', desc: 'Letter by letter reveal' },
-  { id: 'stomp', label: 'Stomp', desc: 'Bold impact entrance' },
-  { id: 'scrapbook', label: 'Scrapbook', desc: 'Handcrafted stop-motion tilt' },
+  { id: 'none', label: 'None', desc: 'Static element', category: 'entrance' },
+  // Entrance Animations
+  { id: 'rise', label: 'Rise', desc: 'Smooth upward entrance', category: 'entrance', badge: 'Popular' },
+  { id: 'pan', label: 'Pan', desc: 'Graceful horizontal slide', category: 'entrance' },
+  { id: 'fade', label: 'Fade', desc: 'Gentle cinema opacity reveal', category: 'entrance' },
+  { id: 'pop', label: 'Pop', desc: 'Energetic spring bounce', category: 'entrance', badge: 'Fun' },
+  { id: 'wipe', label: 'Wipe', desc: 'Curtain reveal across element', category: 'entrance' },
+  { id: 'tumble', label: 'Tumble', desc: 'Playful spin & entrance', category: 'entrance' },
+  { id: 'stomp', label: 'Stomp', desc: 'Bold royal impact entrance', category: 'entrance' },
+  { id: 'tectonic', label: 'Tectonic', desc: 'Dynamic angled slide in', category: 'entrance' },
+  // Text Signature Animations
+  { id: 'typewriter', label: 'Typewriter', desc: 'Letter-by-letter reveal', category: 'text', badge: 'Text' },
+  { id: 'baseline', label: 'Ascend / Baseline', desc: 'Rises from baseline mask', category: 'text', badge: 'Text' },
+  // Photo & Frame Animations
+  { id: 'photo-zoom', label: 'Photo Zoom', desc: 'Smooth Ken Burns zoom-in', category: 'photo', badge: 'Photo' },
+  { id: 'photo-flow', label: 'Photo Drift Loop', desc: 'Continuous cinematic pan', category: 'photo', badge: 'Loop' },
+  // Continuous Loop Animations
+  { id: 'breathe', label: 'Breathe', desc: 'Continuous subtle zoom pulse', category: 'continuous', badge: 'Loop' },
+  { id: 'drift', label: 'Drift', desc: 'Floating levitation motion', category: 'continuous', badge: 'Loop' },
+  { id: 'float', label: 'Royal Float', desc: 'Gentle vertical levitation', category: 'continuous', badge: 'Loop' },
+  { id: 'neon-pulse', label: 'Golden Aura', desc: '24K shimmering glow pulse', category: 'continuous', badge: 'Royal' },
+  { id: 'heartbeat', label: 'Heartbeat', desc: 'Rhythmic double pulse', category: 'continuous', badge: 'Loop' },
+  { id: 'scrapbook', label: 'Scrapbook', desc: 'Handcrafted stop-motion tilt', category: 'continuous' },
+  { id: 'spin-slow', label: 'Mandala Spin', desc: '360° slow rotation for seals', category: 'continuous', badge: 'Motif' },
 ];
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -273,6 +287,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   drawBrush,
   onExitDrawMode,
   onDistributeElements,
+  onAnimateAllPageElements,
 }) => {
   const [openPopover, setOpenPopover] = useState<
     | 'none'
@@ -1985,47 +2000,109 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             </div>
           )}
 
-          {/* 3C. CANVA MOTION ANIMATIONS POPOVER (With Speed & Timing) */}
+          {/* 3C. CANVA MOTION ANIMATIONS POPOVER (With Live Replay, Page Combinations, Speed & Loop) */}
           {openPopover === 'animate' && (
-            <div className="absolute right-24 top-13 w-84 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-3 text-xs max-h-[82vh] overflow-y-auto">
+            <div className="absolute right-12 sm:right-24 top-13 w-92 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-3.5 text-xs max-h-[84vh] overflow-y-auto">
               <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
                 <span className="font-bold text-amber-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                   <Play className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  <span>Canva Element Animations (12 Styles)</span>
+                  <span>
+                    {isText
+                      ? 'Text & Page Animations'
+                      : isImage
+                      ? 'Photo & Page Animations'
+                      : 'Element & Page Animations'}
+                  </span>
                 </span>
+                {selectedElement.animation && selectedElement.animation !== 'none' && (
+                  <button
+                    onClick={() => {
+                      const currentAnim = selectedElement.animation;
+                      onUpdateElement({ animation: 'none' }, false);
+                      setTimeout(() => onUpdateElement({ animation: currentAnim }, true), 30);
+                    }}
+                    className="px-2 py-0.5 rounded-md bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-200 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    title="Replay Animation on Canvas"
+                  >
+                    <Play className="w-2.5 h-2.5 fill-amber-300" />
+                    <span>Replay</span>
+                  </button>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                {ANIMATION_PRESETS.map((anim) => {
-                  const isActive = (selectedElement.animation || 'none') === anim.id;
-                  return (
-                    <button
-                      key={anim.id}
-                      onClick={() => onUpdateElement({ animation: anim.id }, true)}
-                      className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
-                        isActive
-                          ? 'bg-amber-500/20 border-amber-400 text-amber-200 ring-1 ring-amber-400/30'
-                          : 'bg-neutral-800/80 hover:bg-neutral-800 border-neutral-700 text-neutral-200'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs">{anim.label}</span>
-                        {anim.badge && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
-                            {anim.badge}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[10px] text-neutral-400 mt-1">{anim.desc}</span>
-                    </button>
-                  );
-                })}
+              {/* Canva Page Combinations (Apply to ALL elements on current slide) */}
+              {onAnimateAllPageElements && (
+                <div className="p-2.5 rounded-xl bg-neutral-950/90 border border-amber-500/25 space-y-2">
+                  <div className="text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center justify-between">
+                    <span>Animate Entire Slide (Page Presets)</span>
+                    <Sparkles className="w-3 h-3 text-amber-400" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[
+                      { label: 'Royal Rise', anim: 'rise' as ElementAnimationType },
+                      { label: 'Cinema Fade', anim: 'fade' as ElementAnimationType },
+                      { label: 'Breathe Loop', anim: 'breathe' as ElementAnimationType },
+                      { label: 'Golden Pulse', anim: 'neon-pulse' as ElementAnimationType },
+                      { label: 'Festive Pop', anim: 'pop' as ElementAnimationType },
+                      { label: 'Clear All', anim: 'none' as ElementAnimationType },
+                    ].map((combo) => (
+                      <button
+                        key={combo.label}
+                        onClick={() => onAnimateAllPageElements(combo.anim, selectedElement.animationSpeed || 1)}
+                        className="py-1.5 px-2 rounded-lg bg-neutral-900 hover:bg-amber-500/20 border border-neutral-800 hover:border-amber-400 text-[10px] font-semibold text-neutral-200 hover:text-amber-200 transition cursor-pointer"
+                      >
+                        {combo.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Individual Element Animation Grid */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
+                  Selected {selectedElement.type.toUpperCase()} Motion ({ANIMATION_PRESETS.length} Styles):
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {ANIMATION_PRESETS.map((anim) => {
+                    const isActive = (selectedElement.animation || 'none') === anim.id;
+                    return (
+                      <button
+                        key={anim.id}
+                        onClick={() => {
+                          // If clicking already active entrance animation, re-trigger it so user sees it replay immediately
+                          if (isActive && anim.id !== 'none') {
+                            onUpdateElement({ animation: 'none' }, false);
+                            setTimeout(() => onUpdateElement({ animation: anim.id }, true), 30);
+                          } else {
+                            onUpdateElement({ animation: anim.id }, true);
+                          }
+                        }}
+                        className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between cursor-pointer ${
+                          isActive
+                            ? 'bg-amber-500/20 border-amber-400 text-amber-200 ring-1 ring-amber-400/30'
+                            : 'bg-neutral-800/80 hover:bg-neutral-800 border-neutral-700 text-neutral-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-bold text-xs truncate">{anim.label}</span>
+                          {anim.badge && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 shrink-0">
+                              {anim.badge}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-neutral-400 mt-1 leading-tight">{anim.desc}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Animation Speed & Timing Controls */}
-              <div className="pt-2 border-t border-neutral-800 space-y-2.5">
+              {/* Animation Speed & Playback Mode Controls */}
+              <div className="pt-2.5 border-t border-neutral-800 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-neutral-300">Animation Speed:</span>
+                  <span className="text-neutral-300">Motion Speed:</span>
                   <span className="font-mono text-amber-300">
                     {selectedElement.animationSpeed || 1}x
                   </span>
@@ -2039,22 +2116,34 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   onChange={(e) =>
                     onUpdateElement({ animationSpeed: parseFloat(e.target.value) }, true)
                   }
-                  className="w-full accent-amber-400"
+                  className="w-full accent-amber-400 cursor-pointer"
                 />
-                <div className="grid grid-cols-3 gap-1.5">
-                  {(['both', 'enter', 'exit'] as const).map((tm) => (
-                    <button
-                      key={tm}
-                      onClick={() => onUpdateElement({ animationTiming: tm }, true)}
-                      className={`py-1 rounded border text-[11px] capitalize ${
-                        (selectedElement.animationTiming || 'both') === tm
-                          ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-bold'
-                          : 'bg-neutral-800 border-neutral-700 text-neutral-300'
-                      }`}
-                    >
-                      On {tm}
-                    </button>
-                  ))}
+                <div>
+                  <span className="text-[10px] text-neutral-400 block mb-1.5">
+                    Playback Mode (Entrance vs Continuous Loop):
+                  </span>
+                  <div className="grid grid-cols-4 gap-1">
+                    {(
+                      [
+                        { id: 'both', label: 'Standard' },
+                        { id: 'loop', label: '∞ Loop' },
+                        { id: 'enter', label: 'On Enter' },
+                        { id: 'exit', label: 'On Exit' },
+                      ] as const
+                    ).map((tm) => (
+                      <button
+                        key={tm.id}
+                        onClick={() => onUpdateElement({ animationTiming: tm.id }, true)}
+                        className={`py-1.5 rounded-lg border text-[10px] font-semibold transition cursor-pointer ${
+                          (selectedElement.animationTiming || 'both') === tm.id
+                            ? 'bg-amber-500/25 border-amber-400 text-amber-300 font-bold'
+                            : 'bg-neutral-800 border-neutral-700 text-neutral-300 hover:text-white'
+                        }`}
+                      >
+                        {tm.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

@@ -79,6 +79,11 @@ import { TEMPLATE_CATEGORIES, INITIAL_TEMPLATES } from '../data/templates';
 import { STICKER_CATEGORIES, STICKERS, StickerDefinition } from '../data/stickers';
 import { BACKGROUNDS } from '../data/backgrounds';
 import { generateQrDataUrl } from '../utils/qrHelper';
+import {
+  getImageCssFilter,
+  getImageMaskStyle,
+  renderShapeVisual,
+} from './Canvas';
 
 export type SidebarTab =
   | 'templates'
@@ -1471,15 +1476,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         handleAddPhoto(
                           '/images/wedding_couple_1791965341379.jpg',
                           item.mask,
-                          item.mask === 'polaroid' ? 'Siddharth & Ananya ❤️' : undefined
+                          item.mask === 'polaroid' ? 'Siddharth & Ananya' : undefined
                         )
                       }
-                      className="p-2 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 flex flex-col items-center gap-1.5 transition group"
+                      className="p-2 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 flex flex-col items-center gap-1.5 transition group cursor-pointer"
                     >
-                      <div className="w-11 h-11 bg-gradient-to-br from-amber-500/30 to-rose-900/50 border border-amber-400/60 flex items-center justify-center text-[9px] font-bold text-amber-200 rounded-lg group-hover:scale-105 transition text-center px-1">
-                        {item.label.split(' ')[0]}
+                      <div
+                        className="w-14 h-14 overflow-hidden relative shadow-md group-hover:scale-105 transition border border-amber-400/70 bg-neutral-950"
+                        style={getImageMaskStyle({
+                          id: 'preview',
+                          type: 'image',
+                          src: '/images/wedding_couple_1791965341379.jpg',
+                          mask: item.mask,
+                          x: 0,
+                          y: 0,
+                          width: 56,
+                          height: 56,
+                          rotation: 0,
+                          opacity: 1,
+                          zIndex: 1,
+                        })}
+                      >
+                        <img
+                          src="/images/wedding_couple_1791965341379.jpg"
+                          alt={item.label}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                      <span className="text-[10px] text-neutral-300 font-medium truncate w-full text-center">
+                      <span className="text-[10px] text-neutral-200 font-medium truncate w-full text-center">
                         {item.label}
                       </span>
                     </button>
@@ -1634,17 +1658,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   {SHAPE_PRESETS.map((preset) => (
                     <button
                       key={preset.shapeType}
                       onClick={() => handleAddShape(preset)}
-                      className="p-2.5 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 text-left transition flex flex-col justify-between group"
+                      className="p-2.5 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-900/90 hover:bg-neutral-800 text-left transition flex flex-col items-center justify-between gap-2 group cursor-pointer"
                     >
-                      <span className="text-xs font-semibold text-amber-300 group-hover:text-amber-200">
-                        + {preset.label}
-                      </span>
-                      <span className="text-[10px] text-neutral-400 mt-0.5">{preset.desc}</span>
+                      <div className="w-full h-14 flex items-center justify-center p-1.5 bg-[#12060a] rounded-lg border border-amber-500/15 group-hover:border-amber-400/40 overflow-hidden">
+                        <div className="w-20 h-10 flex items-center justify-center">
+                          {renderShapeVisual({
+                            id: `prev-${preset.shapeType}`,
+                            type: 'shape',
+                            shapeType: preset.shapeType,
+                            strokeColor: '#D4AF37',
+                            strokeWidth: 2,
+                            fillColor: preset.fillColor || 'transparent',
+                            x: 0,
+                            y: 0,
+                            width: 80,
+                            height: 40,
+                            rotation: 0,
+                            opacity: 1,
+                            zIndex: 1,
+                          })}
+                        </div>
+                      </div>
+                      <div className="w-full text-center">
+                        <span className="text-[11px] font-bold text-amber-200 group-hover:text-amber-300 block truncate">
+                          {preset.label}
+                        </span>
+                        <span className="text-[9px] text-neutral-400 block truncate">{preset.desc}</span>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -1690,19 +1735,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   ))}
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   {filteredStickers.map((sticker) => (
                     <button
                       key={sticker.id}
                       onClick={() => handleAddSticker(sticker)}
-                      className="p-2.5 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/80 hover:bg-neutral-800 flex flex-col items-center justify-center gap-1.5 group transition"
+                      className="p-3 rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-[#12070b] hover:bg-neutral-800 flex flex-col items-center justify-center gap-2 group transition cursor-pointer shadow-md"
                       title={`Add ${sticker.name}`}
                     >
                       <div
-                        className="w-10 h-10 flex items-center justify-center text-amber-300 group-hover:scale-110 transition-transform [&>svg]:w-full [&>svg]:h-full"
+                        className="w-14 h-14 flex items-center justify-center text-amber-300 group-hover:scale-110 transition-transform [&>svg]:w-full [&>svg]:h-full drop-shadow-[0_2px_8px_rgba(212,175,55,0.25)]"
+                        style={{ color: sticker.defaultColor || '#D4AF37' }}
                         dangerouslySetInnerHTML={{ __html: sticker.svg }}
                       />
-                      <span className="text-[10px] text-neutral-300 text-center truncate w-full">
+                      <span className="text-[10px] font-medium text-amber-100/90 text-center truncate w-full">
                         {sticker.name}
                       </span>
                     </button>

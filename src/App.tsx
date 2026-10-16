@@ -300,6 +300,34 @@ export default function App() {
     }
   };
 
+  // Animate all elements on the current slide with 1 click (Canva Page Animation Combo)
+  const handleAnimateAllPageElements = (anim: CanvasItem['animation'], speed: number = 1) => {
+    // First reset to 'none' briefly so entrance animations replay visibly on canvas
+    const cleared = latestPagesRef.current.map((page, idx) => {
+      if (idx !== currentPageIndex) return page;
+      return {
+        ...page,
+        elements: page.elements.map((el) => ({ ...el, animation: 'none' as const })),
+      };
+    });
+    setPages(cleared);
+
+    setTimeout(() => {
+      const updated = latestPagesRef.current.map((page, idx) => {
+        if (idx !== currentPageIndex) return page;
+        return {
+          ...page,
+          elements: page.elements.map((el) => ({
+            ...el,
+            animation: anim,
+            animationSpeed: speed,
+          })),
+        };
+      });
+      commitPages(updated);
+    }, 35);
+  };
+
   // Update specific page properties (duration, transition, notes)
   const handleUpdatePage = (pageIdx: number, updates: Partial<CardPage>) => {
     const updated = pages.map((p, idx) => (idx === pageIdx ? { ...p, ...updates } : p));
@@ -1071,6 +1099,7 @@ export default function App() {
             drawBrush={drawBrush}
             onExitDrawMode={() => setDrawBrush((prev) => ({ ...prev, isEnabled: false }))}
             onDistributeElements={handleDistributeElements}
+            onAnimateAllPageElements={handleAnimateAllPageElements}
           />
 
           <Canvas
