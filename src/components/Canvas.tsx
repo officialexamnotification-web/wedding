@@ -6,9 +6,11 @@ import {
   StickerElement,
   QrElement,
   ShapeElement,
+  DrawingElement,
   AspectRatioType,
   CANVAS_SIZES,
   PhotoFilterPreset,
+  DrawBrushSettings,
 } from '../types/editor';
 import {
   Maximize2,
@@ -23,6 +25,8 @@ import {
   ArrowDown,
   Edit3,
   Crop,
+  PaintRoller,
+  Layers,
 } from 'lucide-react';
 
 interface CanvasProps {
@@ -33,14 +37,23 @@ interface CanvasProps {
   selectedElementId: string | null;
   onSelectElement: (id: string | null) => void;
   onUpdateElement: (id: string, updates: Partial<CanvasItem>, commitToHistory?: boolean) => void;
+  onAddElement?: (elem: CanvasItem) => void;
   onCommitCurrentState?: () => void;
   onDeleteElement?: () => void;
   onDuplicateElement?: () => void;
   onBringForward?: () => void;
   onSendBackward?: () => void;
+  onBringToFront?: () => void;
+  onSendToBack?: () => void;
   zoom: number;
   onZoomChange?: (newZoom: number) => void;
   onOpenPhotoAdjust?: (elem: ImageElement) => void;
+  drawBrush?: DrawBrushSettings;
+  copiedStyle?: Partial<CanvasItem> | null;
+  onApplyCopiedStyle?: (targetId: string) => void;
+  onCopyStyle?: () => void;
+  showRulers?: boolean;
+  showSafeZones?: boolean;
 }
 
 export function getImageCssFilter(elem: ImageElement): string {
@@ -55,6 +68,11 @@ export function getImageCssFilter(elem: ImageElement): string {
   else if (preset === 'bw-classic') parts.push('grayscale(1) contrast(1.15)');
   else if (preset === 'rose-tint') parts.push('hue-rotate(-15deg) saturate(1.25) brightness(1.03)');
   else if (preset === 'high-contrast') parts.push('contrast(1.3) saturate(1.2)');
+  else if (preset === 'festive-glow') parts.push('saturate(1.6) brightness(1.08) contrast(1.06)');
+  else if (preset === 'cinematic-teal') parts.push('hue-rotate(12deg) contrast(1.18) saturate(1.15)');
+  else if (preset === 'soft-pastel') parts.push('brightness(1.08) saturate(0.88) contrast(0.95)');
+  else if (preset === 'dramatic-noir') parts.push('grayscale(0.9) contrast(1.4) brightness(0.92)');
+  else if (preset === 'golden-hour') parts.push('sepia(0.35) saturate(1.55) brightness(1.05)');
 
   if (elem.brightness !== undefined && elem.brightness !== 100) {
     parts.push(`brightness(${elem.brightness}%)`);
@@ -65,11 +83,54 @@ export function getImageCssFilter(elem: ImageElement): string {
   if (elem.saturation !== undefined && elem.saturation !== 100) {
     parts.push(`saturate(${elem.saturation}%)`);
   }
+  if (elem.hueRotate !== undefined && elem.hueRotate !== 0) {
+    parts.push(`hue-rotate(${elem.hueRotate}deg)`);
+  }
+  if (elem.sepia !== undefined && elem.sepia > 0) {
+    parts.push(`sepia(${elem.sepia}%)`);
+  }
   if (elem.blur !== undefined && elem.blur > 0) {
     parts.push(`blur(${elem.blur}px)`);
   }
+  if (elem.bgRemoved) {
+    parts.push('drop-shadow(0 6px 16px rgba(212,175,55,0.65)) contrast(1.08)');
+  }
 
   return parts.length > 0 ? parts.join(' ') : 'none';
+}
+
+export function getImageMaskStyle(elem: ImageElement): React.CSSProperties {
+  const mask = elem.mask || 'none';
+  const style: React.CSSProperties = {};
+
+  if (mask === 'circle') {
+    style.borderRadius = '9999px';
+  } else if (mask === 'arch') {
+    style.borderRadius = '9999px 9999px 12px 12px';
+  } else if (mask === 'rounded') {
+    style.borderRadius = `${elem.borderRadius || 16}px`;
+  } else if (mask === 'heart') {
+    style.clipPath =
+      'polygon(50% 15%, 80% 0%, 100% 25%, 100% 60%, 50% 95%, 0% 60%, 0% 25%, 20% 0%)';
+  } else if (mask === 'diamond') {
+    style.clipPath = 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
+  } else if (mask === 'octagon') {
+    style.clipPath =
+      'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)';
+  } else if (mask === 'star') {
+    style.clipPath =
+      'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+  } else if (mask === 'hexagon') {
+    style.clipPath = 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)';
+  } else if (mask === 'lotus') {
+    style.clipPath =
+      'polygon(50% 0%, 72% 14%, 92% 8%, 90% 34%, 100% 55%, 84% 76%, 50% 100%, 16% 76%, 0% 55%, 10% 34%, 8% 8%, 28% 14%)';
+  } else if (mask === 'scallop') {
+    style.clipPath =
+      'polygon(50% 0%, 65% 8%, 82% 6%, 89% 21%, 100% 35%, 94% 50%, 100% 65%, 89% 79%, 82% 94%, 65% 92%, 50% 100%, 35% 92%, 18% 94%, 11% 79%, 0% 65%, 6% 50%, 0% 35%, 11% 21%, 18% 6%, 35% 8%)';
+  }
+
+  return style;
 }
 
 export function renderShapeVisual(elem: ShapeElement) {
@@ -89,7 +150,6 @@ export function renderShapeVisual(elem: ShapeElement) {
             borderRadius: `${elem.borderRadius ?? 8}px`,
           }}
         >
-          {/* Inner corner flourishes like royal Canva frame */}
           <div
             className="absolute inset-1.5 pointer-events-none"
             style={{
@@ -98,10 +158,22 @@ export function renderShapeVisual(elem: ShapeElement) {
               borderRadius: `${Math.max(0, (elem.borderRadius ?? 8) - 4)}px`,
             }}
           />
-          <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2" style={{ borderColor: strokeColor }} />
-          <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2" style={{ borderColor: strokeColor }} />
-          <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2" style={{ borderColor: strokeColor }} />
-          <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2" style={{ borderColor: strokeColor }} />
+          <div
+            className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2"
+            style={{ borderColor: strokeColor }}
+          />
+          <div
+            className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2"
+            style={{ borderColor: strokeColor }}
+          />
+          <div
+            className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2"
+            style={{ borderColor: strokeColor }}
+          />
+          <div
+            className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2"
+            style={{ borderColor: strokeColor }}
+          />
         </div>
       );
 
@@ -139,7 +211,13 @@ export function renderShapeVisual(elem: ShapeElement) {
                 backgroundColor: strokeColor,
               }}
             />
-            <div className="w-2.5 h-2.5 rotate-45 shrink-0 border" style={{ borderColor: strokeColor, backgroundColor: fillColor !== 'transparent' ? fillColor : strokeColor }} />
+            <div
+              className="w-2.5 h-2.5 rotate-45 shrink-0 border"
+              style={{
+                borderColor: strokeColor,
+                backgroundColor: fillColor !== 'transparent' ? fillColor : strokeColor,
+              }}
+            />
             <div
               className="flex-1"
               style={{
@@ -220,6 +298,169 @@ export function renderShapeVisual(elem: ShapeElement) {
         </svg>
       );
 
+    case 'scallop-badge':
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
+          <path
+            d="M100,10 C115,10 125,22 140,18 C155,14 162,28 175,35 C188,42 182,58 190,72 C198,86 188,100 190,115 C192,130 180,142 175,156 C170,170 155,172 140,182 C125,192 115,185 100,190 C85,185 75,192 60,182 C45,172 30,170 25,156 C20,142 8,130 10,115 C12,100 2,86 10,72 C18,58 12,42 25,35 C38,28 45,14 60,18 C75,22 85,10 100,10 Z"
+            fill={fillColor === 'transparent' ? 'rgba(196,30,58,0.22)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+          <circle
+            cx="100"
+            cy="100"
+            r="68"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={Math.max(1, strokeWidth)}
+          />
+        </svg>
+      );
+
+    case 'ribbon-banner':
+      return (
+        <svg
+          viewBox="0 0 300 70"
+          preserveAspectRatio="none"
+          className="w-full h-full pointer-events-none"
+        >
+          <polygon
+            points="0,10 24,35 0,60 30,60 30,10"
+            fill={fillColor === 'transparent' ? '#4a0404' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+          />
+          <polygon
+            points="300,10 276,35 300,60 270,60 270,10"
+            fill={fillColor === 'transparent' ? '#4a0404' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+          />
+          <rect
+            x="20"
+            y="6"
+            width="260"
+            height="54"
+            rx="6"
+            fill={fillColor === 'transparent' ? '#630c1d' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 1.5}
+          />
+        </svg>
+      );
+
+    case 'mandala-ring':
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
+          <circle
+            cx="100"
+            cy="100"
+            r="92"
+            fill={fillColor === 'transparent' ? 'none' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+            strokeDasharray="6 4"
+          />
+          <circle
+            cx="100"
+            cy="100"
+            r="78"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 1.5}
+          />
+          <circle
+            cx="100"
+            cy="100"
+            r="64"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={1}
+            strokeDasharray="2 5"
+          />
+        </svg>
+      );
+
+    case 'star':
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
+          <polygon
+            points="100,8 123,68 188,68 136,107 156,170 100,132 44,170 64,107 12,68 77,68"
+            fill={fillColor === 'transparent' ? 'rgba(212,175,55,0.16)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+        </svg>
+      );
+
+    case 'hexagon':
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
+          <polygon
+            points="50,12 150,12 192,100 150,188 50,188 8,100"
+            fill={fillColor === 'transparent' ? 'rgba(212,175,55,0.12)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+        </svg>
+      );
+
+    case 'triangle':
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
+          <polygon
+            points="100,12 190,185 10,185"
+            fill={fillColor === 'transparent' ? 'rgba(212,175,55,0.12)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+        </svg>
+      );
+
+    case 'heart-shape':
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
+          <path
+            d="M100,178 C100,178 18,122 18,65 C18,34 42,14 70,14 C86,14 100,24 100,38 C100,24 114,14 130,14 C158,14 182,34 182,65 C182,122 100,178 100,178 Z"
+            fill={fillColor === 'transparent' ? 'rgba(196,30,58,0.2)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+        </svg>
+      );
+
+    case 'octagon-frame':
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full pointer-events-none">
+          <polygon
+            points="60,8 140,8 192,60 192,140 140,192 60,192 8,140 8,60"
+            fill={fillColor === 'transparent' ? 'rgba(212,175,55,0.08)' : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth * 2}
+          />
+          <polygon
+            points="65,18 135,18 182,65 182,135 135,182 65,182 18,135 18,65"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={1}
+            strokeDasharray="4 4"
+          />
+        </svg>
+      );
+
+    case 'arrow-right':
+      return (
+        <svg viewBox="0 0 200 100" className="w-full h-full pointer-events-none">
+          <polygon
+            points="10,35 135,35 135,12 190,50 135,88 135,65 10,65"
+            fill={fillColor === 'transparent' ? strokeColor : fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+          />
+        </svg>
+      );
+
     case 'rectangle':
     default:
       return (
@@ -235,6 +476,77 @@ export function renderShapeVisual(elem: ShapeElement) {
   }
 }
 
+export function renderTextVisual(t: TextElement) {
+  const isHollow = t.effectType === 'hollow';
+  const curve = t.curveRadius || 0;
+
+  // If Curved Text is active, render clean SVG textPath
+  if (curve !== 0) {
+    const w = Math.max(120, t.width);
+    const h = Math.max(60, t.height);
+    const bend = (curve / 100) * (h * 0.85);
+    const startY = curve > 0 ? h * 0.78 : h * 0.28;
+    const ctrlY = startY - bend;
+    const pathId = `curve-path-${t.id}`;
+    const d = `M 10,${startY} Q ${w / 2},${ctrlY} ${w - 10},${startY}`;
+
+    return (
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full overflow-visible pointer-events-none">
+        <defs>
+          <path id={pathId} d={d} fill="none" />
+        </defs>
+        <text
+          fill={isHollow ? 'transparent' : t.color}
+          stroke={t.strokeWidth && t.strokeWidth > 0 ? t.strokeColor || t.color : undefined}
+          strokeWidth={t.strokeWidth || 0}
+          style={{
+            fontFamily: t.fontFamily,
+            fontSize: `${t.fontSize}px`,
+            fontWeight: t.fontWeight,
+            fontStyle: t.fontStyle,
+            letterSpacing: `${t.letterSpacing}px`,
+            textTransform: t.textTransform || 'none',
+          }}
+        >
+          <textPath href={`#${pathId}`} startOffset="50%" textAnchor="middle">
+            {t.text.replace(/\n/g, ' ')}
+          </textPath>
+        </text>
+      </svg>
+    );
+  }
+
+  return (
+    <div
+      className="whitespace-pre-line break-words w-full select-none"
+      style={{
+        fontFamily: t.fontFamily,
+        fontSize: `${t.fontSize}px`,
+        color: isHollow ? 'transparent' : t.color,
+        textAlign: t.textAlign,
+        fontWeight: t.fontWeight,
+        fontStyle: t.fontStyle,
+        textDecoration: t.textDecoration || 'none',
+        letterSpacing: `${t.letterSpacing}px`,
+        lineHeight: t.lineHeight,
+        textTransform: t.textTransform || 'none',
+        backgroundColor: t.backgroundColor || undefined,
+        padding: t.backgroundPadding ? `${t.backgroundPadding}px` : undefined,
+        borderRadius: t.backgroundColor ? `${t.backgroundRadius || 8}px` : undefined,
+        WebkitTextStroke:
+          t.strokeWidth && t.strokeWidth > 0
+            ? `${t.strokeWidth}px ${t.strokeColor || t.color || '#000'}`
+            : undefined,
+        textShadow: t.shadow
+          ? `${t.shadow.offsetX}px ${t.shadow.offsetY}px ${t.shadow.blur}px ${t.shadow.color}`
+          : undefined,
+      }}
+    >
+      {t.text}
+    </div>
+  );
+}
+
 export const Canvas: React.FC<CanvasProps> = ({
   aspectRatio,
   backgroundType,
@@ -243,14 +555,23 @@ export const Canvas: React.FC<CanvasProps> = ({
   selectedElementId,
   onSelectElement,
   onUpdateElement,
+  onAddElement,
   onCommitCurrentState,
   onDeleteElement,
   onDuplicateElement,
   onBringForward,
   onSendBackward,
+  onBringToFront,
+  onSendToBack,
   zoom,
   onZoomChange,
   onOpenPhotoAdjust,
+  drawBrush,
+  copiedStyle,
+  onApplyCopiedStyle,
+  onCopyStyle,
+  showRulers = false,
+  showSafeZones = true,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -274,6 +595,17 @@ export const Canvas: React.FC<CanvasProps> = ({
     height: 0,
     rotation: 0,
   });
+
+  // Freehand Drawing State
+  const [isDrawingStroke, setIsDrawingStroke] = useState(false);
+  const [currentDrawPoints, setCurrentDrawPoints] = useState<{ x: number; y: number }[]>([]);
+
+  // Right-click Canva Context Menu
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    elementId: string;
+  } | null>(null);
 
   // Smart alignment guide lines (Canva magenta snap lines)
   const [snapGuides, setSnapGuides] = useState<{
@@ -303,7 +635,6 @@ export const Canvas: React.FC<CanvasProps> = ({
     }
   }, [dimensions, onZoomChange]);
 
-  // Auto-fit on mount and when aspect ratio changes
   useEffect(() => {
     const timer = setTimeout(() => {
       calculateAutoFit();
@@ -320,8 +651,83 @@ export const Canvas: React.FC<CanvasProps> = ({
     };
   }, [aspectRatio, calculateAutoFit]);
 
+  // Convert client mouse coordinates to artboard coordinates
+  const getCanvasPoint = (clientX: number, clientY: number) => {
+    if (!canvasRef.current) return { x: 0, y: 0 };
+    const rect = canvasRef.current.getBoundingClientRect();
+    return {
+      x: Math.round((clientX - rect.left) / zoom),
+      y: Math.round((clientY - rect.top) / zoom),
+    };
+  };
+
+  // Start freehand drawing stroke on artboard
+  const handleDrawPointerDown = (e: React.MouseEvent) => {
+    if (!drawBrush?.isEnabled) return;
+    e.stopPropagation();
+    const pt = getCanvasPoint(e.clientX, e.clientY);
+
+    // If eraser tool is active, delete top drawing element near click
+    if (drawBrush.brushType === 'eraser') {
+      const drawingElems = elements.filter((el) => el.type === 'drawing');
+      if (drawingElems.length > 0 && onDeleteElement) {
+        onSelectElement(drawingElems[drawingElems.length - 1].id);
+        setTimeout(() => onDeleteElement(), 10);
+      }
+      return;
+    }
+
+    setIsDrawingStroke(true);
+    setCurrentDrawPoints([pt]);
+  };
+
+  const handleDrawPointerMove = (e: React.MouseEvent) => {
+    if (!isDrawingStroke || !drawBrush?.isEnabled) return;
+    const pt = getCanvasPoint(e.clientX, e.clientY);
+    setCurrentDrawPoints((prev) => [...prev, pt]);
+  };
+
+  const handleDrawPointerUp = () => {
+    if (!isDrawingStroke || !drawBrush?.isEnabled) return;
+    setIsDrawingStroke(false);
+
+    if (currentDrawPoints.length > 1 && onAddElement) {
+      const d = currentDrawPoints
+        .map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`)
+        .join(' ');
+
+      const newDrawing: DrawingElement = {
+        id: `drawing-${Date.now()}`,
+        type: 'drawing',
+        x: 0,
+        y: 0,
+        width: dimensions.width,
+        height: dimensions.height,
+        rotation: 0,
+        opacity: drawBrush.opacity,
+        zIndex: (elements.length || 5) + 10,
+        viewBoxWidth: dimensions.width,
+        viewBoxHeight: dimensions.height,
+        paths: [
+          {
+            d,
+            color: drawBrush.color,
+            strokeWidth: drawBrush.strokeWidth,
+            brushType:
+              drawBrush.brushType === 'eraser' ? 'pen' : drawBrush.brushType,
+            opacity: drawBrush.opacity,
+          },
+        ],
+      };
+
+      onAddElement(newDrawing);
+    }
+    setCurrentDrawPoints([]);
+  };
+
   // Handle click on canvas background to deselect
   const handleCanvasClick = (e: React.MouseEvent) => {
+    setContextMenu(null);
     if (e.target === canvasRef.current || e.target === containerRef.current) {
       onSelectElement(null);
       setEditingTextId(null);
@@ -330,7 +736,17 @@ export const Canvas: React.FC<CanvasProps> = ({
 
   // Start element dragging (Mouse)
   const handleMouseDown = (e: React.MouseEvent, elem: CanvasItem) => {
+    if (drawBrush?.isEnabled) return;
     e.stopPropagation();
+    setContextMenu(null);
+
+    // If Copy Style Paint Roller is active, paste style onto clicked element!
+    if (copiedStyle && onApplyCopiedStyle) {
+      onApplyCopiedStyle(elem.id);
+      onSelectElement(elem.id);
+      return;
+    }
+
     onSelectElement(elem.id);
 
     if (editingTextId === elem.id || elem.locked) return;
@@ -350,6 +766,7 @@ export const Canvas: React.FC<CanvasProps> = ({
 
   // Start element dragging (Touch)
   const handleTouchStart = (e: React.TouchEvent, elem: CanvasItem) => {
+    if (drawBrush?.isEnabled) return;
     e.stopPropagation();
     onSelectElement(elem.id);
 
@@ -568,16 +985,18 @@ export const Canvas: React.FC<CanvasProps> = ({
           y: Math.round(newY),
         };
 
-        // Canva-like corner scaling for text: scale fontSize proportionally when dragging corner handles
         if (
           currentElem.type === 'text' &&
           elemInitialPos.fontSize &&
-          (resizeHandle === 'se' || resizeHandle === 'nw' || resizeHandle === 'ne' || resizeHandle === 'sw')
+          (resizeHandle === 'se' ||
+            resizeHandle === 'nw' ||
+            resizeHandle === 'ne' ||
+            resizeHandle === 'sw')
         ) {
           const scaleRatio = newWidth / Math.max(1, elemInitialPos.width);
           (updates as Partial<TextElement>).fontSize = Math.max(
             8,
-            Math.min(140, Math.round(elemInitialPos.fontSize * scaleRatio))
+            Math.min(160, Math.round(elemInitialPos.fontSize * scaleRatio))
           );
         }
 
@@ -590,7 +1009,6 @@ export const Canvas: React.FC<CanvasProps> = ({
         let angleDeg = Math.round((angleRad * 180) / Math.PI + 90);
         if (angleDeg < 0) angleDeg += 360;
 
-        // Snap rotation to 0, 45, 90, 135, 180, 225, 270, 315 within 4 degrees
         const snapAngles = [0, 45, 90, 135, 180, 225, 270, 315, 360];
         for (const snap of snapAngles) {
           if (Math.abs(angleDeg - snap) <= 4) {
@@ -721,6 +1139,7 @@ export const Canvas: React.FC<CanvasProps> = ({
       } else if (e.key === 'Escape') {
         onSelectElement(null);
         setEditingTextId(null);
+        setContextMenu(null);
       }
     };
 
@@ -746,6 +1165,13 @@ export const Canvas: React.FC<CanvasProps> = ({
 
     const flipTransform = `${elem.flipX ? ' scaleX(-1)' : ''}${elem.flipY ? ' scaleY(-1)' : ''}`;
 
+    const animClass =
+      elem.animation === 'breathe'
+        ? 'animate-pulse'
+        : elem.animation === 'neon-pulse'
+        ? 'drop-shadow-[0_0_12px_rgba(255,215,0,0.8)]'
+        : '';
+
     const baseStyle: React.CSSProperties = {
       position: 'absolute',
       left: `${elem.x}px`,
@@ -755,7 +1181,16 @@ export const Canvas: React.FC<CanvasProps> = ({
       transform: `rotate(${elem.rotation || 0}deg)`,
       opacity: elem.opacity,
       zIndex: elem.zIndex,
-      cursor: isEditing ? 'text' : isLocked ? 'default' : 'move',
+      mixBlendMode: elem.blendMode || 'normal',
+      cursor: drawBrush?.isEnabled
+        ? 'crosshair'
+        : copiedStyle
+        ? 'copy'
+        : isEditing
+        ? 'text'
+        : isLocked
+        ? 'default'
+        : 'move',
       userSelect: isEditing ? 'auto' : 'none',
       touchAction: 'none',
     };
@@ -766,16 +1201,26 @@ export const Canvas: React.FC<CanvasProps> = ({
         style={baseStyle}
         onMouseDown={(e) => handleMouseDown(e, elem)}
         onTouchStart={(e) => handleTouchStart(e, elem)}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onSelectElement(elem.id);
+          setContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            elementId: elem.id,
+          });
+        }}
         onDoubleClick={(e) => {
           e.stopPropagation();
-          if (isLocked) return;
+          if (isLocked || drawBrush?.isEnabled) return;
           if (elem.type === 'text') {
             setEditingTextId(elem.id);
           } else if (elem.type === 'image' && onOpenPhotoAdjust) {
             onOpenPhotoAdjust(elem as ImageElement);
           }
         }}
-        className={`group transition-shadow duration-75 ${
+        className={`group transition-shadow duration-75 ${animClass} ${
           isSelected
             ? isLocked
               ? 'ring-2 ring-rose-400/90 ring-offset-1 ring-offset-transparent'
@@ -801,7 +1246,10 @@ export const Canvas: React.FC<CanvasProps> = ({
                   style={{
                     fontFamily: (elem as TextElement).fontFamily,
                     fontSize: `${(elem as TextElement).fontSize}px`,
-                    textAlign: (elem as TextElement).textAlign,
+                    textAlign:
+                      (elem as TextElement).textAlign === 'justify'
+                        ? 'left'
+                        : (elem as TextElement).textAlign,
                     letterSpacing: `${(elem as TextElement).letterSpacing}px`,
                     lineHeight: (elem as TextElement).lineHeight,
                     fontWeight: (elem as TextElement).fontWeight,
@@ -809,35 +1257,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                   }}
                 />
               ) : (
-                <div
-                  className="whitespace-pre-line break-words w-full select-none"
-                  style={{
-                    fontFamily: (elem as TextElement).fontFamily,
-                    fontSize: `${(elem as TextElement).fontSize}px`,
-                    color: (elem as TextElement).color,
-                    textAlign: (elem as TextElement).textAlign,
-                    fontWeight: (elem as TextElement).fontWeight,
-                    fontStyle: (elem as TextElement).fontStyle,
-                    textDecoration: (elem as TextElement).textDecoration || 'none',
-                    letterSpacing: `${(elem as TextElement).letterSpacing}px`,
-                    lineHeight: (elem as TextElement).lineHeight,
-                    textTransform: (elem as TextElement).textTransform || 'none',
-                    backgroundColor: (elem as TextElement).backgroundColor || undefined,
-                    padding: (elem as TextElement).backgroundPadding
-                      ? `${(elem as TextElement).backgroundPadding}px`
-                      : undefined,
-                    borderRadius: (elem as TextElement).backgroundColor ? '6px' : undefined,
-                    WebkitTextStroke:
-                      (elem as TextElement).strokeWidth && (elem as TextElement).strokeWidth! > 0
-                        ? `${(elem as TextElement).strokeWidth}px ${(elem as TextElement).strokeColor || '#000'}`
-                        : undefined,
-                    textShadow: (elem as TextElement).shadow
-                      ? `${(elem as TextElement).shadow?.offsetX}px ${(elem as TextElement).shadow?.offsetY}px ${(elem as TextElement).shadow?.blur}px ${(elem as TextElement).shadow?.color}`
-                      : undefined,
-                  }}
-                >
-                  {(elem as TextElement).text}
-                </div>
+                renderTextVisual(elem as TextElement)
               )}
             </div>
           )}
@@ -854,27 +1274,40 @@ export const Canvas: React.FC<CanvasProps> = ({
           {/* Render SHAPE */}
           {elem.type === 'shape' && renderShapeVisual(elem as ShapeElement)}
 
+          {/* Render FREEHAND DRAWING */}
+          {elem.type === 'drawing' && (
+            <svg
+              viewBox={`0 0 ${(elem as DrawingElement).viewBoxWidth || dimensions.width} ${
+                (elem as DrawingElement).viewBoxHeight || dimensions.height
+              }`}
+              className="w-full h-full pointer-events-none overflow-visible"
+            >
+              {(elem as DrawingElement).paths.map((p, idx) => (
+                <path
+                  key={idx}
+                  d={p.d}
+                  fill="none"
+                  stroke={p.color}
+                  strokeWidth={p.strokeWidth}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  opacity={p.opacity}
+                  style={
+                    p.brushType === 'glow-gold'
+                      ? { filter: `drop-shadow(0 0 8px ${p.color})` }
+                      : undefined
+                  }
+                />
+              ))}
+            </svg>
+          )}
+
           {/* Render IMAGE */}
           {elem.type === 'image' && (
             <div
               className="w-full h-full overflow-hidden relative"
               style={{
-                borderRadius:
-                  (elem as ImageElement).mask === 'circle'
-                    ? '9999px'
-                    : (elem as ImageElement).mask === 'arch'
-                    ? '9999px 9999px 12px 12px'
-                    : (elem as ImageElement).mask === 'rounded'
-                    ? `${(elem as ImageElement).borderRadius || 16}px`
-                    : '0px',
-                clipPath:
-                  (elem as ImageElement).mask === 'heart'
-                    ? 'polygon(50% 15%, 80% 0%, 100% 25%, 100% 60%, 50% 95%, 0% 60%, 0% 25%, 20% 0%)'
-                    : (elem as ImageElement).mask === 'diamond'
-                    ? 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)'
-                    : (elem as ImageElement).mask === 'octagon'
-                    ? 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
-                    : undefined,
+                ...getImageMaskStyle(elem as ImageElement),
                 borderWidth: `${(elem as ImageElement).borderWidth || 0}px`,
                 borderColor: (elem as ImageElement).borderColor || '#D4AF37',
                 borderStyle: (elem as ImageElement).borderWidth ? 'solid' : 'none',
@@ -895,6 +1328,17 @@ export const Canvas: React.FC<CanvasProps> = ({
                   }deg)`,
                 }}
               />
+              {/* Optional Vignette Overlay */}
+              {((elem as ImageElement).vignette || 0) > 0 && (
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `radial-gradient(circle, transparent 40%, rgba(0,0,0,${
+                      ((elem as ImageElement).vignette || 0) / 100
+                    }) 100%)`,
+                  }}
+                />
+              )}
             </div>
           )}
 
@@ -914,82 +1358,96 @@ export const Canvas: React.FC<CanvasProps> = ({
         </div>
 
         {/* Floating Quick Action Pill Bar (Canva Style) */}
-        {isSelected && !isEditing && !isDragging && !isResizing && !isRotating && (
-          <div
-            onMouseDown={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
-            className="absolute -top-11 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 bg-neutral-900/95 border border-neutral-700 text-neutral-200 px-2 py-1 rounded-full shadow-2xl backdrop-blur-md whitespace-nowrap"
-          >
-            {elem.type === 'text' && !isLocked && (
-              <button
-                onClick={() => setEditingTextId(elem.id)}
-                className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
-                title="Edit Text (Double Click)"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {elem.type === 'image' && !isLocked && onOpenPhotoAdjust && (
-              <button
-                onClick={() => onOpenPhotoAdjust(elem as ImageElement)}
-                className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
-                title="Crop & Adjust Photo"
-              >
-                <Crop className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {onBringForward && !isLocked && (
-              <button
-                onClick={onBringForward}
-                className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
-                title="Bring Forward"
-              >
-                <ArrowUp className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {onSendBackward && !isLocked && (
-              <button
-                onClick={onSendBackward}
-                className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
-                title="Send Backward"
-              >
-                <ArrowDown className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {onDuplicateElement && !isLocked && (
-              <button
-                onClick={onDuplicateElement}
-                className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
-                title="Duplicate (Ctrl+D)"
-              >
-                <Copy className="w-3.5 h-3.5" />
-              </button>
-            )}
-            <button
-              onClick={() => onUpdateElement(elem.id, { locked: !isLocked }, true)}
-              className={`p-1 rounded-full transition ${
-                isLocked
-                  ? 'bg-rose-500/20 text-rose-300 hover:bg-rose-500/30'
-                  : 'hover:bg-neutral-800 hover:text-amber-300'
-              }`}
-              title={isLocked ? 'Unlock Element' : 'Lock Element Position'}
+        {isSelected &&
+          !isEditing &&
+          !isDragging &&
+          !isResizing &&
+          !isRotating &&
+          !drawBrush?.isEnabled && (
+            <div
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              className="absolute -top-11 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 bg-neutral-900/95 border border-neutral-700 text-neutral-200 px-2 py-1 rounded-full shadow-2xl backdrop-blur-md whitespace-nowrap"
             >
-              {isLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-            </button>
-            {onDeleteElement && !isLocked && (
+              {elem.type === 'text' && !isLocked && (
+                <button
+                  onClick={() => setEditingTextId(elem.id)}
+                  className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
+                  title="Edit Text (Double Click)"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {elem.type === 'image' && !isLocked && onOpenPhotoAdjust && (
+                <button
+                  onClick={() => onOpenPhotoAdjust(elem as ImageElement)}
+                  className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
+                  title="Edit Photo Studio"
+                >
+                  <Crop className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {onCopyStyle && (
+                <button
+                  onClick={onCopyStyle}
+                  className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
+                  title="Copy Style (Paint Roller)"
+                >
+                  <PaintRoller className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {onBringForward && !isLocked && (
+                <button
+                  onClick={onBringForward}
+                  className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
+                  title="Bring Forward"
+                >
+                  <ArrowUp className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {onSendBackward && !isLocked && (
+                <button
+                  onClick={onSendBackward}
+                  className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
+                  title="Send Backward"
+                >
+                  <ArrowDown className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {onDuplicateElement && !isLocked && (
+                <button
+                  onClick={onDuplicateElement}
+                  className="p-1 hover:bg-neutral-800 hover:text-amber-300 rounded-full transition"
+                  title="Duplicate (Ctrl+D)"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                </button>
+              )}
               <button
-                onClick={onDeleteElement}
-                className="p-1 hover:bg-rose-950/80 text-rose-400 hover:text-rose-300 rounded-full transition"
-                title="Delete (Del)"
+                onClick={() => onUpdateElement(elem.id, { locked: !isLocked }, true)}
+                className={`p-1 rounded-full transition ${
+                  isLocked
+                    ? 'bg-rose-500/20 text-rose-300 hover:bg-rose-500/30'
+                    : 'hover:bg-neutral-800 hover:text-amber-300'
+                }`}
+                title={isLocked ? 'Unlock Element' : 'Lock Element Position'}
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                {isLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
               </button>
-            )}
-          </div>
-        )}
+              {onDeleteElement && !isLocked && (
+                <button
+                  onClick={onDeleteElement}
+                  className="p-1 hover:bg-rose-950/80 text-rose-400 hover:text-rose-300 rounded-full transition"
+                  title="Delete (Del)"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          )}
 
         {/* 8 RESIZE HANDLES & ROTATION HANDLE when selected and unlocked */}
-        {isSelected && !isEditing && !isLocked && (
+        {isSelected && !isEditing && !isLocked && !drawBrush?.isEnabled && (
           <>
             {/* 4 Corner Handles */}
             <div
@@ -1084,6 +1542,26 @@ export const Canvas: React.FC<CanvasProps> = ({
         backgroundSize: '24px 24px',
       }}
     >
+      {/* Canva Pixel Rulers (Top & Left) */}
+      {showRulers && (
+        <>
+          <div className="absolute top-0 left-0 right-0 h-5 bg-neutral-900/95 border-b border-neutral-800 flex items-end px-8 text-[9px] font-mono text-neutral-500 pointer-events-none z-20 overflow-hidden">
+            {Array.from({ length: 20 }).map((_, idx) => (
+              <div key={idx} className="w-20 border-l border-neutral-700 pl-1 shrink-0">
+                {idx * 100}px
+              </div>
+            ))}
+          </div>
+          <div className="absolute top-5 bottom-0 left-0 w-5 bg-neutral-900/95 border-r border-neutral-800 flex flex-col items-end py-8 text-[9px] font-mono text-neutral-500 pointer-events-none z-20 overflow-hidden">
+            {Array.from({ length: 16 }).map((_, idx) => (
+              <div key={idx} className="h-20 border-t border-neutral-700 pt-0.5 pr-0.5 shrink-0">
+                {idx * 100}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       {/* Centered Artboard Container */}
       <div
         className="transition-transform duration-100 relative shrink-0 flex flex-col items-center justify-center"
@@ -1097,7 +1575,12 @@ export const Canvas: React.FC<CanvasProps> = ({
           ref={canvasRef}
           id="invitation-artboard"
           onClick={handleCanvasClick}
-          className="relative rounded-2xl shadow-2xl shadow-black/90 overflow-hidden border border-amber-500/40 ring-1 ring-amber-400/25"
+          onMouseDown={handleDrawPointerDown}
+          onMouseMove={handleDrawPointerMove}
+          onMouseUp={handleDrawPointerUp}
+          className={`relative rounded-2xl shadow-2xl shadow-black/90 overflow-hidden border border-amber-500/40 ring-1 ring-amber-400/25 ${
+            drawBrush?.isEnabled ? 'cursor-crosshair' : ''
+          }`}
           style={{
             width: `${dimensions.width}px`,
             height: `${dimensions.height}px`,
@@ -1134,8 +1617,30 @@ export const Canvas: React.FC<CanvasProps> = ({
             .sort((a, b) => (a.zIndex || 1) - (b.zIndex || 1))
             .map((elem) => renderElement(elem))}
 
+          {/* Live Freehand Drawing Stroke Preview */}
+          {isDrawingStroke && currentDrawPoints.length > 1 && drawBrush && (
+            <svg
+              viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+              className="absolute inset-0 w-full h-full pointer-events-none z-50"
+            >
+              <path
+                d={currentDrawPoints
+                  .map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`)
+                  .join(' ')}
+                fill="none"
+                stroke={drawBrush.color}
+                strokeWidth={drawBrush.strokeWidth}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity={drawBrush.opacity}
+              />
+            </svg>
+          )}
+
           {/* Safe-print guide indicator (subtle dashed border) */}
-          <div className="absolute inset-4 border border-dashed border-amber-500/15 pointer-events-none rounded" />
+          {showSafeZones && (
+            <div className="absolute inset-5 border border-dashed border-amber-400/25 pointer-events-none rounded" />
+          )}
         </div>
 
         {/* Dimension indicator tag below artboard */}
@@ -1149,6 +1654,102 @@ export const Canvas: React.FC<CanvasProps> = ({
           <span className="text-amber-400 font-semibold">{dimensions.ratioLabel}</span>
         </div>
       </div>
+
+      {/* Canva Right-Click Context Menu */}
+      {contextMenu && (
+        <div
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+          onClick={(e) => e.stopPropagation()}
+          className="fixed z-50 w-48 bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-1.5 text-xs text-neutral-200 space-y-0.5 animate-in fade-in zoom-in-95 duration-100"
+        >
+          {onDuplicateElement && (
+            <button
+              onClick={() => {
+                onDuplicateElement();
+                setContextMenu(null);
+              }}
+              className="w-full px-2.5 py-1.5 rounded-lg hover:bg-neutral-800 flex items-center justify-between"
+            >
+              <span className="flex items-center gap-2">
+                <Copy className="w-3.5 h-3.5 text-amber-400" /> Duplicate
+              </span>
+              <span className="text-[10px] text-neutral-500">Ctrl+D</span>
+            </button>
+          )}
+          {onCopyStyle && (
+            <button
+              onClick={() => {
+                onCopyStyle();
+                setContextMenu(null);
+              }}
+              className="w-full px-2.5 py-1.5 rounded-lg hover:bg-neutral-800 flex items-center justify-between"
+            >
+              <span className="flex items-center gap-2">
+                <PaintRoller className="w-3.5 h-3.5 text-amber-400" /> Copy Style
+              </span>
+            </button>
+          )}
+          {onBringForward && (
+            <button
+              onClick={() => {
+                onBringForward();
+                setContextMenu(null);
+              }}
+              className="w-full px-2.5 py-1.5 rounded-lg hover:bg-neutral-800 flex items-center gap-2"
+            >
+              <ArrowUp className="w-3.5 h-3.5 text-amber-400" /> Bring Forward
+            </button>
+          )}
+          {onSendBackward && (
+            <button
+              onClick={() => {
+                onSendBackward();
+                setContextMenu(null);
+              }}
+              className="w-full px-2.5 py-1.5 rounded-lg hover:bg-neutral-800 flex items-center gap-2"
+            >
+              <ArrowDown className="w-3.5 h-3.5 text-amber-400" /> Send Backward
+            </button>
+          )}
+          {onBringToFront && (
+            <button
+              onClick={() => {
+                onBringToFront();
+                setContextMenu(null);
+              }}
+              className="w-full px-2.5 py-1.5 rounded-lg hover:bg-neutral-800 flex items-center gap-2"
+            >
+              <Layers className="w-3.5 h-3.5 text-amber-400" /> Bring to Front
+            </button>
+          )}
+          {onSendToBack && (
+            <button
+              onClick={() => {
+                onSendToBack();
+                setContextMenu(null);
+              }}
+              className="w-full px-2.5 py-1.5 rounded-lg hover:bg-neutral-800 flex items-center gap-2"
+            >
+              <Layers className="w-3.5 h-3.5 text-neutral-400" /> Send to Back
+            </button>
+          )}
+          <div className="border-t border-neutral-800 my-1" />
+          {onDeleteElement && (
+            <button
+              onClick={() => {
+                onDeleteElement();
+                setContextMenu(null);
+              }}
+              className="w-full px-2.5 py-1.5 rounded-lg hover:bg-rose-950/70 text-rose-400 flex items-center justify-between"
+            >
+              <span className="flex items-center gap-2">
+                <Trash2 className="w-3.5 h-3.5" /> Delete
+              </span>
+              <span className="text-[10px] text-rose-500">Del</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Floating Quick Fit / Zoom Controls Pill */}
       {onZoomChange && (

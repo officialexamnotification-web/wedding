@@ -11,11 +11,17 @@ import {
   AspectRatioType,
   CANVAS_SIZES,
   ImageElement,
+  TextElement,
+  ShapeElement,
+  StickerElement,
+  BrandKit,
+  AudioTrack,
+  DrawBrushSettings,
 } from './types/editor';
 import { INITIAL_TEMPLATES } from './data/templates';
 import { generateQrDataUrl } from './utils/qrHelper';
 import { Navbar } from './components/Navbar';
-import { Sidebar } from './components/Sidebar';
+import { Sidebar, AUDIO_TRACKS } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
 import { Canvas } from './components/Canvas';
 import { PreviewModal } from './components/PreviewModal';
@@ -40,6 +46,19 @@ export default function App() {
     return 0.75;
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => window.innerWidth >= 1024);
+
+  // Canva Pro Studio States
+  const [showRulers, setShowRulers] = useState<boolean>(false);
+  const [showSafeZones, setShowSafeZones] = useState<boolean>(true);
+  const [copiedStyle, setCopiedStyle] = useState<Partial<CanvasItem> | null>(null);
+  const [activeAudioTrack, setActiveAudioTrack] = useState<AudioTrack>(AUDIO_TRACKS[0]);
+  const [drawBrush, setDrawBrush] = useState<DrawBrushSettings>({
+    isEnabled: false,
+    brushType: 'glow-gold',
+    color: '#FFD700',
+    strokeWidth: 4,
+    opacity: 1,
+  });
 
   // Undo / Redo history
   const [history, setHistory] = useState<CardPage[][]>([INITIAL_TEMPLATES[0].pages]);
@@ -235,6 +254,119 @@ export default function App() {
     }
   };
 
+  // Update specific page properties (duration, transition, notes)
+  const handleUpdatePage = (pageIdx: number, updates: Partial<CardPage>) => {
+    const updated = pages.map((p, idx) => (idx === pageIdx ? { ...p, ...updates } : p));
+    commitPages(updated);
+  };
+
+  // Canva Copy Style (Paint Roller)
+  const handleCopyStyle = () => {
+    if (!selectedElement) return;
+    if (selectedElement.type === 'text') {
+      const t = selectedElement as TextElement;
+      setCopiedStyle({
+        fontFamily: t.fontFamily,
+        fontSize: t.fontSize,
+        color: t.color,
+        fontWeight: t.fontWeight,
+        fontStyle: t.fontStyle,
+        letterSpacing: t.letterSpacing,
+        textTransform: t.textTransform,
+        effectType: t.effectType,
+        shadow: t.shadow,
+        strokeColor: t.strokeColor,
+        strokeWidth: t.strokeWidth,
+        backgroundColor: t.backgroundColor,
+        backgroundPadding: t.backgroundPadding,
+        opacity: t.opacity,
+      });
+    } else if (selectedElement.type === 'shape') {
+      const s = selectedElement as ShapeElement;
+      setCopiedStyle({
+        strokeColor: s.strokeColor,
+        strokeWidth: s.strokeWidth,
+        fillColor: s.fillColor,
+        borderStyle: s.borderStyle,
+        opacity: s.opacity,
+      });
+    } else if (selectedElement.type === 'sticker') {
+      const st = selectedElement as StickerElement;
+      setCopiedStyle({
+        color: st.color,
+        opacity: st.opacity,
+      });
+    } else if (selectedElement.type === 'image') {
+      const im = selectedElement as ImageElement;
+      setCopiedStyle({
+        filterPreset: im.filterPreset,
+        brightness: im.brightness,
+        contrast: im.contrast,
+        saturation: im.saturation,
+        borderWidth: im.borderWidth,
+        borderColor: im.borderColor,
+        mask: im.mask,
+        opacity: im.opacity,
+      });
+    }
+  };
+
+  const handleApplyCopiedStyle = (targetId: string) => {
+    if (!copiedStyle) return;
+    handleUpdateElement(targetId, copiedStyle, true);
+    setCopiedStyle(null);
+  };
+
+  // Canva Brand Kit 1-Click Restyle
+  const handleApplyBrandKit = (kit: BrandKit) => {
+    const bgGrad = `radial-gradient(circle at 50% 25%, ${kit.primaryColors[1]} 0%, ${kit.primaryColors[0]} 100%)`;
+    const updated = pages.map((page, idx) => {
+      if (idx !== currentPageIndex) return page;
+      return {
+        ...page,
+        backgroundType: 'gradient' as const,
+        backgroundValue: bgGrad,
+        elements: page.elements.map((el) => {
+          if (el.type === 'text') {
+            const t = el as TextElement;
+            const isLarge = t.fontSize >= 24;
+            return {
+              ...t,
+              color: isLarge ? kit.primaryColors[3] : kit.primaryColors[4] || '#FFFFFF',
+              fontFamily: isLarge ? kit.headingFont : kit.bodyFont,
+            };
+          }
+          if (el.type === 'shape') {
+            return {
+              ...(el as ShapeElement),
+              strokeColor: kit.primaryColors[2],
+            };
+          }
+          if (el.type === 'sticker') {
+            return {
+              ...(el as StickerElement),
+              color: kit.primaryColors[2],
+            };
+          }
+          return el;
+        }),
+      };
+    });
+    commitPages(updated);
+  };
+
+  // Clear all freehand drawings on current page
+  const handleClearDrawings = () => {
+    const updated = pages.map((page, idx) => {
+      if (idx !== currentPageIndex) return page;
+      return {
+        ...page,
+        elements: page.elements.filter((el) => el.type !== 'drawing'),
+      };
+    });
+    commitPages(updated);
+  };
+
   // Delete specific element by id
   const handleDeleteElementById = (id: string) => {
     const updated = pages.map((page, idx) => {
@@ -339,6 +471,8 @@ export default function App() {
       title: `Function / Day ${pages.length + 1}`,
       backgroundType: currentPage.backgroundType,
       backgroundValue: currentPage.backgroundValue,
+      duration: 4.5,
+      transition: 'fade',
       elements: [
         {
           id: `frame-${Date.now()}`,
@@ -478,6 +612,7 @@ export default function App() {
               ? videoModalTemplate.aspectRatio
               : (INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0]).aspectRatio
           }
+          activeAudioTrack={activeAudioTrack}
           onCustomizeInEditor={async (targetSlideIndex = 0) => {
             const targetTmpl = videoModalTemplate || INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0];
             await handleSelectTemplate(targetTmpl, targetSlideIndex);
@@ -554,6 +689,12 @@ export default function App() {
           onUpdateElement={handleUpdateElement}
           onDeleteElementById={handleDeleteElementById}
           onDuplicateElementById={handleDuplicateElementById}
+          drawBrush={drawBrush}
+          onUpdateDrawBrush={(updates) => setDrawBrush((prev) => ({ ...prev, ...updates }))}
+          onClearDrawings={handleClearDrawings}
+          onApplyBrandKit={handleApplyBrandKit}
+          activeAudioTrackId={activeAudioTrack.id}
+          onSelectAudioTrack={setActiveAudioTrack}
         />
 
         {/* Center Canvas Area + Contextual Properties Toolbar + Bottom Filmstrip */}
@@ -573,6 +714,14 @@ export default function App() {
             onBringToFront={handleBringToFront}
             onSendToBack={handleSendToBack}
             onOpenPhotoAdjust={() => handleOpenPhotoAdjust()}
+            copiedStyle={copiedStyle}
+            onCopyStyle={handleCopyStyle}
+            showRulers={showRulers}
+            onToggleRulers={() => setShowRulers((r) => !r)}
+            showSafeZones={showSafeZones}
+            onToggleSafeZones={() => setShowSafeZones((s) => !s)}
+            drawBrush={drawBrush}
+            onExitDrawMode={() => setDrawBrush((prev) => ({ ...prev, isEnabled: false }))}
           />
 
           <Canvas
@@ -583,14 +732,23 @@ export default function App() {
             selectedElementId={selectedElementId}
             onSelectElement={setSelectedElementId}
             onUpdateElement={handleUpdateElement}
+            onAddElement={handleAddElement}
             onCommitCurrentState={handleCommitCurrentState}
             onDeleteElement={handleDeleteElement}
             onDuplicateElement={handleDuplicateElement}
             onBringForward={handleBringForward}
             onSendBackward={handleSendBackward}
+            onBringToFront={handleBringToFront}
+            onSendToBack={handleSendToBack}
             zoom={zoom}
             onZoomChange={setZoom}
             onOpenPhotoAdjust={(elem) => handleOpenPhotoAdjust(elem)}
+            drawBrush={drawBrush}
+            copiedStyle={copiedStyle}
+            onApplyCopiedStyle={handleApplyCopiedStyle}
+            onCopyStyle={handleCopyStyle}
+            showRulers={showRulers}
+            showSafeZones={showSafeZones}
           />
 
           {/* Bottom Canva-style Multi-Page / Video Slide Filmstrip */}
@@ -603,6 +761,7 @@ export default function App() {
               onDuplicatePage={handleDuplicatePage}
               onDeletePage={handleDeletePageByIndex}
               onMovePage={handleMovePage}
+              onUpdatePage={handleUpdatePage}
               onOpenVideoPreview={() => setIsVideoModalOpen(true)}
             />
           </div>
@@ -652,6 +811,7 @@ export default function App() {
         pages={pages}
         title={title}
         aspectRatio={aspectRatio}
+        activeAudioTrack={activeAudioTrack}
         onCustomizeInEditor={(targetSlideIndex = 0) => {
           setIsVideoModalOpen(false);
           if (targetSlideIndex >= 0 && targetSlideIndex < pages.length) {

@@ -9,6 +9,7 @@ import {
   VolumeX,
   Share2,
   Palette,
+  Music,
 } from 'lucide-react';
 import {
   CardPage,
@@ -19,8 +20,16 @@ import {
   StickerElement,
   TextElement,
   QrElement,
+  DrawingElement,
+  AudioTrack,
 } from '../types/editor';
-import { getImageCssFilter, renderShapeVisual } from './Canvas';
+import {
+  getImageCssFilter,
+  getImageMaskStyle,
+  renderShapeVisual,
+  renderTextVisual,
+} from './Canvas';
+import { AUDIO_TRACKS } from './Sidebar';
 
 interface VideoCardModalProps {
   isOpen: boolean;
@@ -28,6 +37,7 @@ interface VideoCardModalProps {
   pages: CardPage[];
   title: string;
   aspectRatio: AspectRatioType;
+  activeAudioTrack?: AudioTrack;
   onCustomizeInEditor: (targetSlideIndex?: number) => void;
 }
 
@@ -37,13 +47,13 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   pages,
   title,
   aspectRatio,
+  activeAudioTrack,
   onCustomizeInEditor,
 }) => {
   if (!isOpen) return null;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [slideDuration] = useState(4500);
   const [progress, setProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
 
@@ -52,7 +62,9 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   const startTimeRef = useRef<number>(Date.now());
 
   const currentSlide = pages[currentIndex] || pages[0];
+  const slideDurationMs = (currentSlide?.duration || 4.5) * 1000;
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
+  const track = activeAudioTrack || AUDIO_TRACKS[0];
 
   const playShehnaiNote = () => {
     if (isMuted) return;
@@ -65,15 +77,15 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
         ctx.resume();
       }
 
-      const ragaFrequencies = [293.66, 329.63, 369.99, 440.0, 493.88, 587.33];
+      const ragaFrequencies = track.ragaNotes;
       const freq = ragaFrequencies[currentIndex % ragaFrequencies.length];
 
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
-      osc.type = 'triangle';
+      osc.type = track.category === 'flute' ? 'sine' : 'triangle';
       osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(freq * 1.5, ctx.currentTime + 1.2);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.4, ctx.currentTime + 1.2);
 
       gain.gain.setValueAtTime(0.08, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
@@ -109,10 +121,10 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
 
     const updateLoop = () => {
       const elapsed = Date.now() - startTimeRef.current;
-      const currentProg = Math.min(100, (elapsed / slideDuration) * 100);
+      const currentProg = Math.min(100, (elapsed / slideDurationMs) * 100);
       setProgress(currentProg);
 
-      if (elapsed >= slideDuration) {
+      if (elapsed >= slideDurationMs) {
         setCurrentIndex((prev) => (prev + 1) % pages.length);
         setProgress(0);
         startTimeRef.current = Date.now();
@@ -127,7 +139,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isPlaying, currentIndex, slideDuration, pages.length]);
+  }, [isPlaying, currentIndex, slideDurationMs, pages.length]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -166,8 +178,8 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                 <h3 className="text-sm font-bold text-neutral-100">
                   Digital Video Invitation Sequence (ई-पत्रिका वीडियो)
                 </h3>
-                <span className="text-[10px] text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30">
-                  {pages.length} Slides Sequence
+                <span className="text-[10px] text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1">
+                  <Music className="w-3 h-3" /> {track.name}
                 </span>
               </div>
               <p className="text-[11px] text-neutral-400">
@@ -276,48 +288,19 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                                 transform: `rotate(${elem.rotation || 0}deg)${flipTransform}`,
                                 opacity: elem.opacity,
                                 zIndex: elem.zIndex,
+                                mixBlendMode: elem.blendMode || 'normal',
                               }}
                             >
                               {elem.type === 'text' && (
-                                <div
-                                  className="whitespace-pre-line break-words w-full h-full flex flex-col justify-center select-none"
-                                  style={{
-                                    fontFamily: (elem as TextElement).fontFamily,
-                                    fontSize: `${(elem as TextElement).fontSize}px`,
-                                    color: (elem as TextElement).color,
-                                    textAlign: (elem as TextElement).textAlign,
-                                    fontWeight: (elem as TextElement).fontWeight,
-                                    fontStyle: (elem as TextElement).fontStyle,
-                                    textDecoration:
-                                      (elem as TextElement).textDecoration || 'none',
-                                    letterSpacing: `${(elem as TextElement).letterSpacing}px`,
-                                    lineHeight: (elem as TextElement).lineHeight,
-                                    textTransform:
-                                      (elem as TextElement).textTransform || 'none',
-                                    textShadow: (elem as TextElement).shadow
-                                      ? `${(elem as TextElement).shadow?.offsetX}px ${
-                                          (elem as TextElement).shadow?.offsetY
-                                        }px ${(elem as TextElement).shadow?.blur}px ${
-                                          (elem as TextElement).shadow?.color
-                                        }`
-                                      : undefined,
-                                  }}
-                                >
-                                  {(elem as TextElement).text}
+                                <div className="w-full h-full flex flex-col justify-center select-none">
+                                  {renderTextVisual(elem as TextElement)}
                                 </div>
                               )}
                               {elem.type === 'image' && (
                                 <div
-                                  className="w-full h-full overflow-hidden"
+                                  className="w-full h-full overflow-hidden relative"
                                   style={{
-                                    borderRadius:
-                                      (elem as ImageElement).mask === 'circle'
-                                        ? '9999px'
-                                        : (elem as ImageElement).mask === 'arch'
-                                        ? '9999px 9999px 12px 12px'
-                                        : (elem as ImageElement).mask === 'rounded'
-                                        ? `${(elem as ImageElement).borderRadius || 16}px`
-                                        : '0px',
+                                    ...getImageMaskStyle(elem as ImageElement),
                                     borderWidth: `${(elem as ImageElement).borderWidth || 0}px`,
                                     borderColor: (elem as ImageElement).borderColor || '#D4AF37',
                                     borderStyle: 'solid',
@@ -351,6 +334,27 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                                 />
                               )}
                               {elem.type === 'shape' && renderShapeVisual(elem as ShapeElement)}
+                              {elem.type === 'drawing' && (
+                                <svg
+                                  viewBox={`0 0 ${
+                                    (elem as DrawingElement).viewBoxWidth || dimensions.width
+                                  } ${(elem as DrawingElement).viewBoxHeight || dimensions.height}`}
+                                  className="w-full h-full pointer-events-none overflow-visible"
+                                >
+                                  {(elem as DrawingElement).paths.map((p, idx) => (
+                                    <path
+                                      key={idx}
+                                      d={p.d}
+                                      fill="none"
+                                      stroke={p.color}
+                                      strokeWidth={p.strokeWidth}
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      opacity={p.opacity}
+                                    />
+                                  ))}
+                                </svg>
+                              )}
                               {elem.type === 'qr' && (
                                 <div
                                   className="w-full h-full p-1.5 rounded shadow-md border border-amber-500/30 flex items-center justify-center"
@@ -392,7 +396,8 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
 
           <div className="text-center mt-3 z-20">
             <span className="text-xs font-semibold text-amber-200">
-              Slide {currentIndex + 1} of {pages.length}: {currentSlide.title}
+              Slide {currentIndex + 1} of {pages.length}: {currentSlide.title} (
+              {currentSlide.duration || 4.5}s)
             </span>
           </div>
         </div>
@@ -436,7 +441,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
               className={`p-2 rounded-lg transition ${
                 !isMuted ? 'bg-amber-500/20 text-amber-300' : 'bg-neutral-800 text-neutral-500'
               }`}
-              title={isMuted ? 'Unmute Shehnai Music' : 'Mute Music'}
+              title={isMuted ? 'Unmute Music' : 'Mute Music'}
             >
               {!isMuted ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
@@ -464,7 +469,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
 
           <button
             onClick={handleShareWhatsApp}
-            className="px-3.5 py-2 bg-[#25D366] hover:bg-[#20ba59] text-neutral-950 font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-[#25D366] hover:bg-[#20ba59] text-neutral-950 font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
           >
             <Share2 className="w-3.5 h-3.5" />
             <span>Share Video Invite</span>

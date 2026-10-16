@@ -8,6 +8,7 @@ import {
   Check,
   Copy,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import {
@@ -19,6 +20,7 @@ import {
   StickerElement,
   QrElement,
   ShapeElement,
+  DrawingElement,
 } from '../types/editor';
 
 interface ExportModalProps {
@@ -40,6 +42,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 }) => {
   const [downloading, setDownloading] = useState(false);
   const [selectedExportPage, setSelectedExportPage] = useState<number>(currentPageIndex);
+  const [exportScale, setExportScale] = useState<number>(2); // 1x, 2x Retina, 3x Ultra Print
   const [copied, setCopied] = useState(false);
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
 
@@ -50,9 +53,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   // Render any CardPage accurately into high-res offscreen HTML5 Canvas
   const generateCanvasImage = async (
     page: CardPage,
-    format: 'png' | 'jpeg' = 'png'
+    format: 'png' | 'jpeg' = 'png',
+    scaleFactor: number = exportScale
   ): Promise<string> => {
-    const scale = 2; // 2x high resolution for retina / print
+    const scale = scaleFactor;
     const canvas = document.createElement('canvas');
     canvas.width = dimensions.width * scale;
     canvas.height = dimensions.height * scale;
@@ -102,7 +106,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       ) {
         grad.addColorStop(0, '#132742');
         grad.addColorStop(1, '#040912');
-      } else if (page.backgroundValue.includes('#fffdf8') || page.backgroundValue.includes('#fbf6ec')) {
+      } else if (
+        page.backgroundValue.includes('#fffdf8') ||
+        page.backgroundValue.includes('#fbf6ec')
+      ) {
         grad.addColorStop(0, '#fffdf8');
         grad.addColorStop(1, '#f4ebd7');
       } else if (page.backgroundValue.includes('#fed876')) {
@@ -128,7 +135,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       ctx.save();
       ctx.globalAlpha = elem.opacity ?? 1;
 
-      // Apply center rotation & flip transforms
       const cx = elem.x + elem.width / 2;
       const cy = elem.y + elem.height / 2;
       ctx.translate(cx, cy);
@@ -151,8 +157,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         ctx.font = `${t.fontWeight === 'bold' ? 'bold ' : ''}${
           t.fontStyle === 'italic' ? 'italic ' : ''
         }${t.fontSize}px "${fontName}", serif`;
-        ctx.fillStyle = t.color || '#FFF';
-        ctx.textAlign = (t.textAlign as CanvasTextAlign) || 'center';
+        ctx.fillStyle = t.effectType === 'hollow' ? 'transparent' : t.color || '#FFF';
+        ctx.textAlign =
+          t.textAlign === 'justify' ? 'center' : (t.textAlign as CanvasTextAlign) || 'center';
 
         if (t.shadow) {
           ctx.shadowColor = t.shadow.color || '#000';
@@ -173,7 +180,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         const totalTextH = lines.length * lineHeight;
         const startY = t.y + (t.height - totalTextH) / 2 + t.fontSize * 0.85;
         const xPos =
-          t.textAlign === 'center'
+          t.textAlign === 'center' || t.textAlign === 'justify'
             ? t.x + t.width / 2
             : t.textAlign === 'right'
             ? t.x + t.width
@@ -181,12 +188,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
         lines.forEach((line: string, i: number) => {
           const yPos = startY + i * lineHeight;
-          if (t.strokeWidth && t.strokeWidth > 0) {
-            ctx.strokeStyle = t.strokeColor || '#000';
-            ctx.lineWidth = t.strokeWidth;
+          if ((t.strokeWidth && t.strokeWidth > 0) || t.effectType === 'hollow') {
+            ctx.strokeStyle = t.strokeColor || t.color || '#000';
+            ctx.lineWidth = t.strokeWidth || 1.5;
             ctx.strokeText(line, xPos, yPos);
           }
-          ctx.fillText(line, xPos, yPos);
+          if (t.effectType !== 'hollow') {
+            ctx.fillText(line, xPos, yPos);
+          }
         });
       }
 
@@ -204,7 +213,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           ctx.moveTo(s.x, s.y + s.height / 2);
           ctx.lineTo(s.x + s.width, s.y + s.height / 2);
           ctx.stroke();
-        } else if (s.shapeType === 'circle' || s.shapeType === 'royal-badge') {
+        } else if (
+          s.shapeType === 'circle' ||
+          s.shapeType === 'royal-badge' ||
+          s.shapeType === 'scallop-badge' ||
+          s.shapeType === 'mandala-ring'
+        ) {
           ctx.beginPath();
           ctx.ellipse(
             s.x + s.width / 2,
@@ -221,6 +235,33 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           if (s.shapeType === 'gold-frame' || s.shapeType === 'ornate-border') {
             ctx.strokeRect(s.x + 5, s.y + 5, s.width - 10, s.height - 10);
           }
+        }
+      }
+
+      // DRAWING ELEMENT
+      else if (elem.type === 'drawing') {
+        const dr = elem as DrawingElement;
+        try {
+          const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${
+            dr.viewBoxWidth || dimensions.width
+          } ${dr.viewBoxHeight || dimensions.height}">${dr.paths
+            .map(
+              (p) =>
+                `<path d="${p.d}" fill="none" stroke="${p.color}" stroke-width="${p.strokeWidth}" stroke-linecap="round" stroke-linejoin="round" opacity="${p.opacity}" />`
+            )
+            .join('')}</svg>`;
+          const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(svgBlob);
+          const img = new Image();
+          img.src = url;
+          await new Promise((res) => {
+            img.onload = res;
+            img.onerror = res;
+          });
+          ctx.drawImage(img, dr.x, dr.y, dr.width, dr.height);
+          URL.revokeObjectURL(url);
+        } catch (e) {
+          console.warn('Drawing render err', e);
         }
       }
 
@@ -296,7 +337,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     setDownloading(true);
     try {
       const targetPage = pages[selectedExportPage] || pages[0];
-      const dataUrl = await generateCanvasImage(targetPage, format);
+      const dataUrl = await generateCanvasImage(targetPage, format, exportScale);
       if (dataUrl) {
         const link = document.createElement('a');
         link.download = `${
@@ -325,7 +366,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     try {
       const allDataUrls: string[] = [];
       for (const page of pages) {
-        const url = await generateCanvasImage(page, 'png');
+        const url = await generateCanvasImage(page, 'png', exportScale);
         if (url) allDataUrls.push(url);
       }
 
@@ -380,9 +421,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <Download className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-neutral-100">Export & Share Invitation</h3>
+              <h3 className="text-sm font-bold text-neutral-100">
+                Canva Pro Export & Share Studio
+              </h3>
               <p className="text-[11px] text-neutral-400">
-                High-Resolution 2x Retina Downloads & Multi-Page PDF
+                High-Resolution 1x/2x/3x Retina Downloads & Multi-Page PDF
               </p>
             </div>
           </div>
@@ -396,23 +439,40 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
         {/* Content */}
         <div className="p-5 space-y-4">
-          {/* Page Selector if multiple pages exist */}
-          {pages.length > 1 && (
-            <div className="flex items-center justify-between bg-neutral-950 px-3 py-2 rounded-xl border border-neutral-800 text-xs">
-              <span className="text-neutral-300 font-medium">Select Page to Download:</span>
+          {/* Page & Resolution Quality Selector */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            {pages.length > 1 && (
+              <div className="flex items-center justify-between bg-neutral-950 px-3 py-2 rounded-xl border border-neutral-800">
+                <span className="text-neutral-300 font-medium">Page:</span>
+                <select
+                  value={selectedExportPage}
+                  onChange={(e) => setSelectedExportPage(parseInt(e.target.value))}
+                  className="bg-neutral-800 text-amber-300 font-semibold px-2 py-1 rounded-lg border border-neutral-700 outline-none"
+                >
+                  {pages.map((p, idx) => (
+                    <option key={p.id || idx} value={idx}>
+                      Page {idx + 1}: {p.title.slice(0, 14)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between bg-neutral-950 px-3 py-2 rounded-xl border border-neutral-800">
+              <span className="text-neutral-300 font-medium flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Quality:
+              </span>
               <select
-                value={selectedExportPage}
-                onChange={(e) => setSelectedExportPage(parseInt(e.target.value))}
-                className="bg-neutral-800 text-amber-300 font-semibold px-2.5 py-1 rounded-lg border border-neutral-700 outline-none"
+                value={exportScale}
+                onChange={(e) => setExportScale(parseInt(e.target.value))}
+                className="bg-neutral-800 text-amber-300 font-semibold px-2 py-1 rounded-lg border border-neutral-700 outline-none"
               >
-                {pages.map((p, idx) => (
-                  <option key={p.id || idx} value={idx}>
-                    Page {idx + 1}: {p.title}
-                  </option>
-                ))}
+                <option value={1}>1x Standard Web</option>
+                <option value={2}>2x Retina HD (300 DPI)</option>
+                <option value={3}>3x Ultra Print Studio</option>
               </select>
             </div>
-          )}
+          </div>
 
           {/* Download Options */}
           <div className="grid grid-cols-2 gap-3">
@@ -425,7 +485,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <div className="flex items-center justify-between">
                 <ImageIcon className="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform" />
                 <span className="text-[10px] font-mono text-amber-300 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
-                  HD 300 DPI
+                  {exportScale}x HD PNG
                 </span>
               </div>
               <div>
@@ -433,7 +493,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   {downloading ? 'Rendering...' : 'Download PNG'}
                 </div>
                 <div className="text-[11px] text-neutral-400">
-                  Crystal-clear image for printing & web
+                  Lossless print & crisp typography
                 </div>
               </div>
             </button>
@@ -447,7 +507,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <div className="flex items-center justify-between">
                 <ImageIcon className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
                 <span className="text-[10px] font-mono text-emerald-300 bg-emerald-400/10 px-1.5 py-0.5 rounded border border-emerald-400/20">
-                  Fast & Light
+                  Fast WhatsApp
                 </span>
               </div>
               <div>

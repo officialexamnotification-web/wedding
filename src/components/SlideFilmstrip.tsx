@@ -1,19 +1,22 @@
-import React, { useRef, useEffect } from 'react';
-import { 
-  Play, 
-  Plus, 
-  Copy, 
-  Trash2, 
-  ChevronLeft, 
-  ChevronRight, 
-  Film, 
-  Clock, 
-  CheckCircle2, 
+import React, { useRef, useEffect, useState } from 'react';
+import {
+  Play,
+  Plus,
+  Copy,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Film,
+  Clock,
+  CheckCircle2,
   Sparkles,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  LayoutGrid,
+  FileText,
+  X,
 } from 'lucide-react';
-import { CardPage, CanvasItem, ImageElement, TextElement } from '../types/editor';
+import { CardPage, ImageElement, TextElement, PageTransitionType } from '../types/editor';
 
 interface SlideFilmstripProps {
   pages: CardPage[];
@@ -23,6 +26,7 @@ interface SlideFilmstripProps {
   onDuplicatePage?: (index: number) => void;
   onDeletePage: (index: number) => void;
   onMovePage?: (fromIndex: number, toIndex: number) => void;
+  onUpdatePage?: (index: number, updates: Partial<CardPage>) => void;
   onOpenVideoPreview: () => void;
 }
 
@@ -34,10 +38,15 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
   onDuplicatePage,
   onDeletePage,
   onMovePage,
+  onUpdatePage,
   onOpenVideoPreview,
 }) => {
-  const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isGridViewOpen, setIsGridViewOpen] = useState(false);
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const currentPage = pages[currentPageIndex] || pages[0];
 
   // Auto-scroll the active slide into view when changed
   useEffect(() => {
@@ -62,32 +71,125 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
     return textElem?.text.slice(0, 25) || `Slide ${pages.indexOf(page) + 1}`;
   };
 
-  const totalDuration = (pages.length * 4.5).toFixed(1);
+  const totalDuration = pages
+    .reduce((sum, p) => sum + (p.duration || 4.5), 0)
+    .toFixed(1);
 
   return (
-    <div className="bg-neutral-900 border-t border-neutral-800 shadow-2xl z-20 flex flex-col select-none transition-all">
+    <div className="bg-neutral-900 border-t border-neutral-800 shadow-2xl z-20 flex flex-col select-none transition-all relative">
+      {/* Speaker / Ceremony Notes Drawer */}
+      {isNotesOpen && (
+        <div className="p-3 bg-neutral-950 border-b border-neutral-800 flex items-center gap-3 text-xs">
+          <span className="text-amber-300 font-semibold shrink-0 flex items-center gap-1">
+            <FileText className="w-3.5 h-3.5" />
+            Slide #{currentPageIndex + 1} Notes:
+          </span>
+          <input
+            type="text"
+            value={currentPage?.notes || ''}
+            onChange={(e) =>
+              onUpdatePage && onUpdatePage(currentPageIndex, { notes: e.target.value })
+            }
+            placeholder="Add event reminders, RSVP contact notes, or vendor instructions for this slide..."
+            className="flex-1 bg-neutral-900 border border-neutral-700 focus:border-amber-400 rounded-lg px-3 py-1.5 text-neutral-200 outline-none"
+          />
+          <button
+            onClick={() => setIsNotesOpen(false)}
+            className="p-1 text-neutral-400 hover:text-white rounded"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Top Header / Bar Controls */}
       <div className="px-4 py-2 border-b border-neutral-800/80 bg-neutral-950/70 flex items-center justify-between gap-3 text-xs">
-        {/* Left: Info */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-amber-400 font-semibold">
+        {/* Left: Info & Per-Slide Timing / Transition Controls */}
+        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 text-amber-400 font-semibold shrink-0">
             <Film className="w-4 h-4 text-amber-400" />
-            <span>Video Slides Timeline</span>
+            <span>Canva Pages & Video Timeline</span>
           </div>
 
-          <div className="hidden sm:flex items-center gap-2 text-neutral-400 text-[11px]">
+          <div className="hidden lg:flex items-center gap-2 text-neutral-400 text-[11px] shrink-0">
             <span className="px-2 py-0.5 rounded-full bg-neutral-800 border border-neutral-700/60 font-mono text-neutral-300">
-              {pages.length} Slides
+              {pages.length} Pages
             </span>
             <span className="flex items-center gap-1 text-neutral-400">
               <Clock className="w-3 h-3 text-amber-400/80" />
-              <span>{totalDuration}s Sequence (4.5s/slide)</span>
+              <span>Total: {totalDuration}s</span>
             </span>
           </div>
+
+          {/* Active Slide Duration & Transition Selector */}
+          {onUpdatePage && (
+            <div className="flex items-center gap-2 pl-2 border-l border-neutral-800 shrink-0">
+              <div className="flex items-center gap-1 bg-neutral-900 px-2 py-0.5 rounded-lg border border-neutral-800">
+                <Clock className="w-3 h-3 text-amber-400" />
+                <select
+                  value={currentPage?.duration || 4.5}
+                  onChange={(e) =>
+                    onUpdatePage(currentPageIndex, { duration: parseFloat(e.target.value) })
+                  }
+                  className="bg-transparent text-[11px] text-amber-300 font-mono outline-none cursor-pointer"
+                  title="Slide Duration in Video"
+                >
+                  <option value={3} className="bg-neutral-900">3.0s</option>
+                  <option value={4.5} className="bg-neutral-900">4.5s</option>
+                  <option value={6} className="bg-neutral-900">6.0s</option>
+                  <option value={8} className="bg-neutral-900">8.0s</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1 bg-neutral-900 px-2 py-0.5 rounded-lg border border-neutral-800">
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                <select
+                  value={currentPage?.transition || 'fade'}
+                  onChange={(e) =>
+                    onUpdatePage(currentPageIndex, {
+                      transition: e.target.value as PageTransitionType,
+                    })
+                  }
+                  className="bg-transparent text-[11px] text-neutral-200 outline-none cursor-pointer"
+                  title="Canva Page Transition Effect"
+                >
+                  <option value="fade" className="bg-neutral-900">Transition: Dissolve</option>
+                  <option value="slide" className="bg-neutral-900">Transition: Slide</option>
+                  <option value="zoom" className="bg-neutral-900">Transition: Royal Zoom</option>
+                  <option value="royal-curtain" className="bg-neutral-900">Transition: Palace Curtain</option>
+                  <option value="sparkle" className="bg-neutral-900">Transition: Gold Sparkle</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-2">
+        {/* Right: Actions (Notes, Grid View, Play Video, Add Slide, Collapse) */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Canva Notes Toggle */}
+          <button
+            onClick={() => setIsNotesOpen(!isNotesOpen)}
+            className={`px-2.5 py-1 rounded-lg border text-xs flex items-center gap-1 transition ${
+              isNotesOpen
+                ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold'
+                : 'bg-neutral-800 hover:bg-neutral-750 border-neutral-700 text-neutral-300'
+            }`}
+            title="Canva Ceremony Notes"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Notes</span>
+          </button>
+
+          {/* Canva Grid View Toggle */}
+          <button
+            onClick={() => setIsGridViewOpen(true)}
+            className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-750 border border-neutral-700 text-neutral-300 hover:text-amber-300 text-xs flex items-center gap-1 transition"
+            title="Canva Multi-Page Grid View"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Grid View</span>
+          </button>
+
           {/* Play Video Preview Button */}
           <button
             onClick={onOpenVideoPreview}
@@ -95,7 +197,7 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
             title="Play full animated video sequence with traditional Shehnai music"
           >
             <Play className="w-3.5 h-3.5 fill-neutral-950 text-neutral-950" />
-            <span>Play Video Preview</span>
+            <span>Play Video</span>
           </button>
 
           {/* Add Slide Button */}
@@ -122,10 +224,7 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
       {/* Slide Thumbnails Filmstrip Strip (Collapsible) */}
       {!isCollapsed && (
         <div className="p-3 bg-neutral-900/90 overflow-x-auto scrollbar-thin scrollbar-thumb-neutral-700">
-          <div 
-            ref={scrollContainerRef}
-            className="flex items-stretch gap-3 min-w-max pb-1"
-          >
+          <div ref={scrollContainerRef} className="flex items-stretch gap-3 min-w-max pb-1">
             {pages.map((page, index) => {
               const isActive = index === currentPageIndex;
               const slideImg = getSlideImage(page);
@@ -144,21 +243,28 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
                 >
                   {/* Top Slide Header Label */}
                   <div className="w-full flex items-center justify-between text-[11px] mb-1.5 px-0.5">
-                    <span className={`font-bold flex items-center gap-1 ${isActive ? 'text-amber-300' : 'text-neutral-300'}`}>
+                    <span
+                      className={`font-bold flex items-center gap-1 ${
+                        isActive ? 'text-amber-300' : 'text-neutral-300'
+                      }`}
+                    >
                       <span>Slide {index + 1}</span>
-                      {isActive && <CheckCircle2 className="w-3 h-3 text-amber-400 fill-amber-400/20" />}
+                      {isActive && (
+                        <CheckCircle2 className="w-3 h-3 text-amber-400 fill-amber-400/20" />
+                      )}
                     </span>
-                    <span className="text-[10px] text-neutral-400 font-mono">4.5s</span>
+                    <span className="text-[10px] text-neutral-400 font-mono">
+                      {page.duration || 4.5}s
+                    </span>
                   </div>
 
-                  {/* Slide Visual Card Thumbnail (9:16 aspect preview) */}
+                  {/* Slide Visual Card Thumbnail */}
                   <div
                     className="relative w-full h-36 rounded-lg overflow-hidden border border-neutral-700/80 bg-neutral-950 shadow-inner flex flex-col justify-between p-1.5"
                     style={{
                       background: page.backgroundValue || '#171717',
                     }}
                   >
-                    {/* Background / Main Photo */}
                     {slideImg ? (
                       <img
                         src={slideImg}
@@ -172,10 +278,8 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
                       </div>
                     )}
 
-                    {/* Gradient Overlay for Text Readability */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/60 pointer-events-none" />
 
-                    {/* Mini Slide Header Badge */}
                     <div className="relative z-10 flex items-center justify-between text-[9px] text-amber-200/90 font-mono">
                       <span className="bg-black/60 px-1 py-0.5 rounded backdrop-blur-xs">
                         #{index + 1}
@@ -192,7 +296,6 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
                       )}
                     </div>
 
-                    {/* Mini Slide Title at bottom */}
                     <div className="relative z-10 text-center">
                       <p className="text-[10px] font-semibold text-amber-100 truncate px-1 drop-shadow-md">
                         {page.title?.split('(')[0]?.trim() || headline}
@@ -201,7 +304,6 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
 
                     {/* Hover Quick Reorder Controls */}
                     <div className="absolute inset-0 bg-neutral-950/75 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 z-20">
-                      {/* Move Left */}
                       {onMovePage && index > 0 && (
                         <button
                           onClick={(e) => {
@@ -215,7 +317,6 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
                         </button>
                       )}
 
-                      {/* Duplicate */}
                       {onDuplicatePage && (
                         <button
                           onClick={(e) => {
@@ -229,7 +330,6 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
                         </button>
                       )}
 
-                      {/* Delete */}
                       {pages.length > 1 && (
                         <button
                           onClick={(e) => {
@@ -243,7 +343,6 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
                         </button>
                       )}
 
-                      {/* Move Right */}
                       {onMovePage && index < pages.length - 1 && (
                         <button
                           onClick={(e) => {
@@ -288,6 +387,79 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
               <span className="text-xs font-medium text-center">Add Slide</span>
               <span className="text-[10px] text-neutral-500 mt-1">New Page</span>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Canva Full-Screen Multi-Page Grid View Modal */}
+      {isGridViewOpen && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex flex-col p-6 animate-fade-in">
+          <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
+            <div className="flex items-center gap-2.5">
+              <LayoutGrid className="w-5 h-5 text-amber-400" />
+              <h3 className="text-base font-bold text-neutral-100">
+                Canva Grid View ({pages.length} Pages)
+              </h3>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onAddPage}
+                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs rounded-lg flex items-center gap-1"
+              >
+                <Plus className="w-4 h-4" /> Add Page
+              </button>
+              <button
+                onClick={() => setIsGridViewOpen(false)}
+                className="p-1.5 rounded-lg bg-neutral-800 text-neutral-300 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto py-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+            {pages.map((page, index) => {
+              const isActive = index === currentPageIndex;
+              const slideImg = getSlideImage(page);
+              const headline = getSlideHeadline(page);
+              return (
+                <div
+                  key={page.id || index}
+                  onClick={() => {
+                    onSelectPage(index);
+                    setIsGridViewOpen(false);
+                  }}
+                  className={`rounded-2xl p-3 cursor-pointer border transition flex flex-col ${
+                    isActive
+                      ? 'bg-amber-950/30 border-2 border-amber-400 shadow-xl'
+                      : 'bg-neutral-900 border-neutral-700 hover:border-amber-400/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <span className="font-bold text-amber-300">Page {index + 1}</span>
+                    <span className="text-[10px] font-mono text-neutral-400">
+                      {page.duration || 4.5}s
+                    </span>
+                  </div>
+                  <div
+                    className="h-52 rounded-xl overflow-hidden relative flex items-end p-2 border border-neutral-800"
+                    style={{ background: page.backgroundValue }}
+                  >
+                    {slideImg && (
+                      <img
+                        src={slideImg}
+                        alt=""
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30" />
+                    <span className="relative z-10 text-xs font-semibold text-amber-100 truncate w-full text-center">
+                      {page.title || headline}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

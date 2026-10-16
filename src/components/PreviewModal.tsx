@@ -9,8 +9,14 @@ import {
   StickerElement,
   TextElement,
   QrElement,
+  DrawingElement,
 } from '../types/editor';
-import { getImageCssFilter, renderShapeVisual } from './Canvas';
+import {
+  getImageCssFilter,
+  getImageMaskStyle,
+  renderShapeVisual,
+  renderTextVisual,
+} from './Canvas';
 
 interface PreviewModalProps {
   isOpen: boolean;
@@ -147,40 +153,12 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                               transform: `rotate(${elem.rotation || 0}deg)${flipTransform}`,
                               opacity: elem.opacity,
                               zIndex: elem.zIndex,
+                              mixBlendMode: elem.blendMode || 'normal',
                             }}
                           >
                             {elem.type === 'text' && (
-                              <div
-                                className="whitespace-pre-line break-words w-full h-full flex flex-col justify-center"
-                                style={{
-                                  fontFamily: (elem as TextElement).fontFamily,
-                                  fontSize: `${(elem as TextElement).fontSize}px`,
-                                  color: (elem as TextElement).color,
-                                  textAlign: (elem as TextElement).textAlign,
-                                  fontWeight: (elem as TextElement).fontWeight,
-                                  fontStyle: (elem as TextElement).fontStyle,
-                                  textDecoration: (elem as TextElement).textDecoration || 'none',
-                                  letterSpacing: `${(elem as TextElement).letterSpacing}px`,
-                                  lineHeight: (elem as TextElement).lineHeight,
-                                  textTransform: (elem as TextElement).textTransform || 'none',
-                                  backgroundColor:
-                                    (elem as TextElement).backgroundColor || undefined,
-                                  padding: (elem as TextElement).backgroundPadding
-                                    ? `${(elem as TextElement).backgroundPadding}px`
-                                    : undefined,
-                                  borderRadius: (elem as TextElement).backgroundColor
-                                    ? '6px'
-                                    : undefined,
-                                  textShadow: (elem as TextElement).shadow
-                                    ? `${(elem as TextElement).shadow?.offsetX}px ${
-                                        (elem as TextElement).shadow?.offsetY
-                                      }px ${(elem as TextElement).shadow?.blur}px ${
-                                        (elem as TextElement).shadow?.color
-                                      }`
-                                    : undefined,
-                                }}
-                              >
-                                {(elem as TextElement).text}
+                              <div className="w-full h-full flex flex-col justify-center">
+                                {renderTextVisual(elem as TextElement)}
                               </div>
                             )}
                             {elem.type === 'sticker' && (
@@ -193,24 +171,32 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                               />
                             )}
                             {elem.type === 'shape' && renderShapeVisual(elem as ShapeElement)}
+                            {elem.type === 'drawing' && (
+                              <svg
+                                viewBox={`0 0 ${
+                                  (elem as DrawingElement).viewBoxWidth || dimensions.width
+                                } ${(elem as DrawingElement).viewBoxHeight || dimensions.height}`}
+                                className="w-full h-full pointer-events-none overflow-visible"
+                              >
+                                {(elem as DrawingElement).paths.map((p, idx) => (
+                                  <path
+                                    key={idx}
+                                    d={p.d}
+                                    fill="none"
+                                    stroke={p.color}
+                                    strokeWidth={p.strokeWidth}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    opacity={p.opacity}
+                                  />
+                                ))}
+                              </svg>
+                            )}
                             {elem.type === 'image' && (
                               <div
-                                className="w-full h-full overflow-hidden"
+                                className="w-full h-full overflow-hidden relative"
                                 style={{
-                                  borderRadius:
-                                    (elem as ImageElement).mask === 'circle'
-                                      ? '9999px'
-                                      : (elem as ImageElement).mask === 'arch'
-                                      ? '9999px 9999px 12px 12px'
-                                      : (elem as ImageElement).mask === 'rounded'
-                                      ? `${(elem as ImageElement).borderRadius || 16}px`
-                                      : '0px',
-                                  clipPath:
-                                    (elem as ImageElement).mask === 'heart'
-                                      ? 'polygon(50% 15%, 80% 0%, 100% 25%, 100% 60%, 50% 95%, 0% 60%, 0% 25%, 20% 0%)'
-                                      : (elem as ImageElement).mask === 'diamond'
-                                      ? 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)'
-                                      : undefined,
+                                  ...getImageMaskStyle(elem as ImageElement),
                                   borderWidth: `${(elem as ImageElement).borderWidth || 0}px`,
                                   borderColor: (elem as ImageElement).borderColor || '#D4AF37',
                                   borderStyle: 'solid',
