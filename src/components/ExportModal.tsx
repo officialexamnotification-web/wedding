@@ -241,6 +241,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             ctx.strokeRect(s.x + 5, s.y + 5, s.width - 10, s.height - 10);
           }
         }
+        if (s.innerText) {
+          ctx.fillStyle = s.innerTextColor || '#FFF2C6';
+          ctx.font = `bold ${s.innerFontSize || 13}px Cinzel, serif`;
+          ctx.textAlign = 'center';
+          ctx.fillText(s.innerText, s.x + s.width / 2, s.y + s.height / 2 + 4);
+        }
       }
 
       // DRAWING ELEMENT
@@ -362,30 +368,131 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         ctx.strokeRect(tb.x, tb.y, tb.width, tb.height);
       }
 
-      // CHART / COUNTDOWN / BARCODE / GRID ELEMENT
-      else if (
-        elem.type === 'chart' ||
-        elem.type === 'countdown' ||
-        elem.type === 'barcode' ||
-        elem.type === 'grid'
-      ) {
-        ctx.fillStyle = 'rgba(20, 5, 10, 0.85)';
-        ctx.fillRect(elem.x, elem.y, elem.width, elem.height);
-        ctx.strokeStyle = '#D4AF37';
+      // CHART ELEMENT
+      else if (elem.type === 'chart') {
+        const ch = elem as ChartElement;
+        ctx.fillStyle = ch.backgroundColor || 'rgba(20, 5, 10, 0.85)';
+        ctx.fillRect(ch.x, ch.y, ch.width, ch.height);
+        ctx.strokeStyle = ch.borderColor || '#D4AF37';
         ctx.lineWidth = 1.5;
-        ctx.strokeRect(elem.x, elem.y, elem.width, elem.height);
-        ctx.fillStyle = '#FFEAA7';
-        ctx.font = 'bold 12px Cinzel, serif';
+        ctx.strokeRect(ch.x, ch.y, ch.width, ch.height);
+        ctx.fillStyle = ch.textColor || '#FFEAA7';
+        ctx.font = 'bold 11px Cinzel, serif';
         ctx.textAlign = 'center';
-        const label =
-          elem.type === 'chart'
-            ? (elem as ChartElement).title
-            : elem.type === 'countdown'
-            ? (elem as CountdownElement).eventLabel
-            : elem.type === 'barcode'
-            ? (elem as BarcodeElement).codeValue
-            : 'PHOTO COLLAGE GRID';
-        ctx.fillText(label, elem.x + elem.width / 2, elem.y + elem.height / 2 + 4);
+        ctx.fillText(ch.title, ch.x + ch.width / 2, ch.y + 18);
+
+        const maxVal = Math.max(1, ...ch.data.map((d) => d.value));
+        const barAreaY = ch.y + 28;
+        const barAreaH = ch.height - 46;
+        const slotW = (ch.width - 20) / Math.max(1, ch.data.length);
+        ch.data.forEach((dp, idx) => {
+          const barH = Math.max(8, (dp.value / maxVal) * barAreaH);
+          const bx = ch.x + 10 + idx * slotW + slotW * 0.15;
+          const bw = slotW * 0.7;
+          const by = barAreaY + (barAreaH - barH);
+          ctx.fillStyle = dp.color || '#D4AF37';
+          ctx.fillRect(bx, by, bw, barH);
+          ctx.fillStyle = ch.textColor || '#FFEAA7';
+          ctx.font = '9px sans-serif';
+          ctx.fillText(dp.label.slice(0, 8), bx + bw / 2, ch.y + ch.height - 6);
+        });
+      }
+
+      // COUNTDOWN ELEMENT
+      else if (elem.type === 'countdown') {
+        const cd = elem as CountdownElement;
+        ctx.fillStyle = cd.backgroundColor || 'rgba(20, 5, 10, 0.88)';
+        ctx.fillRect(cd.x, cd.y, cd.width, cd.height);
+        ctx.strokeStyle = cd.borderColor || '#D4AF37';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(cd.x, cd.y, cd.width, cd.height);
+        ctx.fillStyle = cd.accentColor || '#D4AF37';
+        ctx.font = 'bold 10px Cinzel, serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(cd.eventLabel, cd.x + cd.width / 2, cd.y + 18);
+
+        const diff = Math.max(0, new Date(cd.targetDate).getTime() - Date.now());
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const mins = Math.floor((diff / (1000 * 60)) % 60);
+        const secs = Math.floor((diff / 1000) % 60);
+        const units = [
+          { v: days, l: 'DAYS' },
+          { v: hours, l: 'HRS' },
+          { v: mins, l: 'MIN' },
+          { v: secs, l: 'SEC' },
+        ];
+        const uw = (cd.width - 16) / 4;
+        units.forEach((u, i) => {
+          const ux = cd.x + 8 + i * uw + uw / 2;
+          ctx.fillStyle = cd.textColor || '#FFEAA7';
+          ctx.font = 'bold 16px Cinzel, serif';
+          ctx.fillText(String(u.v).padStart(2, '0'), ux, cd.y + cd.height / 2 + 8);
+          ctx.fillStyle = cd.accentColor || '#D4AF37';
+          ctx.font = '8px sans-serif';
+          ctx.fillText(u.l, ux, cd.y + cd.height - 10);
+        });
+      }
+
+      // BARCODE ELEMENT
+      else if (elem.type === 'barcode') {
+        const bc = elem as BarcodeElement;
+        ctx.fillStyle = bc.backgroundColor || '#FFFDF7';
+        ctx.fillRect(bc.x, bc.y, bc.width, bc.height);
+        ctx.strokeStyle = bc.color || '#1c050a';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(bc.x, bc.y, bc.width, bc.height);
+        ctx.fillStyle = bc.color || '#1c050a';
+        ctx.font = 'bold 9px monospace';
+        ctx.textAlign = 'center';
+        if (bc.label) {
+          ctx.fillText(bc.label, bc.x + bc.width / 2, bc.y + 13);
+        }
+        const barStartX = bc.x + 12;
+        const barW = bc.width - 24;
+        for (let b = 0; b < 32; b++) {
+          if (b % 2 === 0) {
+            const w = ((b * 7) % 3) + 1.5;
+            ctx.fillRect(barStartX + (b / 32) * barW, bc.y + 18, w, bc.height - 34);
+          }
+        }
+        ctx.fillText(bc.codeValue, bc.x + bc.width / 2, bc.y + bc.height - 5);
+      }
+
+      // PHOTO COLLAGE GRID ELEMENT
+      else if (elem.type === 'grid') {
+        const gr = elem as GridElement;
+        ctx.fillStyle = 'rgba(20, 5, 10, 0.7)';
+        ctx.fillRect(gr.x, gr.y, gr.width, gr.height);
+        const cells = gr.cells || [];
+        const cols = gr.gridLayout === '3-col' ? 3 : 2;
+        const rowsCount = gr.gridLayout === '2x2' || gr.gridLayout === 'hero-top-3' ? 2 : 1;
+        const cw = gr.width / cols;
+        const ch = gr.height / rowsCount;
+        for (let i = 0; i < cells.length; i++) {
+          const cellUrl = cells[i];
+          const r = Math.floor(i / cols);
+          const c = i % cols;
+          const cxPos = gr.x + c * cw + 2;
+          const cyPos = gr.y + r * ch + 2;
+          if (cellUrl) {
+            try {
+              const gImg = new Image();
+              gImg.crossOrigin = 'anonymous';
+              gImg.src = cellUrl;
+              await new Promise((res) => {
+                gImg.onload = res;
+                gImg.onerror = res;
+              });
+              ctx.drawImage(gImg, cxPos, cyPos, cw - 4, ch - 4);
+            } catch {
+              // ignore
+            }
+          }
+          ctx.strokeStyle = gr.borderColor || '#D4AF37';
+          ctx.lineWidth = gr.borderWidth || 1.5;
+          ctx.strokeRect(cxPos, cyPos, cw - 4, ch - 4);
+        }
       }
 
       ctx.restore();

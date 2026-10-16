@@ -21,6 +21,11 @@ import {
   TextElement,
   QrElement,
   DrawingElement,
+  TableElement,
+  ChartElement,
+  GridElement,
+  CountdownElement,
+  BarcodeElement,
   AudioTrack,
 } from '../types/editor';
 import {
@@ -28,6 +33,11 @@ import {
   getImageMaskStyle,
   renderShapeVisual,
   renderTextVisual,
+  renderTableVisual,
+  renderChartVisual,
+  renderGridVisual,
+  renderCountdownVisual,
+  renderBarcodeVisual,
 } from './Canvas';
 import { AUDIO_TRACKS } from './Sidebar';
 
@@ -334,6 +344,12 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                                 />
                               )}
                               {elem.type === 'shape' && renderShapeVisual(elem as ShapeElement)}
+                              {elem.type === 'table' && renderTableVisual(elem as TableElement)}
+                              {elem.type === 'chart' && renderChartVisual(elem as ChartElement)}
+                              {elem.type === 'grid' && renderGridVisual(elem as GridElement)}
+                              {elem.type === 'countdown' &&
+                                renderCountdownVisual(elem as CountdownElement)}
+                              {elem.type === 'barcode' && renderBarcodeVisual(elem as BarcodeElement)}
                               {elem.type === 'drawing' && (
                                 <svg
                                   viewBox={`0 0 ${
