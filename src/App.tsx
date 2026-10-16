@@ -901,8 +901,8 @@ export default function App() {
   };
 
   // When user clicks template from homepage
-  const handleOpenFromHome = async (template: CardTemplate) => {
-    await handleSelectTemplate(template);
+  const handleOpenFromHome = async (template: CardTemplate, targetSlideIndex: number = 0) => {
+    await handleSelectTemplate(template, targetSlideIndex);
     setCurrentView('editor');
   };
 

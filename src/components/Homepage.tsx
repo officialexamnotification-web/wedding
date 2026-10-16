@@ -29,13 +29,42 @@ import {
   Film,
   Image as ImageIcon,
   Calendar,
-  Award as Ribbon
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Eye
 } from 'lucide-react';
-import { CardTemplate } from '../types/editor';
+import {
+  CardTemplate,
+  CardPage,
+  CANVAS_SIZES,
+  ImageElement,
+  ShapeElement,
+  StickerElement,
+  TextElement,
+  QrElement,
+  DrawingElement,
+  TableElement,
+  ChartElement,
+  GridElement,
+  CountdownElement,
+  BarcodeElement,
+} from '../types/editor';
 import { INITIAL_TEMPLATES, TEMPLATE_CATEGORIES } from '../data/templates';
+import {
+  getImageCssFilter,
+  getImageMaskStyle,
+  renderShapeVisual,
+  renderTextVisual,
+  renderTableVisual,
+  renderChartVisual,
+  renderGridVisual,
+  renderCountdownVisual,
+  renderBarcodeVisual,
+} from './Canvas';
 
 interface HomepageProps {
-  onOpenEditorWithTemplate: (template: CardTemplate) => void;
+  onOpenEditorWithTemplate: (template: CardTemplate, targetSlideIndex?: number) => void;
   onOpenBlankEditor: () => void;
   onOpenAnalysis?: () => void;
   onOpenVideoCard: (template?: CardTemplate) => void;
@@ -76,6 +105,247 @@ const RoyalLotusIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4
   </svg>
 );
 
+/* Curated Luxury Metadata for each Signature Suite */
+const SUITE_SHOWCASE_META: Record<
+  string,
+  {
+    cleanTitle: string;
+    hindiSubtitle: string;
+    editionTag: string;
+    coupleOrHighlight: string;
+    venueOrDetail: string;
+    palette: string[];
+  }
+> = {
+  'royal-lakeside-wedding': {
+    cleanTitle: 'Royal Lakeside Palace Suite',
+    hindiSubtitle: 'शाही उदयपुर लेक पैलेस विवाह निमंत्रण',
+    editionTag: '5-Slide Royal Suite',
+    coupleOrHighlight: 'Siddharth & Ananya',
+    venueOrDetail: 'The Jagmandir Island Palace, Udaipur',
+    palette: ['#5A0E1A', '#D4AF37', '#FDFBF7', '#0F1424'],
+  },
+  'golden-mandap-wedding': {
+    cleanTitle: 'Swarna Mandap Heritage Suite',
+    hindiSubtitle: 'स्वर्ण मंडप एवं राजसी विवाह समारोह',
+    editionTag: '5-Slide Royal Suite',
+    coupleOrHighlight: 'Aarav & Meera',
+    venueOrDetail: 'The Leela Palace, Udaipur',
+    palette: ['#7C1926', '#E5C158', '#FDF8EE', '#3B2314'],
+  },
+  'royal-indian-video-wedding': {
+    cleanTitle: 'Umaid Marwar Palace Vivah',
+    hindiSubtitle: 'जोधपुर राजवाड़ा शाही विवाह निमंत्रण',
+    editionTag: '5-Slide Video Suite',
+    coupleOrHighlight: 'Sumaiya & Kabir',
+    venueOrDetail: 'Umaid Bhawan Palace, Jodhpur',
+    palette: ['#260309', '#F5D77F', '#800020', '#3D1F05'],
+  },
+  'grand-mandap-royal-video-wedding': {
+    cleanTitle: 'Rajvilas Vedic Mandap Suite',
+    hindiSubtitle: 'वैदिक मंत्रोच्चार एवं सप्तपदी विवाह',
+    editionTag: '6-Slide Grand Suite',
+    coupleOrHighlight: 'Kabir & Sumaiya',
+    venueOrDetail: 'The Oberoi Rajvilas Palace, Jaipur',
+    palette: ['#380A0F', '#FFD700', '#5E0B15', '#FFF4D6'],
+  },
+  'royal-rajasthani-wedding': {
+    cleanTitle: 'Rambagh Crimson Foil Card',
+    hindiSubtitle: 'पारंपरिक राजस्थानी शुभ विवाह पत्रिका',
+    editionTag: 'Heirloom Print & Digital',
+    coupleOrHighlight: 'Vikramaditya & Ananya',
+    venueOrDetail: 'The Rambagh Palace, Jaipur',
+    palette: ['#630C1D', '#D4AF37', '#1F0107', '#FFF3A8'],
+  },
+  'emerald-luxury-wedding': {
+    cleanTitle: 'Emerald Velvet Botanical Card',
+    hindiSubtitle: 'पन्ना मखमली शाही विवाह निमंत्रण',
+    editionTag: 'Couture Portrait Edition',
+    coupleOrHighlight: 'Arjun & Meera',
+    venueOrDetail: 'Taj Falaknuma Palace, Hyderabad',
+    palette: ['#0D3826', '#D4AF37', '#02120B', '#F5E6C8'],
+  },
+  'shubh-griha-pravesh': {
+    cleanTitle: 'Manglik Kalash Griha Pravesh',
+    hindiSubtitle: 'शुभ गृह प्रवेश एवं वास्तु शांति पूजा',
+    editionTag: 'Sacred Pooja Edition',
+    coupleOrHighlight: 'Shivam Residency • Sharma Family',
+    venueOrDetail: 'Vastu Puja, Havan & Swaruchiabhoj',
+    palette: ['#451A03', '#F59E0B', '#150601', '#FEF3C7'],
+  },
+  'sangeet-mehendi-festive': {
+    cleanTitle: 'Mehfil-e-Sangeet & Mehendi',
+    hindiSubtitle: 'संगीत संध्या, ढोल एवं मेहंदी उत्सव',
+    editionTag: 'Festive Gala Card',
+    coupleOrHighlight: 'Rohan & Simran',
+    venueOrDetail: 'Mehendi Rasam & Royal Sangeet Night',
+    palette: ['#663D00', '#FFD700', '#1F1200', '#FDE68A'],
+  },
+  'first-birthday-celebration': {
+    cleanTitle: 'Celestial Star 1st Birthday',
+    hindiSubtitle: 'प्रथम जन्मदिन उत्सव निमंत्रण',
+    editionTag: 'Milestone Celebration',
+    coupleOrHighlight: "Aarav's 1st Birthday Gala",
+    venueOrDetail: 'Evening Cake, Music & Grand Feast',
+    palette: ['#1E1B4B', '#FBBF24', '#0F172A', '#E0E7FF'],
+  },
+};
+
+/* True Scaled Miniature Artwork Renderer — Renders the actual invitation slide with real fonts, shlokas, frames, and QR */
+const MiniCardArtwork: React.FC<{
+  page: CardPage;
+  aspectRatio: CardTemplate['aspectRatio'];
+  targetWidth?: number;
+}> = ({ page, aspectRatio, targetWidth = 240 }) => {
+  const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
+  const scale = targetWidth / dimensions.width;
+  const targetHeight = Math.round(dimensions.height * scale);
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-[18px] shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-amber-400/40 select-none pointer-events-none shrink-0"
+      style={{
+        width: `${targetWidth}px`,
+        height: `${targetHeight}px`,
+        background: page.backgroundValue,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <div
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          width: `${dimensions.width}px`,
+          height: `${dimensions.height}px`,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+        }}
+      >
+        {[...page.elements]
+          .filter((el) => !el.hidden)
+          .sort((a, b) => (a.zIndex || 1) - (b.zIndex || 1))
+          .map((elem) => {
+            const flipTransform = `${elem.flipX ? ' scaleX(-1)' : ''}${
+              elem.flipY ? ' scaleY(-1)' : ''
+            }`;
+            return (
+              <div
+                key={elem.id}
+                style={{
+                  position: 'absolute',
+                  left: `${elem.x}px`,
+                  top: `${elem.y}px`,
+                  width: `${elem.width}px`,
+                  height: `${elem.height}px`,
+                  transform: `rotate(${elem.rotation || 0}deg)${flipTransform}`,
+                  opacity: elem.opacity,
+                  zIndex: elem.zIndex,
+                  mixBlendMode: elem.blendMode || 'normal',
+                }}
+              >
+                {elem.type === 'text' && (
+                  <div className="w-full h-full flex flex-col justify-center">
+                    {renderTextVisual(elem as TextElement)}
+                  </div>
+                )}
+                {elem.type === 'sticker' && (
+                  <div
+                    className="w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full"
+                    style={{ color: (elem as StickerElement).color }}
+                    dangerouslySetInnerHTML={{
+                      __html: (elem as StickerElement).svgContent,
+                    }}
+                  />
+                )}
+                {elem.type === 'shape' && renderShapeVisual(elem as ShapeElement)}
+                {elem.type === 'table' && renderTableVisual(elem as TableElement)}
+                {elem.type === 'chart' && renderChartVisual(elem as ChartElement)}
+                {elem.type === 'grid' && renderGridVisual(elem as GridElement)}
+                {elem.type === 'countdown' && renderCountdownVisual(elem as CountdownElement)}
+                {elem.type === 'barcode' && renderBarcodeVisual(elem as BarcodeElement)}
+                {elem.type === 'drawing' && (
+                  <svg
+                    viewBox={`0 0 ${
+                      (elem as DrawingElement).viewBoxWidth || dimensions.width
+                    } ${(elem as DrawingElement).viewBoxHeight || dimensions.height}`}
+                    className="w-full h-full pointer-events-none overflow-visible"
+                  >
+                    {(elem as DrawingElement).paths.map((p, idx) => (
+                      <path
+                        key={idx}
+                        d={p.d}
+                        fill="none"
+                        stroke={p.color}
+                        strokeWidth={p.strokeWidth}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        opacity={p.opacity}
+                      />
+                    ))}
+                  </svg>
+                )}
+                {elem.type === 'image' && (
+                  <div
+                    className="w-full h-full overflow-hidden relative"
+                    style={{
+                      ...getImageMaskStyle(elem as ImageElement),
+                      borderWidth: `${(elem as ImageElement).borderWidth || 0}px`,
+                      borderColor: (elem as ImageElement).borderColor || '#D4AF37',
+                      borderStyle: 'solid',
+                      filter: getImageCssFilter(elem as ImageElement),
+                    }}
+                  >
+                    <img
+                      src={(elem as ImageElement).src}
+                      alt={(elem as ImageElement).alt || 'Invitation Artwork'}
+                      referrerPolicy="no-referrer"
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                      style={{
+                        transform: `scale(${
+                          (elem as ImageElement).scale || 1
+                        }) translate(${(elem as ImageElement).offsetX || 0}%, ${
+                          (elem as ImageElement).offsetY || 0
+                        }%) rotate(${(elem as ImageElement).rotationInside || 0}deg)`,
+                      }}
+                    />
+                  </div>
+                )}
+                {elem.type === 'qr' && (
+                  <div
+                    className="w-full h-full p-2 rounded-lg shadow-md border border-amber-500/50 flex flex-col items-center justify-center"
+                    style={{
+                      backgroundColor: (elem as QrElement).backgroundColor || '#FFF4D6',
+                    }}
+                  >
+                    {(elem as QrElement).dataUrl ? (
+                      <img
+                        src={(elem as QrElement).dataUrl}
+                        alt="QR Code"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <QrCode
+                        className="w-full h-full"
+                        style={{ color: (elem as QrElement).color || '#1c0308' }}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+      </div>
+      {/* Subtle 24K Gold Inner Hairline on Card */}
+      <div className="absolute inset-1.5 rounded-[13px] border border-amber-300/25 pointer-events-none z-30" />
+    </div>
+  );
+};
+
 export const Homepage: React.FC<HomepageProps> = ({
   onOpenEditorWithTemplate,
   onOpenBlankEditor,
@@ -84,6 +354,9 @@ export const Homepage: React.FC<HomepageProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [previewTemplate, setPreviewTemplate] = useState<CardTemplate | null>(null);
+  const [previewSlideIdx, setPreviewSlideIdx] = useState<number>(0);
+  // Per-card active slide index in the Signature Collection grid
+  const [activeCardSlides, setActiveCardSlides] = useState<Record<string, number>>({});
 
   // Circular Categories with real event photography & bespoke vector icons
   const HOME_CATEGORIES = [
@@ -163,10 +436,10 @@ export const Homepage: React.FC<HomepageProps> = ({
         </span>
         <span className="text-amber-500/50">•</span>
         <span className="hidden sm:inline text-neutral-300">
-          Bespoke Indian Digital Invitations & 5-Slide Video Suites • 300 DPI Print & WhatsApp 4K Ready
+          Bespoke Indian Digital Invitations & Multi-Slide Video Suites • 300 DPI Print & WhatsApp 4K Ready
         </span>
         <span className="sm:hidden text-neutral-300">
-          Royal Digital Cards & 5-Slide Video Suites
+          Royal Digital Cards & Multi-Slide Video Suites
         </span>
       </div>
 
@@ -466,170 +739,259 @@ export const Homepage: React.FC<HomepageProps> = ({
         </div>
       </section>
 
-      {/* 5. TEMPLATES CATALOG SECTION */}
-      <section id="template-catalog" className="py-12 px-4 sm:px-6 max-w-7xl mx-auto w-full flex-1">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h2 className="font-cinzel text-xl sm:text-2xl font-bold text-neutral-100 flex items-center gap-2.5">
-              <span>Signature Invitation Collection</span>
-              <span className="text-[11px] font-sans text-amber-300 font-semibold bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/25">
-                {filteredTemplates.length} Suites
+      {/* 5. SIGNATURE INVITATION COLLECTION (Bespoke Luxury Showcase) */}
+      <section id="template-catalog" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto w-full flex-1 relative">
+        {/* Subtle Ambient Gold Glow */}
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 w-2/3 h-72 bg-amber-500/5 blur-[130px] pointer-events-none rounded-full" />
+
+        {/* Editorial Section Header */}
+        <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6 mb-10 pb-6 border-b border-amber-500/20">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-cinzel font-bold tracking-[0.18em] uppercase">
+              <Crown className="w-3 h-3 text-amber-400" />
+              <span>Royal Atelier Archive • राजसी निमंत्रण संग्रह</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="font-cinzel text-2xl sm:text-4xl font-extrabold gold-text-gradient tracking-wide">
+                Signature Invitation Collection
+              </h2>
+              <span className="text-[11px] font-cinzel text-amber-200 font-bold bg-[#17090e] px-3 py-1 rounded-full border border-amber-400/35 shadow-inner">
+                {filteredTemplates.length} Couture Suites
               </span>
-            </h2>
-            <p className="text-neutral-400 text-xs mt-1">
-              Select any invitation suite to customize names, dates, shlokas & venue QR in the Studio
+            </div>
+            <p className="text-neutral-400 text-xs sm:text-sm max-w-2xl">
+              Every card below is rendered live with authentic Devanagari calligraphy, 24K gold borders, and scannable Google Maps QR. Click slide numbers on multi-page suites to inspect each ceremony card.
             </p>
           </div>
 
-          {/* Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
-            {TEMPLATE_CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`text-xs whitespace-nowrap px-3.5 py-1.5 rounded-full font-medium transition cursor-pointer ${
-                  selectedCategory === cat.id
-                    ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-neutral-950 font-bold shadow-md shadow-amber-500/15'
-                    : 'bg-neutral-900 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 border border-neutral-800'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+          {/* Luxury Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
+            {TEMPLATE_CATEGORIES.map((cat) => {
+              const active = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`text-xs whitespace-nowrap px-4 py-2 rounded-full font-medium transition-all cursor-pointer ${
+                    active
+                      ? 'bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-neutral-950 font-bold shadow-lg shadow-amber-500/20 scale-[1.02]'
+                      : 'bg-[#12090d] text-neutral-400 hover:text-amber-200 hover:border-amber-500/40 border border-neutral-800/90'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Template Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Luxury Showcase Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredTemplates.map((template) => {
-            const firstPage = template.pages[0];
-            const hasQr = Boolean(firstPage?.elements.find((e) => e.type === 'qr'));
+            const meta = SUITE_SHOWCASE_META[template.id] || {
+              cleanTitle: template.title.replace(/\s*\(.*?\)\s*/g, ''),
+              hindiSubtitle: 'शाही डिजिटल निमंत्रण पत्र',
+              editionTag: template.pages.length > 1 ? `${template.pages.length}-Slide Video Suite` : 'Royal Card Suite',
+              coupleOrHighlight: template.title,
+              venueOrDetail: 'Custom Venue & Google Maps QR',
+              palette: ['#5A0E1A', '#D4AF37', '#FDFBF7'],
+            };
+
+            const activeSlideIdx = activeCardSlides[template.id] || 0;
+            const currentPage = template.pages[activeSlideIdx] || template.pages[0];
+            const isMultiSlide = template.pages.length > 1;
+            const hasQr = template.pages.some((p) => p.elements.some((e) => e.type === 'qr'));
+
             return (
               <div
                 key={template.id}
-                className="group relative rounded-2xl overflow-hidden bg-neutral-900/90 border border-neutral-800/90 hover:border-amber-500/60 shadow-lg hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-300 flex flex-col justify-between [content-visibility:auto] [contain-intrinsic-size:320px]"
+                className="group relative rounded-3xl bg-gradient-to-b from-[#150a0f] via-[#0e080b] to-[#0a0608] border border-amber-500/25 hover:border-amber-400/75 shadow-[0_15px_45px_rgba(0,0,0,0.75)] hover:shadow-[0_20px_60px_rgba(212,175,55,0.14)] transition-all duration-300 flex flex-col justify-between overflow-hidden"
               >
-                {/* Visual Card Banner */}
-                <div
-                  className="h-80 w-full p-4 relative overflow-hidden flex flex-col justify-between"
-                  style={{ background: firstPage?.backgroundValue }}
-                >
-                  {/* Real Image Preview if present */}
-                  {(() => {
-                    const img = firstPage?.elements.find((e) => e.type === 'image') as any;
-                    if (!img?.src) return null;
-                    return (
-                      <>
-                        <img
-                          src={img.src}
-                          alt={template.title}
-                          referrerPolicy="no-referrer"
-                          loading="lazy"
-                          decoding="async"
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/60 pointer-events-none" />
-                      </>
-                    );
-                  })()}
+                {/* Top Ornamental Gold Shimmer Hairline */}
+                <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-400/70 to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
 
-                  {/* Subtle gold foil frame */}
-                  <div className="absolute inset-3 border border-amber-400/30 rounded-xl pointer-events-none z-10" />
+                {/* 1. CARD STAGE: Velvet Pedestal + Real Scaled Miniature Invitation */}
+                <div className="relative pt-5 pb-4 px-5 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_35%,rgba(212,175,55,0.12)_0%,rgba(20,7,11,0.6)_60%,rgba(8,6,8,0.95)_100%)] border-b border-amber-500/15">
+                  {/* Decorative Corner Filigree Accents */}
+                  <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-amber-400/35 rounded-tl pointer-events-none" />
+                  <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-amber-400/35 rounded-tr pointer-events-none" />
 
-                  {/* Top tags */}
-                  <div className="flex items-center justify-between text-[11px] text-amber-200 relative z-10">
-                    <span className="px-2.5 py-0.5 rounded-full bg-black/50 backdrop-blur-xs border border-amber-400/25 capitalize font-medium text-[10px]">
-                      {template.aspectRatio.replace('-', ' ')}
+                  {/* Top Floating Suite Badges */}
+                  <div className="w-full flex items-center justify-between mb-3.5 relative z-20 px-1">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-md border border-amber-400/30 text-[10px] font-cinzel font-bold text-amber-200 tracking-wider uppercase">
+                      <Crown className="w-2.5 h-2.5 text-amber-400" />
+                      <span>{meta.editionTag}</span>
                     </span>
-                    {template.pages.length > 1 ? (
-                      <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-neutral-950 font-extrabold flex items-center gap-1 shadow-md text-[10px]">
-                        <Play className="w-2.5 h-2.5 fill-neutral-950" />
-                        {template.pages.length}-Slide Video Suite
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/30 font-semibold text-[10px]">
-                        Complimentary • HD
+
+                    {hasQr && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-[10px] font-medium text-amber-300">
+                        <QrCode className="w-2.5 h-2.5 text-amber-400" />
+                        <span>Live GPS QR</span>
                       </span>
                     )}
                   </div>
 
-                  {/* Center Card Title preview */}
-                  <div className="text-center relative z-10 px-4">
-                    <div className="font-playfair text-xs italic text-amber-200/90 tracking-widest uppercase">
-                      {firstPage?.elements.find((e) => e.type === 'text')?.text || template.title}
-                    </div>
-                    <div className="font-rozha text-2xl text-amber-100 font-bold mt-1">
-                      {template.title}
-                    </div>
-                    <div className="inline-flex items-center gap-1.5 text-[11px] text-amber-200/90 mt-2 px-2.5 py-0.5 rounded-full bg-black/40 border border-amber-400/20">
-                      {hasQr ? (
-                        <>
-                          <MapPin className="w-3 h-3 text-amber-400" />
-                          <span>Google Maps QR Included</span>
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-3 h-3 text-amber-400" />
-                          <span>Royal Foil Layout</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  {/* Authentic Miniature Invitation Frame */}
+                  <div
+                    onClick={() => onOpenEditorWithTemplate(template, activeSlideIdx)}
+                    className="relative cursor-pointer group/card transition-transform duration-500 group-hover:scale-[1.03]"
+                    title="Click to personalize this slide in Studio"
+                  >
+                    <MiniCardArtwork
+                      page={currentPage}
+                      aspectRatio={template.aspectRatio}
+                      targetWidth={216}
+                    />
 
-                  {/* Bottom QR hint */}
-                  <div className="flex items-center justify-between text-[10px] text-amber-200/80 relative z-10">
-                    <span>{template.pages.length} {template.pages.length > 1 ? 'Slides Sequence' : 'Page Card'}</span>
-                    <span>Instant Customization</span>
-                  </div>
-
-                  {/* Hover Actions Overlay */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute inset-0 bg-neutral-950/85 backdrop-blur-xs flex flex-col items-center justify-center gap-2.5 p-6 z-20">
-                    {template.pages.length > 1 && (
+                    {/* Subtle Hover Action Pill Over Artwork */}
+                    <div className="opacity-0 group-hover/card:opacity-100 transition-all duration-200 absolute inset-0 rounded-[18px] bg-black/55 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2 p-4 z-40 pointer-events-auto">
                       <button
-                        onClick={() => onOpenVideoCard(template)}
-                        className="w-full py-2.5 px-4 bg-gradient-to-r from-yellow-400 via-amber-300 to-amber-500 hover:brightness-110 text-neutral-950 font-extrabold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenEditorWithTemplate(template, activeSlideIdx);
+                        }}
+                        className="w-full py-2.5 px-3.5 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 text-neutral-950 font-bold text-xs rounded-xl shadow-xl flex items-center justify-center gap-1.5 cursor-pointer hover:brightness-110"
                       >
-                        <Play className="w-3.5 h-3.5 fill-neutral-950" />
-                        Play Video Suite ({template.pages.length} Slides)
+                        <Palette className="w-3.5 h-3.5" />
+                        <span>Edit Slide #{activeSlideIdx + 1}</span>
                       </button>
-                    )}
-                    <button
-                      onClick={() => onOpenEditorWithTemplate(template)}
-                      className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-neutral-950 font-bold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <Palette className="w-4 h-4" />
-                      Customize in Studio
-                    </button>
-                    <button
-                      onClick={() => setPreviewTemplate(template)}
-                      className="w-full py-2 px-4 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-medium text-xs rounded-xl border border-neutral-700 transition flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <Maximize2 className="w-3.5 h-3.5" />
-                      Quick Preview
-                    </button>
+
+                      {isMultiSlide && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenVideoCard(template);
+                          }}
+                          className="w-full py-2 px-3.5 bg-neutral-900/95 hover:bg-neutral-800 text-amber-200 border border-amber-400/50 font-semibold text-xs rounded-xl shadow-lg flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Play className="w-3 h-3 fill-amber-300 text-amber-300" />
+                          <span>Play {template.pages.length}-Slide Video</span>
+                        </button>
+                      )}
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPreviewTemplate(template);
+                          setPreviewSlideIdx(activeSlideIdx);
+                        }}
+                        className="w-full py-1.5 px-3 bg-white/10 hover:bg-white/20 text-white text-[11px] font-medium rounded-lg flex items-center justify-center gap-1 cursor-pointer"
+                      >
+                        <Eye className="w-3 h-3" />
+                        <span>Inspect Full Size</span>
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Interactive Multi-Slide Story Switcher Bar (for 5-Slide & 6-Slide Suites) */}
+                  {isMultiSlide ? (
+                    <div className="mt-4 flex items-center gap-1.5 bg-black/60 px-2.5 py-1.5 rounded-full border border-amber-500/25 relative z-20">
+                      <span className="text-[9px] font-cinzel text-amber-300/90 uppercase tracking-wider mr-1">
+                        Slides:
+                      </span>
+                      {template.pages.map((pg, sIdx) => {
+                        const isSlideActive = activeSlideIdx === sIdx;
+                        return (
+                          <button
+                            key={pg.id || sIdx}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveCardSlides((prev) => ({
+                                ...prev,
+                                [template.id]: sIdx,
+                              }));
+                            }}
+                            className={`w-6 h-6 rounded-full text-[10px] font-bold transition-all cursor-pointer flex items-center justify-center ${
+                              isSlideActive
+                                ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-neutral-950 shadow-md shadow-amber-500/30 scale-105'
+                                : 'bg-neutral-900/90 text-neutral-400 hover:text-amber-200 border border-neutral-700/70'
+                            }`}
+                            title={pg.title || `Slide ${sIdx + 1}`}
+                          >
+                            {sIdx + 1}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="mt-4 flex items-center gap-2 px-3 py-1 rounded-full bg-black/45 border border-neutral-800 text-[10px] text-neutral-400">
+                      <RoyalLotusIcon className="w-3 h-3 text-amber-400" />
+                      <span>Single-Page Heirloom Card • 300 DPI Ready</span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Card Meta Footer */}
-                <div className="p-4 bg-neutral-900 border-t border-neutral-800/80 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-bold text-neutral-100 group-hover:text-amber-300 transition-colors">
-                      {template.title}
+                {/* 2. EDITORIAL METADATA & DIRECT ACTION BAR */}
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4 bg-gradient-to-b from-[#12090d] to-[#0b0609]">
+                  <div className="space-y-2">
+                    {/* Hindi Subtitle + Palette Swatches */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-tiro text-amber-400/95 tracking-wide">
+                        {meta.hindiSubtitle}
+                      </span>
+                      <div className="flex items-center -space-x-1" title="Suite Color Palette">
+                        {meta.palette.map((hex, pIdx) => (
+                          <span
+                            key={pIdx}
+                            className="w-3.5 h-3.5 rounded-full border border-amber-200/40 shadow-xs"
+                            style={{ backgroundColor: hex }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Clean Royal Suite Title */}
+                    <h3
+                      onClick={() => onOpenEditorWithTemplate(template, activeSlideIdx)}
+                      className="font-cinzel text-base sm:text-lg font-bold text-amber-100 group-hover:text-amber-300 transition-colors cursor-pointer leading-snug"
+                    >
+                      {meta.cleanTitle}
                     </h3>
-                    <div className="flex items-center gap-2 text-[11px] text-neutral-400 mt-0.5">
-                      <span className="capitalize">{template.category.replace('-', ' ')}</span>
-                      <span>•</span>
-                      <span>{template.tags.slice(0, 2).join(', ')}</span>
+
+                    {/* Featured Couple / Venue Info */}
+                    <div className="flex items-center justify-between text-[11px] text-neutral-400 pt-0.5">
+                      <span className="font-medium text-neutral-300 truncate">
+                        {meta.coupleOrHighlight}
+                      </span>
+                      <span className="text-amber-500/40 mx-1.5">•</span>
+                      <span className="truncate text-neutral-400">
+                        {meta.venueOrDetail}
+                      </span>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => onOpenEditorWithTemplate(template)}
-                    className="p-2 bg-neutral-800 hover:bg-amber-500 text-neutral-300 hover:text-neutral-950 rounded-xl transition-colors cursor-pointer"
-                    title="Customize in Studio"
-                  >
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                  {/* Direct Action Buttons Row (Always Visible & Effortless) */}
+                  <div className="pt-3 border-t border-neutral-800/80 flex items-center gap-2">
+                    <button
+                      onClick={() => onOpenEditorWithTemplate(template, activeSlideIdx)}
+                      className="flex-1 py-2.5 px-3.5 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-110 text-neutral-950 font-bold text-xs rounded-xl shadow-md shadow-amber-500/15 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Palette className="w-3.5 h-3.5" />
+                      <span>Customize Suite</span>
+                    </button>
+
+                    {isMultiSlide && (
+                      <button
+                        onClick={() => onOpenVideoCard(template)}
+                        className="py-2.5 px-3 bg-neutral-900 hover:bg-neutral-800 text-amber-200 border border-amber-500/35 hover:border-amber-400 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        title="Play Animated Video Invitation with Shehnai Music"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                        <span>Video</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setPreviewTemplate(template);
+                        setPreviewSlideIdx(activeSlideIdx);
+                      }}
+                      className="p-2.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-amber-200 border border-neutral-800 hover:border-amber-500/30 rounded-xl transition cursor-pointer"
+                      title="Full-Size Suite Preview"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -1098,7 +1460,7 @@ export const Homepage: React.FC<HomepageProps> = ({
               </div>
             </div>
 
-            {/* Column 2: Royal Collections (2.5 -> 2 cols) */}
+            {/* Column 2: Royal Collections (2 cols) */}
             <div className="lg:col-span-2 space-y-4">
               <h4 className="font-cinzel text-[11px] font-bold text-amber-200 uppercase tracking-[0.18em] flex items-center gap-2">
                 <Crown className="w-3.5 h-3.5 text-amber-400" />
@@ -1266,60 +1628,110 @@ export const Homepage: React.FC<HomepageProps> = ({
         </div>
       </footer>
 
-      {/* QUICK PREVIEW MODAL */}
+      {/* FULL-FIDELITY MULTI-SLIDE QUICK PREVIEW MODAL */}
       {previewTemplate && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-neutral-900 border border-amber-500/30 rounded-3xl p-6 max-w-md w-full text-center space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
-              <h3 className="font-cinzel text-base font-bold text-amber-100">{previewTemplate.title}</h3>
-              <span className="text-[10px] text-amber-300 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25 uppercase tracking-wider">
-                {previewTemplate.pages.length} {previewTemplate.pages.length > 1 ? 'Slides' : 'Page'}
-              </span>
-            </div>
-            <div 
-              className="h-80 w-full rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden border border-amber-500/30"
-              style={{ background: previewTemplate.pages[0].backgroundValue }}
-            >
-              {(() => {
-                const img = previewTemplate.pages[0]?.elements.find((e) => e.type === 'image') as any;
-                if (!img?.src) return null;
-                return (
-                  <>
-                    <img
-                      src={img.src}
-                      alt={previewTemplate.title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/60 pointer-events-none" />
-                  </>
-                );
-              })()}
-              <div className="text-xs text-amber-200 font-cinzel tracking-widest uppercase relative z-10">
-                || श्री गणेशाय नमः ||
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="bg-[#11080c] border border-amber-500/35 rounded-3xl p-6 max-w-lg w-full text-center space-y-5 shadow-2xl relative">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3.5">
+              <div className="text-left">
+                <span className="text-[10px] font-tiro text-amber-400 block">
+                  {SUITE_SHOWCASE_META[previewTemplate.id]?.hindiSubtitle || 'शाही निमंत्रण'}
+                </span>
+                <h3 className="font-cinzel text-base sm:text-lg font-bold text-amber-100">
+                  {SUITE_SHOWCASE_META[previewTemplate.id]?.cleanTitle || previewTemplate.title}
+                </h3>
               </div>
-              <div className="font-rozha text-2xl text-amber-100 relative z-10">
-                {previewTemplate.title}
-              </div>
-              <div className="text-xs text-neutral-300 relative z-10">
-                Ready to personalize with your family names, dates & venue QR
-              </div>
-            </div>
-            <div className="flex gap-2.5 pt-1">
               <button
                 onClick={() => setPreviewTemplate(null)}
-                className="flex-1 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-xl text-xs font-medium cursor-pointer transition"
+                className="p-1.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 cursor-pointer"
               >
-                Close
+                <X className="w-4 h-4" />
               </button>
+            </div>
+
+            {/* Center Full Scaled Card */}
+            <div className="flex flex-col items-center justify-center py-2 relative">
+              <MiniCardArtwork
+                page={previewTemplate.pages[previewSlideIdx] || previewTemplate.pages[0]}
+                aspectRatio={previewTemplate.aspectRatio}
+                targetWidth={260}
+              />
+
+              {/* Prev / Next Slide Controls if Multi-Slide */}
+              {previewTemplate.pages.length > 1 && (
+                <>
+                  <button
+                    onClick={() =>
+                      setPreviewSlideIdx((prev) =>
+                        prev > 0 ? prev - 1 : previewTemplate.pages.length - 1
+                      )
+                    }
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/75 hover:bg-amber-500 text-amber-200 hover:text-neutral-950 border border-amber-400/40 flex items-center justify-center transition cursor-pointer shadow-lg"
+                    title="Previous Slide"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() =>
+                      setPreviewSlideIdx((prev) =>
+                        prev < previewTemplate.pages.length - 1 ? prev + 1 : 0
+                      )
+                    }
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/75 hover:bg-amber-500 text-amber-200 hover:text-neutral-950 border border-amber-400/40 flex items-center justify-center transition cursor-pointer shadow-lg"
+                    title="Next Slide"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Slide Selector Pills in Modal */}
+            {previewTemplate.pages.length > 1 && (
+              <div className="flex items-center justify-center gap-1.5">
+                {previewTemplate.pages.map((pg, idx) => (
+                  <button
+                    key={pg.id || idx}
+                    onClick={() => setPreviewSlideIdx(idx)}
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition cursor-pointer ${
+                      previewSlideIdx === idx
+                        ? 'bg-amber-400 text-neutral-950'
+                        : 'bg-neutral-900 text-neutral-400 hover:text-amber-200 border border-neutral-800'
+                    }`}
+                  >
+                    Slide {idx + 1}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Modal Footer Actions */}
+            <div className="flex gap-2.5 pt-2 border-t border-neutral-800/80">
+              {previewTemplate.pages.length > 1 && (
+                <button
+                  onClick={() => {
+                    const t = previewTemplate;
+                    setPreviewTemplate(null);
+                    onOpenVideoCard(t);
+                  }}
+                  className="flex-1 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-amber-200 border border-amber-500/40 font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer transition"
+                >
+                  <Play className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                  <span>Play Video Suite</span>
+                </button>
+              )}
               <button
                 onClick={() => {
                   const t = previewTemplate;
+                  const sIdx = previewSlideIdx;
                   setPreviewTemplate(null);
-                  onOpenEditorWithTemplate(t);
+                  onOpenEditorWithTemplate(t, sIdx);
                 }}
-                className="flex-1 py-2.5 bg-gradient-to-r from-amber-400 to-yellow-500 hover:brightness-110 text-neutral-950 font-bold rounded-xl text-xs cursor-pointer transition"
+                className="flex-1 py-2.5 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 hover:brightness-110 text-neutral-950 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-lg shadow-amber-500/20"
               >
-                Customize in Studio →
+                <Palette className="w-3.5 h-3.5" />
+                <span>Customize Slide #{previewSlideIdx + 1} →</span>
               </button>
             </div>
           </div>
