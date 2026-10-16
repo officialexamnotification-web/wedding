@@ -93,8 +93,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Back to Home Button */}
         <button
           onClick={onBackToHome}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs text-neutral-300 hover:text-amber-300 transition"
-          title="Return to InvitationBazaar Homepage"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs text-neutral-300 hover:text-amber-300 transition cursor-pointer"
+          title="Return to Nimantran Royale Homepage"
         >
           <span>←</span>
           <span className="hidden sm:inline font-medium">Home</span>
@@ -102,8 +102,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Brand Icon */}
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg gold-shimmer flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
-            <span className="font-cinzel text-neutral-950 font-black text-sm sm:text-base">नि</span>
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg p-[1px] bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-lg shadow-amber-500/20 shrink-0">
+            <div className="w-full h-full rounded-[7px] bg-[#14070b] flex items-center justify-center">
+              <span className="font-cinzel gold-text-gradient font-black text-sm sm:text-base">नि</span>
+            </div>
           </div>
         </div>
 
@@ -126,7 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="fixed inset-0 z-40" onClick={() => setShowFileMenu(false)} />
               <div className="absolute left-0 top-full mt-1.5 w-60 bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-1.5 z-50 text-xs space-y-0.5">
                 <div className="px-2.5 py-1.5 border-b border-neutral-800 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                  Canva File & View Settings
+                  Studio File & View Settings
                 </div>
                 <button
                   onClick={() => {
@@ -202,7 +204,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="hidden sm:flex px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/15 to-purple-500/15 hover:from-amber-500/25 hover:to-purple-500/25 border border-amber-500/30 text-xs font-semibold text-amber-200 items-center gap-1.5 transition"
           >
             <Wand2 className="w-3.5 h-3.5 text-amber-400" />
-            <span>Magic Switch™</span>
+            <span>Format & Translate</span>
             <ChevronDown className="w-3 h-3 text-amber-300" />
           </button>
 
@@ -211,7 +213,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="fixed inset-0 z-40" onClick={() => setShowMagicSwitch(false)} />
               <div className="absolute left-0 top-full mt-1.5 w-72 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-3 z-50 text-xs space-y-3">
                 <div className="font-bold text-amber-300 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5 flex items-center justify-between">
-                  <span>Canva Magic Switch & Resize</span>
+                  <span>Suite Format & Language</span>
                   <Maximize2 className="w-3.5 h-3.5 text-amber-400" />
                 </div>
 
@@ -258,18 +260,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onTranslateCard('hindi');
                           setShowMagicSwitch(false);
                         }}
-                        className="py-1.5 px-2 rounded bg-neutral-800 hover:bg-amber-500 hover:text-neutral-950 font-semibold text-amber-200 border border-neutral-700 transition"
+                        className="py-1.5 px-2 rounded bg-neutral-800 hover:bg-amber-500 hover:text-neutral-950 font-semibold text-amber-200 border border-neutral-700 transition cursor-pointer"
                       >
-                        🇮🇳 शुद्ध हिंदी
+                        शुद्ध हिंदी
                       </button>
                       <button
                         onClick={() => {
                           onTranslateCard('english');
                           setShowMagicSwitch(false);
                         }}
-                        className="py-1.5 px-2 rounded bg-neutral-800 hover:bg-amber-500 hover:text-neutral-950 font-semibold text-amber-200 border border-neutral-700 transition"
+                        className="py-1.5 px-2 rounded bg-neutral-800 hover:bg-amber-500 hover:text-neutral-950 font-semibold text-amber-200 border border-neutral-700 transition cursor-pointer"
                       >
-                        🇬🇧 English
+                        English
                       </button>
                     </div>
                   </div>
@@ -417,10 +419,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setShowMoreMenu(false);
                   onOpenAiCopy();
                 }}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-800 text-left transition text-purple-300"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-800 text-left transition text-amber-200"
               >
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                <span>Canva Magic Write™ (AI)</span>
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>Royal Wording & Shloka Assistant</span>
               </button>
 
               <button
@@ -431,18 +433,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-800 text-left transition"
               >
                 <Eye className="w-4 h-4 text-neutral-400" />
-                <span>Full Card Preview</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setShowMoreMenu(false);
-                  onOpenAnalysis();
-                }}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-800 text-left transition text-neutral-300"
-              >
-                <Info className="w-4 h-4 text-amber-400" />
-                <span>Editor Architecture Audit</span>
+                <span>Full Invitation Preview</span>
               </button>
             </div>
           )}

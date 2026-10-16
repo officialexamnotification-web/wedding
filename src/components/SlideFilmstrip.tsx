@@ -106,9 +106,9 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
       <div className="px-4 py-2 border-b border-neutral-800/80 bg-neutral-950/70 flex items-center justify-between gap-3 text-xs">
         {/* Left: Info & Per-Slide Timing / Transition Controls */}
         <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1.5 text-amber-400 font-semibold shrink-0">
+          <div className="flex items-center gap-1.5 text-amber-300 font-cinzel font-bold shrink-0 tracking-wide">
             <Film className="w-4 h-4 text-amber-400" />
-            <span>Canva Pages & Video Timeline</span>
+            <span>Suite Pages & Video Timeline</span>
           </div>
 
           <div className="hidden lg:flex items-center gap-2 text-neutral-400 text-[11px] shrink-0">
