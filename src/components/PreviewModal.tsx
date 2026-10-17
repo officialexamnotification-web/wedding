@@ -15,6 +15,13 @@ import {
   GridElement,
   CountdownElement,
   BarcodeElement,
+  FrameElement,
+  FormElement,
+  SheetElement,
+  MockupElement,
+  Model3DElement,
+  VideoElement,
+  AudioElement,
 } from '../types/editor';
 import {
   getElementAnimationStyle,
@@ -27,6 +34,13 @@ import {
   renderGridVisual,
   renderCountdownVisual,
   renderBarcodeVisual,
+  renderFrameVisual,
+  renderFormVisual,
+  renderSheetVisual,
+  renderMockupVisual,
+  renderModel3DVisual,
+  renderVideoVisual,
+  renderAudioVisual,
 } from './Canvas';
 
 interface PreviewModalProps {
@@ -189,6 +203,13 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                             {elem.type === 'countdown' &&
                               renderCountdownVisual(elem as CountdownElement)}
                             {elem.type === 'barcode' && renderBarcodeVisual(elem as BarcodeElement)}
+                            {elem.type === 'frame' && renderFrameVisual(elem as FrameElement)}
+                            {elem.type === 'form' && renderFormVisual(elem as FormElement)}
+                            {elem.type === 'sheet' && renderSheetVisual(elem as SheetElement)}
+                            {elem.type === 'mockup' && renderMockupVisual(elem as MockupElement)}
+                            {elem.type === 'model3d' && renderModel3DVisual(elem as Model3DElement)}
+                            {elem.type === 'video' && renderVideoVisual(elem as VideoElement)}
+                            {elem.type === 'audio' && renderAudioVisual(elem as AudioElement)}
                             {elem.type === 'drawing' && (
                               <svg
                                 viewBox={`0 0 ${

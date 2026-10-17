@@ -63,6 +63,13 @@ import {
   GridElement,
   CountdownElement,
   BarcodeElement,
+  FrameElement,
+  FormElement,
+  SheetElement,
+  MockupElement,
+  Model3DElement,
+  VideoElement,
+  AudioElement,
   CardPage,
   AspectRatioType,
   CANVAS_SIZES,
@@ -84,6 +91,7 @@ import {
   getImageMaskStyle,
   renderShapeVisual,
 } from './Canvas';
+import { ElementsLibraryPanel } from './ElementsLibraryPanel';
 
 export type SidebarTab =
   | 'templates'
@@ -1110,6 +1118,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (el.type === 'grid') return `Collage Grid (${(el as GridElement).gridLayout})`;
     if (el.type === 'countdown') return `Countdown: ${(el as CountdownElement).eventLabel}`;
     if (el.type === 'barcode') return `Entry Pass: ${(el as BarcodeElement).codeValue}`;
+    if (el.type === 'frame') return `Frame: ${(el as FrameElement).frameName}`;
+    if (el.type === 'form') return `Form: ${(el as FormElement).formTitle}`;
+    if (el.type === 'sheet') return `Sheet: ${(el as SheetElement).sheetTitle}`;
+    if (el.type === 'mockup') return `Mockup: ${(el as MockupElement).mockupName}`;
+    if (el.type === 'model3d') return `3D: ${(el as Model3DElement).modelName}`;
+    if (el.type === 'video') return `Video: ${(el as VideoElement).videoName}`;
+    if (el.type === 'audio') return `Audio: ${(el as AudioElement).trackName}`;
     return 'Element';
   };
 
@@ -1416,9 +1431,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* ================= 2. ELEMENTS (SHAPES, FRAMES, GRIDS, TABLES, CHARTS, STICKERS) TAB ================= */}
+        {/* ================= 2. ELEMENTS (CANVA 14-CATEGORY 1,117-ITEM LIBRARY + CLASSIC PRESETS) TAB ================= */}
         {activeTab === 'elements' && (
           <div className="space-y-4">
+            <ElementsLibraryPanel
+              dimensions={dimensions}
+              onAddElement={onAddElement}
+              selectedElement={
+                currentPage?.elements.find((e) => e.id === selectedElementId) || null
+              }
+              onUpdateElement={(id, updates) => onUpdateElement(id, updates, true)}
+            />
+
+            <details className="group pt-2 border-t border-neutral-800">
+              <summary className="cursor-pointer list-none flex items-center justify-between text-xs font-bold text-amber-300/90 py-1.5 px-2.5 rounded-lg bg-neutral-900/80 border border-neutral-800 hover:border-amber-500/40">
+                <span>Quick Classic Royal Presets & Countdown</span>
+                <ChevronDown className="w-3.5 h-3.5 transition-transform group-open:rotate-180" />
+              </summary>
+              <div className="space-y-4 pt-3">
             {/* Category Pills inside Elements */}
             <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar">
               {(
@@ -1756,6 +1786,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               </div>
             )}
+              </div>
+            </details>
           </div>
         )}
 

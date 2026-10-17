@@ -60,6 +60,13 @@ import {
   GridElement,
   CountdownElement,
   BarcodeElement,
+  FrameElement,
+  FormElement,
+  SheetElement,
+  MockupElement,
+  Model3DElement,
+  VideoElement,
+  AudioElement,
   AspectRatioType,
   CANVAS_SIZES,
   PhotoFilterPreset,
@@ -402,6 +409,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const isGrid = selectedElement.type === 'grid';
   const isCountdown = selectedElement.type === 'countdown';
   const isBarcode = selectedElement.type === 'barcode';
+  const isFrame = selectedElement.type === 'frame';
+  const isForm = selectedElement.type === 'form';
+  const isSheet = selectedElement.type === 'sheet';
+  const isMockup = selectedElement.type === 'mockup';
+  const isModel3d = selectedElement.type === 'model3d';
+  const isVideo = selectedElement.type === 'video';
+  const isAudio = selectedElement.type === 'audio';
   const isLocked = !!selectedElement.locked;
 
   // Apply Canva Text Effect Preset
@@ -1235,6 +1249,195 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <Barcode className="w-3.5 h-3.5" />
             <span>Edit Entry Pass Barcode</span>
           </button>
+        )}
+
+        {/* ================= FRAME CONTROLS (ZOOM / PAN / BORDER) ================= */}
+        {isFrame && (
+          <div className="flex items-center gap-2 bg-neutral-800/90 px-2.5 py-1 rounded-lg border border-neutral-700 shrink-0">
+            <span className="text-[11px] font-semibold text-amber-300">Frame Zoom:</span>
+            <input
+              type="range"
+              min="0.8"
+              max="2.5"
+              step="0.05"
+              disabled={isLocked}
+              value={(selectedElement as FrameElement).imageScale || 1}
+              onChange={(e) =>
+                onUpdateElement({ imageScale: parseFloat(e.target.value) }, true)
+              }
+              className="w-16 accent-amber-400"
+            />
+            <span className="text-[11px] text-neutral-400">Border:</span>
+            <input
+              type="color"
+              disabled={isLocked}
+              value={(selectedElement as FrameElement).borderColor || "#D4AF37"}
+              onChange={(e) => onUpdateElement({ borderColor: e.target.value }, true)}
+              className="w-5 h-5 rounded border-0 bg-transparent cursor-pointer"
+            />
+          </div>
+        )}
+
+        {/* ================= FORM CONTROLS ================= */}
+        {isForm && (
+          <div className="flex items-center gap-2 bg-neutral-800/90 px-2.5 py-1 rounded-lg border border-neutral-700 shrink-0">
+            <input
+              type="text"
+              disabled={isLocked}
+              value={(selectedElement as FormElement).formTitle || ""}
+              onChange={(e) => onUpdateElement({ formTitle: e.target.value }, true)}
+              placeholder="Form Title"
+              className="bg-neutral-900 border border-neutral-700 rounded px-2 py-0.5 text-xs text-amber-200 w-36"
+            />
+            <input
+              type="text"
+              disabled={isLocked}
+              value={(selectedElement as FormElement).submitLabel || ""}
+              onChange={(e) => onUpdateElement({ submitLabel: e.target.value }, true)}
+              placeholder="Button Label"
+              className="bg-neutral-900 border border-neutral-700 rounded px-2 py-0.5 text-xs text-neutral-200 w-28"
+            />
+            <input
+              type="color"
+              disabled={isLocked}
+              value={(selectedElement as FormElement).accentColor || "#D4AF37"}
+              onChange={(e) => onUpdateElement({ accentColor: e.target.value }, true)}
+              className="w-5 h-5 rounded border-0 bg-transparent cursor-pointer"
+              title="Form Accent Color"
+            />
+          </div>
+        )}
+
+        {/* ================= SHEET / SPREADSHEET CONTROLS ================= */}
+        {isSheet && (
+          <div className="flex items-center gap-2 bg-neutral-800/90 px-2.5 py-1 rounded-lg border border-neutral-700 shrink-0">
+            <input
+              type="text"
+              disabled={isLocked}
+              value={(selectedElement as SheetElement).sheetTitle || ""}
+              onChange={(e) => onUpdateElement({ sheetTitle: e.target.value }, true)}
+              className="bg-neutral-900 border border-neutral-700 rounded px-2 py-0.5 text-xs text-amber-200 w-40"
+            />
+            <button
+              type="button"
+              disabled={isLocked}
+              onClick={() => {
+                const sh = selectedElement as SheetElement;
+                const nextCells = [
+                  ...sh.cells.slice(0, -1),
+                  ["New Expense Item", 5, 5, "Added"],
+                  sh.cells[sh.cells.length - 1] || ["Total", "=SUM(B1:B4)", "=SUM(C1:C4)", "Done"],
+                ];
+                onUpdateElement({ cells: nextCells, height: sh.height + 28 }, true);
+              }}
+              className="px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded border border-amber-500/40 text-[11px] font-semibold"
+            >
+              + Row
+            </button>
+          </div>
+        )}
+
+        {/* ================= MOCKUP CONTROLS ================= */}
+        {isMockup && (
+          <div className="flex items-center gap-2 bg-neutral-800/90 px-2.5 py-1 rounded-lg border border-neutral-700 shrink-0">
+            <span className="text-[11px] text-amber-300 font-semibold">Caption:</span>
+            <input
+              type="text"
+              disabled={isLocked}
+              value={(selectedElement as MockupElement).caption || ""}
+              onChange={(e) => onUpdateElement({ caption: e.target.value }, true)}
+              className="bg-neutral-900 border border-neutral-700 rounded px-2 py-0.5 text-xs text-neutral-200 w-36"
+            />
+          </div>
+        )}
+
+        {/* ================= 3D MODEL CONTROLS (PITCH / YAW / ROLL / COLOR) ================= */}
+        {isModel3d && (
+          <div className="flex items-center gap-2 bg-neutral-800/90 px-2.5 py-1 rounded-lg border border-neutral-700 shrink-0">
+            <span className="text-[10px] text-amber-300 font-bold">3D Tilt X:</span>
+            <input
+              type="range"
+              min="-60"
+              max="60"
+              disabled={isLocked}
+              value={(selectedElement as Model3DElement).pitch || 15}
+              onChange={(e) => onUpdateElement({ pitch: parseInt(e.target.value, 10) }, true)}
+              className="w-14 accent-amber-400"
+            />
+            <span className="text-[10px] text-amber-300 font-bold">Spin Y:</span>
+            <input
+              type="range"
+              min="-180"
+              max="180"
+              disabled={isLocked}
+              value={(selectedElement as Model3DElement).yaw || 25}
+              onChange={(e) => onUpdateElement({ yaw: parseInt(e.target.value, 10) }, true)}
+              className="w-14 accent-amber-400"
+            />
+            <input
+              type="color"
+              disabled={isLocked}
+              value={(selectedElement as Model3DElement).primaryColor || "#F59E0B"}
+              onChange={(e) => onUpdateElement({ primaryColor: e.target.value }, true)}
+              className="w-5 h-5 rounded border-0 bg-transparent cursor-pointer"
+              title="3D Shader Primary Color"
+            />
+          </div>
+        )}
+
+        {/* ================= VIDEO LOOP CONTROLS ================= */}
+        {isVideo && (
+          <div className="flex items-center gap-2 bg-neutral-800/90 px-2.5 py-1 rounded-lg border border-neutral-700 shrink-0">
+            <button
+              type="button"
+              disabled={isLocked}
+              onClick={() =>
+                onUpdateElement(
+                  { isPlaying: !(selectedElement as VideoElement).isPlaying },
+                  true
+                )
+              }
+              className="px-2 py-0.5 rounded bg-amber-500 text-neutral-950 font-bold text-[11px]"
+            >
+              {(selectedElement as VideoElement).isPlaying ? "Pause Loop" : "Play Loop"}
+            </button>
+            <span className="text-[10px] text-neutral-300">Speed:</span>
+            <input
+              type="range"
+              min="0.5"
+              max="2.5"
+              step="0.25"
+              disabled={isLocked}
+              value={(selectedElement as VideoElement).playbackSpeed || 1}
+              onChange={(e) =>
+                onUpdateElement({ playbackSpeed: parseFloat(e.target.value) }, true)
+              }
+              className="w-14 accent-amber-400"
+            />
+          </div>
+        )}
+
+        {/* ================= AUDIO BADGE CONTROLS ================= */}
+        {isAudio && (
+          <div className="flex items-center gap-2 bg-neutral-800/90 px-2.5 py-1 rounded-lg border border-neutral-700 shrink-0">
+            <span className="text-[11px] text-amber-300 font-semibold">Tempo BPM:</span>
+            <input
+              type="number"
+              min="60"
+              max="200"
+              disabled={isLocked}
+              value={(selectedElement as AudioElement).tempo || 110}
+              onChange={(e) => onUpdateElement({ tempo: parseInt(e.target.value, 10) || 110 }, true)}
+              className="w-14 bg-neutral-900 border border-neutral-700 rounded px-1.5 py-0.5 text-xs text-amber-200"
+            />
+            <input
+              type="color"
+              disabled={isLocked}
+              value={(selectedElement as AudioElement).accentColor || "#D4AF37"}
+              onChange={(e) => onUpdateElement({ accentColor: e.target.value }, true)}
+              className="w-5 h-5 rounded border-0 bg-transparent cursor-pointer"
+            />
+          </div>
         )}
 
         {/* ================= UNIVERSAL FLIP & DROP SHADOW ================= */}

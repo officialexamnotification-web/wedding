@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+      <path d="M 8 50 C 26 34, 38 66, 50 50 C 62 34, 74 66, 92 50" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M 22 50 C 30 34, 42 36, 50 50 C 58 64, 70 66, 78 50" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/>
+      <polygon points="50,38 56,50 50,62 44,50" fill="currentColor"/>
+      <circle cx="12" cy="50" r="3" fill="currentColor"/>
+      <circle cx="88" cy="50" r="3" fill="currentColor"/>
+    </svg>

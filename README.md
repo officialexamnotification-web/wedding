@@ -1,41 +1,32 @@
-# Nimantran — Canva-Style Digital Invitation Maker & Card Editor
+# Nimantran — Canva-Style Digital Invitation Maker & 1,117-Item Elements Studio
 
 ## Project Overview
 - **Name**: Nimantran (`webapp`)
-- **Goal**: A full-featured Canva-style Digital Invitation Card & Video Story Studio tailored for Indian celebrations (Shubh Vivah, Sangeet & Haldi, Griha Pravesh, Birthday, Baby Shower, Anniversary).
-- **Live Preview URL**: https://3000-ihy5ml1a7ajx7hvfa0izo-0e616f0a.sandbox.novita.ai
+- **Goal**: A full-featured Canva-style Digital Invitation Card & Video Story Studio tailored for Indian celebrations (Shubh Vivah, Sangeet & Haldi, Griha Pravesh, Birthday, Baby Shower, Anniversary) with a complete 14-Category, 1,117-Item Elements Library.
+- **Live Preview URL**: https://3000-i2be56uxohi90io2qsfx0-2b54fc91.sandbox.novita.ai
+- **GitHub Repository**: https://github.com/officialexamnotification-web/wedding
 
-## Completed Canva-Level Customization Features
-1. **Interactive Canvas Artboard (`src/components/Canvas.tsx`)**:
-   - **8-Point Resize Handles**: 4 corner handles (`nw`, `ne`, `sw`, `se`) + 4 edge pill handles (`n`, `s`, `e`, `w`). Corner resizing on text boxes proportionally scales font size just like Canva.
-   - **360° Rotation Handle**: Dedicated bottom rotation handle with live degree readout and automatic angle snapping (`0°`, `45°`, `90°`, `135°`, `180°`, `225°`, `270°`, `315°`).
-   - **Smart Magnetic Alignment Guides**: Pink/magenta snap lines when aligning elements to the artboard center, safe print margins, or other elements on the canvas.
-   - **Floating Quick Action Pill Bar**: Appears directly above any selected element for instant Text Edit, Photo Crop, Bring Forward, Send Backward, Duplicate, Lock/Unlock, and Delete.
-   - **Keyboard Shortcuts**: `Ctrl+Z` / `Ctrl+Y` (Undo/Redo across all drags, resizes, rotations, and edits), `Ctrl+D` (Duplicate), `Delete` / `Backspace` (Delete), `Arrow Keys` (1px nudge, `Shift+Arrow` for 10px nudge).
+## Completed Canva Elements Library & Studio Features
+1. **Canva-Inspired Elements Library (`src/components/ElementsLibraryPanel.tsx` — 1,117 Items across 14 Categories)**:
+   - **Universal Search with Synonym Expansion**: Search across all 1,117 items with Hindi/English wedding synonyms (`kalash`, `ganesh`, `lotus`, `arch`, `jharokha`, `shehnai`, `rsvp`, `budget`, `3d`, etc.), Favorites starring, and Recently Used strip.
+   - **Shapes (`312` static SVG files across `15` subcategories)**: Lines & Dividers (20), Rectangles & Cards (18), Basic & Polygons (32), Directional Arrows (28), Speech Bubbles (20), Clouds & Thoughts (14), Hearts & Romance (16), Stars & Sparkles (22), Bursts & Seals (16), Banners & Ribbons (24), Organic Blobs (20), Gears & Cogs (14), Mandalas & Square Stars (12), Botanical Leaves & Drops (28), Abstract & Architectural (28).
+   - **Graphics (`360` static SVG files across `7` subcategories)**: Flowers & Botanicals (60), Celebration & Wedding (60), Royal Feast & Drinks (50), Bride, Groom & Guests Avatars (50), Venue, Map & Icons (50), Ornate Doodles & Flourishes (40), Royal Seals & Badges (50).
+   - **Photos (`120` curated royal wedding & palace items)**: One-click insert or automatic drop into any selected Frame, Collage Grid, or Device Mockup.
+   - **Videos (`40` animated motion loops)**: Gold dust shimmer, rose petal shower, Udaipur golden bokeh, spinning Surya mandala, sacred Aarti diya flame, fireworks, and temple rays with Play/Pause and speed controls.
+   - **Audio (`60` WebAudio synthesized raga & percussion tracks)**: Live preview in sidebar + insertable Audio Soundtrack Badges with customizable BPM tempo and accent color.
+   - **Frames (`30` SVG clipping masks)**: Royal Mughal Jharokha Arch, Udaipur Scalloped Arch, Sacred Lotus, Polaroid, Heart Locket, Postage Stamp, and Starburst Seals with Frame Zoom & Border controls.
+   - **Grids (`20` multi-slot photo collages)**: 2-split, 3-trio, 4-quad, 5-bento, 6-gallery, 7-mosaic, and 9-grid Instagram layouts.
+   - **Charts (`20` live data visualizations)**: Vertical Bar, Horizontal Bar, Donut, Pie, Line, Progress Rings, Area, Radar, Stacked Bar, Gauge, and Funnel charts.
+   - **Forms (`20` interactive RSVP & guest poll cards)**: Live clickable RSVP counter, customizable Form Title, Button Label, and Accent Color.
+   - **Sheets (`15` live formula spreadsheets)**: Supports live `=SUM(...)`, `=AVERAGE(...)`, `=MAX(...)`, `=MIN(...)` formula evaluation and `+ Row` expansion.
+   - **Tables (`20` editable schedules & menus)**: Shubh Vivah 3-day itineraries, Chhappan Bhog menus, VIP seating charts, and Vedic Muhurat tables.
+   - **Animations (`40` motion presets)**: Entrance, Emphasis, Motion, and Celebration presets that apply directly to the selected element or insert an animated celebratory badge.
+   - **Mockups (`30` device & stationery frames)**: iPhone 16 Pro Gold, Royal Wax-Seal Envelope, Arch Print Card, Palatial Welcome Easel Standee, MacBook Pro, and iPad Guestbook.
+   - **3D Objects (`30` interactive 360° models)**: 3D Sacred Kalash, Padma Lotus, Solitaire Ring, Maharaja Crown, Brass Diya, Temple Pillar, and Kohinoor Diamond with live 3D Tilt X (`pitch`), Spin Y (`yaw`), and shader color controls.
 
-2. **Contextual Properties Toolbar (`src/components/Toolbar.tsx`)**:
-   - **Typography Controls**: 10 Indian & luxury fonts (Rozha One, Tiro Devanagari, Kalam, Cinzel, Playfair Display, Alex Brush, Great Vibes, etc.), font size stepper, color picker & royal swatches, Bold, Italic, Underline, Case converter (`UPPERCASE` / `Capitalize` / `lowercase`).
-   - **Spacing & Canva Text Effects Popovers**: Letter spacing, line height, Drop Shadow, Royal Gold Glow, Text Outline Stroke, and Velvet Pill Box background.
-   - **Photo Studio Controls**: Filter presets (Normal, Royal Warm, Vivid Gold, Vintage, Rose Glow, Studio HD, B&W Classic), in-frame zoom slider, 6 mask shapes (Royal Arch, Circle, Heart, Diamond, Rounded, Rectangle), and gold border thickness/color.
-   - **Shape & Motif Controls**: Shape type switcher, stroke color, stroke width, fill color picker, and motif color customization.
-   - **Live QR Code Editor**: Edit QR destination URL, ink color, and card background directly from the toolbar with instant regeneration.
-   - **Position & Align Popover**: One-click Align to Page (`Left`, `Center`, `Right`, `Top`, `Middle`, `Bottom`), Layer Ordering (`Bring to Front`, `Bring Forward`, `Send Backward`, `Send to Back`), Flip Horizontal/Vertical, Opacity slider, Lock/Unlock, and exact `W`, `H`, `Rotate°` inputs.
-
-3. **Canva Left Studio Dock & Expandable Drawer (`src/components/Sidebar.tsx`)**:
-   - **Templates Tab**: Multi-page Royal Wedding, Griha Pravesh, Haldi/Sangeet, Birthday & Anniversary templates.
-   - **Elements Tab**: Canva Shapes, Frames & Borders (Royal Corner Frame, Double Ornate Border, Diamond Divider Line, Jharokha Arch Frame, Royal Seal Medallion, Event Pill Banner, Gold Card Box, Sacred Circle Ring) + searchable Indian SVG Motifs (Lord Ganesha, Manglik Kalash, Om, Swastik, Dhol, Shehnai, Lotus, Mandap).
-   - **Text & AI Copy Tab**: Quick heading/calligraphy/body presets, traditional Sanskrit Shlokas, and AI Wedding Copywriter.
-   - **Uploads & Photos Tab**: Upload custom photos from device (`FileReader` data URLs) with session gallery, paste image URL, or pick from royal stock photos.
-   - **Bg / Paper Tab**: Custom solid color picker, custom full-card background image upload, and curated velvet/parchment gradients.
-   - **Layers Tab**: Full Canva layer stack manager with Bring Up, Send Down, Lock/Unlock, Show/Hide (`Eye`/`EyeOff`), Duplicate, and Delete per layer.
-   - **QR Code Tab**: Google Maps venue QR, WhatsApp RSVP QR, and Website link QR generator.
-   - **Slides Tab & Bottom Filmstrip (`src/components/SlideFilmstrip.tsx`)**: Multi-page slide management (Add, Duplicate, Reorder, Delete) and 5-slide Animated Video Story Player with Web Audio API Shehnai synthesizer.
-
-4. **High-Resolution Export & Print (`src/components/ExportModal.tsx`)**:
-   - 2x Retina PNG & JPG download for any selected page (accurately rendering backgrounds, text shadows/strokes, SVG stickers, shapes/frames, QR codes, and masked photos).
-   - Multi-page PDF print/save for the entire card sequence.
-   - Direct WhatsApp invitation message sharing.
+2. **Interactive Canvas Artboard, Toolbar, Preview, Video Player & High-Res Export**:
+   - Full rendering, selection, dragging, 8-point resizing, 360° rotation, layer ordering, and contextual Toolbar editing for all 18 `ElementType` variants in `Canvas.tsx`, `Toolbar.tsx`, `PreviewModal.tsx`, `VideoCardModal.tsx`, and `ExportModal.tsx`.
 
 ## Tech Stack & Deployment
-- **Frontend**: React 19 + TypeScript + Tailwind CSS v4 + Lucide Icons + HTML5 Canvas Export + QRCode
+- **Frontend**: React 19 + TypeScript + Tailwind CSS v4 + Lucide Icons + HTML5 Canvas Export + WebAudio Synthesizer
 - **Runtime**: Cloudflare Pages (`wrangler pages dev dist` managed by PM2 on port 3000)

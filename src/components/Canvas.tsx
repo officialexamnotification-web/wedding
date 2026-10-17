@@ -12,6 +12,13 @@ import {
   GridElement,
   CountdownElement,
   BarcodeElement,
+  FrameElement,
+  FormElement,
+  SheetElement,
+  MockupElement,
+  Model3DElement,
+  VideoElement,
+  AudioElement,
   AspectRatioType,
   CANVAS_SIZES,
   PhotoFilterPreset,
@@ -219,6 +226,25 @@ export function renderShapeVisual(elem: ShapeElement) {
       {innerTextOverlay}
     </div>
   );
+
+  // If element came from the 312 Shapes SVG Library, render its custom SVG markup directly with dynamic fill/stroke
+  if (elem.svgPath && elem.svgPath.includes("<svg")) {
+    const colorToUse =
+      fillColor && fillColor !== "transparent" ? fillColor : strokeColor || "#D4AF37";
+    return wrapWithInnerText(
+      <div
+        className="w-full h-full flex items-center justify-center pointer-events-none [&>svg]:w-full [&>svg]:h-full"
+        style={{
+          color: colorToUse,
+          filter:
+            strokeWidth > 2 && strokeColor
+              ? `drop-shadow(0 0 ${Math.min(4, strokeWidth - 1)}px ${strokeColor})`
+              : undefined,
+        }}
+        dangerouslySetInnerHTML={{ __html: elem.svgPath }}
+      />
+    );
+  }
 
   switch (elem.shapeType) {
     case 'gold-frame':
@@ -881,10 +907,15 @@ export function renderChartVisual(ch: ChartElement) {
       {(ch.chartType === 'donut' ||
         ch.chartType === 'pie' ||
         ch.chartType === 'progress-rings' ||
-        ch.chartType === 'line') && (
+        ch.chartType === 'line' ||
+        ch.chartType === 'area' ||
+        ch.chartType === 'radar' ||
+        ch.chartType === 'stacked-bar' ||
+        ch.chartType === 'gauge' ||
+        ch.chartType === 'funnel') && (
         <div className="flex-1 flex items-center justify-around gap-2 py-1">
           <svg viewBox="0 0 100 100" className="w-24 h-24 shrink-0">
-            {ch.chartType === 'line' ? (
+            {(ch.chartType === 'line' || ch.chartType === 'area') ? (
               <>
                 <polyline
                   fill="none"
@@ -955,6 +986,40 @@ export function renderGridVisual(gr: GridElement) {
   const gap = `${gr.gap ?? 6}px`;
   const radius = `${gr.borderRadius ?? 12}px`;
   const border = `${gr.borderWidth ?? 2}px solid ${gr.borderColor || '#D4AF37'}`;
+
+  if (gr.slots && gr.slots.length > 0) {
+    return (
+      <div
+        className="w-full h-full relative overflow-hidden pointer-events-none"
+        style={{
+          borderRadius: radius,
+          border,
+          backgroundColor: gr.backgroundColor || "rgba(212,175,55,0.08)",
+        }}
+      >
+        {gr.slots.map((slot, i) => (
+          <div
+            key={i}
+            className="absolute overflow-hidden shadow-inner"
+            style={{
+              left: `${slot.x}%`,
+              top: `${slot.y}%`,
+              width: `${slot.w}%`,
+              height: `${slot.h}%`,
+              borderRadius: `${slot.rx ?? gr.borderRadius ?? 6}px`,
+              border: `1px solid ${gr.borderColor || "#D4AF37"}66`,
+            }}
+          >
+            <img
+              src={imgs[i % Math.max(1, imgs.length)] || "/images/wedding_couple_1791965341379.jpg"}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (gr.gridLayout === '2-col') {
     return (
@@ -1148,6 +1213,400 @@ export function renderBarcodeVisual(bc: BarcodeElement) {
           {bc.codeValue}
         </div>
       )}
+    </div>
+  );
+}
+
+
+// Evaluate spreadsheet formula cells (=SUM(B1:B4), =AVERAGE(B1:B4))
+export function evaluateSheetCell(raw: string | number, allCells: (string | number)[][]): string | number {
+  if (typeof raw === "number") return raw;
+  const str = String(raw).trim();
+  if (!str.startsWith("=")) return str;
+  const upper = str.toUpperCase();
+  const match = upper.match(/^=(SUM|AVERAGE|AVG|MAX|MIN)\(([A-Z])(\d+):([A-Z])(\d+)\)$/);
+  if (!match) return str;
+  const fn = match[1];
+  const colIdx = match[2].charCodeAt(0) - 65;
+  const startRow = Math.max(0, parseInt(match[3], 10) - 1);
+  const endRow = Math.min(allCells.length - 1, parseInt(match[5], 10) - 1);
+  const nums: number[] = [];
+  for (let r = startRow; r <= endRow; r++) {
+    const v = Number(allCells[r]?.[colIdx]);
+    if (!Number.isNaN(v)) nums.push(v);
+  }
+  if (nums.length === 0) return 0;
+  const sum = nums.reduce((a, b) => a + b, 0);
+  if (fn === "SUM") return sum;
+  if (fn === "AVERAGE" || fn === "AVG") return +(sum / nums.length).toFixed(1);
+  if (fn === "MAX") return Math.max(...nums);
+  if (fn === "MIN") return Math.min(...nums);
+  return str;
+}
+
+// Render Canva Clipping Frame Element (30 Masks)
+export function renderFrameVisual(fr: FrameElement) {
+  const clipId = `canvas-frame-clip-${fr.id}`;
+  return (
+    <div className="w-full h-full relative pointer-events-none select-none">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
+        <defs>
+          <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+            <g dangerouslySetInnerHTML={{ __html: fr.clipPathSvg }} />
+          </clipPath>
+        </defs>
+        <g clipPath={`url(#${clipId})`}>
+          <rect width="100" height="100" fill={fr.placeholderColor || "#2A0A12"} />
+          <image
+            href={fr.imageSrc || "/images/wedding_couple_1791965341379.jpg"}
+            x={-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetX || 0)}
+            y={-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetY || 0)}
+            width={100 * (fr.imageScale || 1)}
+            height={100 * (fr.imageScale || 1)}
+            preserveAspectRatio="xMidYMid slice"
+          />
+        </g>
+        {fr.borderSvg && (
+          <g
+            style={{ color: fr.borderColor || "#D4AF37" }}
+            dangerouslySetInnerHTML={{ __html: fr.borderSvg }}
+          />
+        )}
+      </svg>
+    </div>
+  );
+}
+
+// Render Canva Interactive Form Element (RSVP / Poll / Meal Choice)
+export function renderFormVisual(
+  fm: FormElement,
+  onUpdateElement?: (id: string, updates: Partial<CanvasItem>, commit?: boolean) => void
+) {
+  return (
+    <div
+      className="w-full h-full rounded-2xl p-3 flex flex-col justify-between shadow-xl overflow-hidden select-none"
+      style={{
+        backgroundColor: fm.backgroundColor || "rgba(20, 10, 14, 0.94)",
+        border: `1.5px solid ${fm.borderColor || fm.accentColor || "#D4AF37"}`,
+        color: fm.textColor || "#FFFBEB",
+      }}
+    >
+      <div>
+        <div
+          className="text-xs font-cinzel font-bold tracking-wider uppercase truncate"
+          style={{ color: fm.accentColor || "#D4AF37" }}
+        >
+          {fm.formTitle || "Royal RSVP Form"}
+        </div>
+        {fm.formSubtitle && (
+          <div className="text-[9px] opacity-75 truncate">{fm.formSubtitle}</div>
+        )}
+      </div>
+
+      <div className="space-y-1.5 my-1 flex-1 flex flex-col justify-center overflow-hidden">
+        {(fm.fields || []).slice(0, 3).map((field, idx) => (
+          <div key={field.id || idx} className="space-y-0.5">
+            <label className="text-[9px] font-semibold opacity-90 block truncate">
+              {field.label}
+            </label>
+            {field.fieldType === "select" || field.fieldType === "radio" ? (
+              <div className="px-2 py-1 rounded bg-black/50 border border-amber-500/30 text-[9px] text-amber-200 truncate">
+                ▾ {field.value || field.options?.[0] || "Select option"}
+              </div>
+            ) : (
+              <div className="px-2 py-1 rounded bg-black/50 border border-amber-500/30 text-[9px] text-amber-100 truncate">
+                {field.value || field.placeholder || "Enter response..."}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={(e) => {
+          if (!onUpdateElement) return;
+          e.stopPropagation();
+          onUpdateElement(
+            fm.id,
+            { submittedCount: (fm.submittedCount || 1) + 1 },
+            true
+          );
+        }}
+        className="w-full py-1.5 rounded-lg font-cinzel font-bold text-[10px] uppercase tracking-wider text-neutral-950 shadow transition hover:brightness-110 pointer-events-auto cursor-pointer"
+        style={{ backgroundColor: fm.accentColor || "#D4AF37" }}
+      >
+        {fm.submitLabel || "Confirm RSVP"}{" "}
+        {fm.submittedCount ? `(${fm.submittedCount})` : ""}
+      </button>
+    </div>
+  );
+}
+
+// Render Canva Live Formula Spreadsheet Element
+export function renderSheetVisual(sh: SheetElement) {
+  const rows = sh.cells || [];
+  return (
+    <div
+      className="w-full h-full rounded-xl overflow-hidden flex flex-col shadow-xl pointer-events-none select-none"
+      style={{
+        backgroundColor: sh.backgroundColor || "rgba(18, 8, 12, 0.94)",
+        border: `1.5px solid ${sh.borderColor || "#D4AF37"}`,
+        color: sh.textColor || "#FFFBEB",
+      }}
+    >
+      <div
+        className="px-2.5 py-1.5 flex items-center justify-between text-[10px] font-cinzel font-bold"
+        style={{ backgroundColor: sh.headerBgColor || "#78350F", color: "#FEF3C7" }}
+      >
+        <span className="truncate">📊 {sh.sheetTitle || "Wedding Budget Sheet"}</span>
+        <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-black/40 text-amber-300">
+          fx LIVE
+        </span>
+      </div>
+
+      <div className="grid grid-cols-4 border-b border-amber-500/30 bg-black/40 text-[8px] font-bold text-amber-300">
+        {(sh.columns || ["A", "B", "C", "D"]).slice(0, 4).map((col, idx) => (
+          <div key={idx} className="px-1.5 py-1 truncate border-r border-amber-500/20 last:border-r-0">
+            {col}
+          </div>
+        ))}
+      </div>
+
+      <div className="flex-1 flex flex-col divide-y divide-amber-500/15 overflow-hidden text-[9px]">
+        {rows.map((r, rIdx) => {
+          const isLastRow = rIdx === rows.length - 1;
+          return (
+            <div
+              key={rIdx}
+              className={`grid grid-cols-4 flex-1 items-center ${
+                isLastRow ? "bg-amber-500/15 font-bold text-amber-200" : ""
+              }`}
+            >
+              {r.slice(0, 4).map((cell, cIdx) => {
+                const evaluated = evaluateSheetCell(cell, rows);
+                return (
+                  <div
+                    key={cIdx}
+                    className="px-1.5 truncate border-r border-amber-500/10 last:border-r-0 font-mono"
+                  >
+                    {evaluated}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Render Canva Device & Stationery Mockup Element
+export function renderMockupVisual(mk: MockupElement) {
+  const sr = mk.screenRect || { x: 16, y: 10, w: 68, h: 78, rx: 6 };
+  return (
+    <div className="w-full h-full relative pointer-events-none select-none flex flex-col items-center justify-center">
+      <svg
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        className="w-full h-full overflow-visible"
+        style={{ color: mk.accentColor || "#D4AF37" }}
+      >
+        <defs>
+          <clipPath id={`mockup-screen-${mk.id}`}>
+            <rect x={sr.x} y={sr.y} width={sr.w} height={sr.h} rx={sr.rx} />
+          </clipPath>
+        </defs>
+        <g dangerouslySetInnerHTML={{ __html: mk.frameSvg }} />
+        <g clipPath={`url(#mockup-screen-${mk.id})`}>
+          <image
+            href={mk.contentImageSrc || "/images/royal_mandap_cover.webp"}
+            x={sr.x}
+            y={sr.y}
+            width={sr.w}
+            height={sr.h}
+            preserveAspectRatio="xMidYMid slice"
+          />
+        </g>
+      </svg>
+      {mk.caption && (
+        <div className="absolute bottom-1.5 px-2 py-0.5 rounded-full bg-black/75 border border-amber-400/40 text-[8px] font-cinzel text-amber-200 truncate max-w-[90%]">
+          {mk.caption}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Render Canva Interactive 3D Object Element (360° Pitch/Yaw/Roll Shaded SVG Projection)
+export function renderModel3DVisual(m3: Model3DElement) {
+  const pitch = m3.pitch || 15;
+  const yaw = m3.yaw || 25;
+  const roll = m3.roll || 0;
+  const pCol = m3.primaryColor || "#F59E0B";
+  const sCol = m3.secondaryColor || "#78350F";
+  const gradId = `grad3d-${m3.id}`;
+
+  return (
+    <div
+      className="w-full h-full flex flex-col items-center justify-center relative pointer-events-none select-none"
+      style={{ perspective: "500px" }}
+    >
+      <div
+        className="w-full h-full flex items-center justify-center transition-transform duration-300"
+        style={{
+          transform: `rotateX(${pitch}deg) rotateY(${yaw}deg) rotateZ(${roll}deg)`,
+          transformStyle: "preserve-3d",
+          animation: m3.autoRotate ? "canva-spin-slow 14s linear infinite" : undefined,
+        }}
+      >
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_10px_16px_rgba(0,0,0,0.65)]">
+          <defs>
+            <radialGradient id={gradId} cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="#FFFBEB" />
+              <stop offset="45%" stopColor={pCol} />
+              <stop offset="100%" stopColor={sCol} />
+            </radialGradient>
+          </defs>
+          {m3.geometryType === "ring-torus" ? (
+            <g>
+              <ellipse cx="50" cy="56" rx="34" ry="22" fill="none" stroke={`url(#${gradId})`} strokeWidth="10" />
+              <polygon points="50,14 62,28 50,38 38,28" fill="#E0F2FE" stroke={pCol} strokeWidth="2" />
+            </g>
+          ) : m3.geometryType === "lotus-3d" ? (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.2">
+              <path d="M 50 14 C 36 34, 34 62, 50 82 C 66 62, 64 34, 50 14 Z" />
+              <path d="M 50 82 C 24 72, 14 46, 26 26 C 38 38, 42 58, 50 82 Z" opacity="0.9" />
+              <path d="M 50 82 C 76 72, 86 46, 74 26 C 62 38, 58 58, 50 82 Z" opacity="0.9" />
+            </g>
+          ) : m3.geometryType === "royal-crown" ? (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.5">
+              <polygon points="14,74 10,32 32,50 50,20 68,50 90,32 86,74" />
+              <rect x="14" y="74" width="72" height="10" rx="3" />
+              <circle cx="50" cy="16" r="4" fill="#FEF08A" />
+            </g>
+          ) : (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.4">
+              <ellipse cx="50" cy="78" rx="24" ry="7" />
+              <path d="M 26 56 C 20 36, 36 26, 50 26 C 64 26, 80 36, 74 56 C 68 74, 32 74, 26 56 Z" />
+              <ellipse cx="50" cy="24" rx="14" ry="5" />
+              <circle cx="50" cy="14" r="7" />
+            </g>
+          )}
+        </svg>
+      </div>
+      <span className="absolute bottom-1 right-1 text-[8px] font-mono px-1.5 py-0.5 rounded bg-black/65 text-amber-300 border border-amber-500/30">
+        3D • {yaw}°
+      </span>
+    </div>
+  );
+}
+
+// Render Canva Motion Video Loop Element
+export function renderVideoVisual(vd: VideoElement) {
+  const dur = 3.2 / (vd.playbackSpeed || 1);
+  return (
+    <div
+      className="w-full h-full relative overflow-hidden flex flex-col items-center justify-center select-none pointer-events-none shadow-xl"
+      style={{
+        background: vd.bgGradient || "linear-gradient(135deg, #2a080c 0%, #4a1018 100%)",
+        borderRadius: `${vd.borderRadius ?? 14}px`,
+        border: `${vd.borderWidth ?? 2}px solid ${vd.borderColor || "#D4AF37"}`,
+      }}
+    >
+      {/* Animated Particle / Bokeh / Mandala SVG Layer */}
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
+        {Array.from({ length: 12 }).map((_, idx) => {
+          const cx = 12 + ((idx * 23) % 78);
+          const cy = 14 + ((idx * 19) % 72);
+          const r = 2 + (idx % 4) * 1.8;
+          return (
+            <circle
+              key={idx}
+              cx={cx}
+              cy={cy}
+              r={r}
+              fill={idx % 2 === 0 ? vd.primaryColor : vd.secondaryColor}
+              opacity={0.65}
+              style={{
+                animation: vd.isPlaying
+                  ? `canva-float-up ${(dur + (idx % 3) * 0.6).toFixed(1)}s ease-in-out infinite alternate`
+                  : undefined,
+              }}
+            />
+          );
+        })}
+        <circle
+          cx="50"
+          cy="50"
+          r="28"
+          fill="none"
+          stroke={vd.primaryColor}
+          strokeWidth="1.2"
+          strokeDasharray="4 3"
+          opacity="0.55"
+          style={{
+            transformOrigin: "50% 50%",
+            animation: vd.isPlaying ? `canva-spin-slow ${(dur * 3).toFixed(1)}s linear infinite` : undefined,
+          }}
+        />
+      </svg>
+
+      <div className="relative z-10 px-2.5 py-1 rounded-full bg-black/55 border border-amber-400/50 text-[10px] font-cinzel font-bold text-amber-200 flex items-center gap-1.5">
+        <span
+          className="w-2 h-2 rounded-full"
+          style={{
+            backgroundColor: vd.isPlaying ? "#34D399" : "#F59E0B",
+            boxShadow: vd.isPlaying ? "0 0 8px #34D399" : undefined,
+          }}
+        />
+        <span className="truncate max-w-[150px]">{vd.videoName}</span>
+      </div>
+    </div>
+  );
+}
+
+// Render Canva Audio Soundtrack Badge Element
+export function renderAudioVisual(au: AudioElement) {
+  return (
+    <div
+      className="w-full h-full rounded-2xl px-3 py-2 flex items-center justify-between gap-2.5 shadow-xl select-none pointer-events-none"
+      style={{
+        backgroundColor: au.backgroundColor || "rgba(20, 8, 12, 0.94)",
+        border: `1.5px solid ${au.accentColor || "#D4AF37"}`,
+      }}
+    >
+      <div
+        className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border"
+        style={{
+          backgroundColor: `${au.accentColor || "#D4AF37"}25`,
+          borderColor: au.accentColor || "#D4AF37",
+          color: au.accentColor || "#D4AF37",
+        }}
+      >
+        ♫
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-[11px] font-cinzel font-bold text-amber-200 truncate">
+          {au.trackName || "Royal Shehnai Raga"}
+        </div>
+        <div className="text-[9px] text-neutral-400 font-mono">
+          {au.category?.toUpperCase()} • {au.tempo || 110} BPM
+        </div>
+      </div>
+      <div className="flex items-end gap-0.5 h-6 px-1">
+        {[45, 85, 60, 95, 50, 75].map((h, i) => (
+          <div
+            key={i}
+            className="w-1 rounded-full"
+            style={{
+              height: `${h}%`,
+              backgroundColor: au.accentColor || "#D4AF37",
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -1946,6 +2405,27 @@ export const Canvas: React.FC<CanvasProps> = ({
 
           {/* Render BARCODE PASS */}
           {elem.type === 'barcode' && renderBarcodeVisual(elem as BarcodeElement)}
+
+          {/* Render CLIPPING FRAME */}
+          {elem.type === 'frame' && renderFrameVisual(elem as FrameElement)}
+
+          {/* Render INTERACTIVE FORM */}
+          {elem.type === 'form' && renderFormVisual(elem as FormElement, onUpdateElement)}
+
+          {/* Render LIVE SPREADSHEET */}
+          {elem.type === 'sheet' && renderSheetVisual(elem as SheetElement)}
+
+          {/* Render DEVICE / STATIONERY MOCKUP */}
+          {elem.type === 'mockup' && renderMockupVisual(elem as MockupElement)}
+
+          {/* Render INTERACTIVE 3D MODEL */}
+          {elem.type === 'model3d' && renderModel3DVisual(elem as Model3DElement)}
+
+          {/* Render MOTION VIDEO LOOP */}
+          {elem.type === 'video' && renderVideoVisual(elem as VideoElement)}
+
+          {/* Render AUDIO SOUNDTRACK BADGE */}
+          {elem.type === 'audio' && renderAudioVisual(elem as AudioElement)}
 
           {/* Render FREEHAND DRAWING */}
           {elem.type === 'drawing' && (

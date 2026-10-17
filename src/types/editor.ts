@@ -70,7 +70,14 @@ export type ElementType =
   | 'chart'
   | 'grid'
   | 'countdown'
-  | 'barcode';
+  | 'barcode'
+  | 'frame'
+  | 'form'
+  | 'sheet'
+  | 'mockup'
+  | 'model3d'
+  | 'video'
+  | 'audio';
 
 export type ElementAnimationType =
   | 'none'
@@ -250,7 +257,7 @@ export interface StickerElement extends BaseElement {
   type: 'sticker';
   stickerId: string;
   name: string;
-  category: 'religious' | 'wedding' | 'festive' | 'borders' | 'dividers';
+  category: 'religious' | 'wedding' | 'festive' | 'borders' | 'dividers' | string;
   svgContent: string;
   color: string;
   glowColor?: string;
@@ -301,7 +308,10 @@ export type ShapeVariant =
 
 export interface ShapeElement extends BaseElement {
   type: 'shape';
-  shapeType: ShapeVariant;
+  shapeType: ShapeVariant | string;
+  shapeName?: string;
+  svgPath?: string; // Custom SVG markup or path for 312 Shapes library
+  svgFilePath?: string; // Static asset path under /assets/elements/shapes/
   strokeColor: string;
   strokeWidth: number;
   fillColor?: string;
@@ -347,7 +357,18 @@ export interface TableElement extends BaseElement {
 }
 
 // CANVA CHART & INFOGRAPHIC ELEMENT (RSVP Stats / Event Timeline / Budget / Seating)
-export type ChartVariant = 'bar' | 'horizontal-bar' | 'donut' | 'pie' | 'line' | 'progress-rings';
+export type ChartVariant =
+  | 'bar'
+  | 'horizontal-bar'
+  | 'donut'
+  | 'pie'
+  | 'line'
+  | 'progress-rings'
+  | 'area'
+  | 'radar'
+  | 'stacked-bar'
+  | 'gauge'
+  | 'funnel';
 
 export interface ChartDataPoint {
   label: string;
@@ -374,17 +395,147 @@ export type GridLayoutVariant =
   | '3-collage'
   | '4-quad'
   | 'polaroid-trio'
-  | 'hero-split';
+  | 'hero-split'
+  | string;
+
+export interface GridSlotRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  rx?: number;
+}
 
 export interface GridElement extends BaseElement {
   type: 'grid';
   gridLayout: GridLayoutVariant;
+  gridName?: string;
+  slots?: GridSlotRect[]; // Custom normalized slots 0..100
   images: string[];
   gap: number;
   borderRadius: number;
   borderColor: string;
   borderWidth: number;
   backgroundColor?: string;
+}
+
+// CANVA CLIPPING FRAME ELEMENT (30 Masks with Photo Drop, Zoom, Pan, Border)
+export interface FrameElement extends BaseElement {
+  type: 'frame';
+  frameId: string;
+  frameName: string;
+  clipPathSvg: string; // SVG content inside <clipPath viewBox="0 0 100 100">
+  borderSvg?: string; // Optional decorative border in 0..100 viewBox
+  imageSrc: string;
+  imageScale: number; // 0.8 to 3.0
+  imageOffsetX: number; // -50 to 50
+  imageOffsetY: number; // -50 to 50
+  borderColor: string;
+  borderWidth: number;
+  placeholderColor?: string;
+}
+
+// CANVA INTERACTIVE FORM ELEMENT (RSVP / Poll / Meal Choice / Feedback)
+export interface FormFieldItem {
+  id: string;
+  label: string;
+  fieldType: 'text' | 'select' | 'radio' | 'checkbox' | 'textarea' | 'rating' | 'number';
+  placeholder?: string;
+  options?: string[];
+  value?: string;
+  required?: boolean;
+}
+
+export interface FormElement extends BaseElement {
+  type: 'form';
+  formId: string;
+  formTitle: string;
+  formSubtitle?: string;
+  fields: FormFieldItem[];
+  submitLabel: string;
+  accentColor: string;
+  backgroundColor: string;
+  borderColor: string;
+  textColor: string;
+  submittedCount?: number;
+}
+
+// CANVA SPREADSHEET / LIVE SHEET ELEMENT (Formulas, Guest Tracker, Budget)
+export interface SheetElement extends BaseElement {
+  type: 'sheet';
+  sheetId: string;
+  sheetTitle: string;
+  columns: string[];
+  cells: (string | number)[][];
+  headerBgColor: string;
+  accentColor: string;
+  textColor: string;
+  backgroundColor: string;
+  borderColor: string;
+  showFormulas?: boolean;
+}
+
+// CANVA DEVICE & STATIONERY MOCKUP ELEMENT
+export interface MockupElement extends BaseElement {
+  type: 'mockup';
+  mockupId: string;
+  mockupName: string;
+  subcategory: string;
+  frameSvg: string; // 0..200 viewBox outer frame
+  screenRect: { x: number; y: number; w: number; h: number; rx: number };
+  contentImageSrc: string;
+  caption?: string;
+  accentColor: string;
+  imageScale?: number;
+}
+
+// CANVA INTERACTIVE 3D MODEL ELEMENT
+export interface Model3DElement extends BaseElement {
+  type: 'model3d';
+  modelId: string;
+  modelName: string;
+  geometryType: string;
+  primaryColor: string;
+  secondaryColor: string;
+  metalness: number;
+  roughness: number;
+  pitch: number; // -90 to 90
+  yaw: number;   // -180 to 180
+  roll: number;  // -180 to 180
+  autoRotate: boolean;
+  wireframe?: boolean;
+}
+
+// CANVA MOTION VIDEO LOOP ELEMENT
+export interface VideoElement extends BaseElement {
+  type: 'video';
+  videoId: string;
+  videoName: string;
+  visualTheme: string;
+  primaryColor: string;
+  secondaryColor: string;
+  bgGradient: string;
+  isPlaying: boolean;
+  isMuted: boolean;
+  loop: boolean;
+  playbackSpeed: number;
+  borderRadius?: number;
+  borderColor?: string;
+  borderWidth?: number;
+}
+
+// CANVA AUDIO PLAYER / SOUNDTRACK BADGE ELEMENT
+export interface AudioElement extends BaseElement {
+  type: 'audio';
+  audioId: string;
+  trackName: string;
+  category: string;
+  ragaNotes: number[];
+  tempo: number;
+  accentColor: string;
+  backgroundColor: string;
+  isPlaying?: boolean;
+  volume?: number;
 }
 
 // CANVA LIVE EVENT COUNTDOWN / DATE STAMP ELEMENT
@@ -422,7 +573,14 @@ export type CanvasItem =
   | ChartElement
   | GridElement
   | CountdownElement
-  | BarcodeElement;
+  | BarcodeElement
+  | FrameElement
+  | FormElement
+  | SheetElement
+  | MockupElement
+  | Model3DElement
+  | VideoElement
+  | AudioElement;
 
 export type PageTransitionType =
   | 'none'

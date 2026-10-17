@@ -26,7 +26,15 @@ import {
   GridElement,
   CountdownElement,
   BarcodeElement,
+  FrameElement,
+  FormElement,
+  SheetElement,
+  MockupElement,
+  Model3DElement,
+  VideoElement,
+  AudioElement,
 } from '../types/editor';
+import { evaluateSheetCell } from './Canvas';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -207,6 +215,26 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       // SHAPE ELEMENT
       else if (elem.type === 'shape') {
         const s = elem as ShapeElement;
+        if (s.svgPath && s.svgPath.includes("<svg")) {
+          try {
+            const coloredSvg = s.svgPath.replace(
+              /currentColor/g,
+              s.fillColor && s.fillColor !== "transparent" ? s.fillColor : s.strokeColor || "#D4AF37"
+            );
+            const svgBlob = new Blob([coloredSvg], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(svgBlob);
+            const img = new Image();
+            img.src = url;
+            await new Promise((res) => {
+              img.onload = res;
+              img.onerror = res;
+            });
+            ctx.drawImage(img, s.x, s.y, s.width, s.height);
+            URL.revokeObjectURL(url);
+          } catch {
+            // fallback
+          }
+        } else
         ctx.strokeStyle = s.strokeColor || '#D4AF37';
         ctx.lineWidth = s.strokeWidth || 2;
         if (s.fillColor && s.fillColor !== 'transparent') {
@@ -462,37 +490,175 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       // PHOTO COLLAGE GRID ELEMENT
       else if (elem.type === 'grid') {
         const gr = elem as GridElement;
-        ctx.fillStyle = 'rgba(20, 5, 10, 0.7)';
+        ctx.fillStyle = gr.backgroundColor || 'rgba(20, 5, 10, 0.7)';
         ctx.fillRect(gr.x, gr.y, gr.width, gr.height);
-        const cells = gr.cells || [];
-        const cols = gr.gridLayout === '3-col' ? 3 : 2;
-        const rowsCount = gr.gridLayout === '2x2' || gr.gridLayout === 'hero-top-3' ? 2 : 1;
-        const cw = gr.width / cols;
-        const ch = gr.height / rowsCount;
-        for (let i = 0; i < cells.length; i++) {
-          const cellUrl = cells[i];
-          const r = Math.floor(i / cols);
-          const c = i % cols;
-          const cxPos = gr.x + c * cw + 2;
-          const cyPos = gr.y + r * ch + 2;
-          if (cellUrl) {
-            try {
-              const gImg = new Image();
-              gImg.crossOrigin = 'anonymous';
-              gImg.src = cellUrl;
-              await new Promise((res) => {
-                gImg.onload = res;
-                gImg.onerror = res;
-              });
-              ctx.drawImage(gImg, cxPos, cyPos, cw - 4, ch - 4);
-            } catch {
-              // ignore
+        const imgs = gr.images || [];
+        if (gr.slots && gr.slots.length > 0) {
+          for (let i = 0; i < gr.slots.length; i++) {
+            const slot = gr.slots[i];
+            const sx = gr.x + (slot.x / 100) * gr.width + 2;
+            const sy = gr.y + (slot.y / 100) * gr.height + 2;
+            const sw = (slot.w / 100) * gr.width - 4;
+            const sh = (slot.h / 100) * gr.height - 4;
+            const imgUrl = imgs[i % Math.max(1, imgs.length)];
+            if (imgUrl) {
+              try {
+                const gImg = new Image();
+                gImg.crossOrigin = 'anonymous';
+                gImg.src = imgUrl;
+                await new Promise((res) => {
+                  gImg.onload = res;
+                  gImg.onerror = res;
+                });
+                ctx.drawImage(gImg, sx, sy, sw, sh);
+              } catch {
+                // ignore
+              }
             }
           }
-          ctx.strokeStyle = gr.borderColor || '#D4AF37';
-          ctx.lineWidth = gr.borderWidth || 1.5;
-          ctx.strokeRect(cxPos, cyPos, cw - 4, ch - 4);
+        } else {
+          const cols = 2;
+          const rowsCount = gr.gridLayout === '2-col' ? 1 : 2;
+          const cw = gr.width / cols;
+          const ch = gr.height / rowsCount;
+          for (let i = 0; i < imgs.length; i++) {
+            const cellUrl = imgs[i];
+            const r = Math.floor(i / cols);
+            const c = i % cols;
+            const cxPos = gr.x + c * cw + 2;
+            const cyPos = gr.y + r * ch + 2;
+            if (cellUrl) {
+              try {
+                const gImg = new Image();
+                gImg.crossOrigin = 'anonymous';
+                gImg.src = cellUrl;
+                await new Promise((res) => {
+                  gImg.onload = res;
+                  gImg.onerror = res;
+                });
+                ctx.drawImage(gImg, cxPos, cyPos, cw - 4, ch - 4);
+              } catch {
+                // ignore
+              }
+            }
+          }
         }
+        ctx.strokeStyle = gr.borderColor || '#D4AF37';
+        ctx.lineWidth = gr.borderWidth || 1.5;
+        ctx.strokeRect(gr.x, gr.y, gr.width, gr.height);
+      }
+
+      // CLIPPING FRAME ELEMENT
+      else if (elem.type === 'frame') {
+        const fr = elem as FrameElement;
+        try {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.src = fr.imageSrc || '/images/wedding_couple_1791965341379.jpg';
+          await new Promise((res) => {
+            img.onload = res;
+            img.onerror = res;
+          });
+          ctx.drawImage(img, fr.x, fr.y, fr.width, fr.height);
+          ctx.strokeStyle = fr.borderColor || '#D4AF37';
+          ctx.lineWidth = fr.borderWidth || 2;
+          ctx.strokeRect(fr.x, fr.y, fr.width, fr.height);
+        } catch {
+          // ignore
+        }
+      }
+
+      // INTERACTIVE FORM ELEMENT
+      else if (elem.type === 'form') {
+        const fm = elem as FormElement;
+        ctx.fillStyle = fm.backgroundColor || 'rgba(20, 14, 10, 0.94)';
+        ctx.fillRect(fm.x, fm.y, fm.width, fm.height);
+        ctx.strokeStyle = fm.borderColor || '#D4AF37';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(fm.x, fm.y, fm.width, fm.height);
+        ctx.fillStyle = fm.accentColor || '#D4AF37';
+        ctx.font = 'bold 12px Cinzel, serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(fm.formTitle || 'R.S.V.P.', fm.x + 12, fm.y + 22);
+        ctx.fillStyle = fm.accentColor || '#D4AF37';
+        ctx.fillRect(fm.x + 12, fm.y + fm.height - 32, fm.width - 24, 22);
+        ctx.fillStyle = '#111827';
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 10px Cinzel, serif';
+        ctx.fillText(fm.submitLabel || 'Confirm RSVP', fm.x + fm.width / 2, fm.y + fm.height - 17);
+      }
+
+      // LIVE FORMULA SPREADSHEET ELEMENT
+      else if (elem.type === 'sheet') {
+        const sh = elem as SheetElement;
+        ctx.fillStyle = sh.backgroundColor || 'rgba(15, 23, 42, 0.94)';
+        ctx.fillRect(sh.x, sh.y, sh.width, sh.height);
+        ctx.fillStyle = sh.headerBgColor || '#78350F';
+        ctx.fillRect(sh.x, sh.y, sh.width, 24);
+        ctx.fillStyle = '#FEF3C7';
+        ctx.font = 'bold 10px Cinzel, serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(sh.sheetTitle || 'Wedding Sheet', sh.x + 8, sh.y + 16);
+        const rows = sh.cells || [];
+        const rowH = (sh.height - 28) / Math.max(1, rows.length);
+        const colW = sh.width / Math.max(1, sh.columns?.length || 4);
+        ctx.fillStyle = sh.textColor || '#F3F4F6';
+        ctx.font = '9px sans-serif';
+        rows.forEach((r, rIdx) => {
+          r.forEach((cell, cIdx) => {
+            const val = String(evaluateSheetCell(cell, rows));
+            ctx.fillText(val, sh.x + cIdx * colW + 6, sh.y + 38 + rIdx * rowH);
+          });
+        });
+        ctx.strokeStyle = sh.borderColor || '#D4AF37';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(sh.x, sh.y, sh.width, sh.height);
+      }
+
+      // DEVICE / CARD MOCKUP ELEMENT
+      else if (elem.type === 'mockup') {
+        const mk = elem as MockupElement;
+        try {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.src = mk.contentImageSrc || '/images/wedding_couple_1791965341379.jpg';
+          await new Promise((res) => {
+            img.onload = res;
+            img.onerror = res;
+          });
+          const sr = mk.screenRect || { x: 14, y: 10, w: 72, h: 80 };
+          ctx.drawImage(
+            img,
+            mk.x + (sr.x / 100) * mk.width,
+            mk.y + (sr.y / 100) * mk.height,
+            (sr.w / 100) * mk.width,
+            (sr.h / 100) * mk.height
+          );
+          ctx.strokeStyle = mk.accentColor || '#D4AF37';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(mk.x, mk.y, mk.width, mk.height);
+        } catch {
+          // ignore
+        }
+      }
+
+      // 3D MODEL / VIDEO / AUDIO ELEMENTS
+      else if (elem.type === 'model3d' || elem.type === 'video' || elem.type === 'audio') {
+        ctx.fillStyle = 'rgba(24, 16, 8, 0.85)';
+        ctx.fillRect(elem.x, elem.y, elem.width, elem.height);
+        ctx.strokeStyle = '#D4AF37';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(elem.x, elem.y, elem.width, elem.height);
+        ctx.fillStyle = '#FDE68A';
+        ctx.font = 'bold 11px Cinzel, serif';
+        ctx.textAlign = 'center';
+        const label =
+          elem.type === 'model3d'
+            ? (elem as Model3DElement).modelName
+            : elem.type === 'video'
+            ? (elem as VideoElement).videoName
+            : (elem as AudioElement).trackName;
+        ctx.fillText(label || elem.type.toUpperCase(), elem.x + elem.width / 2, elem.y + elem.height / 2 + 4);
       }
 
       ctx.restore();
