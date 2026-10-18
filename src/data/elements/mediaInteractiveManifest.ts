@@ -9402,10 +9402,10 @@ export const TABLES_LIBRARY_ITEMS: TableAssetItem[] = [
 export const MOCKUPS_LIBRARY_ITEMS: MockupAssetItem[] = [
   {
     "id": "mockup-01",
-    "name": "iPhone 16 Pro Gold WhatsApp Invite #1",
+    "name": "iPhone 16 Pro Gold WhatsApp Invite",
     "category": "mockups",
     "subcategory": "phone",
-    "frameSvg": "<rect x=\"14\" y=\"4\" width=\"72\" height=\"92\" rx=\"12\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"3\"/><rect x=\"38\" y=\"7\" width=\"24\" height=\"4\" rx=\"2\" fill=\"currentColor\"/>",
+    "frameSvg": "<rect x=\"14\" y=\"4\" width=\"72\" height=\"92\" rx=\"12\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"3\"/><rect x=\"38\" y=\"7\" width=\"24\" height=\"4\" rx=\"2\" fill=\"currentColor\"/><circle cx=\"58\" cy=\"9\" r=\"1.2\" fill=\"#1E293B\"/><line x1=\"36\" y1=\"92\" x2=\"64\" y2=\"92\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/>",
     "screenRect": {
       "x": 18,
       "y": 10,
@@ -9430,10 +9430,10 @@ export const MOCKUPS_LIBRARY_ITEMS: MockupAssetItem[] = [
   },
   {
     "id": "mockup-02",
-    "name": "Royal Wax-Seal Velvet Envelope #1",
+    "name": "Royal Wax-Seal Velvet Envelope",
     "category": "mockups",
     "subcategory": "envelope",
-    "frameSvg": "<path d=\"M 8 36 L 50 64 L 92 36 V 94 H 8 Z\" fill=\"#4A0E17\" stroke=\"currentColor\" stroke-width=\"2.5\"/><circle cx=\"50\" cy=\"64\" r=\"9\" fill=\"#D4AF37\" stroke=\"#FEF3C7\" stroke-width=\"1.5\"/>",
+    "frameSvg": "<path d=\"M 8 36 L 50 64 L 92 36 V 94 H 8 Z\" fill=\"#4A0E17\" stroke=\"currentColor\" stroke-width=\"2.5\"/><path d=\"M 8 94 L 40 60 M 92 94 L 60 60\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.6\"/><circle cx=\"50\" cy=\"64\" r=\"9\" fill=\"#D4AF37\" stroke=\"#FEF3C7\" stroke-width=\"1.5\"/><polygon points=\"50,59 52,63 56,63 53,65 54,69 50,67 46,69 47,65 44,63 48,63\" fill=\"#4A0E17\"/>",
     "screenRect": {
       "x": 16,
       "y": 8,
@@ -9456,10 +9456,10 @@ export const MOCKUPS_LIBRARY_ITEMS: MockupAssetItem[] = [
   },
   {
     "id": "mockup-03",
-    "name": "Arch Cut Deckle-Edge Print Card #1",
+    "name": "Arch Cut Deckle-Edge Print Card",
     "category": "mockups",
     "subcategory": "card",
-    "frameSvg": "<rect x=\"8\" y=\"4\" width=\"84\" height=\"92\" rx=\"6\" fill=\"#1F1209\" stroke=\"currentColor\" stroke-width=\"2\" stroke-dasharray=\"4 2\"/>",
+    "frameSvg": "<rect x=\"8\" y=\"4\" width=\"84\" height=\"92\" rx=\"6\" fill=\"#1F1209\" stroke=\"currentColor\" stroke-width=\"2\" stroke-dasharray=\"4 2\"/><path d=\"M 12 8 H 24 M 12 8 V 20 M 88 8 H 76 M 88 8 V 20 M 12 92 H 24 M 12 92 V 80 M 88 92 H 76 M 88 92 V 80\" stroke=\"currentColor\" stroke-width=\"1.8\"/>",
     "screenRect": {
       "x": 14,
       "y": 10,
@@ -9483,10 +9483,10 @@ export const MOCKUPS_LIBRARY_ITEMS: MockupAssetItem[] = [
   },
   {
     "id": "mockup-04",
-    "name": " Palatial Welcome Easel Standee #1",
+    "name": "Palatial Welcome Easel Standee",
     "category": "mockups",
     "subcategory": "standee",
-    "frameSvg": "<path d=\"M 50 4 L 22 96 M 50 4 L 78 96 M 16 80 H 84\" stroke=\"currentColor\" stroke-width=\"3.5\" stroke-linecap=\"round\"/><rect x=\"18\" y=\"8\" width=\"64\" height=\"72\" rx=\"4\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"2.5\"/>",
+    "frameSvg": "<path d=\"M 50 4 L 22 96 M 50 4 L 78 96 M 16 80 H 84 M 50 78 V 95\" stroke=\"currentColor\" stroke-width=\"3.2\" stroke-linecap=\"round\"/><rect x=\"18\" y=\"8\" width=\"64\" height=\"72\" rx=\"4\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"2.5\"/><circle cx=\"50\" cy=\"4\" r=\"2.5\" fill=\"currentColor\"/>",
     "screenRect": {
       "x": 20,
       "y": 10,
@@ -9494,14 +9494,13 @@ export const MOCKUPS_LIBRARY_ITEMS: MockupAssetItem[] = [
       "h": 68,
       "rx": 4
     },
-    "defaultCaption": " Palatial Welcome",
+    "defaultCaption": "Palatial Welcome Easel",
     "accentColor": "#A78BFA",
     "tags": [
       "mockup",
       "device",
       "stationery",
       "standee",
-      "",
       "palatial",
       "welcome",
       "easel",
@@ -9510,10 +9509,10 @@ export const MOCKUPS_LIBRARY_ITEMS: MockupAssetItem[] = [
   },
   {
     "id": "mockup-05",
-    "name": "MacBook Pro Wedding Website Preview #1",
+    "name": "MacBook Pro Wedding Website Preview",
     "category": "mockups",
     "subcategory": "laptop",
-    "frameSvg": "<rect x=\"10\" y=\"12\" width=\"80\" height=\"60\" rx=\"5\" fill=\"#0F172A\" stroke=\"currentColor\" stroke-width=\"2.5\"/><path d=\"M 4 72 H 96 L 88 80 H 12 Z\" fill=\"currentColor\"/>",
+    "frameSvg": "<rect x=\"10\" y=\"12\" width=\"80\" height=\"60\" rx=\"5\" fill=\"#0F172A\" stroke=\"currentColor\" stroke-width=\"2.5\"/><rect x=\"44\" y=\"13\" width=\"12\" height=\"2.5\" rx=\"1\" fill=\"currentColor\"/><path d=\"M 4 72 H 96 L 88 80 H 12 Z\" fill=\"currentColor\"/><rect x=\"42\" y=\"73\" width=\"16\" height=\"2\" rx=\"1\" fill=\"#0F172A\"/>",
     "screenRect": {
       "x": 14,
       "y": 16,
@@ -9537,10 +9536,10 @@ export const MOCKUPS_LIBRARY_ITEMS: MockupAssetItem[] = [
   },
   {
     "id": "mockup-06",
-    "name": "iPad Royal Digital Guestbook #1",
+    "name": "iPad Pro Royal Digital Guestbook",
     "category": "mockups",
     "subcategory": "tablet",
-    "frameSvg": "<rect x=\"12\" y=\"8\" width=\"76\" height=\"84\" rx=\"9\" fill=\"#1E293B\" stroke=\"currentColor\" stroke-width=\"3\"/>",
+    "frameSvg": "<rect x=\"12\" y=\"8\" width=\"76\" height=\"84\" rx=\"9\" fill=\"#1E293B\" stroke=\"currentColor\" stroke-width=\"3\"/><circle cx=\"50\" cy=\"10\" r=\"1.2\" fill=\"currentColor\"/><line x1=\"42\" y1=\"89\" x2=\"58\" y2=\"89\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"/>",
     "screenRect": {
       "x": 16,
       "y": 12,
@@ -9548,14 +9547,15 @@ export const MOCKUPS_LIBRARY_ITEMS: MockupAssetItem[] = [
       "h": 76,
       "rx": 6
     },
-    "defaultCaption": "iPad Royal Digital",
-    "accentColor": "#D4AF37",
+    "defaultCaption": "iPad Pro Royal",
+    "accentColor": "#38BDF8",
     "tags": [
       "mockup",
       "device",
       "stationery",
       "tablet",
       "ipad",
+      "pro",
       "royal",
       "digital",
       "guestbook"
@@ -9563,646 +9563,643 @@ export const MOCKUPS_LIBRARY_ITEMS: MockupAssetItem[] = [
   },
   {
     "id": "mockup-07",
-    "name": "iPhone 16 Pro Gold WhatsApp Invite #2",
+    "name": "Samsung Galaxy Fold Royal E-Invite",
     "category": "mockups",
     "subcategory": "phone",
-    "frameSvg": "<rect x=\"14\" y=\"4\" width=\"72\" height=\"92\" rx=\"12\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"3\"/><rect x=\"38\" y=\"7\" width=\"24\" height=\"4\" rx=\"2\" fill=\"currentColor\"/>",
+    "frameSvg": "<rect x=\"10\" y=\"6\" width=\"80\" height=\"88\" rx=\"9\" fill=\"#0F172A\" stroke=\"currentColor\" stroke-width=\"2.8\"/><line x1=\"50\" y1=\"6\" x2=\"50\" y2=\"94\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"3 2\" opacity=\"0.7\"/><circle cx=\"30\" cy=\"9\" r=\"1.3\" fill=\"currentColor\"/><circle cx=\"70\" cy=\"9\" r=\"1.3\" fill=\"currentColor\"/>",
     "screenRect": {
-      "x": 18,
+      "x": 14,
       "y": 10,
-      "w": 64,
+      "w": 72,
       "h": 80,
-      "rx": 8
+      "rx": 6
     },
-    "defaultCaption": "iPhone 16 Pro",
-    "accentColor": "#F43F5E",
+    "defaultCaption": "Samsung Galaxy Fold",
+    "accentColor": "#D4AF37",
     "tags": [
       "mockup",
       "device",
       "stationery",
       "phone",
-      "iphone",
-      "16",
-      "pro",
-      "gold",
-      "whatsapp",
-      "invite"
+      "samsung",
+      "galaxy",
+      "fold",
+      "royal",
+      "e-invite"
     ]
   },
   {
     "id": "mockup-08",
-    "name": "Royal Wax-Seal Velvet Envelope #2",
+    "name": "Mughal Jharokha Laser-Cut Pocket",
     "category": "mockups",
     "subcategory": "envelope",
-    "frameSvg": "<path d=\"M 8 36 L 50 64 L 92 36 V 94 H 8 Z\" fill=\"#4A0E17\" stroke=\"currentColor\" stroke-width=\"2.5\"/><circle cx=\"50\" cy=\"64\" r=\"9\" fill=\"#D4AF37\" stroke=\"#FEF3C7\" stroke-width=\"1.5\"/>",
+    "frameSvg": "<path d=\"M 10 32 Q 50 56 90 32 V 94 H 10 Z\" fill=\"#3B0718\" stroke=\"currentColor\" stroke-width=\"2.5\"/><path d=\"M 14 40 H 86 M 14 88 H 86\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"3 2\"/><polygon points=\"50,52 57,60 50,68 43,60\" fill=\"currentColor\"/>",
     "screenRect": {
-      "x": 16,
-      "y": 8,
-      "w": 68,
-      "h": 64,
-      "rx": 4
+      "x": 18,
+      "y": 10,
+      "w": 64,
+      "h": 66,
+      "rx": 16
     },
-    "defaultCaption": "Royal Wax-Seal Velvet",
-    "accentColor": "#34D399",
+    "defaultCaption": "Mughal Jharokha Laser-Cut",
+    "accentColor": "#F43F5E",
     "tags": [
       "mockup",
       "device",
       "stationery",
       "envelope",
-      "royal",
-      "wax-seal",
-      "velvet",
-      "envelope"
+      "mughal",
+      "jharokha",
+      "laser-cut",
+      "pocket"
     ]
   },
   {
     "id": "mockup-09",
-    "name": "Arch Cut Deckle-Edge Print Card #2",
+    "name": "Gold Foil Beveled Acrylic Plaque",
     "category": "mockups",
     "subcategory": "card",
-    "frameSvg": "<rect x=\"8\" y=\"4\" width=\"84\" height=\"92\" rx=\"6\" fill=\"#1F1209\" stroke=\"currentColor\" stroke-width=\"2\" stroke-dasharray=\"4 2\"/>",
+    "frameSvg": "<polygon points=\"18,6 82,6 92,16 92,84 82,94 18,94 8,84 8,16\" fill=\"#18120B\" stroke=\"currentColor\" stroke-width=\"2.6\"/><polygon points=\"21,10 79,10 88,19 88,81 79,90 21,90 12,81 12,19\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.9\" stroke-dasharray=\"3 2\"/>",
     "screenRect": {
-      "x": 14,
-      "y": 10,
-      "w": 72,
-      "h": 80,
-      "rx": 28
+      "x": 16,
+      "y": 12,
+      "w": 68,
+      "h": 76,
+      "rx": 4
     },
-    "defaultCaption": "Arch Cut Deckle-Edge",
-    "accentColor": "#A78BFA",
+    "defaultCaption": "Gold Foil Beveled",
+    "accentColor": "#34D399",
     "tags": [
       "mockup",
       "device",
       "stationery",
       "card",
-      "arch",
-      "cut",
-      "deckle-edge",
-      "print",
-      "card"
+      "gold",
+      "foil",
+      "beveled",
+      "acrylic",
+      "plaque"
     ]
   },
   {
     "id": "mockup-10",
-    "name": " Palatial Welcome Easel Standee #2",
+    "name": "Royal Palace Arch Welcome Board",
     "category": "mockups",
     "subcategory": "standee",
-    "frameSvg": "<path d=\"M 50 4 L 22 96 M 50 4 L 78 96 M 16 80 H 84\" stroke=\"currentColor\" stroke-width=\"3.5\" stroke-linecap=\"round\"/><rect x=\"18\" y=\"8\" width=\"64\" height=\"72\" rx=\"4\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"2.5\"/>",
+    "frameSvg": "<path d=\"M 24 78 L 16 96 M 76 78 L 84 96 M 14 88 H 86\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\"/><path d=\"M 16 80 V 36 A 34 30 0 0 1 84 36 V 80 Z\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"2.8\"/><circle cx=\"50\" cy=\"5\" r=\"2.5\" fill=\"currentColor\"/>",
     "screenRect": {
       "x": 20,
-      "y": 10,
+      "y": 14,
       "w": 60,
-      "h": 68,
-      "rx": 4
-    },
-    "defaultCaption": " Palatial Welcome",
-    "accentColor": "#FBBF24",
-    "tags": [
-      "mockup",
-      "device",
-      "stationery",
-      "standee",
-      "",
-      "palatial",
-      "welcome",
-      "easel",
-      "standee"
-    ]
-  },
-  {
-    "id": "mockup-11",
-    "name": "MacBook Pro Wedding Website Preview #2",
-    "category": "mockups",
-    "subcategory": "laptop",
-    "frameSvg": "<rect x=\"10\" y=\"12\" width=\"80\" height=\"60\" rx=\"5\" fill=\"#0F172A\" stroke=\"currentColor\" stroke-width=\"2.5\"/><path d=\"M 4 72 H 96 L 88 80 H 12 Z\" fill=\"currentColor\"/>",
-    "screenRect": {
-      "x": 14,
-      "y": 16,
-      "w": 72,
-      "h": 52,
-      "rx": 3
-    },
-    "defaultCaption": "MacBook Pro Wedding",
-    "accentColor": "#D4AF37",
-    "tags": [
-      "mockup",
-      "device",
-      "stationery",
-      "laptop",
-      "macbook",
-      "pro",
-      "wedding",
-      "website",
-      "preview"
-    ]
-  },
-  {
-    "id": "mockup-12",
-    "name": "iPad Royal Digital Guestbook #2",
-    "category": "mockups",
-    "subcategory": "tablet",
-    "frameSvg": "<rect x=\"12\" y=\"8\" width=\"76\" height=\"84\" rx=\"9\" fill=\"#1E293B\" stroke=\"currentColor\" stroke-width=\"3\"/>",
-    "screenRect": {
-      "x": 16,
-      "y": 12,
-      "w": 68,
-      "h": 76,
-      "rx": 6
-    },
-    "defaultCaption": "iPad Royal Digital",
-    "accentColor": "#F43F5E",
-    "tags": [
-      "mockup",
-      "device",
-      "stationery",
-      "tablet",
-      "ipad",
-      "royal",
-      "digital",
-      "guestbook"
-    ]
-  },
-  {
-    "id": "mockup-13",
-    "name": "iPhone 16 Pro Gold WhatsApp Invite #3",
-    "category": "mockups",
-    "subcategory": "phone",
-    "frameSvg": "<rect x=\"14\" y=\"4\" width=\"72\" height=\"92\" rx=\"12\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"3\"/><rect x=\"38\" y=\"7\" width=\"24\" height=\"4\" rx=\"2\" fill=\"currentColor\"/>",
-    "screenRect": {
-      "x": 18,
-      "y": 10,
-      "w": 64,
-      "h": 80,
-      "rx": 8
-    },
-    "defaultCaption": "iPhone 16 Pro",
-    "accentColor": "#34D399",
-    "tags": [
-      "mockup",
-      "device",
-      "stationery",
-      "phone",
-      "iphone",
-      "16",
-      "pro",
-      "gold",
-      "whatsapp",
-      "invite"
-    ]
-  },
-  {
-    "id": "mockup-14",
-    "name": "Royal Wax-Seal Velvet Envelope #3",
-    "category": "mockups",
-    "subcategory": "envelope",
-    "frameSvg": "<path d=\"M 8 36 L 50 64 L 92 36 V 94 H 8 Z\" fill=\"#4A0E17\" stroke=\"currentColor\" stroke-width=\"2.5\"/><circle cx=\"50\" cy=\"64\" r=\"9\" fill=\"#D4AF37\" stroke=\"#FEF3C7\" stroke-width=\"1.5\"/>",
-    "screenRect": {
-      "x": 16,
-      "y": 8,
-      "w": 68,
       "h": 64,
-      "rx": 4
+      "rx": 24
     },
-    "defaultCaption": "Royal Wax-Seal Velvet",
+    "defaultCaption": "Royal Palace Arch",
     "accentColor": "#A78BFA",
     "tags": [
       "mockup",
       "device",
       "stationery",
-      "envelope",
+      "standee",
       "royal",
-      "wax-seal",
-      "velvet",
-      "envelope"
+      "palace",
+      "arch",
+      "welcome",
+      "board"
+    ]
+  },
+  {
+    "id": "mockup-11",
+    "name": "iMac 24-Inch Studio Wedding Hub",
+    "category": "mockups",
+    "subcategory": "laptop",
+    "frameSvg": "<rect x=\"6\" y=\"6\" width=\"88\" height=\"66\" rx=\"5\" fill=\"#0F172A\" stroke=\"currentColor\" stroke-width=\"2.6\"/><circle cx=\"50\" cy=\"68\" r=\"2\" fill=\"currentColor\"/><path d=\"M 42 72 L 36 88 H 64 L 58 72 Z\" fill=\"currentColor\" fill-opacity=\"0.7\" stroke=\"currentColor\" stroke-width=\"2\"/><line x1=\"28\" y1=\"88\" x2=\"72\" y2=\"88\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\"/>",
+    "screenRect": {
+      "x": 10,
+      "y": 10,
+      "w": 80,
+      "h": 54,
+      "rx": 3
+    },
+    "defaultCaption": "iMac 24-Inch Studio",
+    "accentColor": "#FBBF24",
+    "tags": [
+      "mockup",
+      "device",
+      "stationery",
+      "laptop",
+      "imac",
+      "24-inch",
+      "studio",
+      "wedding",
+      "hub"
+    ]
+  },
+  {
+    "id": "mockup-12",
+    "name": "Landscape Digital Photo Frame",
+    "category": "mockups",
+    "subcategory": "tablet",
+    "frameSvg": "<rect x=\"6\" y=\"12\" width=\"88\" height=\"76\" rx=\"8\" fill=\"#1E293B\" stroke=\"currentColor\" stroke-width=\"3\"/><rect x=\"9\" y=\"15\" width=\"82\" height=\"70\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.9\" stroke-dasharray=\"3 2\"/><path d=\"M 36 88 L 42 95 H 58 L 64 88\" fill=\"currentColor\"/>",
+    "screenRect": {
+      "x": 12,
+      "y": 18,
+      "w": 76,
+      "h": 64,
+      "rx": 5
+    },
+    "defaultCaption": "Landscape Digital Photo",
+    "accentColor": "#38BDF8",
+    "tags": [
+      "mockup",
+      "device",
+      "stationery",
+      "tablet",
+      "landscape",
+      "digital",
+      "photo",
+      "frame"
+    ]
+  },
+  {
+    "id": "mockup-13",
+    "name": "Rose Gold Minimal Bezel Phone",
+    "category": "mockups",
+    "subcategory": "phone",
+    "frameSvg": "<rect x=\"16\" y=\"4\" width=\"68\" height=\"92\" rx=\"14\" fill=\"#1C1018\" stroke=\"currentColor\" stroke-width=\"2.8\"/><circle cx=\"50\" cy=\"7\" r=\"1.8\" fill=\"currentColor\"/><rect x=\"84\" y=\"24\" width=\"2\" height=\"12\" rx=\"1\" fill=\"currentColor\"/><rect x=\"84\" y=\"42\" width=\"2\" height=\"18\" rx=\"1\" fill=\"currentColor\"/>",
+    "screenRect": {
+      "x": 20,
+      "y": 8,
+      "w": 60,
+      "h": 84,
+      "rx": 10
+    },
+    "defaultCaption": "Rose Gold Minimal",
+    "accentColor": "#D4AF37",
+    "tags": [
+      "mockup",
+      "device",
+      "stationery",
+      "phone",
+      "rose",
+      "gold",
+      "minimal",
+      "bezel",
+      "phone"
+    ]
+  },
+  {
+    "id": "mockup-14",
+    "name": "Zari Tassel Ribbon Shagun Lifafa",
+    "category": "mockups",
+    "subcategory": "envelope",
+    "frameSvg": "<rect x=\"16\" y=\"4\" width=\"68\" height=\"88\" rx=\"6\" fill=\"#58111A\" stroke=\"currentColor\" stroke-width=\"2.6\"/><path d=\"M 16 26 L 50 48 L 84 26\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><line x1=\"16\" y1=\"48\" x2=\"84\" y2=\"48\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-dasharray=\"4 2\"/><circle cx=\"50\" cy=\"48\" r=\"6\" fill=\"currentColor\"/>",
+    "screenRect": {
+      "x": 22,
+      "y": 8,
+      "w": 56,
+      "h": 78,
+      "rx": 4
+    },
+    "defaultCaption": "Zari Tassel Ribbon",
+    "accentColor": "#F43F5E",
+    "tags": [
+      "mockup",
+      "device",
+      "stationery",
+      "envelope",
+      "zari",
+      "tassel",
+      "ribbon",
+      "shagun",
+      "lifafa"
     ]
   },
   {
     "id": "mockup-15",
-    "name": "Arch Cut Deckle-Edge Print Card #3",
+    "name": "Royal Farmaan Silk Scroll Case",
     "category": "mockups",
     "subcategory": "card",
-    "frameSvg": "<rect x=\"8\" y=\"4\" width=\"84\" height=\"92\" rx=\"6\" fill=\"#1F1209\" stroke=\"currentColor\" stroke-width=\"2\" stroke-dasharray=\"4 2\"/>",
+    "frameSvg": "<rect x=\"10\" y=\"8\" width=\"80\" height=\"6\" rx=\"3\" fill=\"currentColor\"/><rect x=\"10\" y=\"86\" width=\"80\" height=\"6\" rx=\"3\" fill=\"currentColor\"/><circle cx=\"8\" cy=\"11\" r=\"4\" fill=\"currentColor\"/><circle cx=\"92\" cy=\"11\" r=\"4\" fill=\"currentColor\"/><circle cx=\"8\" cy=\"89\" r=\"4\" fill=\"currentColor\"/><circle cx=\"92\" cy=\"89\" r=\"4\" fill=\"currentColor\"/><rect x=\"16\" y=\"14\" width=\"68\" height=\"72\" fill=\"#1F1209\" stroke=\"currentColor\" stroke-width=\"2\"/>",
     "screenRect": {
-      "x": 14,
-      "y": 10,
-      "w": 72,
-      "h": 80,
-      "rx": 28
+      "x": 18,
+      "y": 14,
+      "w": 64,
+      "h": 72,
+      "rx": 2
     },
-    "defaultCaption": "Arch Cut Deckle-Edge",
-    "accentColor": "#FBBF24",
+    "defaultCaption": "Royal Farmaan Silk",
+    "accentColor": "#34D399",
     "tags": [
       "mockup",
       "device",
       "stationery",
       "card",
-      "arch",
-      "cut",
-      "deckle-edge",
-      "print",
-      "card"
+      "royal",
+      "farmaan",
+      "silk",
+      "scroll",
+      "case"
     ]
   },
   {
     "id": "mockup-16",
-    "name": " Palatial Welcome Easel Standee #3",
+    "name": "Golden Marigold Garland Easel",
     "category": "mockups",
     "subcategory": "standee",
-    "frameSvg": "<path d=\"M 50 4 L 22 96 M 50 4 L 78 96 M 16 80 H 84\" stroke=\"currentColor\" stroke-width=\"3.5\" stroke-linecap=\"round\"/><rect x=\"18\" y=\"8\" width=\"64\" height=\"72\" rx=\"4\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"2.5\"/>",
+    "frameSvg": "<path d=\"M 50 4 L 20 96 M 50 4 L 80 96 M 14 80 H 86\" stroke=\"currentColor\" stroke-width=\"3\"/><rect x=\"18\" y=\"12\" width=\"64\" height=\"68\" rx=\"5\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"2.5\"/><circle cx=\"22\" cy=\"12\" r=\"3.5\" fill=\"currentColor\"/><circle cx=\"36\" cy=\"12\" r=\"3.5\" fill=\"currentColor\"/><circle cx=\"50\" cy=\"12\" r=\"3.5\" fill=\"currentColor\"/><circle cx=\"64\" cy=\"12\" r=\"3.5\" fill=\"currentColor\"/><circle cx=\"78\" cy=\"12\" r=\"3.5\" fill=\"currentColor\"/>",
     "screenRect": {
       "x": 20,
-      "y": 10,
+      "y": 14,
       "w": 60,
-      "h": 68,
+      "h": 64,
       "rx": 4
     },
-    "defaultCaption": " Palatial Welcome",
-    "accentColor": "#D4AF37",
-    "tags": [
-      "mockup",
-      "device",
-      "stationery",
-      "standee",
-      "",
-      "palatial",
-      "welcome",
-      "easel",
-      "standee"
-    ]
-  },
-  {
-    "id": "mockup-17",
-    "name": "MacBook Pro Wedding Website Preview #3",
-    "category": "mockups",
-    "subcategory": "laptop",
-    "frameSvg": "<rect x=\"10\" y=\"12\" width=\"80\" height=\"60\" rx=\"5\" fill=\"#0F172A\" stroke=\"currentColor\" stroke-width=\"2.5\"/><path d=\"M 4 72 H 96 L 88 80 H 12 Z\" fill=\"currentColor\"/>",
-    "screenRect": {
-      "x": 14,
-      "y": 16,
-      "w": 72,
-      "h": 52,
-      "rx": 3
-    },
-    "defaultCaption": "MacBook Pro Wedding",
-    "accentColor": "#F43F5E",
-    "tags": [
-      "mockup",
-      "device",
-      "stationery",
-      "laptop",
-      "macbook",
-      "pro",
-      "wedding",
-      "website",
-      "preview"
-    ]
-  },
-  {
-    "id": "mockup-18",
-    "name": "iPad Royal Digital Guestbook #3",
-    "category": "mockups",
-    "subcategory": "tablet",
-    "frameSvg": "<rect x=\"12\" y=\"8\" width=\"76\" height=\"84\" rx=\"9\" fill=\"#1E293B\" stroke=\"currentColor\" stroke-width=\"3\"/>",
-    "screenRect": {
-      "x": 16,
-      "y": 12,
-      "w": 68,
-      "h": 76,
-      "rx": 6
-    },
-    "defaultCaption": "iPad Royal Digital",
-    "accentColor": "#34D399",
-    "tags": [
-      "mockup",
-      "device",
-      "stationery",
-      "tablet",
-      "ipad",
-      "royal",
-      "digital",
-      "guestbook"
-    ]
-  },
-  {
-    "id": "mockup-19",
-    "name": "iPhone 16 Pro Gold WhatsApp Invite #4",
-    "category": "mockups",
-    "subcategory": "phone",
-    "frameSvg": "<rect x=\"14\" y=\"4\" width=\"72\" height=\"92\" rx=\"12\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"3\"/><rect x=\"38\" y=\"7\" width=\"24\" height=\"4\" rx=\"2\" fill=\"currentColor\"/>",
-    "screenRect": {
-      "x": 18,
-      "y": 10,
-      "w": 64,
-      "h": 80,
-      "rx": 8
-    },
-    "defaultCaption": "iPhone 16 Pro",
+    "defaultCaption": "Golden Marigold Garland",
     "accentColor": "#A78BFA",
     "tags": [
       "mockup",
       "device",
       "stationery",
-      "phone",
-      "iphone",
-      "16",
-      "pro",
-      "gold",
-      "whatsapp",
-      "invite"
+      "standee",
+      "golden",
+      "marigold",
+      "garland",
+      "easel"
     ]
   },
   {
-    "id": "mockup-20",
-    "name": "Royal Wax-Seal Velvet Envelope #4",
+    "id": "mockup-17",
+    "name": "Dual-Screen Event Live Stream Desk",
     "category": "mockups",
-    "subcategory": "envelope",
-    "frameSvg": "<path d=\"M 8 36 L 50 64 L 92 36 V 94 H 8 Z\" fill=\"#4A0E17\" stroke=\"currentColor\" stroke-width=\"2.5\"/><circle cx=\"50\" cy=\"64\" r=\"9\" fill=\"#D4AF37\" stroke=\"#FEF3C7\" stroke-width=\"1.5\"/>",
+    "subcategory": "laptop",
+    "frameSvg": "<rect x=\"8\" y=\"10\" width=\"84\" height=\"60\" rx=\"6\" fill=\"#0F172A\" stroke=\"currentColor\" stroke-width=\"2.5\"/><path d=\"M 2 70 H 98 L 90 78 H 10 Z\" fill=\"currentColor\" fill-opacity=\"0.85\"/><line x1=\"34\" y1=\"82\" x2=\"66\" y2=\"82\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>",
     "screenRect": {
-      "x": 16,
-      "y": 8,
-      "w": 68,
-      "h": 64,
+      "x": 12,
+      "y": 14,
+      "w": 76,
+      "h": 52,
       "rx": 4
     },
-    "defaultCaption": "Royal Wax-Seal Velvet",
+    "defaultCaption": "Dual-Screen Event Live",
     "accentColor": "#FBBF24",
     "tags": [
       "mockup",
       "device",
       "stationery",
+      "laptop",
+      "dual-screen",
+      "event",
+      "live",
+      "stream",
+      "desk"
+    ]
+  },
+  {
+    "id": "mockup-18",
+    "name": " Brass Kiosk Touch Check-In Stand",
+    "category": "mockups",
+    "subcategory": "tablet",
+    "frameSvg": "<rect x=\"14\" y=\"6\" width=\"72\" height=\"72\" rx=\"9\" fill=\"#1E293B\" stroke=\"currentColor\" stroke-width=\"3\"/><path d=\"M 42 78 L 36 94 H 64 L 58 78 Z\" fill=\"currentColor\" fill-opacity=\"0.6\" stroke=\"currentColor\" stroke-width=\"2\"/><rect x=\"24\" y=\"92\" width=\"52\" height=\"4\" rx=\"2\" fill=\"currentColor\"/>",
+    "screenRect": {
+      "x": 18,
+      "y": 10,
+      "w": 64,
+      "h": 64,
+      "rx": 6
+    },
+    "defaultCaption": " Brass Kiosk",
+    "accentColor": "#38BDF8",
+    "tags": [
+      "mockup",
+      "device",
+      "stationery",
+      "tablet",
+      "",
+      "brass",
+      "kiosk",
+      "touch",
+      "check-in",
+      "stand"
+    ]
+  },
+  {
+    "id": "mockup-19",
+    "name": "Curved Edge Luxury Titanium Phone",
+    "category": "mockups",
+    "subcategory": "phone",
+    "frameSvg": "<rect x=\"14\" y=\"5\" width=\"72\" height=\"90\" rx=\"13\" fill=\"#090D16\" stroke=\"currentColor\" stroke-width=\"3\"/><rect x=\"16\" y=\"7\" width=\"68\" height=\"86\" rx=\"11\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.8\" stroke-dasharray=\"3 2\"/><rect x=\"40\" y=\"8\" width=\"20\" height=\"3.5\" rx=\"1.7\" fill=\"currentColor\"/>",
+    "screenRect": {
+      "x": 18,
+      "y": 9,
+      "w": 64,
+      "h": 82,
+      "rx": 9
+    },
+    "defaultCaption": "Curved Edge Luxury",
+    "accentColor": "#D4AF37",
+    "tags": [
+      "mockup",
+      "device",
+      "stationery",
+      "phone",
+      "curved",
+      "edge",
+      "luxury",
+      "titanium",
+      "phone"
+    ]
+  },
+  {
+    "id": "mockup-20",
+    "name": "Peacock Crest Lined Couture Envelope",
+    "category": "mockups",
+    "subcategory": "envelope",
+    "frameSvg": "<path d=\"M 8 34 L 50 62 L 92 34 V 94 H 8 Z\" fill=\"#06392C\" stroke=\"currentColor\" stroke-width=\"2.5\"/><path d=\"M 8 34 L 50 6 L 92 34\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><circle cx=\"50\" cy=\"62\" r=\"8\" fill=\"currentColor\"/><circle cx=\"50\" cy=\"62\" r=\"4\" fill=\"#06392C\"/>",
+    "screenRect": {
+      "x": 16,
+      "y": 8,
+      "w": 68,
+      "h": 62,
+      "rx": 4
+    },
+    "defaultCaption": "Peacock Crest Lined",
+    "accentColor": "#F43F5E",
+    "tags": [
+      "mockup",
+      "device",
+      "stationery",
       "envelope",
-      "royal",
-      "wax-seal",
-      "velvet",
+      "peacock",
+      "crest",
+      "lined",
+      "couture",
       "envelope"
     ]
   },
   {
     "id": "mockup-21",
-    "name": "Arch Cut Deckle-Edge Print Card #4",
+    "name": "Scalloped Lotus Die-Cut Invitation",
     "category": "mockups",
     "subcategory": "card",
-    "frameSvg": "<rect x=\"8\" y=\"4\" width=\"84\" height=\"92\" rx=\"6\" fill=\"#1F1209\" stroke=\"currentColor\" stroke-width=\"2\" stroke-dasharray=\"4 2\"/>",
+    "frameSvg": "<rect x=\"10\" y=\"6\" width=\"80\" height=\"88\" rx=\"16\" fill=\"#230C14\" stroke=\"currentColor\" stroke-width=\"2.8\"/><circle cx=\"50\" cy=\"6\" r=\"4\" fill=\"currentColor\"/><circle cx=\"50\" cy=\"94\" r=\"4\" fill=\"currentColor\"/><circle cx=\"10\" cy=\"50\" r=\"4\" fill=\"currentColor\"/><circle cx=\"90\" cy=\"50\" r=\"4\" fill=\"currentColor\"/>",
     "screenRect": {
-      "x": 14,
-      "y": 10,
-      "w": 72,
-      "h": 80,
-      "rx": 28
+      "x": 16,
+      "y": 12,
+      "w": 68,
+      "h": 76,
+      "rx": 14
     },
-    "defaultCaption": "Arch Cut Deckle-Edge",
-    "accentColor": "#D4AF37",
+    "defaultCaption": "Scalloped Lotus Die-Cut",
+    "accentColor": "#34D399",
     "tags": [
       "mockup",
       "device",
       "stationery",
       "card",
-      "arch",
-      "cut",
-      "deckle-edge",
-      "print",
-      "card"
+      "scalloped",
+      "lotus",
+      "die-cut",
+      "invitation"
     ]
   },
   {
     "id": "mockup-22",
-    "name": " Palatial Welcome Easel Standee #4",
+    "name": "Ornate Hanging Banner Standee",
     "category": "mockups",
     "subcategory": "standee",
-    "frameSvg": "<path d=\"M 50 4 L 22 96 M 50 4 L 78 96 M 16 80 H 84\" stroke=\"currentColor\" stroke-width=\"3.5\" stroke-linecap=\"round\"/><rect x=\"18\" y=\"8\" width=\"64\" height=\"72\" rx=\"4\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"2.5\"/>",
+    "frameSvg": "<line x1=\"10\" y1=\"8\" x2=\"90\" y2=\"8\" stroke=\"currentColor\" stroke-width=\"3.5\" stroke-linecap=\"round\"/><line x1=\"24\" y1=\"8\" x2=\"24\" y2=\"14\" stroke=\"currentColor\" stroke-width=\"2.5\"/><line x1=\"76\" y1=\"8\" x2=\"76\" y2=\"14\" stroke=\"currentColor\" stroke-width=\"2.5\"/><rect x=\"18\" y=\"12\" width=\"64\" height=\"72\" rx=\"4\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"2.5\"/><path d=\"M 30 84 L 22 95 M 70 84 L 78 95 M 50 84 V 96\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>",
     "screenRect": {
       "x": 20,
-      "y": 10,
+      "y": 14,
       "w": 60,
       "h": 68,
-      "rx": 4
+      "rx": 3
     },
-    "defaultCaption": " Palatial Welcome",
-    "accentColor": "#F43F5E",
+    "defaultCaption": "Ornate Hanging Banner",
+    "accentColor": "#A78BFA",
     "tags": [
       "mockup",
       "device",
       "stationery",
       "standee",
-      "",
-      "palatial",
-      "welcome",
-      "easel",
+      "ornate",
+      "hanging",
+      "banner",
       "standee"
     ]
   },
   {
     "id": "mockup-23",
-    "name": "MacBook Pro Wedding Website Preview #4",
+    "name": "Ultrabook Gold Slim Folio Preview",
     "category": "mockups",
     "subcategory": "laptop",
-    "frameSvg": "<rect x=\"10\" y=\"12\" width=\"80\" height=\"60\" rx=\"5\" fill=\"#0F172A\" stroke=\"currentColor\" stroke-width=\"2.5\"/><path d=\"M 4 72 H 96 L 88 80 H 12 Z\" fill=\"currentColor\"/>",
+    "frameSvg": "<rect x=\"11\" y=\"13\" width=\"78\" height=\"56\" rx=\"4\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"2.4\"/><path d=\"M 3 69 H 97 L 93 74 H 7 Z\" fill=\"currentColor\"/><path d=\"M 16 74 H 84\" stroke=\"currentColor\" stroke-width=\"1.5\"/>",
     "screenRect": {
       "x": 14,
       "y": 16,
       "w": 72,
-      "h": 52,
+      "h": 50,
       "rx": 3
     },
-    "defaultCaption": "MacBook Pro Wedding",
-    "accentColor": "#34D399",
+    "defaultCaption": "Ultrabook Gold Slim",
+    "accentColor": "#FBBF24",
     "tags": [
       "mockup",
       "device",
       "stationery",
       "laptop",
-      "macbook",
-      "pro",
-      "wedding",
-      "website",
+      "ultrabook",
+      "gold",
+      "slim",
+      "folio",
       "preview"
     ]
   },
   {
     "id": "mockup-24",
-    "name": "iPad Royal Digital Guestbook #4",
+    "name": "Ornate Filigree Brass Tablet Frame",
     "category": "mockups",
     "subcategory": "tablet",
-    "frameSvg": "<rect x=\"12\" y=\"8\" width=\"76\" height=\"84\" rx=\"9\" fill=\"#1E293B\" stroke=\"currentColor\" stroke-width=\"3\"/>",
+    "frameSvg": "<rect x=\"12\" y=\"8\" width=\"76\" height=\"84\" rx=\"10\" fill=\"#1E1B4B\" stroke=\"currentColor\" stroke-width=\"3\"/><polygon points=\"50,3 54,8 46,8\" fill=\"currentColor\"/><polygon points=\"50,97 54,92 46,92\" fill=\"currentColor\"/><polygon points=\"7,50 12,54 12,46\" fill=\"currentColor\"/><polygon points=\"93,50 88,54 88,46\" fill=\"currentColor\"/>",
     "screenRect": {
-      "x": 16,
-      "y": 12,
-      "w": 68,
-      "h": 76,
+      "x": 18,
+      "y": 14,
+      "w": 64,
+      "h": 72,
       "rx": 6
     },
-    "defaultCaption": "iPad Royal Digital",
-    "accentColor": "#A78BFA",
+    "defaultCaption": "Ornate Filigree Brass",
+    "accentColor": "#38BDF8",
     "tags": [
       "mockup",
       "device",
       "stationery",
       "tablet",
-      "ipad",
-      "royal",
-      "digital",
-      "guestbook"
+      "ornate",
+      "filigree",
+      "brass",
+      "tablet",
+      "frame"
     ]
   },
   {
     "id": "mockup-25",
-    "name": "iPhone 16 Pro Gold WhatsApp Invite #5",
+    "name": " Maharani Jewel-Crust Phone Frame",
     "category": "mockups",
     "subcategory": "phone",
-    "frameSvg": "<rect x=\"14\" y=\"4\" width=\"72\" height=\"92\" rx=\"12\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"3\"/><rect x=\"38\" y=\"7\" width=\"24\" height=\"4\" rx=\"2\" fill=\"currentColor\"/>",
+    "frameSvg": "<rect x=\"14\" y=\"5\" width=\"72\" height=\"90\" rx=\"12\" fill=\"#2A0810\" stroke=\"currentColor\" stroke-width=\"3\"/><circle cx=\"18\" cy=\"9\" r=\"2\" fill=\"currentColor\"/><circle cx=\"82\" cy=\"9\" r=\"2\" fill=\"currentColor\"/><circle cx=\"18\" cy=\"91\" r=\"2\" fill=\"currentColor\"/><circle cx=\"82\" cy=\"91\" r=\"2\" fill=\"currentColor\"/><rect x=\"38\" y=\"7\" width=\"24\" height=\"3.5\" rx=\"1.7\" fill=\"currentColor\"/>",
     "screenRect": {
-      "x": 18,
+      "x": 19,
       "y": 10,
-      "w": 64,
+      "w": 62,
       "h": 80,
       "rx": 8
     },
-    "defaultCaption": "iPhone 16 Pro",
-    "accentColor": "#FBBF24",
-    "tags": [
-      "mockup",
-      "device",
-      "stationery",
-      "phone",
-      "iphone",
-      "16",
-      "pro",
-      "gold",
-      "whatsapp",
-      "invite"
-    ]
-  },
-  {
-    "id": "mockup-26",
-    "name": "Royal Wax-Seal Velvet Envelope #5",
-    "category": "mockups",
-    "subcategory": "envelope",
-    "frameSvg": "<path d=\"M 8 36 L 50 64 L 92 36 V 94 H 8 Z\" fill=\"#4A0E17\" stroke=\"currentColor\" stroke-width=\"2.5\"/><circle cx=\"50\" cy=\"64\" r=\"9\" fill=\"#D4AF37\" stroke=\"#FEF3C7\" stroke-width=\"1.5\"/>",
-    "screenRect": {
-      "x": 16,
-      "y": 8,
-      "w": 68,
-      "h": 64,
-      "rx": 4
-    },
-    "defaultCaption": "Royal Wax-Seal Velvet",
+    "defaultCaption": " Maharani Jewel-Crust",
     "accentColor": "#D4AF37",
     "tags": [
       "mockup",
       "device",
       "stationery",
-      "envelope",
-      "royal",
-      "wax-seal",
-      "velvet",
-      "envelope"
+      "phone",
+      "",
+      "maharani",
+      "jewel-crust",
+      "phone",
+      "frame"
     ]
   },
   {
-    "id": "mockup-27",
-    "name": "Arch Cut Deckle-Edge Print Card #5",
+    "id": "mockup-26",
+    "name": "Velvet Box & Mithai Suite Envelope",
     "category": "mockups",
-    "subcategory": "card",
-    "frameSvg": "<rect x=\"8\" y=\"4\" width=\"84\" height=\"92\" rx=\"6\" fill=\"#1F1209\" stroke=\"currentColor\" stroke-width=\"2\" stroke-dasharray=\"4 2\"/>",
+    "subcategory": "envelope",
+    "frameSvg": "<rect x=\"10\" y=\"6\" width=\"80\" height=\"88\" rx=\"6\" fill=\"#3B0A14\" stroke=\"currentColor\" stroke-width=\"2.8\"/><path d=\"M 10 42 L 50 68 L 90 42 V 94 H 10 Z\" fill=\"#58111A\" stroke=\"currentColor\" stroke-width=\"2.2\"/><polygon points=\"50,58 58,66 50,74 42,66\" fill=\"currentColor\" stroke=\"#FEF3C7\" stroke-width=\"1.2\"/>",
     "screenRect": {
-      "x": 14,
+      "x": 18,
       "y": 10,
-      "w": 72,
-      "h": 80,
-      "rx": 28
+      "w": 64,
+      "h": 64,
+      "rx": 4
     },
-    "defaultCaption": "Arch Cut Deckle-Edge",
+    "defaultCaption": "Velvet Box &",
     "accentColor": "#F43F5E",
     "tags": [
       "mockup",
       "device",
       "stationery",
-      "card",
-      "arch",
-      "cut",
-      "deckle-edge",
-      "print",
-      "card"
+      "envelope",
+      "velvet",
+      "box",
+      "&",
+      "mithai",
+      "suite",
+      "envelope"
     ]
   },
   {
-    "id": "mockup-28",
-    "name": " Palatial Welcome Easel Standee #5",
+    "id": "mockup-27",
+    "name": "Tri-Fold Gatefold Palace Card",
     "category": "mockups",
-    "subcategory": "standee",
-    "frameSvg": "<path d=\"M 50 4 L 22 96 M 50 4 L 78 96 M 16 80 H 84\" stroke=\"currentColor\" stroke-width=\"3.5\" stroke-linecap=\"round\"/><rect x=\"18\" y=\"8\" width=\"64\" height=\"72\" rx=\"4\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"2.5\"/>",
+    "subcategory": "card",
+    "frameSvg": "<path d=\"M 6 14 L 18 8 V 92 L 6 86 Z M 94 14 L 82 8 V 92 L 94 86 Z\" fill=\"#2D1606\" stroke=\"currentColor\" stroke-width=\"2\"/><rect x=\"18\" y=\"8\" width=\"64\" height=\"84\" rx=\"4\" fill=\"#1F1209\" stroke=\"currentColor\" stroke-width=\"2.6\"/>",
     "screenRect": {
       "x": 20,
       "y": 10,
       "w": 60,
-      "h": 68,
+      "h": 80,
       "rx": 4
     },
-    "defaultCaption": " Palatial Welcome",
+    "defaultCaption": "Tri-Fold Gatefold Palace",
     "accentColor": "#34D399",
     "tags": [
       "mockup",
       "device",
       "stationery",
-      "standee",
-      "",
-      "palatial",
-      "welcome",
-      "easel",
-      "standee"
+      "card",
+      "tri-fold",
+      "gatefold",
+      "palace",
+      "card"
     ]
   },
   {
-    "id": "mockup-29",
-    "name": "MacBook Pro Wedding Website Preview #5",
+    "id": "mockup-28",
+    "name": "Mandap Entrance Pillar Standee",
     "category": "mockups",
-    "subcategory": "laptop",
-    "frameSvg": "<rect x=\"10\" y=\"12\" width=\"80\" height=\"60\" rx=\"5\" fill=\"#0F172A\" stroke=\"currentColor\" stroke-width=\"2.5\"/><path d=\"M 4 72 H 96 L 88 80 H 12 Z\" fill=\"currentColor\"/>",
+    "subcategory": "standee",
+    "frameSvg": "<rect x=\"12\" y=\"10\" width=\"6\" height=\"82\" rx=\"2\" fill=\"currentColor\" fill-opacity=\"0.45\" stroke=\"currentColor\" stroke-width=\"1.8\"/><rect x=\"82\" y=\"10\" width=\"6\" height=\"82\" rx=\"2\" fill=\"currentColor\" fill-opacity=\"0.45\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M 8 10 Q 50 2 92 10\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/><rect x=\"20\" y=\"12\" width=\"60\" height=\"72\" rx=\"4\" fill=\"#111827\" stroke=\"currentColor\" stroke-width=\"2.4\"/><line x1=\"8\" y1=\"92\" x2=\"92\" y2=\"92\" stroke=\"currentColor\" stroke-width=\"3.5\"/>",
     "screenRect": {
-      "x": 14,
-      "y": 16,
-      "w": 72,
-      "h": 52,
-      "rx": 3
+      "x": 22,
+      "y": 14,
+      "w": 56,
+      "h": 68,
+      "rx": 4
     },
-    "defaultCaption": "MacBook Pro Wedding",
+    "defaultCaption": "Mandap Entrance Pillar",
     "accentColor": "#A78BFA",
     "tags": [
       "mockup",
       "device",
       "stationery",
-      "laptop",
-      "macbook",
-      "pro",
-      "wedding",
-      "website",
-      "preview"
+      "standee",
+      "mandap",
+      "entrance",
+      "pillar",
+      "standee"
     ]
   },
   {
-    "id": "mockup-30",
-    "name": "iPad Royal Digital Guestbook #5",
+    "id": "mockup-29",
+    "name": "Curved Ultrawide Cinema Showcase",
     "category": "mockups",
-    "subcategory": "tablet",
-    "frameSvg": "<rect x=\"12\" y=\"8\" width=\"76\" height=\"84\" rx=\"9\" fill=\"#1E293B\" stroke=\"currentColor\" stroke-width=\"3\"/>",
+    "subcategory": "laptop",
+    "frameSvg": "<rect x=\"4\" y=\"12\" width=\"92\" height=\"56\" rx=\"6\" fill=\"#0F172A\" stroke=\"currentColor\" stroke-width=\"2.6\"/><path d=\"M 46 68 V 84 M 54 68 V 84 M 30 84 Q 50 78 70 84\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\"/>",
     "screenRect": {
-      "x": 16,
-      "y": 12,
-      "w": 68,
-      "h": 76,
-      "rx": 6
+      "x": 8,
+      "y": 16,
+      "w": 84,
+      "h": 48,
+      "rx": 4
     },
-    "defaultCaption": "iPad Royal Digital",
+    "defaultCaption": "Curved Ultrawide Cinema",
     "accentColor": "#FBBF24",
     "tags": [
       "mockup",
       "device",
       "stationery",
+      "laptop",
+      "curved",
+      "ultrawide",
+      "cinema",
+      "showcase"
+    ]
+  },
+  {
+    "id": "mockup-30",
+    "name": "Royal Pedestal Gallery Kiosk",
+    "category": "mockups",
+    "subcategory": "tablet",
+    "frameSvg": "<rect x=\"12\" y=\"6\" width=\"76\" height=\"76\" rx=\"11\" fill=\"#1E293B\" stroke=\"currentColor\" stroke-width=\"2.8\"/><circle cx=\"50\" cy=\"79\" r=\"1.8\" fill=\"currentColor\"/><path d=\"M 34 82 L 26 95 H 74 L 66 82\" fill=\"currentColor\" fill-opacity=\"0.4\" stroke=\"currentColor\" stroke-width=\"2\"/>",
+    "screenRect": {
+      "x": 16,
+      "y": 10,
+      "w": 68,
+      "h": 68,
+      "rx": 8
+    },
+    "defaultCaption": "Royal Pedestal Gallery",
+    "accentColor": "#38BDF8",
+    "tags": [
+      "mockup",
+      "device",
+      "stationery",
       "tablet",
-      "ipad",
       "royal",
-      "digital",
-      "guestbook"
+      "pedestal",
+      "gallery",
+      "kiosk"
     ]
   }
 ];

@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <path d="M 14 88 V 44 A 36 36 0 0 1 86 44 V 88 Z" stroke="currentColor" stroke-width="1.8" fill="currentColor" fill-opacity="0.08"/>
-      <circle cx="50" cy="38" r="10" fill="currentColor" fill-opacity="0.28" stroke="currentColor" stroke-width="2.2"/>
-      
-      <path d="M 24 84 C 24 62, 56 62, 56 84 Z" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="2"/>
-      
-      <path d="M 34 26 L 40 18 L 46 26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><path d="M12 6.5 H88.0 M12 93.5 H88.0" stroke="currentColor" stroke-width="1" stroke-dasharray="1.8 3" opacity="0.45"/><path d="M12 90 V42 C12 22 32 14 50 6 C68 14 88 22 88 42 V90 Z" stroke="currentColor" stroke-width="1.6" fill="currentColor" fill-opacity="0.07"/><g stroke="currentColor" fill="currentColor">
+      <path d="M32 34 C30 20 42 14 54 16 C66 14 70 24 68 34 Z" fill-opacity="0.38" stroke-width="2"/>
+      <path d="M52 18 Q58 8 66 10" fill="none" stroke-width="2.2"/>
+      <circle cx="50" cy="40" r="11" fill-opacity="0.22" stroke-width="2"/>
+      <path d="M43 43 Q50 40 57 43" fill="none" stroke-width="1.8"/>
+      <path d="M24 88 C24 62 36 54 50 54 C64 54 76 62 76 88 Z" fill-opacity="0.28" stroke-width="2.2"/>
+      <path d="M38 56 Q50 72 62 56 M36 62 Q50 80 64 62" fill="none" stroke-width="1.6" stroke-dasharray="2 2"/>
+    </g></svg>

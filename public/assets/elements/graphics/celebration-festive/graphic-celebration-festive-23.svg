@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="1.5" stroke-dasharray="none"/>
-      <path d="M 30 63 C 24 48, 34 32, 50 28 C 66 32, 76 48, 70 63 Z" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="2.2"/>
-      <path d="M 50 12 C 44 20, 44 26, 50 28 C 56 26, 56 20, 50 12 Z" fill="currentColor"/>
-      <path d="M 22 72 H 78 M 28 78 H 72" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-      <circle cx="50" cy="50" r="8" fill="currentColor" fill-opacity="0.5"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><path d="M12 7.5 H88.0 M12 92.5 H88.0" stroke="currentColor" stroke-width="1" stroke-dasharray="4 2.5" opacity="0.45"/><g stroke="currentColor" fill="currentColor">
+      <line x1="50" y1="6" x2="50" y2="24" stroke-width="2.5"/>
+      <path d="M18 42 H82 L72 24 H28 Z" fill-opacity="0.26" stroke-width="2"/>
+      <path d="M26 58 H74 L66 42 H34 Z" fill-opacity="0.32" stroke-width="2"/>
+      <path d="M22 42 Q36 68 50 42 Q64 68 78 42" fill="none" stroke-width="1.5" stroke-dasharray="2 2"/>
+      <polygon points="50,64 56,76 50,88 44,76" fill-opacity="0.45"/>
+    </g></svg>

@@ -1,8 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <ellipse cx="50" cy="70" rx="39" ry="12" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2.2"/>
-      <path d="M 22 54 C 22 76, 78 76, 78 54 Z" fill="currentColor" fill-opacity="0.26" stroke="currentColor" stroke-width="2.2"/>
-      <circle cx="38" cy="48" r="6" fill="currentColor" fill-opacity="0.4" stroke="currentColor" stroke-width="1.6"/>
-      <circle cx="50" cy="44" r="6.5" fill="currentColor" fill-opacity="0.4" stroke="currentColor" stroke-width="1.6"/>
-      <circle cx="62" cy="48" r="6" fill="currentColor" fill-opacity="0.4" stroke="currentColor" stroke-width="1.6"/>
-      <path d="M 42 28 Q 46 20 42 14 M 56 26 Q 60 18 56 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><g fill="currentColor" opacity="0.5"><polygon points="50,3.8 52.4,8.8 47.6,8.8"/><polygon points="50,96.2 52.4,91.2 47.6,91.2"/><polygon points="3.8,50 8.8,52.4 8.8,47.6"/><polygon points="96.2,50 91.2,52.4 91.2,47.6"/></g><rect x="10" y="10" width="80" height="80" rx="6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/><g transform="scale(0.9500000000000001) translate(2, 2)"><g stroke="currentColor" fill="currentColor">
+      <circle cx="50" cy="50" r="38" fill-opacity="0.16" stroke-width="2.6"/>
+      <circle cx="50" cy="50" r="33" fill="none" stroke-width="1" stroke-dasharray="3 2"/>
+      <circle cx="35.86" cy="33.15" r="6.5" fill-opacity="0.35" stroke-width="1.6"/><circle cx="50" cy="28" r="6.5" fill-opacity="0.35" stroke-width="1.6"/><circle cx="64.14" cy="33.15" r="6.5" fill-opacity="0.35" stroke-width="1.6"/><circle cx="71.67" cy="46.18" r="6.5" fill-opacity="0.35" stroke-width="1.6"/><circle cx="69.05" cy="61" r="6.5" fill-opacity="0.35" stroke-width="1.6"/>
+      <ellipse cx="42" cy="64" rx="14" ry="9" fill-opacity="0.28" stroke-width="1.8"/>
+      <circle cx="50" cy="48" r="5" fill-opacity="0.4"/>
+    </g></g></svg>

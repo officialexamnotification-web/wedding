@@ -16,12 +16,12 @@ export const MAIN_ELEMENT_CATEGORIES: CategoryTileMeta[] = [
   },
   {
     id: 'graphics',
-    label: 'Graphics',
-    hindiSub: 'शाही कलाकृति (360)',
-    targetCount: 360,
+    label: 'Graphics & Torans',
+    hindiSub: 'तोरण व शाही कलाकृति (370)',
+    targetCount: 370,
     accentGradient: 'from-rose-600/30 to-amber-900/40',
-    badgeText: '360 Icons',
-    description: 'Botanicals, festive Indian motifs, Barat, food, avatars & badges',
+    badgeText: '370 Icons',
+    description: '10 Royal Wedding Torans, botanicals, festive Indian motifs & badges',
   },
   {
     id: 'photos',
@@ -156,6 +156,7 @@ export const GRAPHIC_SUBCATEGORIES: {
   label: string;
   targetCount: number;
 }[] = [
+  { id: 'torans-bandhanwar', label: 'Royal Wedding Torans (बंदनवार)', targetCount: 10 },
   { id: 'flowers-botanicals', label: 'Flowers & Botanicals', targetCount: 60 },
   { id: 'celebration-festive', label: 'Celebration & Wedding', targetCount: 60 },
   { id: 'food-drinks', label: 'Royal Feast & Drinks', targetCount: 50 },
@@ -166,6 +167,7 @@ export const GRAPHIC_SUBCATEGORIES: {
 ];
 
 export const SEARCH_SYNONYMS: Record<string, string[]> = {
+  toran: ['bandhanwar', 'thoranam', 'garland', 'bunting', 'door hanging', 'marigold', 'genda', 'mango leaf', 'ashoka', 'chandelier'],
   kalash: ['pot', 'urn', 'auspicious', 'mangal', 'water pot', 'coconut', 'religious', 'celebration'],
   ganesh: ['ganpati', 'vinayak', 'bappa', 'auspicious', 'shri', 'om', 'blessing'],
   lotus: ['kamal', 'flower', 'floral', 'petal', 'padma', 'botanical'],

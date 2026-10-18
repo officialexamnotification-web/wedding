@@ -1,8 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <ellipse cx="50" cy="70" rx="35" ry="12" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2.2"/>
-      <path d="M 22 54 C 22 76, 78 76, 78 54 Z" fill="currentColor" fill-opacity="0.26" stroke="currentColor" stroke-width="2.2"/>
-      <circle cx="38" cy="48" r="6" fill="currentColor" fill-opacity="0.4" stroke="currentColor" stroke-width="1.6"/>
-      <circle cx="50" cy="44" r="6.5" fill="currentColor" fill-opacity="0.4" stroke="currentColor" stroke-width="1.6"/>
-      <circle cx="62" cy="48" r="6" fill="currentColor" fill-opacity="0.4" stroke="currentColor" stroke-width="1.6"/>
-      <path d="M 42 28 Q 46 20 42 14 M 56 26 Q 60 18 56 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><g stroke="currentColor" stroke-width="1" opacity="0.45" fill="none"><path d="M6 20.0 A14 14 0 0 1 20.0 6 M80.0 6 A14 14 0 0 1 94 20.0 M6 80.0 A14 14 0 0 0 20.0 94 M80.0 94 A14 14 0 0 0 94 80.0"/></g><polygon points="20,14 21.41,18.59 26,20 21.41,21.41 20,26 18.59,21.41 14,20 18.59,18.59" fill="currentColor"/><polygon points="80,14 81.41,18.59 86,20 81.41,21.41 80,26 78.59,21.41 74,20 78.59,18.59" fill="currentColor"/><g transform="scale(0.92) translate(3, 3)"><g stroke="currentColor" fill="currentColor">
+      <rect x="46" y="66" width="8" height="24" rx="4" fill-opacity="0.4" stroke-width="2"/>
+      <path d="M30 66 L38 22 A12 12 0 0 1 62 22 L70 66 Z" fill-opacity="0.28" stroke-width="2.4" stroke-linejoin="round"/>
+      <path d="M33 48 Q50 56 67 48" fill="none" stroke-width="1.8"/>
+      <circle cx="46" cy="30" r="2"/><circle cx="54" cy="34" r="2"/><circle cx="48" cy="40" r="2"/>
+    </g></g></svg>

@@ -1,7 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <path d="M 8 50 C 26 38, 38 62, 50 50 C 62 38, 74 62, 92 50" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
-      <path d="M 22 50 C 30 34, 42 36, 50 50 C 58 64, 70 66, 78 50" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/>
-      <polygon points="50,38 56,50 50,62 44,50" fill="currentColor"/>
-      <circle cx="12" cy="50" r="3" fill="currentColor"/>
-      <circle cx="88" cy="50" r="3" fill="currentColor"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><g stroke="currentColor" stroke-width="1" opacity="0.45" fill="none"><path d="M6 20.8 A14.8 14.8 0 0 1 20.8 6 M79.2 6 A14.8 14.8 0 0 1 94 20.8 M6 79.2 A14.8 14.8 0 0 0 20.8 94 M79.2 94 A14.8 14.8 0 0 0 94 79.2"/></g><g stroke="currentColor" fill="none" stroke-width="2.4" stroke-linecap="round">
+      <path d="M10 44 Q50 68 90 44"/>
+      <path d="M22 56 Q50 76 78 56" stroke-width="1.4"/>
+      <circle cx="50" cy="64" r="3.5" fill="currentColor"/>
+    </g></svg>

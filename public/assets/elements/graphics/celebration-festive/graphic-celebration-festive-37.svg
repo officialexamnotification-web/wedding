@@ -1,7 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="1.5" stroke-dasharray="none"/>
-      <path d="M 30 67 C 24 48, 34 32, 50 28 C 66 32, 76 48, 70 67 Z" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="2.2"/>
-      <path d="M 50 12 C 44 20, 44 26, 50 28 C 56 26, 56 20, 50 12 Z" fill="currentColor"/>
-      <path d="M 22 72 H 78 M 28 78 H 72" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-      <circle cx="50" cy="50" r="6" fill="currentColor" fill-opacity="0.5"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="43.19" stroke="currentColor" stroke-width="0.8" opacity="0.35"/><circle cx="50" cy="6.8" r="1.55" fill="currentColor" opacity="0.6"/><circle cx="50" cy="93.2" r="1.55" fill="currentColor" opacity="0.6"/><g stroke="currentColor" fill="currentColor">
+      <rect x="12" y="22" width="76" height="56" rx="4" fill-opacity="0.18" stroke-width="2.4"/>
+      <path d="M12 24 L50 54 L88 24" fill="none" stroke-width="2.4"/>
+      <circle cx="50" cy="54" r="10" fill-opacity="0.5" stroke-width="2"/>
+      <polygon points="50,48 51.5,51.4 55.2,51 53,54 55.2,57 51.5,56.6 50,60 48.5,56.6 44.8,57 47,54 44.8,51 48.5,51.4" fill="#FEF08A"/>
+    </g></svg>

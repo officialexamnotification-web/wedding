@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="1.5" stroke-dasharray="none"/>
-      <path d="M 30 67 C 24 48, 34 32, 50 28 C 66 32, 76 48, 70 67 Z" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="2.2"/>
-      <path d="M 50 12 C 44 20, 44 26, 50 28 C 56 26, 56 20, 50 12 Z" fill="currentColor"/>
-      <path d="M 22 72 H 78 M 28 78 H 72" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-      <circle cx="50" cy="50" r="6" fill="currentColor" fill-opacity="0.5"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><path d="M12.9 6.5 H87.1 M12.9 93.5 H87.1" stroke="currentColor" stroke-width="1" stroke-dasharray="1.8 2.5" opacity="0.45"/><g stroke="currentColor" fill="currentColor">
+      <line x1="6" y1="54" x2="94" y2="54" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M24 54 V38 C24 22 38 16 50 14 C62 16 76 22 76 38 V54 Z" fill-opacity="0.26" stroke-width="2.2"/>
+      <rect x="22" y="54" width="56" height="18" rx="3" fill-opacity="0.32" stroke-width="2.2"/>
+      <path d="M24 38 Q37 52 50 38 Q63 52 76 38" fill="none" stroke-width="1.8"/>
+      <circle cx="50" cy="11" r="3"/>
+    </g></svg>

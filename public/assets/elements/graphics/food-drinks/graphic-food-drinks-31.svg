@@ -1,8 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <ellipse cx="50" cy="70" rx="35" ry="12" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2.2"/>
-      <path d="M 22 54 C 22 76, 78 76, 78 54 Z" fill="currentColor" fill-opacity="0.26" stroke="currentColor" stroke-width="2.2"/>
-      <circle cx="38" cy="48" r="6" fill="currentColor" fill-opacity="0.4" stroke="currentColor" stroke-width="1.6"/>
-      <circle cx="50" cy="44" r="6.5" fill="currentColor" fill-opacity="0.4" stroke="currentColor" stroke-width="1.6"/>
-      <circle cx="62" cy="48" r="6" fill="currentColor" fill-opacity="0.4" stroke="currentColor" stroke-width="1.6"/>
-      <path d="M 42 28 Q 46 20 42 14 M 56 26 Q 60 18 56 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><g fill="currentColor" opacity="0.5"><polygon points="50,1.8 53.2,6.8 46.8,6.8"/><polygon points="50,98.2 53.2,93.2 46.8,93.2"/><polygon points="1.8,50 6.8,53.2 6.8,46.8"/><polygon points="98.2,50 93.2,53.2 93.2,46.8"/></g><path d="M12 50 C12 20 88 20 88 50" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 2"/><g transform="scale(0.92) translate(3, 3)"><g stroke="currentColor" fill="currentColor">
+      <circle cx="50" cy="50" r="38" fill-opacity="0.16" stroke-width="2.6"/>
+      <circle cx="50" cy="50" r="33" fill="none" stroke-width="1" stroke-dasharray="3 2"/>
+      <circle cx="35.86" cy="33.15" r="6.5" fill-opacity="0.35" stroke-width="1.6"/><circle cx="50" cy="28" r="6.5" fill-opacity="0.35" stroke-width="1.6"/><circle cx="64.14" cy="33.15" r="6.5" fill-opacity="0.35" stroke-width="1.6"/><circle cx="71.67" cy="46.18" r="6.5" fill-opacity="0.35" stroke-width="1.6"/><circle cx="69.05" cy="61" r="6.5" fill-opacity="0.35" stroke-width="1.6"/>
+      <ellipse cx="42" cy="64" rx="14" ry="9" fill-opacity="0.28" stroke-width="1.8"/>
+      <circle cx="50" cy="48" r="5" fill-opacity="0.4"/>
+    </g></g></svg>

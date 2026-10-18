@@ -1,7 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="1.5" stroke-dasharray="none"/>
-      <path d="M 30 67 C 24 48, 34 32, 50 28 C 66 32, 76 48, 70 67 Z" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="2.2"/>
-      <path d="M 50 12 C 44 20, 44 26, 50 28 C 56 26, 56 20, 50 12 Z" fill="currentColor"/>
-      <path d="M 22 72 H 78 M 28 78 H 72" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-      <circle cx="50" cy="50" r="8" fill="currentColor" fill-opacity="0.5"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45.44" stroke="currentColor" stroke-width="0.8" opacity="0.35"/><circle cx="50" cy="4.6" r="1.55" fill="currentColor" opacity="0.6"/><circle cx="50" cy="95.4" r="1.55" fill="currentColor" opacity="0.6"/><g stroke="currentColor" fill="currentColor">
+      <ellipse cx="24" cy="52" rx="8" ry="22" fill-opacity="0.35" stroke-width="2.2"/>
+      <ellipse cx="76" cy="52" rx="8" ry="22" fill-opacity="0.25" stroke-width="2.2"/>
+      <path d="M24 30 Q50 24 76 30 M24 74 Q50 80 76 74" fill="none" stroke-width="2.4"/>
+      <path d="M30 30 L42 74 L54 30 L66 74" fill="none" stroke-width="1.8"/>
+      <path d="M34 14 L56 26 M68 14 L46 26" stroke-width="2.8" stroke-linecap="round"/>
+      <circle cx="56" cy="26" r="3"/><circle cx="46" cy="26" r="3"/>
+    </g></svg>

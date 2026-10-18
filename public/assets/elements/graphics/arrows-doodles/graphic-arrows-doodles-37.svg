@@ -1,7 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <path d="M 8 50 C 26 31, 38 69, 50 50 C 62 31, 74 69, 92 50" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
-      <path d="M 22 50 C 30 35, 42 36, 50 50 C 58 64, 70 65, 78 50" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/>
-      <polygon points="50,38 56,50 50,62 44,50" fill="currentColor"/>
-      <circle cx="12" cy="50" r="3" fill="currentColor"/>
-      <circle cx="88" cy="50" r="3" fill="currentColor"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><g stroke="currentColor" stroke-width="1" opacity="0.45" fill="none"><path d="M7 15 V7 H15 M85 7 H93 V15 M7 85 V93 H15 M85 93 H93 V85"/></g><g stroke="currentColor" fill="currentColor">
+      <line x1="50" y1="10" x2="50" y2="34" stroke-width="2.2"/>
+      <path d="M28 54 A22 20 0 0 1 72 54 Z" fill-opacity="0.3" stroke-width="2.2"/>
+      <line x1="30" y1="54" x2="30" y2="74" stroke-width="1.5"/><circle cx="30" cy="77" r="2.8"/><line x1="40" y1="54" x2="40" y2="74" stroke-width="1.5"/><circle cx="40" cy="77" r="2.8"/><line x1="50" y1="54" x2="50" y2="74" stroke-width="1.5"/><circle cx="50" cy="77" r="2.8"/><line x1="60" y1="54" x2="60" y2="74" stroke-width="1.5"/><circle cx="60" cy="77" r="2.8"/><line x1="70" y1="54" x2="70" y2="74" stroke-width="1.5"/><circle cx="70" cy="77" r="2.8"/>
+    </g></svg>

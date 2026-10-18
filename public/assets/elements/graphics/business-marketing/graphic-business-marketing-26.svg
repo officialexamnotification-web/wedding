@@ -1,5 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <rect x="14" y="14" width="72" height="72" rx="20" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-width="2.2"/>
-      <path d="M 50 24 C 36 24, 28 34, 28 46 C 28 62, 50 78, 50 78 C 50 78, 72 62, 72 46 C 72 34, 64 24, 50 24 Z" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="2.2"/>
-      <circle cx="50" cy="45" r="9" fill="currentColor"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="44.9" stroke="currentColor" stroke-width="0.9" stroke-dasharray="2.4 1.2" opacity="0.45"/><rect x="12" y="12" width="76" height="76" rx="10" fill="currentColor" fill-opacity="0.1" stroke="currentColor" stroke-width="2"/><polygon points="50,6 54,11 50,16 46,11" fill="currentColor"/><polygon points="50,84 54,89 50,94 46,89" fill="currentColor"/><g stroke="currentColor" fill="currentColor"><circle cx="50" cy="50" r="28" fill-opacity="0.22" stroke-width="2.4"/><polyline points="50,32 50,50 64,56" fill="none" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="50" r="3"/></g></svg>

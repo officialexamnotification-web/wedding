@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-    <polygon points="94.0,50.0 87.4,56.6 91.3,65.0 82.9,69.0 83.7,78.3 74.4,79.1 72.0,88.1 63.0,85.7 57.6,93.3 50.0,88.0 42.4,93.3 37.0,85.7 28.0,88.1 25.6,79.1 16.3,78.3 17.1,69.0 8.7,65.0 12.6,56.6 6.0,50.0 12.6,43.4 8.7,35.0 17.1,31.0 16.3,21.7 25.6,20.9 28.0,11.9 37.0,14.3 42.4,6.7 50.0,12.0 57.6,6.7 63.0,14.3 72.0,11.9 74.4,20.9 83.7,21.7 82.9,31.0 91.3,35.0 87.4,43.4" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2"/>
-    <circle cx="50" cy="50" r="31" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 2"/>
-    <path d="M 36 36 L 50 24 L 64 36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    <text x="50" y="54" text-anchor="middle" fill="currentColor" font-family="Cinzel, serif" font-size="7.5" font-weight="bold">SHUBH VIVAH</text>
-    <circle cx="50" cy="68" r="3" fill="currentColor"/>
+    <polygon points="95,50 87.05,58.46 90.54,69.52 79.71,73.69 78.06,85.18 66.49,84.24 60.01,93.87 50,88 39.99,93.87 33.51,84.24 21.94,85.18 20.29,73.69 9.46,69.52 12.95,58.46 5,50 12.95,41.54 9.46,30.48 20.29,26.31 21.94,14.82 33.51,15.76 39.99,6.13 50,12 60.01,6.13 66.49,15.76 78.06,14.82 79.71,26.31 90.54,30.48 87.05,41.54" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2"/>
+    <circle cx="50" cy="50" r="30" stroke="currentColor" stroke-width="1.3" stroke-dasharray="3 2"/>
+    <polygon points="42,32 45,26 50,30 55,26 58,32" fill="currentColor"/>
+    <text x="50" y="48" text-anchor="middle" fill="currentColor" font-family="Cinzel, serif" font-size="8" font-weight="bold">SHUBH</text>
+    <text x="50" y="59" text-anchor="middle" fill="currentColor" font-family="Cinzel, serif" font-size="7.2" font-weight="bold">VIVAH</text>
+    <polygon points="50,64 54,68 50,72 46,68" fill="currentColor"/>
   </svg>

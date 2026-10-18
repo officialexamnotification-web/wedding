@@ -1471,26 +1471,115 @@ export function renderModel3DVisual(m3: Model3DElement) {
           </defs>
           {m3.geometryType === "ring-torus" ? (
             <g>
-              <ellipse cx="50" cy="56" rx="34" ry="22" fill="none" stroke={`url(#${gradId})`} strokeWidth="10" />
-              <polygon points="50,14 62,28 50,38 38,28" fill="#E0F2FE" stroke={pCol} strokeWidth="2" />
+              <ellipse cx="50" cy="58" rx="34" ry="22" fill="none" stroke={`url(#${gradId})`} strokeWidth="10" />
+              <ellipse cx="50" cy="58" rx="34" ry="22" fill="none" stroke="#FEF3C7" strokeWidth="1" opacity="0.7" />
+              <polygon points="50,12 63,27 50,39 37,27" fill="#E0F2FE" stroke={pCol} strokeWidth="2" />
+              <polyline points="37,27 63,27 M50,12 50,39" stroke="#BAE6FD" strokeWidth="1.2" />
             </g>
           ) : m3.geometryType === "lotus-3d" ? (
             <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.2">
-              <path d="M 50 14 C 36 34, 34 62, 50 82 C 66 62, 64 34, 50 14 Z" />
-              <path d="M 50 82 C 24 72, 14 46, 26 26 C 38 38, 42 58, 50 82 Z" opacity="0.9" />
-              <path d="M 50 82 C 76 72, 86 46, 74 26 C 62 38, 58 58, 50 82 Z" opacity="0.9" />
+              <ellipse cx="50" cy="84" rx="32" ry="8" opacity="0.6" />
+              <path d="M 50 80 C 18 72, 8 44, 22 24 C 34 36, 40 56, 50 80 Z" opacity="0.88" />
+              <path d="M 50 80 C 82 72, 92 44, 78 24 C 66 36, 60 56, 50 80 Z" opacity="0.88" />
+              <path d="M 50 12 C 34 32, 32 60, 50 80 C 68 60, 66 32, 50 12 Z" />
+              <circle cx="50" cy="48" r="5" fill="#FEF08A" />
             </g>
           ) : m3.geometryType === "royal-crown" ? (
             <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.5">
-              <polygon points="14,74 10,32 32,50 50,20 68,50 90,32 86,74" />
+              <polygon points="14,74 10,32 32,50 50,18 68,50 90,32 86,74" />
               <rect x="14" y="74" width="72" height="10" rx="3" />
-              <circle cx="50" cy="16" r="4" fill="#FEF08A" />
+              <circle cx="50" cy="14" r="4" fill="#FEF08A" />
+              <circle cx="10" cy="28" r="3" fill="#FEF08A" />
+              <circle cx="90" cy="28" r="3" fill="#FEF08A" />
+              <circle cx="32" cy="79" r="2.2" fill="#FEF08A" />
+              <circle cx="50" cy="79" r="2.5" fill="#FEF08A" />
+              <circle cx="68" cy="79" r="2.2" fill="#FEF08A" />
+            </g>
+          ) : m3.geometryType === "diya-3d" ? (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.4">
+              <path d="M 50 12 C 60 26, 64 38, 50 48 C 36 38, 40 26, 50 12 Z" fill="#FDE047" />
+              <path d="M 50 22 C 55 30, 56 38, 50 44 C 44 38, 45 30, 50 22 Z" fill="#F97316" stroke="none" />
+              <path d="M 14 54 Q 50 64 86 54 C 82 78, 66 86, 50 86 C 34 86, 18 78, 14 54 Z" />
+              <ellipse cx="50" cy="88" rx="22" ry="5" />
+            </g>
+          ) : m3.geometryType === "mandap-pillar" ? (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.3">
+              <rect x="24" y="10" width="52" height="10" rx="3" />
+              <path d="M 30 20 H 70 L 64 30 H 36 Z" />
+              <rect x="36" y="30" width="28" height="46" rx="2" />
+              <line x1="44" y1="30" x2="44" y2="76" stroke="#FEF3C7" strokeWidth="1" opacity="0.6" />
+              <line x1="56" y1="30" x2="56" y2="76" stroke="#FEF3C7" strokeWidth="1" opacity="0.6" />
+              <path d="M 28 76 H 72 L 78 88 H 22 Z" />
+            </g>
+          ) : m3.geometryType === "diamond-gem" ? (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.5" strokeLinejoin="round">
+              <polygon points="28,22 72,22 90,42 50,88 10,42" />
+              <polyline points="10,42 90,42 M28,22 38,42 50,88 62,42 72,22 M38,42 50,22 62,42" fill="none" />
+            </g>
+          ) : m3.geometryType === "sphere-orb" ? (
+            <g>
+              <circle cx="50" cy="50" r="36" fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.5" />
+              <ellipse cx="50" cy="50" rx="36" ry="14" fill="none" stroke="#FEF3C7" strokeWidth="1.1" strokeDasharray="3 2" />
+              <ellipse cx="50" cy="50" rx="14" ry="36" fill="none" stroke="#FEF3C7" strokeWidth="1.1" strokeDasharray="3 2" />
+              <circle cx="38" cy="36" r="5" fill="#FFFBEB" opacity="0.65" />
+            </g>
+          ) : m3.geometryType === "cube-matrix" ? (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.5" strokeLinejoin="round">
+              <polygon points="50,12 86,32 50,52 14,32" />
+              <polygon points="14,32 50,52 50,88 14,68" opacity="0.88" />
+              <polygon points="86,32 50,52 50,88 86,68" opacity="0.72" />
+              <polygon points="50,24 70,35 50,46 30,35" fill="#FEF08A" opacity="0.45" />
+            </g>
+          ) : m3.geometryType === "pyramid-prism" ? (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.5" strokeLinejoin="round">
+              <polygon points="50,10 12,74 50,88" />
+              <polygon points="50,10 88,74 50,88" opacity="0.78" />
+              <polygon points="50,28 28,68 50,76 72,68" fill="none" strokeDasharray="3 2" />
+            </g>
+          ) : m3.geometryType === "star-poly" ? (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.4" strokeLinejoin="round">
+              <polygon points="50,8 61,35 90,38 68,57 75,86 50,70 25,86 32,57 10,38 39,35" />
+              <polygon points="50,8 61,35 50,50 39,35" fill="#FEF08A" opacity="0.4" />
+              <circle cx="50" cy="50" r="6" fill="#FFFBEB" />
+            </g>
+          ) : m3.geometryType === "heart-crystal" ? (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.5" strokeLinejoin="round">
+              <path d="M 50 86 C 18 64, 8 38, 22 22 C 34 10, 46 18, 50 28 C 54 18, 66 10, 78 22 C 92 38, 82 64, 50 86 Z" />
+              <polyline points="22,22 50,48 78,22 M50,28 50,86 M15,44 50,48 85,44" fill="none" opacity="0.75" />
+            </g>
+          ) : m3.geometryType === "chandelier-3d" ? (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.3">
+              <line x1="50" y1="6" x2="50" y2="22" strokeWidth="2.5" />
+              <ellipse cx="50" cy="26" rx="20" ry="6" />
+              <ellipse cx="50" cy="44" rx="34" ry="9" />
+              <ellipse cx="50" cy="62" rx="22" ry="6" />
+              <polygon points="50,70 55,80 50,90 45,80" fill="#FEF08A" />
+              <circle cx="20" cy="52" r="3" fill="#FEF08A" />
+              <circle cx="80" cy="52" r="3" fill="#FEF08A" />
+              <circle cx="32" cy="70" r="2.5" fill="#FEF08A" />
+              <circle cx="68" cy="70" r="2.5" fill="#FEF08A" />
+            </g>
+          ) : m3.geometryType === "drum-dhol" ? (
+            <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.5">
+              <path d="M 24 24 C 40 16, 60 16, 76 24 L 76 76 C 60 84, 40 84, 24 76 Z" />
+              <ellipse cx="24" cy="50" rx="8" ry="26" fill="#FEF3C7" stroke={pCol} strokeWidth="2" />
+              <ellipse cx="76" cy="50" rx="8" ry="26" fill={`url(#${gradId})`} />
+              <polyline points="28,28 72,40 28,52 72,64 28,74" fill="none" stroke="#FEF08A" strokeWidth="1.4" />
+            </g>
+          ) : m3.geometryType === "helix-spiral" ? (
+            <g fill="none" stroke={`url(#${gradId})`} strokeWidth="5" strokeLinecap="round">
+              <path d="M 26 14 C 74 26, 26 50, 74 62 C 26 74, 74 88, 50 92" />
+              <path d="M 74 14 C 26 26, 74 50, 26 62 C 74 74, 26 88, 50 92" stroke="#FEF3C7" strokeWidth="2" strokeDasharray="4 3" />
+              <circle cx="50" cy="20" r="4" fill="#FEF08A" stroke="none" />
+              <circle cx="50" cy="56" r="4" fill="#FEF08A" stroke="none" />
+              <circle cx="50" cy="78" r="4" fill="#FEF08A" stroke="none" />
             </g>
           ) : (
             <g fill={`url(#${gradId})`} stroke="#FEF3C7" strokeWidth="1.4">
-              <ellipse cx="50" cy="78" rx="24" ry="7" />
-              <path d="M 26 56 C 20 36, 36 26, 50 26 C 64 26, 80 36, 74 56 C 68 74, 32 74, 26 56 Z" />
-              <ellipse cx="50" cy="24" rx="14" ry="5" />
+              <ellipse cx="50" cy="82" rx="24" ry="7" />
+              <path d="M 26 58 C 20 38, 36 28, 50 28 C 64 28, 80 38, 74 58 C 68 76, 32 76, 26 58 Z" />
+              <ellipse cx="50" cy="26" rx="14" ry="5" />
+              <path d="M 38 24 C 30 14, 34 10, 44 18 M 62 24 C 70 14, 66 10, 56 18" fill="#34D399" />
               <circle cx="50" cy="14" r="7" />
             </g>
           )}

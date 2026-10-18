@@ -40,6 +40,7 @@ export type ShapeSubcategoryId =
   | 'abstract';
 
 export type GraphicSubcategoryId =
+  | 'torans-bandhanwar'
   | 'flowers-botanicals'
   | 'celebration-festive'
   | 'food-drinks'

@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <path d="M 8 50 C 26 38, 38 62, 50 50 C 62 38, 74 62, 92 50" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
-      <path d="M 22 50 C 30 36, 42 36, 50 50 C 58 64, 70 64, 78 50" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/>
-      <polygon points="50,38 56,50 50,62 44,50" fill="currentColor"/>
-      <circle cx="12" cy="50" r="3" fill="currentColor"/>
-      <circle cx="88" cy="50" r="3" fill="currentColor"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><g fill="currentColor" opacity="0.55"><path d="M11.8 7.3 Q11.8 11.8 16.3 11.8 Q11.8 11.8 11.8 16.3 Q11.8 11.8 7.3 11.8 Q11.8 11.8 11.8 7.3 Z"/><path d="M88.2 7.3 Q88.2 11.8 92.7 11.8 Q88.2 11.8 88.2 16.3 Q88.2 11.8 83.7 11.8 Q88.2 11.8 88.2 7.3 Z"/></g><g stroke="currentColor" fill="currentColor">
+      <path d="M8 26 Q50 44 92 26" fill="none" stroke-width="2.4"/>
+      <polygon points="14,28 28,32 21,54" fill-opacity="0.28" stroke-width="1.8"/>
+      <polygon points="32,33 46,35 39,58" fill-opacity="0.35" stroke-width="1.8"/>
+      <polygon points="54,35 68,33 61,58" fill-opacity="0.28" stroke-width="1.8"/>
+      <polygon points="72,32 86,28 79,54" fill-opacity="0.35" stroke-width="1.8"/>
+    </g></svg>

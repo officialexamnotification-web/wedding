@@ -1,7 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-      <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="1.5" stroke-dasharray="none"/>
-      <path d="M 30 63 C 24 48, 34 32, 50 28 C 66 32, 76 48, 70 63 Z" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="2.2"/>
-      <path d="M 50 12 C 44 20, 44 26, 50 28 C 56 26, 56 20, 50 12 Z" fill="currentColor"/>
-      <path d="M 22 72 H 78 M 28 78 H 72" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-      <circle cx="50" cy="50" r="6" fill="currentColor" fill-opacity="0.5"/>
-    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><polygon points="50,3.8 96.2,50 50,96.2 3.8,50" fill="none" stroke="currentColor" stroke-width="0.85" stroke-dasharray="4 3" opacity="0.4"/><g stroke="currentColor" fill="currentColor">
+      <polygon points="28,12 72,12 88,28 88,72 72,88 28,88 12,72 12,28" fill-opacity="0.2" stroke-width="2.4"/>
+      <text x="50" y="45" text-anchor="middle" font-size="11" font-family="serif" font-weight="bold" stroke="none">SHUBH</text>
+      <line x1="26" y1="51" x2="74" y2="51" stroke-width="1.5"/>
+      <text x="50" y="66" text-anchor="middle" font-size="11" font-family="serif" font-weight="bold" stroke="none">LABH</text>
+    </g></svg>
