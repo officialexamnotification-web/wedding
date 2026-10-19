@@ -1071,6 +1071,10 @@ export default function App() {
           onFindAndReplaceText={handleFindAndReplaceText}
           onTranslateCard={handleTranslateCard}
           onApplyPageLayout={handleApplyPageLayout}
+          showRulers={showRulers}
+          onToggleRulers={() => setShowRulers((r) => !r)}
+          showSafeZones={showSafeZones}
+          onToggleSafeZones={() => setShowSafeZones((s) => !s)}
         />
 
         {/* Center Canvas Area + Contextual Properties Toolbar + Bottom Filmstrip */}
@@ -1092,10 +1096,6 @@ export default function App() {
             onOpenPhotoAdjust={() => handleOpenPhotoAdjust()}
             copiedStyle={copiedStyle}
             onCopyStyle={handleCopyStyle}
-            showRulers={showRulers}
-            onToggleRulers={() => setShowRulers((r) => !r)}
-            showSafeZones={showSafeZones}
-            onToggleSafeZones={() => setShowSafeZones((s) => !s)}
             drawBrush={drawBrush}
             onExitDrawMode={() => setDrawBrush((prev) => ({ ...prev, isEnabled: false }))}
             onDistributeElements={handleDistributeElements}

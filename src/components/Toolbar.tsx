@@ -29,8 +29,6 @@ import {
   Play,
   Spline,
   Eye,
-  Grid,
-  Ruler,
   Wand2,
   Link2,
   ChevronDown,
@@ -92,10 +90,6 @@ interface ToolbarProps {
   onOpenPhotoAdjust?: () => void;
   copiedStyle?: Partial<CanvasItem> | null;
   onCopyStyle?: () => void;
-  showRulers?: boolean;
-  onToggleRulers?: () => void;
-  showSafeZones?: boolean;
-  onToggleSafeZones?: () => void;
   drawBrush?: DrawBrushSettings;
   onExitDrawMode?: () => void;
   onDistributeElements?: (axis: 'horizontal' | 'vertical' | 'tidy') => void;
@@ -287,10 +281,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onOpenPhotoAdjust,
   copiedStyle,
   onCopyStyle,
-  showRulers = false,
-  onToggleRulers,
-  showSafeZones = true,
-  onToggleSafeZones,
   drawBrush,
   onExitDrawMode,
   onDistributeElements,
@@ -352,51 +342,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     );
   }
 
-  // When no element is selected: show Canva Canvas View Controls bar
-  if (!selectedElement) {
-    return (
-      <div className="h-11 bg-neutral-900/95 border-b border-neutral-800 px-3 sm:px-4 flex items-center justify-between text-xs text-neutral-400 select-none shrink-0 overflow-x-auto">
-        <div className="flex items-center gap-2.5 shrink-0">
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-neutral-200 font-medium text-[11px] sm:text-xs">
-            Canva Pro Studio: Click any element on the card to unlock contextual tools
-          </span>
-        </div>
-
-        {/* Right Canvas View Guides (Rulers & Print Margins) */}
-        <div className="flex items-center gap-2 shrink-0">
-          {onToggleRulers && (
-            <button
-              onClick={onToggleRulers}
-              className={`px-2.5 py-1 rounded-lg border text-[11px] flex items-center gap-1.5 transition ${
-                showRulers
-                  ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold'
-                  : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:text-neutral-200'
-              }`}
-              title="Toggle Canva Pixel Rulers"
-            >
-              <Ruler className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Rulers</span>
-            </button>
-          )}
-          {onToggleSafeZones && (
-            <button
-              onClick={onToggleSafeZones}
-              className={`px-2.5 py-1 rounded-lg border text-[11px] flex items-center gap-1.5 transition ${
-                showSafeZones
-                  ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold'
-                  : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:text-neutral-200'
-              }`}
-              title="Toggle Print Bleed & Safe Margin Guides"
-            >
-              <Grid className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Print Guides</span>
-            </button>
-          )}
-        </div>
-      </div>
-    );
-  }
+  if (!selectedElement) return null;
 
   const isText = selectedElement.type === 'text';
   const isImage = selectedElement.type === 'image';

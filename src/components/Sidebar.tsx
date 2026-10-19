@@ -31,6 +31,8 @@ import {
   Crown,
   PenTool,
   Music,
+  Ruler,
+  Grid,
   Eraser,
   Shuffle,
   Volume2,
@@ -99,7 +101,7 @@ export type SidebarTab =
   | 'text'
   | 'brand'
   | 'photos'
-  | 'draw'
+  | 'tools'
   | 'projects'
   | 'apps'
   | 'audio'
@@ -141,6 +143,10 @@ interface SidebarProps {
   onFindAndReplaceText?: (findStr: string, replaceStr: string) => number;
   onTranslateCard?: (targetLang: 'hindi' | 'english' | 'hinglish' | 'sanskrit') => void;
   onApplyPageLayout?: (layoutId: string) => void;
+  showRulers?: boolean;
+  onToggleRulers?: () => void;
+  showSafeZones?: boolean;
+  onToggleSafeZones?: () => void;
 }
 
 export const SHAPE_PRESETS: {
@@ -296,7 +302,7 @@ export const SHAPE_PRESETS: {
   {
     shapeType: 'line-arrow-both',
     label: 'Double Arrow Connector',
-    desc: 'Canva pointer line',
+    desc: 'Connector with arrowheads on both ends',
     category: 'lines',
     width: 260,
     height: 24,
@@ -604,13 +610,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onFindAndReplaceText,
   onTranslateCard,
   onApplyPageLayout,
+  showRulers = false,
+  onToggleRulers,
+  showSafeZones = false,
+  onToggleSafeZones,
 }) => {
   const [activeTab, setActiveTab] = useState<SidebarTab>('templates');
+  const [activeToolTab, setActiveToolTab] = useState<
+    'draw' | 'audio' | 'backgrounds' | 'layers' | 'guides'
+  >('backgrounds');
   const [designSubTab, setDesignSubTab] = useState<'templates' | 'layouts' | 'styles'>('templates');
   const [elementSubTab, setElementSubTab] = useState<
     'all' | 'shapes' | 'frames' | 'grids' | 'tables' | 'charts' | 'stickers'
   >('all');
-  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  // Keep the first workspace view focused on the invitation; the rail still
+  // opens any tool panel on demand.
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [templateCategory, setTemplateCategory] = useState<string>('all');
   const [stickerCategory, setStickerCategory] = useState<string>('all');
   const [stickerSearch, setStickerSearch] = useState<string>('');
@@ -685,9 +700,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     } else {
       setActiveTab(tab);
       setIsDrawerOpen(true);
-      if (tab === 'draw' && onUpdateDrawBrush) {
-        onUpdateDrawBrush({ isEnabled: true });
-      } else if (tab !== 'draw' && drawBrush?.isEnabled && onUpdateDrawBrush) {
+      if (tab !== 'tools' && drawBrush?.isEnabled && onUpdateDrawBrush) {
         onUpdateDrawBrush({ isEnabled: false });
       }
     }
@@ -1096,12 +1109,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'text' as SidebarTab, label: 'Text', icon: Type },
     { id: 'brand' as SidebarTab, label: 'Brand', icon: Crown },
     { id: 'photos' as SidebarTab, label: 'Uploads', icon: ImageIcon },
-    { id: 'draw' as SidebarTab, label: 'Draw', icon: PenTool },
+    { id: 'tools' as SidebarTab, label: 'Tools', icon: Wand2 },
     { id: 'projects' as SidebarTab, label: 'Projects', icon: FolderKanban },
     { id: 'apps' as SidebarTab, label: 'Apps', icon: QrCode },
-    { id: 'audio' as SidebarTab, label: 'Audio', icon: Music },
-    { id: 'backgrounds' as SidebarTab, label: 'Bg / Paper', icon: Palette },
-    { id: 'layers' as SidebarTab, label: 'Position', icon: Layers },
     { id: 'slides' as SidebarTab, label: 'Pages', icon: Film },
   ];
 
@@ -1134,7 +1144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="hidden md:flex h-full select-none shrink-0 z-40 relative">
         {/* Far-Left Activity Rail (Canva Pro 12-Tab Dock) */}
         <div className="w-18 bg-neutral-950 border-r border-neutral-800/80 flex flex-col items-center py-2 gap-1 z-20 shrink-0 overflow-y-auto no-scrollbar">
-          {TABS_CONFIG.map((tab) => {
+          {TABS_CONFIG.filter((tab) => tab.id !== 'slides').map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id && isDrawerOpen;
             return (
@@ -1197,9 +1207,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => {
                 setActiveTab(tab.id);
                 setIsDrawerOpen(true);
-                if (tab.id === 'draw' && onUpdateDrawBrush) {
-                  onUpdateDrawBrush({ isEnabled: true });
-                } else if (tab.id !== 'draw' && drawBrush?.isEnabled && onUpdateDrawBrush) {
+                if (tab.id !== 'tools' && drawBrush?.isEnabled && onUpdateDrawBrush) {
                   onUpdateDrawBrush({ isEnabled: false });
                 }
               }}
@@ -1228,7 +1236,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="flex flex-col items-center pt-2.5 pb-2 px-4 border-b border-neutral-800">
               <div className="w-10 h-1 bg-neutral-600 rounded-full mb-2" />
               <div className="w-full flex items-center justify-between">
-                <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">
+                <span className="text-xs font-bold text-amber-200 uppercase tracking-wider flex items-center gap-1.5">
                   {TABS_CONFIG.find((t) => t.id === activeTab)?.label} Studio
                 </span>
                 <button
@@ -1246,12 +1254,48 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
       )}
+
     </>
   );
 
   function renderTabContent() {
     return (
       <>
+        {activeTab === 'tools' && (
+          <div className="grid grid-cols-3 gap-1 rounded-xl bg-neutral-950 p-1 border border-neutral-800" role="tablist" aria-label="Editor tools">
+            {([
+              { id: 'backgrounds', label: 'Background', icon: Palette },
+              { id: 'layers', label: 'Layers', icon: Layers },
+              { id: 'draw', label: 'Draw', icon: PenTool },
+              { id: 'audio', label: 'Audio', icon: Music },
+              { id: 'guides', label: 'Guides', icon: Ruler },
+            ] as const).map((tool) => {
+              const Icon = tool.icon;
+              const isActive = activeToolTab === tool.id;
+              return (
+                <button
+                  key={tool.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => {
+                    setActiveToolTab(tool.id);
+                    if (tool.id === 'draw' && onUpdateDrawBrush) {
+                      onUpdateDrawBrush({ isEnabled: true });
+                    } else if (drawBrush?.isEnabled && onUpdateDrawBrush) {
+                      onUpdateDrawBrush({ isEnabled: false });
+                    }
+                  }}
+                  className={`min-w-0 rounded-lg px-1 py-2 flex flex-col items-center gap-1 text-[10px] transition ${isActive ? 'bg-amber-500 text-neutral-950 font-semibold shadow' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'}`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="truncate w-full text-center">{tool.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* ================= 1. DESIGN (TEMPLATES, LAYOUTS & STYLES) TAB ================= */}
         {activeTab === 'templates' && (
           <div className="space-y-4">
@@ -1349,9 +1393,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <span className="text-xs font-medium text-neutral-200 truncate flex-1 pr-2">
                             {template.title}
                           </span>
-                          <span className="text-[11px] text-amber-400 font-semibold group-hover:underline shrink-0">
-                            Apply All →
-                          </span>
+                          <span className="text-[11px] text-amber-400 font-semibold group-hover:underline shrink-0">Apply All →</span>
                         </div>
                       </div>
                     );
@@ -1363,7 +1405,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {designSubTab === 'layouts' && (
               <div className="space-y-3">
                 <p className="text-xs text-neutral-400">
-                  Canva Smart Page Layouts — restructure your current slide with 1 click:
+                  Invitation page layouts
                 </p>
                 {[
                   {
@@ -1407,7 +1449,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {designSubTab === 'styles' && (
               <div className="space-y-3">
                 <p className="text-xs text-neutral-400">
-                  Canva 1-Click Color & Font Pairings — shuffle your card palette instantly:
+                  Royal color and font pairings
                 </p>
                 {BRAND_KITS.map((kit) => (
                   <div
@@ -1431,7 +1473,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* ================= 2. ELEMENTS (CANVA 14-CATEGORY 1,117-ITEM LIBRARY + CLASSIC PRESETS) TAB ================= */}
+        {/* ================= 2. ELEMENTS (14-CATEGORY LIBRARY + CLASSIC PRESETS) TAB ================= */}
         {activeTab === 'elements' && (
           <div className="space-y-4">
             <ElementsLibraryPanel
@@ -1482,7 +1524,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
                     <Frame className="w-3.5 h-3.5" />
-                    <span>Canva Photo Frames & Mockups</span>
+                    <span>Photo frames & mockups</span>
                   </h3>
                 </div>
 
@@ -1547,7 +1589,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="space-y-2.5 pt-3 border-t border-neutral-800">
                 <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
                   <LayoutGrid className="w-3.5 h-3.5" />
-                  <span>Canva Collage Grids (Multi-Photo)</span>
+                  <span>Photo collages</span>
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
                   {(
@@ -1578,7 +1620,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="space-y-2.5 pt-3 border-t border-neutral-800">
                 <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Table2 className="w-3.5 h-3.5" />
-                  <span>Canva Tables & Schedules</span>
+                  <span>Tables & schedules</span>
                 </h3>
                 <p className="text-[11px] text-neutral-400">
                   Insert editable tables for wedding ceremonies, dining menu, or guest seating:
@@ -1635,7 +1677,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="space-y-2.5 pt-3 border-t border-neutral-800">
                 <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
                   <BarChart3 className="w-3.5 h-3.5" />
-                  <span>Canva Charts & Live Countdown</span>
+                  <span>Charts & countdowns</span>
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
                   {(
@@ -1681,7 +1723,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="space-y-2.5 pt-3 border-t border-neutral-800">
                 <div>
                   <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider">
-                    Canva Shapes, Lines, Banners & Seals (28+)
+                    Shapes, lines, banners & seals
                   </h3>
                   <p className="text-[11px] text-neutral-400">
                     Double-click any shape or banner on canvas to type text inside it!
@@ -1796,7 +1838,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-semibold text-neutral-100">
-                Canva Typography & Magic Write
+                Invitation typography
               </h3>
               <p className="text-xs text-neutral-400">
                 Add headings, curved badges, metallic gold text & Sanskrit shlokas
@@ -1809,7 +1851,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className="w-full py-2.5 px-3 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 hover:brightness-110 text-white font-bold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 transition"
               >
                 <Wand2 className="w-4 h-4" />
-                <span>Canva Magic Write™ (AI Shloka & Wording)</span>
+                <span>AI wording & shloka</span>
               </button>
             )}
 
@@ -1874,7 +1916,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Canva Curated Font Combinations */}
             <div className="pt-2 border-t border-neutral-800 space-y-2.5">
               <h4 className="text-xs font-semibold text-amber-300 uppercase tracking-wider">
-                Canva Ready Font Combinations
+                Royal font pairings
               </h4>
               <div className="grid grid-cols-1 gap-2">
                 {CANVA_FONT_COMBINATIONS.map((combo, idx) => (
@@ -1959,7 +2001,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <h3 className="text-sm font-semibold text-neutral-100 flex items-center gap-1.5">
                 <Crown className="w-4 h-4 text-amber-400" />
-                <span>Canva Brand Hub & Custom Kit</span>
+                <span>Brand colors & fonts</span>
               </h3>
               <p className="text-xs text-neutral-400">
                 1-click restyle your entire invitation card or create your family wedding monogram kit
@@ -2210,13 +2252,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         {/* ================= 6. CANVA DRAW (FREEHAND BRUSH STUDIO) TAB ================= */}
-        {activeTab === 'draw' && drawBrush && onUpdateDrawBrush && (
+        {activeTab === 'tools' && activeToolTab === 'draw' && drawBrush && onUpdateDrawBrush && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold text-neutral-100 flex items-center gap-1.5">
                   <PenTool className="w-4 h-4 text-amber-400" />
-                  <span>Canva Draw Studio (फ्रीहैंड ब्रश)</span>
+                <span>Draw (फ्रीहैंड ब्रश)</span>
                 </h3>
                 <p className="text-xs text-neutral-400">
                   Draw custom signatures, golden sparkles or calligraphy directly on your card
@@ -2352,7 +2394,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <h3 className="text-sm font-semibold text-neutral-100 flex items-center gap-1.5">
                 <FolderKanban className="w-4 h-4 text-amber-400" />
-                <span>Canva Projects & Saved Designs</span>
+                <span>Saved projects</span>
               </h3>
               <p className="text-xs text-neutral-400">
                 Save snapshots of your invitation cards locally and switch between versions anytime
@@ -2422,7 +2464,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="space-y-5">
             <div>
               <h3 className="text-sm font-semibold text-neutral-100">
-                Canva Apps, QR, Translate & Widgets
+                Apps, QR & widgets
               </h3>
               <p className="text-xs text-neutral-400">
                 Smart wedding tools: QR Generator, Magic Translate, Find & Replace, Countdown & Entry Pass
@@ -2587,7 +2629,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="p-3 rounded-xl bg-neutral-800/70 border border-neutral-700 space-y-2.5">
                 <div className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Languages className="w-3.5 h-3.5" />
-                  <span>2. Canva Magic Translate™ (Card Language)</span>
+                  <span>Translate invitation</span>
                 </div>
                 <p className="text-[11px] text-neutral-400">
                   Translate common wedding phrases on the current slide into Hindi, English, or Sanskrit:
@@ -2717,12 +2759,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         {/* ================= 9. CANVA AUDIO & WEDDING MUSIC TAB ================= */}
-        {activeTab === 'audio' && (
+        {activeTab === 'tools' && activeToolTab === 'audio' && (
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-semibold text-neutral-100 flex items-center gap-1.5">
                 <Music className="w-4 h-4 text-amber-400" />
-                <span>Canva Audio & Wedding Music</span>
+                <span>Wedding audio</span>
               </h3>
               <p className="text-xs text-neutral-400">
                 Choose the background instrumental raga for your animated video invitation
@@ -2777,7 +2819,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         {/* ================= 10. BACKGROUNDS & PAPER TAB ================= */}
-        {activeTab === 'backgrounds' && (
+        {activeTab === 'tools' && activeToolTab === 'backgrounds' && (
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-semibold text-neutral-100">Card Background & Paper</h3>
@@ -2858,8 +2900,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
+        {activeTab === 'tools' && activeToolTab === 'guides' && (
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-sm font-semibold text-neutral-100">Canvas guides</h3>
+              <p className="text-xs text-neutral-400">Optional alignment and print-safe overlays</p>
+            </div>
+            <button
+              type="button"
+              onClick={onToggleRulers}
+              className={`w-full rounded-xl border p-3 text-left flex items-center justify-between gap-3 transition ${showRulers ? 'border-amber-400/60 bg-amber-500/10 text-amber-200' : 'border-neutral-700 bg-neutral-800/70 text-neutral-200 hover:border-neutral-500'}`}
+            >
+              <span className="flex items-center gap-2 text-xs font-medium"><Ruler className="w-4 h-4 text-amber-400" />Rulers and alignment lines</span>
+              <span className="text-[10px] text-neutral-400">{showRulers ? 'On' : 'Off'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onToggleSafeZones}
+              className={`w-full rounded-xl border p-3 text-left flex items-center justify-between gap-3 transition ${showSafeZones ? 'border-amber-400/60 bg-amber-500/10 text-amber-200' : 'border-neutral-700 bg-neutral-800/70 text-neutral-200 hover:border-neutral-500'}`}
+            >
+              <span className="flex items-center gap-2 text-xs font-medium"><Grid className="w-4 h-4 text-amber-400" />Print-safe margins</span>
+              <span className="text-[10px] text-neutral-400">{showSafeZones ? 'On' : 'Off'}</span>
+            </button>
+          </div>
+        )}
+
         {/* ================= 11. CANVA LAYERS & POSITION TAB ================= */}
-        {activeTab === 'layers' && (
+        {activeTab === 'tools' && activeToolTab === 'layers' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
