@@ -46,7 +46,8 @@ export type GraphicSubcategoryId =
   | 'people-avatars'
   | 'business-marketing'
   | 'arrows-doodles'
-  | 'stickers-badges';
+  | 'stickers-badges'
+  | 'canva-decorative-pack';
 
 export interface CategoryTileMeta {
   id: MainElementCategoryId;

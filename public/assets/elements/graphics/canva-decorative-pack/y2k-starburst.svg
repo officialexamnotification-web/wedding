@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <g id="y2k-starburst-brutalist-offset-shadow" transform="translate(12, 12)">
+    <path fill="#10002B" d="M 455 250 Q 275.87 260.72 338.39 338.39 Q 260.72 275.87 250 455 Q 239.28 275.87 161.61 338.39 Q 224.13 260.72 45 250 Q 224.13 239.28 161.61 161.61 Q 239.28 224.13 250 45 Q 260.72 224.13 338.39 161.61 Q 275.87 239.28 455 250 Z"/>
+    <ellipse cx="250" cy="250" rx="220" ry="68" transform="rotate(-28 250 250)" fill="none" stroke="#10002B" stroke-width="16"/>
+  </g>
+  <g id="y2k-starburst-y2k-orbital-rings">
+    <ellipse cx="250" cy="250" rx="220" ry="68" transform="rotate(-28 250 250)" fill="none" stroke="#7209B7" stroke-width="16"/>
+    <ellipse cx="250" cy="250" rx="220" ry="68" transform="rotate(-28 250 250)" fill="none" stroke="#00F5D4" stroke-width="4" stroke-dasharray="18 10"/>
+    <circle cx="250" cy="250" r="96" fill="#10002B" stroke="#7209B7" stroke-width="3"/>
+    <ellipse cx="250" cy="250" rx="96" ry="38" fill="none" stroke="#7209B7" stroke-width="2"/>
+    <ellipse cx="250" cy="250" rx="38" ry="96" fill="none" stroke="#7209B7" stroke-width="2"/>
+  </g>
+  <g id="y2k-starburst-main-hyperbolic-star">
+    <path fill="#F72585" stroke="#10002B" stroke-width="4" d="M 455 250 Q 275.87 260.72 338.39 338.39 Q 260.72 275.87 250 455 Q 239.28 275.87 161.61 338.39 Q 224.13 260.72 45 250 Q 224.13 239.28 161.61 161.61 Q 239.28 224.13 250 45 Q 260.72 224.13 338.39 161.61 Q 275.87 239.28 455 250 Z"/>
+  </g>
+  <g id="y2k-starburst-neon-cyan-core-and-sparkles">
+    <path fill="#00F5D4" d="M 355 250 Q 261.88 261.88 250 355 Q 238.12 261.88 145 250 Q 238.12 238.12 250 145 Q 261.88 238.12 355 250 Z M 143 115 Q 109.3 119.3 105 153 Q 100.7 119.3 67 115 Q 100.7 110.7 105 77 Q 109.3 110.7 143 115 Z M 437 375 Q 399.75 379.75 395 417 Q 390.25 379.75 353 375 Q 390.25 370.25 395 333 Q 399.75 370.25 437 375 Z"/>
+    <path fill="#F72585" d="M 409 110 Q 387.72 112.72 385 134 Q 382.28 112.72 361 110 Q 382.28 107.28 385 86 Q 387.72 107.28 409 110 Z"/>
+    <circle cx="250" cy="250" r="18" fill="#10002B"/>
+    <circle cx="250" cy="250" r="8" fill="#00F5D4"/>
+    <path d="M 55 342 A 220 68 -28 0 0 445 158" fill="none" stroke="#00F5D4" stroke-width="7" stroke-linecap="round"/>
+  </g>
+</svg>

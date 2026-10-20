@@ -12,6 +12,7 @@ import {
 } from './categories';
 import { SHAPES_LIBRARY_ITEMS } from './shapesManifest';
 import { GRAPHICS_LIBRARY_ITEMS } from './graphicsManifest';
+import { CANVA_DECORATIVE_ITEMS } from './canvaDecorativeManifest';
 import { FRAMES_LIBRARY_ITEMS, GRIDS_LIBRARY_ITEMS } from './framesGridsManifest';
 import {
   PHOTOS_LIBRARY_ITEMS,
@@ -33,6 +34,7 @@ export {
   SEARCH_SYNONYMS,
   SHAPES_LIBRARY_ITEMS,
   GRAPHICS_LIBRARY_ITEMS,
+  CANVA_DECORATIVE_ITEMS,
   PREMIUM_WEDDING_ELEMENTS,
   FRAMES_LIBRARY_ITEMS,
   GRIDS_LIBRARY_ITEMS,
@@ -51,6 +53,7 @@ export const ALL_UNIVERSAL_ELEMENTS: UniversalElementItem[] = [
   ...PREMIUM_WEDDING_ELEMENTS,
   ...SHAPES_LIBRARY_ITEMS,
   ...GRAPHICS_LIBRARY_ITEMS,
+  ...CANVA_DECORATIVE_ITEMS,
   ...PHOTOS_LIBRARY_ITEMS,
   ...VIDEOS_LIBRARY_ITEMS,
   ...AUDIO_LIBRARY_ITEMS,
@@ -69,7 +72,7 @@ export function getItemsByCategory(catId: MainElementCategoryId): UniversalEleme
     case 'shapes':
       return SHAPES_LIBRARY_ITEMS;
     case 'graphics':
-      return [...PREMIUM_WEDDING_ELEMENTS, ...GRAPHICS_LIBRARY_ITEMS];
+      return [...PREMIUM_WEDDING_ELEMENTS, ...GRAPHICS_LIBRARY_ITEMS, ...CANVA_DECORATIVE_ITEMS];
     case 'photos':
       return PHOTOS_LIBRARY_ITEMS;
     case 'videos':
@@ -105,6 +108,7 @@ export function getGraphicsBySubcategory(subId: GraphicSubcategoryId) {
   return [
     ...PREMIUM_WEDDING_ELEMENTS.filter((item) => item.subcategory === subId),
     ...GRAPHICS_LIBRARY_ITEMS.filter((item) => item.subcategory === subId),
+    ...CANVA_DECORATIVE_ITEMS.filter((item) => item.subcategory === subId),
   ];
 }
 
@@ -146,7 +150,7 @@ export function searchElementsCatalogue(
 export function validateCatalogueIntegrity() {
   const counts: Record<MainElementCategoryId, number> = {
     shapes: SHAPES_LIBRARY_ITEMS.length,
-    graphics: GRAPHICS_LIBRARY_ITEMS.length + PREMIUM_WEDDING_ELEMENTS.length,
+    graphics: GRAPHICS_LIBRARY_ITEMS.length + CANVA_DECORATIVE_ITEMS.length + PREMIUM_WEDDING_ELEMENTS.length,
     photos: PHOTOS_LIBRARY_ITEMS.length,
     videos: VIDEOS_LIBRARY_ITEMS.length,
     audio: AUDIO_LIBRARY_ITEMS.length,

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <g id="ornamental-divider-outer-lotus-petals">
+    <path fill="#FAF0CA" stroke="#6B4415" stroke-width="2.5" d="M 250 255 C 223.84 260.75, 199.97 247.7, 185.17 232.08 C 209.27 230.22, 237.26 235.5, 250 255 Z M 250 255 C 262.74 235.5, 290.73 230.22, 314.83 232.08 C 300.03 247.7, 276.16 260.75, 250 255 Z"/>
+    <path fill="#C59325" stroke="#6B4415" stroke-width="2.5" d="M 250 255 C 219.03 245.35, 203.06 216.65, 198.2 190.67 C 224.43 203.3, 249.9 226.06, 250 255 Z M 250 255 C 250.1 226.06, 275.57 203.3, 301.8 190.67 C 296.94 216.65, 280.97 245.35, 250 255 Z"/>
+    <path fill="#FAF0CA" stroke="#6B4415" stroke-width="3" d="M 250 255 C 227.9 226.5, 234.7 188.5, 250 160 C 265.3 188.5, 272.1 226.5, 250 255 Z"/>
+  </g>
+  <g id="ornamental-divider-filigree-scrollwork">
+    <!-- Left & Right Primary Art Nouveau S-Scrolls -->
+    <path fill="none" stroke="#6B4415" stroke-width="5.5" stroke-linecap="round" d="
+      M 232 265 C 195 292, 138 282, 138 238 C 138 205, 178 202, 182 228 C 185 246, 165 254, 156 240
+      M 268 265 C 305 292, 362 282, 362 238 C 362 205, 322 202, 318 228 C 315 246, 335 254, 344 240
+    "/>
+    <!-- Left & Right Outer Filigree Flourishes -->
+    <path fill="none" stroke="#C59325" stroke-width="4.5" stroke-linecap="round" d="
+      M 148 268 C 112 298, 52 290, 52 250 C 52 224, 86 222, 88 244 C 90 258, 72 262, 68 250
+      M 352 268 C 388 298, 448 290, 448 250 C 448 224, 414 222, 412 244 C 410 258, 428 262, 432 250
+    "/>
+    <!-- Lower Under-Swash Scrolls -->
+    <path fill="none" stroke="#6B4415" stroke-width="4" stroke-linecap="round" d="
+      M 250 288 C 225 325, 175 322, 175 295 C 175 280, 195 280, 195 294
+      M 250 288 C 275 325, 325 322, 325 295 C 325 280, 305 280, 305 294
+    "/>
+    <!-- Tapered Horizontal Wing Rules -->
+    <polygon points="12,265 118,261 118,269" fill="#6B4415"/>
+    <polygon points="488,265 382,261 382,269" fill="#6B4415"/>
+  </g>
+  <g id="ornamental-divider-ornamental-gems-and-crown">
+    <path fill="#C59325" d="M 268 128 Q 252.04 130.04 250 152 Q 247.96 130.04 232 128 Q 247.96 125.96 250 104 Q 252.04 125.96 268 128 Z M 97 195 Q 86.36 196.36 85 211 Q 83.64 196.36 73 195 Q 83.64 193.64 85 179 Q 86.36 193.64 97 195 Z M 427 195 Q 416.36 196.36 415 211 Q 413.64 196.36 403 195 Q 413.64 193.64 415 179 Q 416.36 193.64 427 195 Z"/>
+    <!-- Central Diamond Medallion -->
+    <polygon points="250,238 270,265 250,292 230,265" fill="#1D3557" stroke="#FAF0CA" stroke-width="2.5"/>
+    <circle cx="250" cy="265" r="5.5" fill="#FAF0CA"/>
+    <!-- Teardrop & Pearl Terminals -->
+    <circle cx="156" cy="240" r="5" fill="#C59325"/>
+    <circle cx="344" cy="240" r="5" fill="#C59325"/>
+    <circle cx="68" cy="250" r="4.5" fill="#6B4415"/>
+    <circle cx="432" cy="250" r="4.5" fill="#6B4415"/>
+    <circle cx="250" cy="322" r="6" fill="#C59325"/>
+    <circle cx="18" cy="265" r="5" fill="#C59325"/>
+    <circle cx="482" cy="265" r="5" fill="#C59325"/>
+  </g>
+</svg>

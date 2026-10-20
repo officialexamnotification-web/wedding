@@ -623,6 +623,7 @@ export interface AudioTrack {
   ragaNotes: number[];
   tempo: number;
   description: string;
+  audioUrl?: string;
 }
 
 export interface DrawBrushSettings {

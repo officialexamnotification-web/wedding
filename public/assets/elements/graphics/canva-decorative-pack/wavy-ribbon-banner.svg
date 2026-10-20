@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <g id="wavy-ribbon-banner-ribbon-Forked-Tails">
+    <path fill="#C9182B" stroke="#5E0811" stroke-width="4" stroke-linejoin="round" d="
+      M 135 268
+      C 95 275, 58 265, 28 245
+      L 58 292
+      L 24 338
+      C 62 355, 108 358, 152 338
+      Z
+    "/>
+    <path fill="#C9182B" stroke="#5E0811" stroke-width="4" stroke-linejoin="round" d="
+      M 365 242
+      C 405 235, 442 245, 472 265
+      L 442 218
+      L 476 172
+      C 438 155, 392 152, 348 172
+      Z
+    "/>
+    <path fill="none" stroke="#F4B41A" stroke-width="3" d="
+      M 42 256 C 72 272, 105 276, 132 274
+      M 38 330 C 72 344, 108 346, 145 330
+      M 458 254 C 428 238, 395 234, 368 236
+      M 462 180 C 428 166, 392 164, 355 180
+    "/>
+  </g>
+  <g id="wavy-ribbon-banner-3d-under-folds-with-hatching">
+    <path fill="#5E0811" stroke="#5E0811" stroke-width="4" stroke-linejoin="round" d="
+      M 92 282 L 152 338 L 152 262 Z
+    "/>
+    <path fill="#5E0811" stroke="#5E0811" stroke-width="4" stroke-linejoin="round" d="
+      M 408 228 L 348 172 L 348 248 Z
+    "/>
+  </g>
+  <g id="wavy-ribbon-banner-main-s-curve-front-banner">
+    <path fill="#5E0811" opacity="0.25" transform="translate(0, 10)" d="
+      M 92 198
+      C 175 155, 325 245, 408 198
+      L 408 282
+      C 325 329, 175 239, 92 282
+      Z
+    "/>
+    <path fill="#C9182B" stroke="#5E0811" stroke-width="4.5" stroke-linejoin="round" d="
+      M 92 198
+      C 175 155, 325 245, 408 198
+      L 408 282
+      C 325 329, 175 239, 92 282
+      Z
+    "/>
+    <path fill="none" stroke="#F4B41A" stroke-width="3.5" d="
+      M 102 208 C 178 168, 322 256, 398 208
+      M 102 272 C 178 232, 322 320, 398 272
+    "/>
+    <path fill="none" stroke="#FFF9F0" stroke-width="2" stroke-dasharray="8 6" d="
+      M 118 240 C 185 204, 315 284, 382 240
+    "/>
+  </g>
+  <g id="wavy-ribbon-banner-crown-sparkles">
+    <path fill="#F4B41A" d="M 270 125 Q 252.26 127.26 250 151 Q 247.74 127.26 230 125 Q 247.74 122.74 250 99 Q 252.26 122.74 270 125 Z M 197 145 Q 186.36 146.36 185 161 Q 183.64 146.36 173 145 Q 183.64 143.64 185 129 Q 186.36 143.64 197 145 Z M 327 145 Q 316.36 146.36 315 161 Q 313.64 146.36 303 145 Q 313.64 143.64 315 129 Q 316.36 143.64 327 145 Z"/>
+    <circle cx="250" cy="365" r="5" fill="#F4B41A"/>
+    <circle cx="225" cy="358" r="3.5" fill="#C9182B"/>
+    <circle cx="275" cy="358" r="3.5" fill="#C9182B"/>
+  </g>
+</svg>

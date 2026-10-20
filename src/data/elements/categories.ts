@@ -155,6 +155,7 @@ export const GRAPHIC_SUBCATEGORIES: {
   { id: 'business-marketing', label: 'Venue, Map & Icons', targetCount: 50 },
   { id: 'arrows-doodles', label: 'Ornate Doodles & Flourishes', targetCount: 40 },
   { id: 'stickers-badges', label: 'Royal Seals & Badges', targetCount: 50 },
+  { id: 'canva-decorative-pack', label: 'Decorative Elements', targetCount: 30 },
 ];
 
 export const SEARCH_SYNONYMS: Record<string, string[]> = {

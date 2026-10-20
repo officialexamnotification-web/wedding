@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <g id="sparkle-stars-constellation-trails">
+    <path fill="none" stroke="#1E3545" stroke-width="2.5" stroke-dasharray="7 7" stroke-linecap="round" d="
+      M 75 110 Q 195 55 375 125
+      M 120 375 Q 245 430 365 345
+      M 375 125 Q 435 235 365 345
+    "/>
+    <path fill="none" stroke="#C85A28" stroke-width="3" stroke-linecap="round" d="
+      M 195 32 V 46 M 195 344 V 358 M 32 195 H 46 M 344 195 H 358
+    "/>
+  </g>
+  <g id="sparkle-stars-diagonal-facet-rays">
+    <path fill="#C85A28" d="M 250.15 250.15 Q 195 207.48 139.85 250.15 Q 182.52 195 139.85 139.85 Q 195 182.52 250.15 139.85 Q 207.48 195 250.15 250.15 Z M 420 125 Q 380.09 130.09 375 183 Q 369.91 130.09 330 125 Q 369.91 119.91 375 67 Q 380.09 119.91 420 125 Z M 172 375 Q 125.88 380.88 120 439 Q 114.12 380.88 68 375 Q 114.12 369.12 120 311 Q 125.88 369.12 172 375 Z"/>
+  </g>
+  <g id="sparkle-stars-primary-gilded-sparkles">
+    <path fill="#E09F24" d="M 330 195 Q 210.27 210.27 195 330 Q 179.73 210.27 60 195 Q 179.73 179.73 195 60 Q 210.27 179.73 330 195 Z M 443 345 Q 373.82 353.82 365 437 Q 356.18 353.82 287 345 Q 356.18 336.18 365 253 Q 373.82 336.18 443 345 Z"/>
+    <path fill="#E09F24" d="M 148 338 C 122 342, 104 365, 108 392 C 112 415, 134 432, 158 428 C 132 440, 98 426, 88 396 C 78 365, 95 332, 126 326 C 134 324, 142 328, 148 338 Z"/>
+  </g>
+  <g id="sparkle-stars-starlight-inner-cores">
+    <path fill="#FFF3B0" d="M 237 195 Q 199.75 199.75 195 237 Q 190.25 199.75 153 195 Q 190.25 190.25 195 153 Q 199.75 190.25 237 195 Z"/>
+    <circle cx="195" cy="195" r="10" fill="#1E3545"/>
+    <circle cx="365" cy="345" r="14" fill="#FFF3B0"/>
+    <circle cx="365" cy="345" r="6" fill="#1E3545"/>
+    <circle cx="375" cy="125" r="8" fill="#FFF3B0"/>
+    <circle cx="285" cy="88" r="7" fill="#E09F24"/>
+    <circle cx="95" cy="112" r="6" fill="#C85A28"/>
+    <circle cx="425" cy="240" r="8" fill="#E09F24"/>
+    <circle cx="248" cy="412" r="6" fill="#1E3545"/>
+  </g>
+</svg>

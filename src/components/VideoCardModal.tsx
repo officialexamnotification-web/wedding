@@ -83,6 +83,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   const [isMuted, setIsMuted] = useState(false);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const trackAudioRef = useRef<HTMLAudioElement | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
 
@@ -91,8 +92,21 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
   const track = activeAudioTrack || AUDIO_TRACKS[0];
 
+  useEffect(() => {
+    const audio = trackAudioRef.current;
+    if (!audio || !track.audioUrl) return;
+    audio.volume = 0.45;
+    audio.muted = isMuted;
+    if (isPlaying && !isMuted) {
+      void audio.play().catch(() => undefined);
+    } else {
+      audio.pause();
+    }
+    return () => audio.pause();
+  }, [track.audioUrl, isPlaying, isMuted]);
+
   const playShehnaiNote = () => {
-    if (isMuted) return;
+    if (isMuted || track.audioUrl) return;
     try {
       if (!audioCtxRef.current) {
         audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -191,6 +205,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-lg flex items-center justify-center p-3 sm:p-6 z-50 animate-fade-in select-none">
+      {track.audioUrl && <audio ref={trackAudioRef} src={track.audioUrl} loop preload="metadata" />}
       <div className="bg-neutral-900 border border-neutral-700 rounded-3xl w-full max-w-4xl max-h-[96vh] flex flex-col overflow-hidden shadow-2xl relative">
         {/* Top Header Bar */}
         <div className="p-3.5 sm:p-4 border-b border-neutral-800 flex items-center justify-between z-20 bg-neutral-900/90 backdrop-blur-md">
