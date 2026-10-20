@@ -485,30 +485,6 @@ export const BRAND_KITS: BrandKit[] = [
 
 export const AUDIO_TRACKS: AudioTrack[] = [
   {
-    id: 'royal-shehnai',
-    name: 'Ustad Bismillah Royal Shehnai',
-    category: 'shehnai',
-    ragaNotes: [293.66, 329.63, 369.99, 440.0, 493.88, 587.33],
-    tempo: 1.2,
-    description: 'Auspicious Manglik Wedding Raga Malkauns',
-  },
-  {
-    id: 'udaipur-sitar',
-    name: 'Lake Palace Classical Sitar',
-    category: 'sitar',
-    ragaNotes: [261.63, 293.66, 329.63, 392.0, 440.0, 523.25],
-    tempo: 1.0,
-    description: 'Serene evening Raga Yaman plucked strings',
-  },
-  {
-    id: 'vrindavan-flute',
-    name: 'Divine Bansuri Flute Serenade',
-    category: 'flute',
-    ragaNotes: [329.63, 369.99, 440.0, 493.88, 554.37, 659.25],
-    tempo: 1.4,
-    description: 'Soulful bamboo flute melody for Pheras',
-  },
-  {
     id: 'punjabi-dhol',
     name: 'Baraat & Sangeet Festive Beats',
     category: 'dhol',
@@ -624,7 +600,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onUpdateDrawBrush,
   onClearDrawings,
   onApplyBrandKit,
-  activeAudioTrackId = 'royal-shehnai',
+  activeAudioTrackId = 'punjabi-dhol',
   onSelectAudioTrack,
   savedProjects = [],
   onSaveProject,
