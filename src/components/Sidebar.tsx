@@ -1147,6 +1147,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'text' as SidebarTab, label: 'Text', icon: Type },
     { id: 'brand' as SidebarTab, label: 'Brand', icon: Crown },
     { id: 'photos' as SidebarTab, label: 'Uploads', icon: ImageIcon },
+    { id: 'audio' as SidebarTab, label: 'Music', icon: Music },
     { id: 'tools' as SidebarTab, label: 'Tools', icon: Wand2 },
     { id: 'projects' as SidebarTab, label: 'Projects', icon: FolderKanban },
     { id: 'apps' as SidebarTab, label: 'Apps', icon: QrCode },
@@ -1305,7 +1306,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               { id: 'backgrounds', label: 'Background', icon: Palette },
               { id: 'layers', label: 'Layers', icon: Layers },
               { id: 'draw', label: 'Draw', icon: PenTool },
-              { id: 'audio', label: 'Audio', icon: Music },
               { id: 'guides', label: 'Guides', icon: Ruler },
             ] as const).map((tool) => {
               const Icon = tool.icon;
@@ -2797,7 +2797,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         {/* ================= 9. CANVA AUDIO & WEDDING MUSIC TAB ================= */}
-        {activeTab === 'tools' && activeToolTab === 'audio' && (
+        {activeTab === 'audio' && (
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-semibold text-neutral-100 flex items-center gap-1.5">
