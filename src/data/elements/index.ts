@@ -25,6 +25,7 @@ import {
   MOCKUPS_LIBRARY_ITEMS,
   MODELS3D_LIBRARY_ITEMS,
 } from './mediaInteractiveManifest';
+import { PREMIUM_WEDDING_ELEMENTS } from './premiumWedding';
 
 export {
   MAIN_ELEMENT_CATEGORIES,
@@ -33,6 +34,7 @@ export {
   SEARCH_SYNONYMS,
   SHAPES_LIBRARY_ITEMS,
   GRAPHICS_LIBRARY_ITEMS,
+  PREMIUM_WEDDING_ELEMENTS,
   FRAMES_LIBRARY_ITEMS,
   GRIDS_LIBRARY_ITEMS,
   PHOTOS_LIBRARY_ITEMS,
@@ -48,6 +50,7 @@ export {
 };
 
 export const ALL_UNIVERSAL_ELEMENTS: UniversalElementItem[] = [
+  ...PREMIUM_WEDDING_ELEMENTS,
   ...SHAPES_LIBRARY_ITEMS,
   ...GRAPHICS_LIBRARY_ITEMS,
   ...PHOTOS_LIBRARY_ITEMS,
@@ -69,7 +72,7 @@ export function getItemsByCategory(catId: MainElementCategoryId): UniversalEleme
     case 'shapes':
       return SHAPES_LIBRARY_ITEMS;
     case 'graphics':
-      return GRAPHICS_LIBRARY_ITEMS;
+      return [...PREMIUM_WEDDING_ELEMENTS, ...GRAPHICS_LIBRARY_ITEMS];
     case 'photos':
       return PHOTOS_LIBRARY_ITEMS;
     case 'videos':
@@ -104,10 +107,13 @@ export function getShapesBySubcategory(subId: ShapeSubcategoryId) {
 }
 
 export function getGraphicsBySubcategory(subId: GraphicSubcategoryId) {
-  return GRAPHICS_LIBRARY_ITEMS.filter((item) => item.subcategory === subId);
+  return [
+    ...PREMIUM_WEDDING_ELEMENTS.filter((item) => item.subcategory === subId),
+    ...GRAPHICS_LIBRARY_ITEMS.filter((item) => item.subcategory === subId),
+  ];
 }
 
-// Smart search across all 1,117 items with synonym expansion
+// Smart search across the available library with synonym expansion
 export function searchElementsCatalogue(
   rawQuery: string,
   filterCategory?: MainElementCategoryId | 'all'
@@ -145,7 +151,7 @@ export function searchElementsCatalogue(
 export function validateCatalogueIntegrity() {
   const counts: Record<MainElementCategoryId, number> = {
     shapes: SHAPES_LIBRARY_ITEMS.length,
-    graphics: GRAPHICS_LIBRARY_ITEMS.length,
+    graphics: GRAPHICS_LIBRARY_ITEMS.length + PREMIUM_WEDDING_ELEMENTS.length,
     photos: PHOTOS_LIBRARY_ITEMS.length,
     videos: VIDEOS_LIBRARY_ITEMS.length,
     audio: AUDIO_LIBRARY_ITEMS.length,

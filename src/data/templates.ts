@@ -1,4 +1,5 @@
 import { CardTemplate } from '../types/editor';
+import { PREMIUM_WEDDING_TEMPLATES } from './premiumWeddingTemplates';
 
 export const TEMPLATE_CATEGORIES = [
   { id: 'all', label: 'All Designs' },
@@ -3814,4 +3815,5 @@ export const INITIAL_TEMPLATES: CardTemplate[] = [
       },
     ],
   },
+  ...PREMIUM_WEDDING_TEMPLATES,
 ];

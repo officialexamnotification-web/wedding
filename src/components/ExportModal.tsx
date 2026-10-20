@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { jsPDF } from 'jspdf';
 import {
   CardPage,
   AspectRatioType,
@@ -434,7 +435,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         ctx.strokeStyle = cd.borderColor || '#D4AF37';
         ctx.lineWidth = 1.5;
         ctx.strokeRect(cd.x, cd.y, cd.width, cd.height);
-        ctx.fillStyle = cd.accentColor || '#D4AF37';
+        ctx.fillStyle = cd.primaryColor || '#D4AF37';
         ctx.font = 'bold 10px Cinzel, serif';
         ctx.textAlign = 'center';
         ctx.fillText(cd.eventLabel, cd.x + cd.width / 2, cd.y + 18);
@@ -453,10 +454,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         const uw = (cd.width - 16) / 4;
         units.forEach((u, i) => {
           const ux = cd.x + 8 + i * uw + uw / 2;
-          ctx.fillStyle = cd.textColor || '#FFEAA7';
+          ctx.fillStyle = cd.primaryColor || '#FFEAA7';
           ctx.font = 'bold 16px Cinzel, serif';
           ctx.fillText(String(u.v).padStart(2, '0'), ux, cd.y + cd.height / 2 + 8);
-          ctx.fillStyle = cd.accentColor || '#D4AF37';
+          ctx.fillStyle = cd.primaryColor || '#D4AF37';
           ctx.font = '8px sans-serif';
           ctx.fillText(u.l, ux, cd.y + cd.height - 10);
         });
@@ -695,39 +696,33 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     }
   };
 
-  // Handle Multi-Page PDF Print
+  // Download the full card deck as a multipage PDF.
   const handleDownloadPdf = async () => {
     setDownloading(true);
     try {
-      const allDataUrls: string[] = [];
-      for (const page of pages) {
-        const url = await generateCanvasImage(page, 'png', exportScale);
-        if (url) allDataUrls.push(url);
+      if (pages.length === 0) return;
+
+      // Keep the design's aspect ratio and physical page size (96 CSS px = 72 pt).
+      const pageWidth = (dimensions.width * 72) / 96;
+      const pageHeight = (dimensions.height * 72) / 96;
+      const orientation = pageWidth > pageHeight ? 'landscape' : 'portrait';
+      const pdf = new jsPDF({
+        orientation,
+        unit: 'pt',
+        format: [pageWidth, pageHeight],
+        compress: true,
+      });
+
+      for (const [index, page] of pages.entries()) {
+        const image = await generateCanvasImage(page, 'png', exportScale);
+        if (!image) throw new Error(`Could not render page ${index + 1}.`);
+        if (index > 0) pdf.addPage([pageWidth, pageHeight], orientation);
+        pdf.addImage(image, 'PNG', 0, 0, pageWidth, pageHeight, undefined, 'FAST');
       }
 
-      const win = window.open('', '_blank');
-      if (win) {
-        win.document.write(`
-          <html>
-            <head>
-              <title>${title} - All ${pages.length} Pages Print</title>
-              <style>
-                @page { size: auto; margin: 0mm; }
-                body { margin: 0; background: #111; display: flex; flex-direction: column; align-items: center; gap: 16px; }
-                .page { page-break-after: always; display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; }
-                img { max-width: 100%; max-height: 100vh; object-fit: contain; }
-              </style>
-            </head>
-            <body>
-              ${allDataUrls
-                .map((u) => `<div class="page"><img src="${u}" /></div>`)
-                .join('')}
-              <script>window.onload = () => setTimeout(() => window.print(), 400);</script>
-            </body>
-          </html>
-        `);
-        win.document.close();
-      }
+      const safeTitle = title.trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'invitation';
+      pdf.save(`${safeTitle}-invitation.pdf`);
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#D4AF37', '#FFEAA7', '#FFD700', '#C41E3A'] });
     } catch (err) {
       console.error('PDF generation failed', err);
     } finally {
@@ -866,10 +861,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <FileText className="w-5 h-5 text-amber-400" />
               <div className="text-left">
                 <div className="text-sm font-semibold text-neutral-100">
-                  Print / Export All {pages.length} Pages as PDF
+                  Download All {pages.length} Pages as PDF
                 </div>
                 <div className="text-[11px] text-neutral-400">
-                  Full card deck ready for PDF save or print shop
+                  Direct multipage PDF download at {exportScale}x resolution
                 </div>
               </div>
             </div>

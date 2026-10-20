@@ -69,9 +69,9 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
   onUpdateElement,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<MainElementCategoryId | 'home'>('home');
+  const [activeCategory, setActiveCategory] = useState<MainElementCategoryId | 'home'>('graphics');
   const [activeShapeSub, setActiveShapeSub] = useState<ShapeSubcategoryId | 'all'>('all');
-  const [activeGraphicSub, setActiveGraphicSub] = useState<GraphicSubcategoryId | 'all'>('all');
+  const [activeGraphicSub, setActiveGraphicSub] = useState<GraphicSubcategoryId | 'all'>('torans-bandhanwar');
   const [recentIds, setRecentIds] = useState<string[]>([
     'shape-lines-05',
     'graphic-celebration-festive-01',
@@ -152,7 +152,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
     }
   };
 
-  // Insert any of the 1,117 items onto the active Canvas page
+  // Insert a catalogue item onto the active Canvas page
   const handleInsertItem = (item: UniversalElementItem) => {
     trackRecent(item.id);
     const uid = `${item.category}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -597,7 +597,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
         onClick={() => handleInsertItem(item)}
         title={`${item.name} — Click to add to canvas`}
         className={`group relative rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 transition-all cursor-pointer flex flex-col items-center justify-between overflow-hidden ${
-          compact ? 'p-2 min-h-[78px]' : 'p-2.5 min-h-[96px]'
+          compact ? 'p-2 min-h-[94px]' : 'p-2.5 min-h-[118px]'
         }`}
       >
         {/* Favorite Star Toggle */}
@@ -615,7 +615,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
         </button>
 
         {/* Visual Preview Area */}
-        <div className="w-full flex-1 flex items-center justify-center py-1">
+        <div className={`w-full flex-1 flex items-center justify-center py-1 ${item.category === 'graphics' ? 'rounded-lg bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 border border-amber-100/80' : ''}`}>
           {item.category === 'shapes' && (
             <div
               className="w-11 h-11 text-amber-300 group-hover:scale-110 transition-transform [&>svg]:w-full [&>svg]:h-full"
@@ -627,8 +627,8 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
             <div
               className={`${
                 (item as GraphicAssetItem).subcategory === 'torans-bandhanwar'
-                  ? 'w-full h-14 px-1'
-                  : 'w-11 h-11'
+                  ? 'w-full h-16 px-1'
+                  : 'w-14 h-14'
               } group-hover:scale-105 transition-transform flex items-center justify-center [&>svg]:w-full [&>svg]:h-full`}
               style={{ color: (item as GraphicAssetItem).defaultColor || '#D4AF37' }}
               dangerouslySetInnerHTML={{ __html: (item as GraphicAssetItem).svgContent }}
@@ -926,7 +926,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
 
         {/* Item Label */}
         {item.category !== 'audio' && (
-          <span className="text-[10px] font-medium text-neutral-200 group-hover:text-amber-200 text-center truncate w-full mt-1">
+          <span className="text-[10px] font-medium text-neutral-200 group-hover:text-amber-200 text-center line-clamp-2 w-full mt-1 leading-tight">
             {item.name}
           </span>
         )}
@@ -941,10 +941,10 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
         <div>
           <h3 className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5" />
-            Canva Elements Library
+            Wedding Elements Library
           </h3>
           <p className="text-[10px] text-neutral-400">
-            1,117 Assets • 14 Categories • 312 Shapes • 360 Graphics
+            Handpicked Indian wedding art, layouts and editable design pieces
           </p>
         </div>
         <button
@@ -969,7 +969,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search 1,117 elements (e.g. kalash, lotus, arch, rsvp, 3d)..."
+          placeholder="Search wedding elements (e.g. lotus, kalash, peacock, arch)..."
           className="w-full bg-neutral-900 border border-neutral-700 focus:border-amber-400 rounded-xl pl-8 pr-8 py-2 text-xs text-amber-100 placeholder-neutral-500 outline-none"
         />
         {searchQuery && (
@@ -994,7 +994,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
               : 'bg-neutral-800 text-neutral-400 hover:text-neutral-200'
           }`}
         >
-          All 14 Categories
+          All Elements
         </button>
         {MAIN_ELEMENT_CATEGORIES.map((cat) => (
           <button
@@ -1008,7 +1008,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
             }`}
           >
             <span>{cat.label}</span>
-            <span className="text-[9px] opacity-75">({cat.targetCount})</span>
+            <span className="text-[9px] opacity-75">({getItemsByCategory(cat.id).length})</span>
           </button>
         ))}
       </div>
@@ -1105,7 +1105,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
                       <div className="text-[10px] text-amber-200/70">{cat.hindiSub}</div>
                     </div>
                     <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/40 text-amber-300 border border-amber-500/30">
-                      {cat.badgeText}
+                      {getItemsByCategory(cat.id).length} items
                     </span>
                   </div>
                   <div className="text-[9px] text-neutral-300/90 line-clamp-1 mt-1 flex items-center justify-between">
@@ -1204,7 +1204,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
         </div>
       )}
 
-      {/* ================= 4. GRAPHICS BROWSER (7 SUBCATEGORIES + SEE ALL) ================= */}
+      {/* ================= 4. WEDDING GRAPHICS BROWSER ================= */}
       {!searchQuery.trim() && !showFavoritesOnly && activeCategory === 'graphics' && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -1217,10 +1217,10 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
               className="text-xs text-amber-300 hover:underline flex items-center gap-1 font-semibold"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
-              {activeGraphicSub === 'all' ? 'Back to Categories' : 'All 7 Graphic Collections'}
+              {activeGraphicSub === 'all' ? 'Back to Categories' : 'All Graphic Collections'}
             </button>
             <span className="text-[10px] text-neutral-400 font-mono">
-              {GRAPHICS_LIBRARY_ITEMS.length} Royal Graphics
+              {getGraphicsBySubcategory(activeGraphicSub === 'all' ? 'torans-bandhanwar' : activeGraphicSub).length} items in this collection
             </span>
           </div>
 
@@ -1234,7 +1234,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
                   : 'bg-neutral-800 text-neutral-400 hover:text-white'
               }`}
             >
-              All 7 Collections
+              All collections
             </button>
             {GRAPHIC_SUBCATEGORIES.map((sub) => (
               <button
@@ -1247,7 +1247,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
                     : 'bg-neutral-800 text-neutral-400 hover:text-white'
                 }`}
               >
-                {sub.label} ({sub.targetCount})
+                {sub.label} ({getGraphicsBySubcategory(sub.id).length})
               </button>
             ))}
           </div>
