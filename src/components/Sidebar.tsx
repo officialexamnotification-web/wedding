@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   LayoutTemplate,
   Type,
@@ -79,6 +79,7 @@ import {
   PhotoMask,
   BrandKit,
   AudioTrack,
+  AudioClipSettings,
   DrawBrushSettings,
   SavedProject,
   ChartVariant,
@@ -136,6 +137,9 @@ interface SidebarProps {
   onApplyBrandKit?: (kit: BrandKit) => void;
   activeAudioTrackId?: string;
   onSelectAudioTrack?: (track: AudioTrack) => void;
+  audioClip?: AudioClipSettings;
+  audioScopeDuration?: number;
+  onUpdateAudioClip?: (updates: Partial<AudioClipSettings>) => void;
   savedProjects?: SavedProject[];
   onSaveProject?: () => void;
   onLoadProject?: (proj: SavedProject) => void;
@@ -578,6 +582,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onApplyBrandKit,
   activeAudioTrackId = 'at-the-palace-gates',
   onSelectAudioTrack,
+  audioClip = { startSec: 0, durationSec: null, volume: 0.45, fadeInSec: 0, fadeOutSec: 0, loop: true },
+  audioScopeDuration,
+  onUpdateAudioClip,
   savedProjects = [],
   onSaveProject,
   onLoadProject,
@@ -598,16 +605,43 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [elementSubTab, setElementSubTab] = useState<
     'all' | 'shapes' | 'frames' | 'grids' | 'tables' | 'charts' | 'stickers'
   >('all');
-  // Keep the first workspace view focused on the invitation; the rail still
-  // opens any tool panel on demand.
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  // Open the customization panel with the editor so available tools are visible immediately.
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [templateCategory, setTemplateCategory] = useState<string>('all');
   const [stickerCategory, setStickerCategory] = useState<string>('all');
   const [stickerSearch, setStickerSearch] = useState<string>('');
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
+  const [audioSourceDuration, setAudioSourceDuration] = useState(0);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const previewClipTimerRef = useRef<number | null>(null);
+
+  const stopPreviewAudio = () => {
+    if (previewClipTimerRef.current !== null) window.clearInterval(previewClipTimerRef.current);
+    previewClipTimerRef.current = null;
+    previewAudioRef.current?.pause();
+    if (previewAudioRef.current) previewAudioRef.current.currentTime = 0;
+    previewAudioRef.current = null;
+    const audioContext = audioCtxRef.current;
+    audioCtxRef.current = null;
+    if (audioContext && audioContext.state !== 'closed') {
+      void audioContext.close().catch(() => undefined);
+    }
+    setPlayingTrackId(null);
+  };
+
+  useEffect(() => () => {
+    if (previewClipTimerRef.current !== null) window.clearInterval(previewClipTimerRef.current);
+    previewAudioRef.current?.pause();
+    if (previewAudioRef.current) previewAudioRef.current.currentTime = 0;
+    previewAudioRef.current = null;
+    const audioContext = audioCtxRef.current;
+    audioCtxRef.current = null;
+    if (audioContext && audioContext.state !== 'closed') {
+      void audioContext.close().catch(() => undefined);
+    }
+  }, []);
 
   // Apps State
   const [qrType, setQrType] = useState<'maps' | 'rsvp' | 'custom' | 'upi' | 'wifi' | 'calendar'>(
@@ -666,11 +700,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return textElem?.text.slice(0, 25) || `Slide ${pages.indexOf(page) + 1}`;
   };
 
-  const totalDuration = pages
-    .reduce((sum, p) => sum + (p.duration || 4.5), 0)
-    .toFixed(1);
+  const totalDuration = pages.reduce((sum, p) => sum + (p.duration || 4.5), 0);
+  const selectedAudioTrack = AUDIO_TRACKS.find((track) => track.id === activeAudioTrackId) || AUDIO_TRACKS[0];
+  const activeAudioScopeDuration = Math.max(0.25, audioScopeDuration ?? totalDuration);
+  const effectiveAudioDuration = Math.max(0.25, Math.min(audioClip.durationSec ?? activeAudioScopeDuration, activeAudioScopeDuration));
+  const maxAudioStart = audioSourceDuration > 0 ? Math.max(0, audioSourceDuration - 0.1) : 999;
+  const safeAudioStart = Math.min(Math.max(0, audioClip.startSec), maxAudioStart);
+  const safeAudioEnd = audioSourceDuration > 0
+    ? Math.max(safeAudioStart + 0.1, Math.min(audioClip.sourceEndSec ?? audioSourceDuration, audioSourceDuration))
+    : Math.max(safeAudioStart + 0.1, audioClip.sourceEndSec ?? (safeAudioStart + 30));
+  const selectedPartDuration = Math.max(0.1, safeAudioEnd - safeAudioStart);
+
+  useEffect(() => {
+    setAudioSourceDuration(0);
+    if (!selectedAudioTrack.audioUrl) return;
+    const metadataAudio = new Audio();
+    metadataAudio.preload = 'metadata';
+    metadataAudio.src = selectedAudioTrack.audioUrl;
+    metadataAudio.onloadedmetadata = () => {
+      if (Number.isFinite(metadataAudio.duration)) setAudioSourceDuration(metadataAudio.duration);
+    };
+    metadataAudio.load();
+    return () => {
+      metadataAudio.onloadedmetadata = null;
+      metadataAudio.src = '';
+    };
+  }, [selectedAudioTrack.audioUrl]);
 
   const handleTabClick = (tab: SidebarTab) => {
+    if (activeTab === 'audio') stopPreviewAudio();
     if (activeTab === tab && isDrawerOpen) {
       setIsDrawerOpen(false);
     } else {
@@ -683,26 +741,64 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   // Preview audio track in Sidebar
-  const previewTrackAudio = (track: AudioTrack) => {
+  const previewTrackAudio = (track: AudioTrack, previewPartOnly = false) => {
     if (playingTrackId === track.id) {
-      previewAudioRef.current?.pause();
-      previewAudioRef.current = null;
-      setPlayingTrackId(null);
+      stopPreviewAudio();
       return;
     }
-    previewAudioRef.current?.pause();
-    previewAudioRef.current = null;
+    stopPreviewAudio();
     setPlayingTrackId(track.id);
     if (onSelectAudioTrack) onSelectAudioTrack(track);
 
     try {
       if (track.audioUrl) {
         const audio = new Audio(track.audioUrl);
-        audio.volume = 0.72;
+        let clipStart = safeAudioStart;
+        let clipEnd = safeAudioEnd;
+        const clipDuration = previewPartOnly ? selectedPartDuration : effectiveAudioDuration;
+        audio.volume = audioClip.volume;
+        audio.currentTime = clipStart;
+        audio.onloadedmetadata = () => {
+          if (!Number.isFinite(audio.duration)) return;
+          clipStart = Math.min(Math.max(0, audioClip.startSec), Math.max(0, audio.duration - 0.1));
+          clipEnd = Math.max(clipStart + 0.1, Math.min(audioClip.sourceEndSec ?? audio.duration, audio.duration));
+          audio.currentTime = clipStart;
+          if (clipStart !== audioClip.startSec) onUpdateAudioClip?.({ startSec: clipStart });
+        };
         audio.onended = () => setPlayingTrackId((current) => current === track.id ? null : current);
-        audio.onerror = () => setPlayingTrackId((current) => current === track.id ? null : current);
+        let elapsed = 0;
+        let lastTick = performance.now();
+        previewClipTimerRef.current = window.setInterval(() => {
+          const now = performance.now();
+          elapsed += (now - lastTick) / 1000;
+          lastTick = now;
+          if (elapsed >= clipDuration) {
+            audio.pause();
+            if (previewClipTimerRef.current !== null) window.clearInterval(previewClipTimerRef.current);
+            previewClipTimerRef.current = null;
+            setPlayingTrackId((current) => current === track.id ? null : current);
+            return;
+          }
+          if (audio.currentTime >= clipEnd - 0.03) {
+            if (audioClip.loop && !previewPartOnly) audio.currentTime = clipStart;
+            else {
+              audio.pause();
+              if (previewClipTimerRef.current !== null) window.clearInterval(previewClipTimerRef.current);
+              previewClipTimerRef.current = null;
+              setPlayingTrackId((current) => current === track.id ? null : current);
+              return;
+            }
+          }
+          let fade = 1;
+          if (audioClip.fadeInSec > 0 && elapsed < audioClip.fadeInSec) fade = elapsed / audioClip.fadeInSec;
+          if (audioClip.fadeOutSec > 0 && elapsed > clipDuration - audioClip.fadeOutSec) {
+            fade = Math.min(fade, Math.max(0, (clipDuration - elapsed) / audioClip.fadeOutSec));
+          }
+          audio.volume = Math.max(0, Math.min(1, audioClip.volume * fade));
+        }, 40);
+        audio.onerror = () => stopPreviewAudio();
         previewAudioRef.current = audio;
-        void audio.play().catch(() => setPlayingTrackId((current) => current === track.id ? null : current));
+        void audio.play().catch(() => stopPreviewAudio());
         return;
       }
 
@@ -1171,7 +1267,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {TABS_CONFIG.find((t) => t.id === activeTab)?.label} Studio
               </span>
               <button
-                onClick={() => setIsDrawerOpen(false)}
+                onClick={() => {
+                  stopPreviewAudio();
+                  setIsDrawerOpen(false);
+                }}
                 className="p-1 text-neutral-400 hover:text-neutral-200 rounded-lg hover:bg-neutral-800 transition"
                 title="Collapse Panel (Expand Canvas)"
               >
@@ -1196,6 +1295,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={tab.id}
               onClick={() => {
+                if (activeTab === 'audio' && tab.id !== 'audio') stopPreviewAudio();
                 setActiveTab(tab.id);
                 setIsDrawerOpen(true);
                 if (tab.id !== 'tools' && drawBrush?.isEnabled && onUpdateDrawBrush) {
@@ -1219,7 +1319,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {isDrawerOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end pointer-events-none">
           <div
-            onClick={() => setIsDrawerOpen(false)}
+            onClick={() => {
+              stopPreviewAudio();
+              setIsDrawerOpen(false);
+            }}
             className="fixed inset-0 bg-black/70 backdrop-blur-xs pointer-events-auto transition-opacity"
           />
 
@@ -1231,7 +1334,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {TABS_CONFIG.find((t) => t.id === activeTab)?.label} Studio
                 </span>
                 <button
-                  onClick={() => setIsDrawerOpen(false)}
+                  onClick={() => {
+                    stopPreviewAudio();
+                    setIsDrawerOpen(false);
+                  }}
                   className="p-1 rounded-full bg-neutral-800 text-neutral-300 hover:text-white"
                 >
                   <X className="w-4 h-4" />
@@ -2757,7 +2863,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span>Wedding audio</span>
               </h3>
               <p className="text-xs text-neutral-400">
-                Preview and choose background music for your animated video invitation
+                Click a song to add it to the selected slide. Choose another slide to give it different music, or use one song on every slide.
               </p>
             </div>
 
@@ -2768,7 +2874,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 return (
                   <div
                     key={track.id}
-                    onClick={() => onSelectAudioTrack && onSelectAudioTrack(track)}
+                    onClick={() => {
+                      stopPreviewAudio();
+                      onSelectAudioTrack?.(track);
+                    }}
                     className={`p-3 rounded-xl border cursor-pointer transition flex items-center justify-between gap-2 ${
                       isSelected
                         ? 'bg-amber-500/15 border-amber-400 text-amber-200'
@@ -2804,6 +2913,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 );
               })}
+            </div>
+
+            <div className="rounded-xl border border-neutral-700 bg-neutral-950/70 p-3 text-[11px] leading-relaxed text-neutral-300">
+              <p className="font-semibold text-neutral-100">Add music to this slide</p>
+              <p className="mt-1 text-neutral-400">Choose a song above. It appears as a clip beneath the slides. Select that clip to preview it, choose a part of the song, and adjust its volume.</p>
+              <p className="mt-2 text-[10px] text-violet-200">Want the same song throughout? Select its clip and choose <span className="font-semibold">Use on all slides</span>.</p>
             </div>
           </div>
         )}

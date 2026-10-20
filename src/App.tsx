@@ -16,6 +16,8 @@ import {
   StickerElement,
   BrandKit,
   AudioTrack,
+  AudioClipSettings,
+  AudioTimelineClip,
   DrawBrushSettings,
   SavedProject,
 } from './types/editor';
@@ -56,6 +58,21 @@ export default function App() {
   const [showSafeZones, setShowSafeZones] = useState<boolean>(true);
   const [copiedStyle, setCopiedStyle] = useState<Partial<CanvasItem> | null>(null);
   const [activeAudioTrack, setActiveAudioTrack] = useState<AudioTrack>(AUDIO_TRACKS[0]);
+  const [audioClip, setAudioClip] = useState<AudioClipSettings>({
+    startSec: 0,
+    durationSec: null,
+    volume: 0.45,
+    fadeInSec: 0,
+    fadeOutSec: 0,
+    loop: true,
+  });
+  const [audioClips, setAudioClips] = useState<AudioTimelineClip[]>([]);
+  const [selectedAudioClipId, setSelectedAudioClipId] = useState<string | null>(null);
+  const handleUpdateAudioClipSettings = (updates: Partial<AudioClipSettings>) => {
+    const next = { ...audioClip, ...updates };
+    setAudioClip(next);
+    setAudioClips((clips) => clips.map((clip) => clip.id === selectedAudioClipId ? { ...clip, settings: next } : clip));
+  };
   const [drawBrush, setDrawBrush] = useState<DrawBrushSettings>({
     isEnabled: false,
     brushType: 'glow-gold',
@@ -81,6 +98,9 @@ export default function App() {
       updatedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       aspectRatio,
       pages,
+      audioTrackId: activeAudioTrack.id,
+      audioClip,
+      audioClips,
     };
     const next = [newProj, ...savedProjects.slice(0, 14)];
     setSavedProjects(next);
@@ -94,6 +114,20 @@ export default function App() {
   const handleLoadProject = (proj: SavedProject) => {
     setTitle(proj.title);
     setAspectRatio(proj.aspectRatio);
+    const restoredTrack = proj.audioTrackId
+      ? AUDIO_TRACKS.find((track) => track.id === proj.audioTrackId)
+      : undefined;
+    if (restoredTrack) setActiveAudioTrack(restoredTrack);
+    if (proj.audioClip) setAudioClip(proj.audioClip);
+    const restoredAudioClips = proj.audioClips ?? (proj.audioTrackId ? [{
+      id: `audio-legacy-${proj.id}`,
+      trackId: proj.audioTrackId,
+      pageIndex: null,
+      timelineStartSec: 0,
+      settings: proj.audioClip || { startSec: 0, durationSec: null, volume: 0.45, fadeInSec: 0, fadeOutSec: 0, loop: true },
+    }] : []);
+    setAudioClips(restoredAudioClips);
+    setSelectedAudioClipId(restoredAudioClips[0]?.id || null);
     setCurrentPageIndex(0);
     setSelectedElementId(null);
     commitPages(proj.pages);
@@ -336,6 +370,15 @@ export default function App() {
   const handleUpdatePage = (pageIdx: number, updates: Partial<CardPage>) => {
     const updated = pages.map((p, idx) => (idx === pageIdx ? { ...p, ...updates } : p));
     commitPages(updated);
+    if (updates.duration !== undefined) {
+      setAudioClips((clips) => clips.map((clip) => {
+        if (clip.pageIndex === null) return clip;
+        const timelineStartSec = updated.slice(0, clip.pageIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0);
+        const pageEndSec = timelineStartSec + (updated[clip.pageIndex]?.duration || 4.5);
+        const start = Math.max(timelineStartSec, Math.min(clip.timelineStartSec ?? timelineStartSec, pageEndSec - 0.25));
+        return { ...clip, timelineStartSec: start, settings: { ...clip.settings, durationSec: clip.settings.durationSec === null ? null : Math.min(clip.settings.durationSec, pageEndSec - start) } };
+      }));
+    }
   };
 
   // Canva Copy Style (Paint Roller)
@@ -891,6 +934,13 @@ export default function App() {
     if (pages.length <= 1) return;
     const newPages = pages.filter((_, idx) => idx !== currentPageIndex);
     commitPages(newPages);
+    setAudioClips((clips) => clips.flatMap((clip) => {
+      if (clip.pageIndex === null) return [clip];
+      if (clip.pageIndex === currentPageIndex) return [];
+      const pageIndex = clip.pageIndex > currentPageIndex ? clip.pageIndex - 1 : clip.pageIndex;
+      const timelineStartSec = newPages.slice(0, pageIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0);
+      return [{ ...clip, pageIndex, timelineStartSec }];
+    }));
     setCurrentPageIndex(Math.max(0, currentPageIndex - 1));
   };
 
@@ -899,6 +949,13 @@ export default function App() {
     if (pages.length <= 1) return;
     const newPages = pages.filter((_, idx) => idx !== targetIndex);
     commitPages(newPages);
+    setAudioClips((clips) => clips.flatMap((clip) => {
+      if (clip.pageIndex === null) return [clip];
+      if (clip.pageIndex === targetIndex) return [];
+      const pageIndex = clip.pageIndex > targetIndex ? clip.pageIndex - 1 : clip.pageIndex;
+      const timelineStartSec = newPages.slice(0, pageIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0);
+      return [{ ...clip, pageIndex, timelineStartSec }];
+    }));
     if (currentPageIndex >= newPages.length) {
       setCurrentPageIndex(newPages.length - 1);
     } else if (targetIndex < currentPageIndex) {
@@ -921,6 +978,16 @@ export default function App() {
     };
     const newPages = [...pages.slice(0, index + 1), duplicatedPage, ...pages.slice(index + 1)];
     commitPages(newPages);
+    setAudioClips((clips) => clips.flatMap((clip) => {
+      if (clip.pageIndex === null) return [clip];
+      const pageIndex = clip.pageIndex > index ? clip.pageIndex + 1 : clip.pageIndex;
+      const timelineStartSec = newPages.slice(0, pageIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0);
+      const shifted = { ...clip, pageIndex, timelineStartSec };
+      if (clip.pageIndex !== index) return [shifted];
+      const duplicatePageIndex = index + 1;
+      const duplicateStartSec = newPages.slice(0, duplicatePageIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0);
+      return [shifted, { ...clip, id: `audio-copy-${Date.now()}-${clip.id}`, pageIndex: duplicatePageIndex, timelineStartSec: duplicateStartSec }];
+    }));
     setCurrentPageIndex(index + 1);
   };
 
@@ -932,6 +999,16 @@ export default function App() {
     newPages.splice(fromIndex, 1);
     newPages.splice(toIndex, 0, item);
     commitPages(newPages);
+    const oldIndexes = pages.map((_, index) => index);
+    const [movedIndex] = oldIndexes.splice(fromIndex, 1);
+    oldIndexes.splice(toIndex, 0, movedIndex);
+    const newIndexByOldIndex = new Map(oldIndexes.map((oldIndex, newIndex) => [oldIndex, newIndex]));
+    setAudioClips((clips) => clips.map((clip) => {
+      if (clip.pageIndex === null) return clip;
+      const pageIndex = newIndexByOldIndex.get(clip.pageIndex) ?? clip.pageIndex;
+      const timelineStartSec = newPages.slice(0, pageIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0);
+      return { ...clip, pageIndex, timelineStartSec };
+    }));
     setCurrentPageIndex(toIndex);
   };
 
@@ -1008,6 +1085,8 @@ export default function App() {
               : (INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0]).aspectRatio
           }
           activeAudioTrack={activeAudioTrack}
+          audioClip={audioClip}
+          audioClips={videoModalTemplate ? [] : audioClips}
           onCustomizeInEditor={async (targetSlideIndex = 0) => {
             const targetTmpl = videoModalTemplate || INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0];
             await handleSelectTemplate(targetTmpl, targetSlideIndex);
@@ -1095,7 +1174,30 @@ export default function App() {
           onClearDrawings={handleClearDrawings}
           onApplyBrandKit={handleApplyBrandKit}
           activeAudioTrackId={activeAudioTrack.id}
-          onSelectAudioTrack={setActiveAudioTrack}
+          audioScopeDuration={(() => {
+            const selectedClip = audioClips.find((clip) => clip.id === selectedAudioClipId);
+            if (selectedClip?.pageIndex === null) return pages.reduce((sum, page) => sum + (page.duration || 4.5), 0);
+            if (selectedClip?.pageIndex !== undefined) return pages[selectedClip.pageIndex]?.duration || 4.5;
+            return pages[currentPageIndex]?.duration || 4.5;
+          })()}
+          onSelectAudioTrack={(track) => {
+            setActiveAudioTrack(track);
+            const id = `audio-${Date.now()}-${currentPageIndex}`;
+            const settings = { ...audioClip, startSec: 0, sourceEndSec: null, durationSec: null };
+            const timelineStartSec = pages.slice(0, currentPageIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0);
+            setAudioClip(settings);
+            setAudioClips((clips) => {
+              const allSlidesClip = clips.find((clip) => clip.pageIndex === null);
+              const existing = clips.filter((clip) => clip.pageIndex !== null && clip.pageIndex !== currentPageIndex);
+              const inherited = allSlidesClip
+                ? pages.map((_, pageIndex) => pageIndex === currentPageIndex ? null : ({ id: `audio-${allSlidesClip.id}-${pageIndex}`, trackId: allSlidesClip.trackId, pageIndex, settings: allSlidesClip.settings })).filter((clip): clip is AudioTimelineClip => clip !== null)
+                : [];
+              return [...existing, ...inherited, { id, trackId: track.id, pageIndex: currentPageIndex, timelineStartSec, settings }];
+            });
+            setSelectedAudioClipId(id);
+          }}
+          audioClip={audioClip}
+          onUpdateAudioClip={handleUpdateAudioClipSettings}
           savedProjects={savedProjects}
           onSaveProject={handleSaveProject}
           onLoadProject={handleLoadProject}
@@ -1163,7 +1265,7 @@ export default function App() {
           />
 
           {/* Bottom Canva-style Multi-Page / Video Slide Filmstrip */}
-          <div className="hidden md:block">
+          <div className="hidden md:block shrink-0 max-h-[72vh] overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-neutral-700">
             <SlideFilmstrip
               pages={pages}
               currentPageIndex={currentPageIndex}
@@ -1174,6 +1276,50 @@ export default function App() {
               onMovePage={handleMovePage}
               onUpdatePage={handleUpdatePage}
               onOpenVideoPreview={() => setIsVideoModalOpen(true)}
+              activeAudioTrack={activeAudioTrack}
+              audioClip={audioClip}
+              audioClips={audioClips}
+              audioTracks={AUDIO_TRACKS}
+              selectedAudioClipId={selectedAudioClipId}
+              onSelectAudioClip={(clip) => {
+                setSelectedAudioClipId(clip.id);
+                setAudioClip(clip.settings);
+                const track = AUDIO_TRACKS.find((item) => item.id === clip.trackId);
+                if (track) setActiveAudioTrack(track);
+                if (clip.pageIndex !== null) setCurrentPageIndex(clip.pageIndex);
+              }}
+              onUpdateAudioClip={handleUpdateAudioClipSettings}
+              onApplyAudioToAll={(selectedClip) => {
+                const trackId = selectedClip.trackId;
+                const id = `audio-all-${Date.now()}`;
+                const settings = { ...selectedClip.settings, startSec: 0, sourceEndSec: null, durationSec: null };
+                setAudioClips([{ id, trackId, pageIndex: null, timelineStartSec: 0, settings }]);
+                setSelectedAudioClipId(id);
+                setAudioClip(settings);
+              }}
+              onRemoveAudioClip={(clipId) => {
+                setAudioClips((clips) => clips.filter((clip) => clip.id !== clipId));
+                setSelectedAudioClipId((selected) => selected === clipId ? null : selected);
+              }}
+              onSplitAudioClip={(clipId, splitAt) => {
+                const clip = audioClips.find((item) => item.id === clipId);
+                if (!clip) return;
+                const clipStart = clip.timelineStartSec ?? (clip.pageIndex === null ? 0 : pages.slice(0, clip.pageIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0));
+                const scopeEnd = clip.pageIndex === null ? pages.reduce((sum, page) => sum + (page.duration || 4.5), 0) : pages.slice(0, clip.pageIndex + 1).reduce((sum, page) => sum + (page.duration || 4.5), 0);
+                const clipEnd = Math.min(clipStart + (clip.settings.durationSec ?? (scopeEnd - clipStart)), scopeEnd);
+                if (!Number.isFinite(splitAt) || splitAt <= clipStart + 0.15 || splitAt >= clipEnd - 0.15) return;
+                const firstLength = splitAt - clipStart;
+                const secondLength = clipEnd - splitAt;
+                const secondHalf: AudioTimelineClip = { ...clip, id: `audio-split-${Date.now()}`, timelineStartSec: splitAt, settings: { ...clip.settings, startSec: clip.settings.startSec + firstLength, durationSec: secondLength } };
+                const firstHalf = { ...clip, timelineStartSec: clipStart, settings: { ...clip.settings, durationSec: firstLength } };
+                setAudioClips((clips) => [...clips.filter((item) => item.id !== clipId), firstHalf, secondHalf]);
+                setSelectedAudioClipId(secondHalf.id);
+                setAudioClip(secondHalf.settings);
+              }}
+              onTrimAudioClip={(clipId, next) => {
+                setAudioClips((clips) => clips.map((clip) => clip.id === clipId ? { ...clip, ...next } : clip));
+                if (clipId === selectedAudioClipId && next.settings) setAudioClip(next.settings);
+              }}
             />
           </div>
         </div>
@@ -1196,6 +1342,10 @@ export default function App() {
         pages={pages}
         currentPageIndex={currentPageIndex}
         aspectRatio={aspectRatio}
+        activeAudioTrack={activeAudioTrack}
+        audioClip={audioClip}
+        audioClips={audioClips}
+        audioTracks={AUDIO_TRACKS}
       />
 
       <AnalysisModal isOpen={isAnalysisOpen} onClose={() => setIsAnalysisOpen(false)} />
@@ -1223,6 +1373,8 @@ export default function App() {
         title={title}
         aspectRatio={aspectRatio}
         activeAudioTrack={activeAudioTrack}
+        audioClip={audioClip}
+        audioClips={audioClips}
         onCustomizeInEditor={(targetSlideIndex = 0) => {
           setIsVideoModalOpen(false);
           if (targetSlideIndex >= 0 && targetSlideIndex < pages.length) {

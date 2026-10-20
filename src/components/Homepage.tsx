@@ -197,16 +197,18 @@ const MiniCardArtwork: React.FC<{
   page: CardPage;
   aspectRatio: CardTemplate['aspectRatio'];
   targetWidth?: number;
-}> = ({ page, aspectRatio, targetWidth = 240 }) => {
+  maxHeight?: number;
+}> = ({ page, aspectRatio, targetWidth = 240, maxHeight = 280 }) => {
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
-  const scale = targetWidth / dimensions.width;
+  const scale = Math.min(targetWidth / dimensions.width, maxHeight / dimensions.height);
+  const renderedWidth = Math.round(dimensions.width * scale);
   const targetHeight = Math.round(dimensions.height * scale);
 
   return (
     <div
       className="relative overflow-hidden rounded-[18px] shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-amber-400/40 select-none pointer-events-none shrink-0"
       style={{
-        width: `${targetWidth}px`,
+        width: `${renderedWidth}px`,
         height: `${targetHeight}px`,
         background: page.backgroundValue,
         backgroundSize: 'cover',
@@ -806,7 +808,7 @@ export const Homepage: React.FC<HomepageProps> = ({
         </div>
 
         {/* Luxury Showcase Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {visibleTemplates.map((template) => {
             const meta = SUITE_SHOWCASE_META[template.id] || {
               cleanTitle: template.title.replace(/\s*\(.*?\)\s*/g, ''),
@@ -831,20 +833,20 @@ export const Homepage: React.FC<HomepageProps> = ({
                 <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-400/70 to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
 
                 {/* 1. CARD STAGE: Velvet Pedestal + Real Scaled Miniature Invitation */}
-                <div className="relative pt-5 pb-4 px-5 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_35%,rgba(212,175,55,0.12)_0%,rgba(20,7,11,0.6)_60%,rgba(8,6,8,0.95)_100%)] border-b border-amber-500/15">
+                <div className="relative h-[300px] px-4 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_35%,rgba(212,175,55,0.12)_0%,rgba(20,7,11,0.6)_60%,rgba(8,6,8,0.95)_100%)] border-b border-amber-500/15">
                   {/* Decorative Corner Filigree Accents */}
                   <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-amber-400/35 rounded-tl pointer-events-none" />
                   <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-amber-400/35 rounded-tr pointer-events-none" />
 
                   {/* Top Floating Suite Badges */}
-                  <div className="w-full flex items-center justify-between mb-3.5 relative z-20 px-1">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-md border border-amber-400/30 text-[10px] font-cinzel font-bold text-amber-200 tracking-wider uppercase">
+                  <div className="absolute top-3.5 left-4 right-4 flex items-center justify-between gap-2 z-20 px-1">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-black/65 backdrop-blur-md border border-amber-400/30 text-[9px] font-cinzel font-bold text-amber-200 tracking-wider uppercase">
                       <Crown className="w-2.5 h-2.5 text-amber-400" />
                       <span>{meta.editionTag}</span>
                     </span>
 
                     {hasQr && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-[10px] font-medium text-amber-300">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-[9px] font-medium text-amber-300">
                         <QrCode className="w-2.5 h-2.5 text-amber-400" />
                         <span>Live GPS QR</span>
                       </span>
@@ -860,7 +862,8 @@ export const Homepage: React.FC<HomepageProps> = ({
                     <MiniCardArtwork
                       page={currentPage}
                       aspectRatio={template.aspectRatio}
-                      targetWidth={216}
+                      targetWidth={190}
+                      maxHeight={208}
                     />
 
                     {/* Subtle Hover Action Pill Over Artwork */}
@@ -905,7 +908,7 @@ export const Homepage: React.FC<HomepageProps> = ({
 
                   {/* Interactive Multi-Slide Story Switcher Bar (for 5-Slide & 6-Slide Suites) */}
                   {isMultiSlide ? (
-                    <div className="mt-4 flex items-center gap-1.5 bg-black/60 px-2.5 py-1.5 rounded-full border border-amber-500/25 relative z-20">
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-black/70 px-2 py-1 rounded-full border border-amber-500/25 z-20">
                       <span className="text-[9px] font-cinzel text-amber-300/90 uppercase tracking-wider mr-1">
                         Slides:
                       </span>
@@ -934,7 +937,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                       })}
                     </div>
                   ) : (
-                    <div className="mt-4 flex items-center gap-2 px-3 py-1 rounded-full bg-black/45 border border-neutral-800 text-[10px] text-neutral-400">
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 border border-neutral-800 text-[9px] text-neutral-400 whitespace-nowrap">
                       <RoyalLotusIcon className="w-3 h-3 text-amber-400" />
                       <span>Single-Page Heirloom Card • 300 DPI Ready</span>
                     </div>
@@ -942,7 +945,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </div>
 
                 {/* 2. EDITORIAL METADATA & DIRECT ACTION BAR */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4 bg-gradient-to-b from-[#12090d] to-[#0b0609]">
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-3 bg-gradient-to-b from-[#12090d] to-[#0b0609]">
                   <div className="space-y-2">
                     {/* Hindi Subtitle + Palette Swatches */}
                     <div className="flex items-center justify-between gap-2">

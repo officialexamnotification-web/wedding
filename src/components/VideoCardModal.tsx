@@ -34,6 +34,8 @@ import {
   VideoElement,
   AudioElement,
   AudioTrack,
+  AudioClipSettings,
+  AudioTimelineClip,
 } from '../types/editor';
 import {
   getElementAnimationStyle,
@@ -63,6 +65,8 @@ interface VideoCardModalProps {
   title: string;
   aspectRatio: AspectRatioType;
   activeAudioTrack?: AudioTrack;
+  audioClip?: AudioClipSettings;
+  audioClips?: AudioTimelineClip[];
   onCustomizeInEditor: (targetSlideIndex?: number) => void;
 }
 
@@ -73,40 +77,120 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   title,
   aspectRatio,
   activeAudioTrack,
+  audioClip = { startSec: 0, durationSec: null, volume: 0.45, fadeInSec: 0, fadeOutSec: 0, loop: true },
+  audioClips = [],
   onCustomizeInEditor,
 }) => {
-  if (!isOpen) return null;
-
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
+  const [audioCycle, setAudioCycle] = useState(0);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const trackAudioRef = useRef<HTMLAudioElement | null>(null);
+  const clipTimerRef = useRef<number | null>(null);
+  const clipElapsedRef = useRef(0);
   const animFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
 
   const currentSlide = pages[currentIndex] || pages[0];
   const slideDurationMs = (currentSlide?.duration || 4.5) * 1000;
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
-  const track = activeAudioTrack || AUDIO_TRACKS[0];
+  const invitationDurationSec = pages.reduce((sum, page) => sum + (page.duration || 4.5), 0);
+  const currentPageDurationSec = currentSlide?.duration || 4.5;
+  const pageStartSec = pages.slice(0, currentIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0);
+  const timelineCursorSec = pageStartSec + (progress / 100) * currentPageDurationSec;
+  const timelineClip = audioClips.find((clip) => {
+    if (clip.pageIndex !== currentIndex) return false;
+    const start = clip.timelineStartSec ?? pageStartSec;
+    const end = start + Math.min(clip.settings.durationSec ?? currentPageDurationSec, currentPageDurationSec);
+    return timelineCursorSec >= start && timelineCursorSec < end;
+  }) || audioClips.find((clip) => {
+    if (clip.pageIndex !== null) return false;
+    const start = clip.timelineStartSec ?? 0;
+    const end = start + Math.min(clip.settings.durationSec ?? invitationDurationSec, invitationDurationSec);
+    return timelineCursorSec >= start && timelineCursorSec < end;
+  });
+  const track = (timelineClip && AUDIO_TRACKS.find((item) => item.id === timelineClip.trackId)) || activeAudioTrack || AUDIO_TRACKS[0];
+  const currentAudioClip = timelineClip?.settings || audioClip;
+  const clipTimelineStartSec = timelineClip?.timelineStartSec ?? (timelineClip?.pageIndex === null ? 0 : pageStartSec);
+  const audioScopeEndSec = timelineClip?.pageIndex === null ? invitationDurationSec : pageStartSec + currentPageDurationSec;
+  const musicDurationSec = Math.max(0.25, Math.min(currentAudioClip.durationSec ?? (audioScopeEndSec - clipTimelineStartSec), audioScopeEndSec - clipTimelineStartSec));
 
   useEffect(() => {
+    clipElapsedRef.current = 0;
+  }, [isOpen, track.audioUrl, timelineClip?.id]);
+
+  useEffect(() => {
+    if (!isOpen) return;
     const audio = trackAudioRef.current;
-    if (!audio || !track.audioUrl) return;
-    audio.volume = 0.45;
+    if (!audio || !track.audioUrl || !timelineClip) {
+      audio?.pause();
+      return;
+    }
+    audio.volume = currentAudioClip.volume;
     audio.muted = isMuted;
     if (isPlaying && !isMuted) {
+      let elapsedSec = clipElapsedRef.current >= musicDurationSec ? 0 : clipElapsedRef.current;
+      let lastTick = performance.now();
+      const sourceStartSec = Math.max(0, currentAudioClip.startSec);
+      const sourceEndSec = Number.isFinite(audio.duration)
+        ? Math.max(sourceStartSec + 0.05, Math.min(currentAudioClip.sourceEndSec ?? audio.duration, audio.duration))
+        : Number.POSITIVE_INFINITY;
+      audio.loop = false;
+      const sourceLength = Number.isFinite(audio.duration) ? Math.max(0.05, sourceEndSec - sourceStartSec) : 0;
+      const sourceOffset = currentAudioClip.loop && sourceLength > 0
+        ? elapsedSec % sourceLength
+        : Math.min(elapsedSec, sourceLength || elapsedSec);
+      audio.currentTime = Number.isFinite(audio.duration)
+        ? Math.min(sourceStartSec + sourceOffset, Math.max(0, audio.duration - 0.05))
+        : sourceStartSec + sourceOffset;
       void audio.play().catch(() => undefined);
+      clipTimerRef.current = window.setInterval(() => {
+        const now = performance.now();
+        elapsedSec += (now - lastTick) / 1000;
+        lastTick = now;
+        clipElapsedRef.current = elapsedSec;
+
+        if (elapsedSec >= musicDurationSec) {
+          audio.pause();
+          audio.volume = currentAudioClip.volume;
+          if (clipTimerRef.current !== null) window.clearInterval(clipTimerRef.current);
+          clipTimerRef.current = null;
+          return;
+        }
+
+        if (Number.isFinite(audio.duration) && audio.currentTime >= sourceEndSec - 0.03) {
+          if (currentAudioClip.loop) audio.currentTime = Math.min(sourceStartSec, Math.max(0, audio.duration - 0.05));
+          else {
+            audio.pause();
+            return;
+          }
+        }
+
+        let fade = 1;
+        if (currentAudioClip.fadeInSec > 0 && elapsedSec < currentAudioClip.fadeInSec) {
+          fade = elapsedSec / currentAudioClip.fadeInSec;
+        }
+        if (currentAudioClip.fadeOutSec > 0 && elapsedSec > musicDurationSec - currentAudioClip.fadeOutSec) {
+          fade = Math.min(fade, Math.max(0, (musicDurationSec - elapsedSec) / currentAudioClip.fadeOutSec));
+        }
+        audio.volume = Math.max(0, Math.min(1, currentAudioClip.volume * fade));
+      }, 40);
     } else {
       audio.pause();
     }
-    return () => audio.pause();
-  }, [track.audioUrl, isPlaying, isMuted]);
+    return () => {
+      audio.pause();
+      audio.volume = currentAudioClip.volume;
+      if (clipTimerRef.current !== null) window.clearInterval(clipTimerRef.current);
+      clipTimerRef.current = null;
+    };
+  }, [isOpen, track.audioUrl, isPlaying, isMuted, audioCycle, currentAudioClip.startSec, currentAudioClip.sourceEndSec, currentAudioClip.durationSec, currentAudioClip.volume, currentAudioClip.fadeInSec, currentAudioClip.fadeOutSec, currentAudioClip.loop, musicDurationSec, timelineClip?.id, currentIndex]);
 
   const playShehnaiNote = () => {
-    if (isMuted || track.audioUrl) return;
+    if (isMuted || track.audioUrl || !timelineClip) return;
     try {
       if (!audioCtxRef.current) {
         audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -140,6 +224,10 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   };
 
   const handleNext = () => {
+    if (currentIndex === pages.length - 1 && (audioClip.durationSec === null || audioClip.durationSec >= invitationDurationSec - 0.05)) {
+      clipElapsedRef.current = 0;
+      setAudioCycle((cycle) => cycle + 1);
+    }
     setCurrentIndex((prev) => (prev + 1) % pages.length);
     setProgress(0);
     startTimeRef.current = Date.now();
@@ -154,7 +242,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   };
 
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isOpen || !isPlaying) return;
 
     startTimeRef.current = Date.now();
 
@@ -164,6 +252,10 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
       setProgress(currentProg);
 
       if (elapsed >= slideDurationMs) {
+        if (currentIndex === pages.length - 1 && (audioClip.durationSec === null || audioClip.durationSec >= invitationDurationSec - 0.05)) {
+          clipElapsedRef.current = 0;
+          setAudioCycle((cycle) => cycle + 1);
+        }
         setCurrentIndex((prev) => (prev + 1) % pages.length);
         setProgress(0);
         startTimeRef.current = Date.now();
@@ -178,9 +270,10 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isPlaying, currentIndex, slideDurationMs, pages.length]);
+  }, [isOpen, isPlaying, currentIndex, slideDurationMs, pages.length, audioClip.durationSec, invitationDurationSec]);
 
   useEffect(() => {
+    if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === ' ' || e.code === 'Space') {
         e.preventDefault();
@@ -196,16 +289,18 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, []);
+  }, [isOpen]);
 
   const handleShareWhatsApp = () => {
     const msg = `✨ *Watch Our Royal Digital Video Invitation Card* ✨\n\n${title}\n\n🎬 Watch the complete ${pages.length}-Page Celebration Sequence:\n1. Royal Cover Page\n2. Haldi & Sangeet Celebration\n3. Sacred Mandap & Vedic Pheras\n4. Grand Reception & Google Maps Venue QR\n5. Thank You & Warm Blessings\n\nWarm Regards & Blessings!`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-lg flex items-center justify-center p-3 sm:p-6 z-50 animate-fade-in select-none">
-      {track.audioUrl && <audio ref={trackAudioRef} src={track.audioUrl} loop preload="metadata" />}
+      {track.audioUrl && <audio ref={trackAudioRef} src={track.audioUrl} preload="metadata" />}
       <div className="bg-neutral-900 border border-neutral-700 rounded-3xl w-full max-w-4xl max-h-[96vh] flex flex-col overflow-hidden shadow-2xl relative">
         {/* Top Header Bar */}
         <div className="p-3.5 sm:p-4 border-b border-neutral-800 flex items-center justify-between z-20 bg-neutral-900/90 backdrop-blur-md">

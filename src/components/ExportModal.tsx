@@ -9,6 +9,8 @@ import {
   Copy,
   ExternalLink,
   Sparkles,
+  Music,
+  Film,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { jsPDF } from 'jspdf';
@@ -34,6 +36,9 @@ import {
   Model3DElement,
   VideoElement,
   AudioElement,
+  AudioTrack,
+  AudioClipSettings,
+  AudioTimelineClip,
 } from '../types/editor';
 import { evaluateSheetCell } from './Canvas';
 
@@ -44,6 +49,10 @@ interface ExportModalProps {
   pages: CardPage[];
   currentPageIndex?: number;
   aspectRatio: AspectRatioType;
+  activeAudioTrack?: AudioTrack;
+  audioClip?: AudioClipSettings;
+  audioClips?: AudioTimelineClip[];
+  audioTracks?: AudioTrack[];
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
@@ -53,11 +62,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   pages,
   currentPageIndex = 0,
   aspectRatio,
+  activeAudioTrack,
+  audioClip = { startSec: 0, durationSec: null, volume: 0.45, fadeInSec: 0, fadeOutSec: 0, loop: true },
+  audioClips = [],
+  audioTracks = [],
 }) => {
   const [downloading, setDownloading] = useState(false);
   const [selectedExportPage, setSelectedExportPage] = useState<number>(currentPageIndex);
   const [exportScale, setExportScale] = useState<number>(2); // 1x, 2x Retina, 3x Ultra Print
   const [copied, setCopied] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
 
   if (!isOpen) return null;
@@ -749,6 +763,162 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     }
   };
 
+  const handleDownloadVideo = async () => {
+    if (!pages.length) return;
+    setDownloading(true);
+    setExportError(null);
+    let audioContext: AudioContext | null = null;
+    const sources: AudioBufferSourceNode[] = [];
+    let recorder: MediaRecorder | null = null;
+    let stream: MediaStream | null = null;
+
+    try {
+      if (!HTMLCanvasElement.prototype.captureStream || typeof MediaRecorder === 'undefined') {
+        throw new Error('Video export is not supported in this browser. Please use the latest Chrome or Edge.');
+      }
+
+      const renderScale = Math.min(exportScale, 2);
+      const renderedPages = await Promise.all(pages.map(async (page) => {
+        const dataUrl = await generateCanvasImage(page, 'png', renderScale);
+        if (!dataUrl) throw new Error(`Could not render “${page.title}”.`);
+        const image = new Image();
+        image.src = dataUrl;
+        await new Promise<void>((resolve, reject) => {
+          image.onload = () => resolve();
+          image.onerror = () => reject(new Error(`Could not load “${page.title}” for video export.`));
+        });
+        return image;
+      }));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = dimensions.width * renderScale;
+      canvas.height = dimensions.height * renderScale;
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Could not initialize the video renderer.');
+
+      const videoStream = canvas.captureStream(30);
+      stream = videoStream;
+      const audioDurationSec = pages.reduce((sum, page) => sum + (page.duration || 4.5), 0);
+      let audioDestination: MediaStreamAudioDestinationNode | null = null;
+
+      if (audioClips.length > 0) {
+        audioContext = new AudioContext();
+        await audioContext.resume();
+        audioDestination = audioContext.createMediaStreamDestination();
+        const clipsToRender = audioClips;
+        const pageStarts = pages.map((_, index) => pages.slice(0, index).reduce((sum, page) => sum + (page.duration || 4.5), 0));
+        for (const clip of clipsToRender) {
+          const track = audioTracks.find((item) => item.id === clip.trackId) || (clip.trackId === activeAudioTrack?.id ? activeAudioTrack : undefined);
+          if (!track?.audioUrl) continue;
+          const response = await fetch(track.audioUrl);
+          if (!response.ok) throw new Error(`Could not load the “${track.name}” music track.`);
+          const audioBuffer = await audioContext.decodeAudioData(await response.arrayBuffer());
+          const settings = clip.settings;
+          const defaultStart = clip.pageIndex === null ? 0 : pageStarts[clip.pageIndex] ?? 0;
+          const timelineStart = clip.timelineStartSec ?? defaultStart;
+          const scopeEnd = clip.pageIndex === null ? audioDurationSec : defaultStart + (pages[clip.pageIndex]?.duration || 4.5);
+          const scopeDuration = Math.max(0.25, scopeEnd - timelineStart);
+          const musicDuration = Math.max(0.25, Math.min(settings.durationSec ?? scopeDuration, scopeDuration));
+          const startAt = audioContext.currentTime + timelineStart;
+          const safeSourceStart = Math.min(Math.max(0, settings.startSec), Math.max(0, audioBuffer.duration - 0.05));
+          const safeSourceEnd = Math.max(safeSourceStart + 0.05, Math.min(settings.sourceEndSec ?? audioBuffer.duration, audioBuffer.duration));
+          const selectedSourceDuration = safeSourceEnd - safeSourceStart;
+          const audibleDuration = settings.loop ? musicDuration : Math.min(musicDuration, selectedSourceDuration);
+          const sourceNode = audioContext.createBufferSource();
+          sourceNode.buffer = audioBuffer;
+          if (settings.loop && safeSourceStart < audioBuffer.duration) {
+            sourceNode.loop = true;
+            sourceNode.loopStart = safeSourceStart;
+            sourceNode.loopEnd = safeSourceEnd;
+          }
+          const gain = audioContext.createGain();
+          const fadeIn = Math.min(settings.fadeInSec, audibleDuration / 2);
+          const fadeOut = Math.min(settings.fadeOutSec, audibleDuration / 2);
+          gain.gain.setValueAtTime(fadeIn > 0 ? 0 : settings.volume, startAt);
+          if (fadeIn > 0) gain.gain.linearRampToValueAtTime(settings.volume, startAt + fadeIn);
+          if (fadeOut > 0) {
+            gain.gain.setValueAtTime(settings.volume, startAt + Math.max(fadeIn, audibleDuration - fadeOut));
+            gain.gain.linearRampToValueAtTime(0, startAt + audibleDuration);
+          }
+          sourceNode.connect(gain);
+          gain.connect(audioDestination);
+          sources.push(sourceNode);
+          sourceNode.start(startAt, safeSourceStart);
+          sourceNode.stop(startAt + audibleDuration);
+        }
+        for (const track of audioDestination.stream.getAudioTracks()) videoStream.addTrack(track);
+      }
+
+      const mimeType = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
+        .find((candidate) => MediaRecorder.isTypeSupported(candidate));
+      if (!mimeType) throw new Error('This browser cannot encode a WebM video. Please use the latest Chrome or Edge.');
+
+      const chunks: BlobPart[] = [];
+      recorder = new MediaRecorder(videoStream, { mimeType, videoBitsPerSecond: 5_000_000 });
+      const recording = new Promise<Blob>((resolve, reject) => {
+        recorder!.ondataavailable = (event) => { if (event.data.size > 0) chunks.push(event.data); };
+        recorder!.onerror = () => reject(new Error('Video recording failed. Please try again.'));
+        recorder!.onstop = () => resolve(new Blob(chunks, { type: mimeType }));
+      });
+
+      const pageDurations = pages.map((page) => page.duration || 4.5);
+      const totalDurationSec = pageDurations.reduce((sum, duration) => sum + duration, 0);
+      const drawFrame = (elapsedSec: number) => {
+        let pageIndex = 0;
+        let pageStart = 0;
+        while (pageIndex < pageDurations.length - 1 && elapsedSec >= pageStart + pageDurations[pageIndex]) {
+          pageStart += pageDurations[pageIndex];
+          pageIndex += 1;
+        }
+        const pageDuration = pageDurations[pageIndex];
+        const progress = Math.max(0, Math.min(1, (elapsedSec - pageStart) / pageDuration));
+        const page = pages[pageIndex];
+        const transitionDuration = Math.min(0.55, pageDuration * 0.2);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        if (pageIndex > 0 && page.transition !== 'none' && progress < transitionDuration / pageDuration) {
+          context.globalAlpha = 1;
+          context.drawImage(renderedPages[pageIndex - 1], 0, 0, canvas.width, canvas.height);
+          context.globalAlpha = Math.min(1, progress * pageDuration / transitionDuration);
+        } else context.globalAlpha = 1;
+        context.drawImage(renderedPages[pageIndex], 0, 0, canvas.width, canvas.height);
+        context.globalAlpha = 1;
+      };
+
+      drawFrame(0);
+      recorder.start(250);
+      const startedAt = performance.now();
+      await new Promise<void>((resolve) => {
+        const render = () => {
+          const elapsed = (performance.now() - startedAt) / 1000;
+          drawFrame(Math.min(elapsed, totalDurationSec - 0.001));
+          if (elapsed >= totalDurationSec) {
+            recorder?.stop();
+            resolve();
+          } else requestAnimationFrame(render);
+        };
+        requestAnimationFrame(render);
+      });
+      const blob = await recording;
+      const safeTitle = title.trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'invitation';
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${safeTitle}-invitation-with-music.webm`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 30_000);
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#D4AF37', '#FFEAA7', '#FFD700', '#C41E3A'] });
+    } catch (error) {
+      console.error('Video export failed', error);
+      setExportError(error instanceof Error ? error.message : 'Video export failed. Please try again.');
+    } finally {
+      if (recorder?.state === 'recording') recorder.stop();
+      sources.forEach((sourceNode) => { try { sourceNode.stop(); } catch { /* already stopped */ } });
+      stream?.getTracks().forEach((track) => track.stop());
+      if (audioContext && audioContext.state !== 'closed') await audioContext.close();
+      setDownloading(false);
+    }
+  };
+
   const handleShareWhatsApp = () => {
     const url = `https://wa.me/?text=${encodeURIComponent(sampleMessage)}`;
     window.open(url, '_blank');
@@ -761,88 +931,96 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in select-none">
-      <div className="bg-neutral-900 border border-neutral-700 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 z-50 animate-fade-in">
+      <div className="bg-[#111110] border border-white/10 rounded-2xl w-full max-w-xl max-h-[88vh] overflow-hidden shadow-[0_28px_100px_rgba(0,0,0,0.65)]">
         {/* Header */}
-        <div className="p-4 border-b border-neutral-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg gold-shimmer flex items-center justify-center text-neutral-950">
+        <div className="px-5 py-3.5 border-b border-white/10 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 flex items-center justify-center text-neutral-950 shadow-lg shadow-amber-950/30">
               <Download className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-neutral-100">
-                Canva Pro Export & Share Studio
+              <h3 className="text-sm font-semibold tracking-tight text-neutral-100">
+                Export & share
               </h3>
-              <p className="text-[11px] text-neutral-400">
-                High-Resolution 1x/2x/3x Retina Downloads & Multi-Page PDF
+              <p className="text-[10px] text-neutral-400 mt-0.5">
+                Choose how you want to save or send your invitation
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-neutral-400 hover:text-neutral-100 rounded-lg hover:bg-neutral-800 transition"
+            aria-label="Close export and share"
+            className="p-2 text-neutral-400 hover:text-white rounded-lg hover:bg-white/5 transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4">
-          {/* Page & Resolution Quality Selector */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+        <div className="px-5 py-4 space-y-3.5 overflow-y-auto max-h-[calc(88vh-66px)]">
+          {/* Export settings */}
+          <section className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+            <div className="mb-2">
+              <h4 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-300">Export settings</h4>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px]">
             {pages.length > 1 && (
-              <div className="flex items-center justify-between bg-neutral-950 px-3 py-2 rounded-xl border border-neutral-800">
-                <span className="text-neutral-300 font-medium">Page:</span>
+              <label className="min-w-0 space-y-1.5">
+                <span className="block text-[10px] font-medium text-neutral-400">Image page</span>
                 <select
                   value={selectedExportPage}
                   onChange={(e) => setSelectedExportPage(parseInt(e.target.value))}
-                  className="bg-neutral-800 text-amber-300 font-semibold px-2 py-1 rounded-lg border border-neutral-700 outline-none"
+                  className="w-full min-w-0 bg-neutral-950 text-neutral-100 font-medium px-2.5 py-2 rounded-lg border border-white/10 outline-none focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/10"
                 >
                   {pages.map((p, idx) => (
                     <option key={p.id || idx} value={idx}>
-                      Page {idx + 1}: {p.title.slice(0, 14)}
+                      Page {idx + 1}{p.title ? ` · ${p.title.slice(0, 32)}` : ''}
                     </option>
                   ))}
                 </select>
-              </div>
+              </label>
             )}
 
-            <div className="flex items-center justify-between bg-neutral-950 px-3 py-2 rounded-xl border border-neutral-800">
-              <span className="text-neutral-300 font-medium flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Quality:
+            <label className="min-w-0 space-y-1.5">
+              <span className="flex items-center gap-1.5 text-[10px] font-medium text-neutral-400">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Image quality
               </span>
               <select
                 value={exportScale}
                 onChange={(e) => setExportScale(parseInt(e.target.value))}
-                className="bg-neutral-800 text-amber-300 font-semibold px-2 py-1 rounded-lg border border-neutral-700 outline-none"
+                className="w-full min-w-0 bg-neutral-950 text-neutral-100 font-medium px-2.5 py-2 rounded-lg border border-white/10 outline-none focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/10"
               >
                 <option value={1}>1x Standard Web</option>
                 <option value={2}>2x Retina HD (300 DPI)</option>
                 <option value={3}>3x Ultra Print Studio</option>
               </select>
+            </label>
             </div>
-          </div>
+          </section>
 
-          {/* Download Options */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Image downloads */}
+          <section>
+            <div className="mb-3">
+              <h4 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-300">Download image</h4>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {/* PNG */}
             <button
               onClick={() => handleDownloadImage('png')}
               disabled={downloading}
-              className="p-4 rounded-xl bg-neutral-800/80 hover:bg-neutral-750 border border-neutral-700 hover:border-amber-500/50 text-left transition group flex flex-col justify-between h-28"
+              className="min-w-0 p-3 rounded-xl bg-[#191918] hover:bg-[#20201e] border border-white/10 hover:border-amber-400/40 text-left transition group disabled:opacity-50"
             >
-              <div className="flex items-center justify-between">
-                <ImageIcon className="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-mono text-amber-300 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
-                  {exportScale}x HD PNG
-                </span>
-              </div>
-              <div>
-                <div className="text-sm font-semibold text-neutral-100">
-                  {downloading ? 'Rendering...' : 'Download PNG'}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 shrink-0 rounded-lg bg-amber-400/10 flex items-center justify-center">
+                  <ImageIcon className="w-4 h-4 text-amber-300" />
                 </div>
-                <div className="text-[11px] text-neutral-400">
-                  Lossless print & crisp typography
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-neutral-100">{downloading ? 'Rendering PNG…' : 'Download PNG'}</span>
+                    <span className="text-[9px] text-amber-200 bg-amber-400/10 px-1.5 py-0.5 rounded-full whitespace-nowrap">{exportScale}× HD</span>
+                  </div>
+                  <span className="block mt-1 text-[10px] text-neutral-500">Lossless, crisp details</span>
                 </div>
               </div>
             </button>
@@ -851,77 +1029,116 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <button
               onClick={() => handleDownloadImage('jpeg')}
               disabled={downloading}
-              className="p-4 rounded-xl bg-neutral-800/80 hover:bg-neutral-750 border border-neutral-700 hover:border-amber-500/50 text-left transition group flex flex-col justify-between h-28"
+              className="min-w-0 p-3 rounded-xl bg-[#191918] hover:bg-[#20201e] border border-white/10 hover:border-emerald-400/40 text-left transition group disabled:opacity-50"
             >
-              <div className="flex items-center justify-between">
-                <ImageIcon className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-mono text-emerald-300 bg-emerald-400/10 px-1.5 py-0.5 rounded border border-emerald-400/20">
-                  Fast WhatsApp
-                </span>
-              </div>
-              <div>
-                <div className="text-sm font-semibold text-neutral-100">
-                  {downloading ? 'Rendering...' : 'Download JPG'}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 shrink-0 rounded-lg bg-emerald-400/10 flex items-center justify-center">
+                  <ImageIcon className="w-4 h-4 text-emerald-300" />
                 </div>
-                <div className="text-[11px] text-neutral-400">
-                  Ideal for mobile & WhatsApp chats
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-neutral-100">{downloading ? 'Rendering JPG…' : 'Download JPG'}</span>
+                    <span className="text-[9px] text-emerald-200 bg-emerald-400/10 px-1.5 py-0.5 rounded-full whitespace-nowrap">Smaller file</span>
+                  </div>
+                  <span className="block mt-1 text-[10px] text-neutral-500">Easy to send in chats</span>
                 </div>
               </div>
             </button>
-          </div>
+            </div>
+          </section>
+
+          {/* Video download */}
+          <section>
+            <div className="mb-3">
+              <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-300">Animated invitation</h4>
+            </div>
+          <button
+            onClick={handleDownloadVideo}
+            disabled={downloading}
+            className="group w-full p-3 rounded-xl bg-gradient-to-r from-amber-400/10 to-amber-200/[0.03] hover:from-amber-400/15 hover:to-amber-200/[0.06] border border-amber-300/20 hover:border-amber-300/40 text-left transition flex items-center justify-between gap-3 disabled:opacity-60"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-8 h-8 shrink-0 rounded-lg bg-amber-400/15 border border-amber-400/20 flex items-center justify-center">
+                <Film className="w-4 h-4 text-amber-300" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-semibold text-neutral-100">
+                  {downloading ? 'Rendering invitation video…' : 'Download Animated Video'}
+                </div>
+                <div className="text-[10px] text-neutral-400 flex items-center gap-1 mt-0.5">
+                  <Music className="w-3 h-3 text-amber-300" />
+                  <span className="truncate">{activeAudioTrack?.name || 'No music'} · exact clip duration · WebM</span>
+                </div>
+              </div>
+            </div>
+            <Download className="w-4 h-4 shrink-0 text-amber-300 group-hover:translate-y-0.5 transition-transform" />
+          </button>
+          {exportError && (
+            <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] text-red-200">{exportError}</p>
+          )}
+          </section>
 
           {/* PDF Print Option */}
+          <section>
+            <div className="mb-3">
+              <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-300">Multiple pages</h4>
+            </div>
           <button
             onClick={handleDownloadPdf}
             disabled={downloading}
-            className="w-full p-3.5 rounded-xl bg-neutral-800/80 hover:bg-neutral-750 border border-neutral-700 hover:border-amber-500/50 flex items-center justify-between transition group"
+            className="group w-full p-3 rounded-xl bg-[#191918] hover:bg-[#20201e] border border-white/10 hover:border-amber-400/30 flex items-center justify-between transition disabled:opacity-50"
           >
             <div className="flex items-center gap-3">
               <FileText className="w-5 h-5 text-amber-400" />
               <div className="text-left">
-                <div className="text-sm font-semibold text-neutral-100">
-                  Download All {pages.length} Pages as PDF
+                <div className="text-xs font-semibold text-neutral-100">
+                  Download all {pages.length} pages as PDF
                 </div>
-                <div className="text-[11px] text-neutral-400">
+                <div className="text-[10px] text-neutral-400">
                   Direct multipage PDF download at {exportScale}x resolution
                 </div>
               </div>
             </div>
             <ExternalLink className="w-4 h-4 text-neutral-400 group-hover:text-amber-400" />
           </button>
+          </section>
 
           {/* WhatsApp Direct Share Section */}
-          <div className="pt-2 border-t border-neutral-800">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-neutral-200 flex items-center gap-1.5">
-                <Share2 className="w-3.5 h-3.5 text-emerald-400" />
-                Instant WhatsApp Share
-              </span>
+          <section className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 shrink-0 rounded-lg bg-emerald-400/10 flex items-center justify-center">
+                  <Share2 className="w-4 h-4 text-emerald-300" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-neutral-100">Share with WhatsApp</h4>
+                  <p className="mt-0.5 text-[10px] text-neutral-500">Open WhatsApp with your invitation message.</p>
+                </div>
+              </div>
               <button
-                onClick={handleCopyMessage}
-                className="text-[11px] text-neutral-400 hover:text-amber-300 flex items-center gap-1 transition"
+                onClick={handleShareWhatsApp}
+                className="shrink-0 py-2 px-3 bg-[#25D366] hover:bg-[#20ba59] text-neutral-950 font-semibold text-[11px] rounded-lg transition flex items-center justify-center gap-2"
               >
-                {copied ? (
-                  <Check className="w-3 h-3 text-emerald-400" />
-                ) : (
-                  <Copy className="w-3 h-3" />
-                )}
-                {copied ? 'Copied!' : 'Copy Text'}
+                <Share2 className="w-4 h-4" />
+                Continue to WhatsApp
               </button>
             </div>
-
-            <div className="p-3 bg-neutral-950 rounded-xl border border-neutral-800 text-xs text-neutral-300 font-mono whitespace-pre-line max-h-24 overflow-y-auto">
-              {sampleMessage}
-            </div>
-
-            <button
-              onClick={handleShareWhatsApp}
-              className="w-full mt-3 py-2.5 px-4 bg-[#25D366] hover:bg-[#20ba59] text-neutral-950 font-bold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2"
-            >
-              <Share2 className="w-4 h-4" />
-              Open in WhatsApp & Share to Contacts
-            </button>
-          </div>
+            <details className="mt-2 group">
+              <summary className="cursor-pointer select-none text-[10px] text-neutral-400 hover:text-neutral-200">Preview or copy message</summary>
+              <div className="mt-1.5 flex items-center justify-end">
+                <button
+                  onClick={handleCopyMessage}
+                  className="text-[10px] text-neutral-400 hover:text-amber-300 flex items-center gap-1 transition"
+                >
+                  {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  {copied ? 'Copied!' : 'Copy message'}
+                </button>
+              </div>
+              <div className="p-2.5 mt-1 bg-neutral-950 rounded-lg border border-white/10 text-[11px] text-neutral-300 whitespace-pre-line max-h-24 overflow-y-auto">
+                {sampleMessage}
+              </div>
+            </details>
+          </section>
         </div>
       </div>
     </div>

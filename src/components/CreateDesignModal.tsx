@@ -96,7 +96,7 @@ export const CreateDesignModal: React.FC<CreateDesignModalProps> = ({ isOpen, on
             <h2 id="create-design-title" className="font-cinzel text-xl font-bold text-white sm:text-2xl">Create a blank invitation</h2>
             <p className="mt-1 text-xs text-neutral-400 sm:text-sm">Choose a format and a starting color. Add your own text, photos and elements in the studio.</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close create design" className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-neutral-300 transition hover:border-amber-300/40 hover:text-white"><X className="h-4 w-4" /></button>
+          <button type="button" onClick={() => onCreate({ aspectRatio, backgroundColor, occasion, themeName })} aria-label="Close and open design studio" title="Close and open Design Studio" className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-neutral-300 transition hover:border-amber-300/40 hover:text-white"><X className="h-4 w-4" /></button>
         </header>
 
         <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[1fr_310px]">

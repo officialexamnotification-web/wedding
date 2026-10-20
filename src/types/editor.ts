@@ -626,6 +626,31 @@ export interface AudioTrack {
   audioUrl?: string;
 }
 
+export interface AudioClipSettings {
+  /** In point of the chosen source-music section, in seconds. */
+  startSec: number;
+  /** Null means the whole invitation duration. */
+  durationSec: number | null;
+  /** Exclusive out point in the source track. Undefined keeps legacy projects using the remaining track. */
+  sourceEndSec?: number | null;
+  volume: number;
+  fadeInSec: number;
+  fadeOutSec: number;
+  loop: boolean;
+  /** Indicates that this clip's in-point and length are aligned to the track beat grid. */
+  beatSync?: boolean;
+}
+
+/** A music clip assigned to one slide, or to the full invitation when pageIndex is null. */
+export interface AudioTimelineClip {
+  id: string;
+  trackId: string;
+  pageIndex: number | null;
+  /** Absolute position on the invitation timeline, in seconds. */
+  timelineStartSec?: number;
+  settings: AudioClipSettings;
+}
+
 export interface DrawBrushSettings {
   isEnabled: boolean;
   brushType: 'pen' | 'marker' | 'highlighter' | 'glow-gold' | 'calligraphy' | 'eraser';
@@ -640,6 +665,9 @@ export interface SavedProject {
   updatedAt: string;
   aspectRatio: AspectRatioType;
   pages: CardPage[];
+  audioTrackId?: string;
+  audioClip?: AudioClipSettings;
+  audioClips?: AudioTimelineClip[];
 }
 
 export interface CustomGuide {
