@@ -484,30 +484,6 @@ export const BRAND_KITS: BrandKit[] = [
 ];
 
 export const AUDIO_TRACKS: AudioTrack[] = [
-  {
-    id: 'punjabi-dhol',
-    name: 'Baraat & Sangeet Festive Beats',
-    category: 'dhol',
-    ragaNotes: [146.83, 196.0, 220.0, 293.66, 329.63, 392.0],
-    tempo: 0.8,
-    description: 'Upbeat celebratory rhythm for Haldi & Sangeet',
-  },
-  {
-    id: 'vedic-mantra',
-    name: 'Sacred Ganesh & Vivah Chants',
-    category: 'mantra',
-    ragaNotes: [220.0, 246.94, 277.18, 329.63, 369.99, 440.0],
-    tempo: 1.6,
-    description: 'Spiritual temple bells and Vedic resonance',
-  },
-  {
-    id: 'bollywood-royal',
-    name: 'Jashn-e-Bahara Orchestra Strings',
-    category: 'bollywood',
-    ragaNotes: [261.63, 329.63, 392.0, 493.88, 523.25, 659.25],
-    tempo: 1.1,
-    description: 'Romantic royal bridal entry symphony',
-  },
   ...[
     { id: 'at-the-palace-gates', name: 'At the Palace Gates', category: 'shehnai', description: 'A regal instrumental welcome for a palace celebration', file: 'At_The_Palace_Gates.mp3' },
     { id: 'marigold-and-saffron', name: 'Marigold & Saffron', category: 'dhol', description: 'Bright festive music for Haldi and family celebrations', file: 'Marigold_and_Saffron.mp3' },
@@ -600,7 +576,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onUpdateDrawBrush,
   onClearDrawings,
   onApplyBrandKit,
-  activeAudioTrackId = 'punjabi-dhol',
+  activeAudioTrackId = 'at-the-palace-gates',
   onSelectAudioTrack,
   savedProjects = [],
   onSaveProject,
