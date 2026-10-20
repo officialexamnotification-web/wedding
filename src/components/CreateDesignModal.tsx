@@ -4,7 +4,9 @@ import { AspectRatioType, CANVAS_SIZES } from '../types/editor';
 
 export interface BlankDesignOptions {
   aspectRatio: AspectRatioType;
+  backgroundColor: string;
   occasion: string;
+  themeName: string;
 }
 
 interface CreateDesignModalProps {
@@ -37,6 +39,27 @@ const occasions = [
   { id: 'anniversary', label: 'Anniversary', icon: Flower2 },
 ];
 
+const themes = [
+  { name: 'Ivory & Gold', color: '#FFF8EA', accent: '#C6A257' },
+  { name: 'Crimson Royal', color: '#3B0B16', accent: '#D5B45F' },
+  { name: 'Emerald Garden', color: '#0B2C20', accent: '#C5A45C' },
+  { name: 'Sapphire Night', color: '#111C35', accent: '#D9B86B' },
+  { name: 'Marigold', color: '#FFF2D4', accent: '#B96A18' },
+  { name: 'Blush Garden', color: '#F9EDF0', accent: '#B57683' },
+  { name: 'Champagne & Sage', color: '#F4F1E7', accent: '#70836A' },
+  { name: 'Dusty Rose & Wine', color: '#F3E4E6', accent: '#762F43' },
+  { name: 'Terracotta & Sand', color: '#F2E3D5', accent: '#A6533C' },
+  { name: 'Midnight & Champagne', color: '#171B2E', accent: '#D8C49A' },
+  { name: 'Peacock Teal', color: '#0D3B3B', accent: '#D2A65A' },
+  { name: 'Lavender & Silver', color: '#F0ECF6', accent: '#80718F' },
+  { name: 'Peach Blossom', color: '#FFF0E8', accent: '#D87962' },
+  { name: 'Plum & Antique Gold', color: '#302033', accent: '#C7A66A' },
+  { name: 'Dusty Blue & Champagne', color: '#E8EEF4', accent: '#667F9B' },
+  { name: 'Sage & Terracotta', color: '#E9EEE5', accent: '#A6533C' },
+  { name: 'Olive & Cream', color: '#EAEBDD', accent: '#697246' },
+  { name: 'Black Tie Gold', color: '#171513', accent: '#D2AF61' },
+];
+
 const previewRatio: Record<AspectRatioType, string> = {
   'portrait-story': '9 / 16',
   'portrait-classic': '5 / 7',
@@ -49,12 +72,20 @@ const previewRatio: Record<AspectRatioType, string> = {
 export const CreateDesignModal: React.FC<CreateDesignModalProps> = ({ isOpen, onClose, onCreate }) => {
   const [aspectRatio, setAspectRatio] = useState<AspectRatioType>('portrait-story');
   const [occasion, setOccasion] = useState('wedding');
+  const [themeName, setThemeName] = useState(themes[0].name);
+  const [backgroundColor, setBackgroundColor] = useState(themes[0].color);
 
   if (!isOpen) return null;
 
   const selectedFormat = formats.find((format) => format.id === aspectRatio) || formats[0];
+  const selectedTheme = themes.find((theme) => theme.name === themeName);
   const occasionLabel = occasions.find((item) => item.id === occasion)?.label || 'Invitation';
   const canvasDimensions = CANVAS_SIZES[aspectRatio];
+
+  const selectTheme = (theme: (typeof themes)[number]) => {
+    setThemeName(theme.name);
+    setBackgroundColor(theme.color);
+  };
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-3 backdrop-blur-md sm:p-6" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
@@ -63,7 +94,7 @@ export const CreateDesignModal: React.FC<CreateDesignModalProps> = ({ isOpen, on
           <div>
             <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.22em] text-amber-300/80"><Sparkles className="h-3.5 w-3.5" /> Nimantran Atelier</div>
             <h2 id="create-design-title" className="font-cinzel text-xl font-bold text-white sm:text-2xl">Create a blank invitation</h2>
-            <p className="mt-1 text-xs text-neutral-400 sm:text-sm">Choose a format and occasion. Customize the background, text and elements in the studio.</p>
+            <p className="mt-1 text-xs text-neutral-400 sm:text-sm">Choose a format and a starting color. Add your own text, photos and elements in the studio.</p>
           </div>
           <button type="button" onClick={onClose} aria-label="Close create design" className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-neutral-300 transition hover:border-amber-300/40 hover:text-white"><X className="h-4 w-4" /></button>
         </header>
@@ -102,21 +133,33 @@ export const CreateDesignModal: React.FC<CreateDesignModalProps> = ({ isOpen, on
               </div>
             </section>
 
+            <section>
+              <div className="flex items-end justify-between gap-3">
+                <div><h3 className="text-sm font-bold text-white">Pick a color direction</h3><p className="mt-1 text-[11px] text-neutral-500">Sets the blank canvas background. The small accent swatch is a preview cue; you can add matching details in the editor.</p></div>
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[.035] px-3 py-2 text-[10px] font-semibold text-neutral-300 hover:border-amber-300/40 hover:text-white"><span className="h-4 w-4 rounded-full border border-white/30" style={{ backgroundColor }} /><span>Custom color</span><input type="color" value={backgroundColor} onChange={(event) => { setBackgroundColor(event.target.value); setThemeName('Custom color'); }} className="sr-only" /></label>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {themes.map((theme) => {
+                  const active = themeName === theme.name;
+                  return <button key={theme.name} type="button" onClick={() => selectTheme(theme)} aria-pressed={active} className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition ${active ? 'border-amber-300/60 bg-amber-300/[.06]' : 'border-white/[.08] bg-white/[.02] hover:border-white/20'}`}><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/15" style={{ backgroundColor: theme.color }}><span className="h-2 w-2 rounded-full" style={{ backgroundColor: theme.accent }} /></span><span className="truncate text-[10px] font-semibold text-neutral-200">{theme.name}</span>{active && <Check className="ml-auto h-3.5 w-3.5 shrink-0 text-amber-300" />}</button>;
+                })}
+              </div>
+            </section>
           </div>
 
           <aside className="flex flex-col border-t border-white/10 bg-black/20 p-5 sm:p-7 lg:border-l lg:border-t-0">
             <div className="mb-4 flex items-center justify-between"><div><div className="text-[10px] font-semibold uppercase tracking-[.16em] text-neutral-500">Live preview</div><div className="mt-1 text-sm font-bold text-white">{selectedFormat.label}</div></div><span className="rounded-md bg-white/[.06] px-2 py-1 text-[10px] font-semibold text-neutral-300">{CANVAS_SIZES[aspectRatio].ratioLabel}</span></div>
             <div className="flex min-h-[190px] flex-1 items-center justify-center rounded-2xl border border-white/[.07] bg-[#080708] p-5">
-              <div className="relative max-h-[290px] w-full max-w-[200px] border border-amber-300/25 bg-[#FFF8EA] shadow-[0_18px_48px_rgba(0,0,0,.6)] transition-all duration-300" style={{ aspectRatio: previewRatio[aspectRatio], maxWidth: aspectRatio === 'whatsapp-banner' || aspectRatio === 'landscape' ? '240px' : '175px' }}>
-                <div className="absolute inset-[5%] border border-[#C6A257]/35" />
-                <div className="absolute inset-x-[14%] top-[16%] flex justify-center"><div className="h-px w-1/3 bg-[#C6A257]" /></div>
-                <div className="absolute bottom-[16%] left-1/2 flex -translate-x-1/2 items-center gap-1"><span className="h-1 w-1 rounded-full bg-[#C6A257]" /><span className="h-px w-8 bg-[#C6A257]" /><span className="h-1 w-1 rounded-full bg-[#C6A257]" /></div>
+              <div className="relative max-h-[290px] w-full max-w-[200px] border border-amber-300/25 shadow-[0_18px_48px_rgba(0,0,0,.6)] transition-all duration-300" style={{ aspectRatio: previewRatio[aspectRatio], backgroundColor, maxWidth: aspectRatio === 'whatsapp-banner' || aspectRatio === 'landscape' ? '240px' : '175px' }}>
+                <div className="absolute inset-[5%] border" style={{ borderColor: `${selectedTheme?.accent || '#C6A257'}55` }} />
+                <div className="absolute inset-x-[14%] top-[16%] flex justify-center"><div className="h-px w-1/3" style={{ backgroundColor: selectedTheme?.accent || '#C6A257' }} /></div>
+                <div className="absolute bottom-[16%] left-1/2 flex -translate-x-1/2 items-center gap-1"><span className="h-1 w-1 rounded-full" style={{ backgroundColor: selectedTheme?.accent || '#C6A257' }} /><span className="h-px w-8" style={{ backgroundColor: selectedTheme?.accent || '#C6A257' }} /><span className="h-1 w-1 rounded-full" style={{ backgroundColor: selectedTheme?.accent || '#C6A257' }} /></div>
               </div>
             </div>
             <div className="mt-4 space-y-2 rounded-2xl border border-white/[.07] bg-white/[.025] p-3.5">
               <div className="flex items-center justify-between text-[11px]"><span className="text-neutral-500">Occasion</span><span className="font-semibold text-neutral-200">{occasionLabel}</span></div>
               <div className="flex items-center justify-between text-[11px]"><span className="text-neutral-500">Canvas</span><span className="font-semibold text-neutral-200">{canvasDimensions.width} × {canvasDimensions.height}</span></div>
-              <div className="flex items-center justify-between text-[11px]"><span className="text-neutral-500">Starting background</span><span className="font-semibold text-neutral-200">Ivory & Gold</span></div>
+              <div className="flex items-center justify-between text-[11px]"><span className="text-neutral-500">Color theme</span><span className="font-semibold text-neutral-200">{themeName}</span></div>
             </div>
             <div className="mt-3 flex items-start gap-2 text-[10px] leading-relaxed text-neutral-500"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300/70" />The canvas starts blank. Add editable text, photos, motifs, shapes, QR codes and more in Design Studio.</div>
           </aside>
@@ -124,7 +167,7 @@ export const CreateDesignModal: React.FC<CreateDesignModalProps> = ({ isOpen, on
 
         <footer className="flex flex-col-reverse gap-2 border-t border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
           <button type="button" onClick={onClose} className="rounded-xl px-4 py-3 text-xs font-semibold text-neutral-400 transition hover:bg-white/[.05] hover:text-white">Cancel</button>
-          <button type="button" onClick={() => onCreate({ aspectRatio, occasion })} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-400 px-5 py-3 text-xs font-extrabold text-[#1e1407] shadow-lg shadow-amber-500/15 transition hover:brightness-110">Create blank design <ChevronRight className="h-4 w-4" /></button>
+          <button type="button" onClick={() => onCreate({ aspectRatio, backgroundColor, occasion, themeName })} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-400 px-5 py-3 text-xs font-extrabold text-[#1e1407] shadow-lg shadow-amber-500/15 transition hover:brightness-110">Create blank design <ChevronRight className="h-4 w-4" /></button>
         </footer>
       </section>
     </div>

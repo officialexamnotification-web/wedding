@@ -941,7 +941,7 @@ export default function App() {
     setCurrentView('editor');
   };
 
-  const handleOpenBlankFromHome = ({ aspectRatio, occasion }: BlankDesignOptions) => {
+  const handleOpenBlankFromHome = ({ aspectRatio, backgroundColor, occasion, themeName }: BlankDesignOptions) => {
     const occasionNames: Record<string, string> = {
       wedding: 'Shubh Vivah',
       housewarming: 'Griha Pravesh',
@@ -950,12 +950,12 @@ export default function App() {
       'baby-shower': 'Godh Bharai',
       anniversary: 'Anniversary',
     };
-    const pageTitle = `${CANVAS_SIZES[aspectRatio].name} · Invitation`;
+    const pageTitle = `${CANVAS_SIZES[aspectRatio].name} · ${themeName}`;
     const blankPages: CardPage[] = [{
       id: `blank-design-${Date.now()}`,
       title: pageTitle,
       backgroundType: 'color',
-      backgroundValue: '#FFF8EA',
+      backgroundValue: backgroundColor,
       elements: [],
     }];
     setTitle(`Untitled ${occasionNames[occasion] || 'Invitation'}`);

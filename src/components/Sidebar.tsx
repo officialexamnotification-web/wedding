@@ -94,13 +94,11 @@ import {
   renderShapeVisual,
 } from './Canvas';
 import { ElementsLibraryPanel } from './ElementsLibraryPanel';
-import { DESIGN_COLOR_MOODS, DESIGN_COLOR_PALETTES } from '../data/colorPalettes';
 
 export type SidebarTab =
   | 'templates'
   | 'elements'
   | 'text'
-  | 'colors'
   | 'brand'
   | 'photos'
   | 'tools'
@@ -622,7 +620,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     'draw' | 'audio' | 'backgrounds' | 'layers' | 'guides'
   >('backgrounds');
   const [designSubTab, setDesignSubTab] = useState<'templates' | 'layouts' | 'styles'>('templates');
-  const [colorMood, setColorMood] = useState<(typeof DESIGN_COLOR_MOODS)[number]>('All');
   const [elementSubTab, setElementSubTab] = useState<
     'all' | 'shapes' | 'frames' | 'grids' | 'tables' | 'charts' | 'stickers'
   >('all');
@@ -680,24 +677,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const currentPage = pages[currentPageIndex] || pages[0];
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
-  const selectedCanvasElement = currentPage?.elements.find((element) => element.id === selectedElementId) || null;
-  const colorTargetLabel = selectedCanvasElement?.type === 'text' ? 'selected text' : selectedCanvasElement?.type === 'shape' ? 'selected shape' : selectedCanvasElement?.type === 'sticker' ? 'selected graphic' : selectedCanvasElement?.type === 'qr' ? 'selected QR code' : selectedCanvasElement?.type === 'image' ? 'selected image border' : selectedCanvasElement?.type === 'drawing' ? 'selected drawing' : null;
-  const applyColorToSelection = (color: string) => {
-    if (!selectedCanvasElement) return;
-    if (selectedCanvasElement.type === 'text') {
-      onUpdateElement(selectedCanvasElement.id, { color, gradientText: undefined }, true);
-    } else if (selectedCanvasElement.type === 'shape') {
-      onUpdateElement(selectedCanvasElement.id, { fillColor: color, strokeColor: color }, true);
-    } else if (selectedCanvasElement.type === 'sticker') {
-      onUpdateElement(selectedCanvasElement.id, { color }, true);
-    } else if (selectedCanvasElement.type === 'qr') {
-      onUpdateElement(selectedCanvasElement.id, { color, borderColor: color }, true);
-    } else if (selectedCanvasElement.type === 'image') {
-      onUpdateElement(selectedCanvasElement.id, { borderColor: color, borderWidth: Math.max(2, selectedCanvasElement.borderWidth || 0) }, true);
-    } else if (selectedCanvasElement.type === 'drawing') {
-      onUpdateElement(selectedCanvasElement.id, { paths: selectedCanvasElement.paths.map((path) => ({ ...path, color })) }, true);
-    }
-  };
 
   // Slide helpers
   const getSlideImage = (page: CardPage): string | null => {
@@ -1128,7 +1107,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'templates' as SidebarTab, label: 'Design', icon: LayoutTemplate },
     { id: 'elements' as SidebarTab, label: 'Elements', icon: Shapes },
     { id: 'text' as SidebarTab, label: 'Text', icon: Type },
-    { id: 'colors' as SidebarTab, label: 'Colors', icon: Palette },
     { id: 'brand' as SidebarTab, label: 'Brand', icon: Crown },
     { id: 'photos' as SidebarTab, label: 'Uploads', icon: ImageIcon },
     { id: 'tools' as SidebarTab, label: 'Tools', icon: Wand2 },
@@ -1496,92 +1474,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         {/* ================= 2. ELEMENTS (14-CATEGORY LIBRARY + CLASSIC PRESETS) TAB ================= */}
-        {activeTab === 'colors' && (
-          <div className="space-y-4">
-            <div>
-              <div className="text-sm font-semibold text-neutral-100">Color studio</div>
-              <p className="mt-1 text-xs leading-relaxed text-neutral-400">Premium color combinations for your invitation. Set a page background or select an element first to apply a coordinated color.</p>
-            </div>
-
-            <div className="rounded-xl border border-neutral-700 bg-neutral-950/70 p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-semibold text-neutral-200">Custom page color</div>
-                  <div className="mt-0.5 text-[10px] text-neutral-500">Choose any background color</div>
-                </div>
-                <input
-                  type="color"
-                  value={/^#[\da-f]{6}$/i.test(activeBackground) ? activeBackground : '#FFF8EA'}
-                  onChange={(event) => onSetBackground('color', event.target.value)}
-                  aria-label="Custom page background color"
-                  className="h-9 w-10 cursor-pointer rounded-lg border border-neutral-700 bg-transparent p-1"
-                />
-              </div>
-              <div className="text-right font-mono text-[10px] text-amber-200">{/^#[\da-f]{6}$/i.test(activeBackground) ? activeBackground.toUpperCase() : 'Custom'}</div>
-            </div>
-
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-300">Curated palettes</h4>
-                <span className="text-[10px] text-neutral-500">{DESIGN_COLOR_PALETTES.length} premium sets</span>
-              </div>
-              <div className="mb-3 flex gap-1 overflow-x-auto pb-1">
-                {DESIGN_COLOR_MOODS.map((mood) => (
-                  <button
-                    key={mood}
-                    type="button"
-                    onClick={() => setColorMood(mood)}
-                    aria-pressed={colorMood === mood}
-                    className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold transition ${colorMood === mood ? 'border-amber-400/60 bg-amber-400/10 text-amber-200' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200'}`}
-                  >
-                    {mood}
-                  </button>
-                ))}
-              </div>
-              <div className="space-y-2">
-                {DESIGN_COLOR_PALETTES.filter((palette) => colorMood === 'All' || palette.mood === colorMood).map((palette) => (
-                  <section key={palette.name} className="overflow-hidden rounded-xl border border-neutral-700 bg-neutral-950/70 p-2.5 transition hover:border-amber-500/40">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="truncate text-[11px] font-semibold text-neutral-100">{palette.name}</div>
-                        <div className="text-[9px] uppercase tracking-wider text-neutral-500">{palette.mood} palette</div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => onSetBackground('color', palette.colors[0])}
-                        aria-label={`Set ${palette.name} page background`}
-                        className={`shrink-0 rounded-lg border px-2 py-1.5 text-[9px] font-semibold transition ${activeBackground === palette.colors[0] ? 'border-amber-400/60 bg-amber-400/10 text-amber-200' : 'border-neutral-700 text-neutral-300 hover:border-amber-400/50 hover:text-amber-100'}`}
-                      >
-                        {activeBackground === palette.colors[0] ? 'Applied' : 'Set background'}
-                      </button>
-                    </div>
-                    <div className="mt-2 flex gap-1.5">
-                      {palette.colors.map((color, index) => (
-                        <button
-                          key={`${palette.name}-${color}`}
-                          type="button"
-                          onClick={() => applyColorToSelection(color)}
-                          disabled={!colorTargetLabel}
-                          title={colorTargetLabel ? `Apply ${color} to ${colorTargetLabel}` : 'Select text or an element to apply this color'}
-                          aria-label={colorTargetLabel ? `Apply ${color} to ${colorTargetLabel}` : `${palette.name} color ${index + 1}: ${color}`}
-                          className={`h-7 min-w-0 flex-1 rounded-md border border-white/15 transition ${colorTargetLabel ? 'cursor-pointer hover:-translate-y-0.5 hover:ring-2 hover:ring-amber-300/60' : 'cursor-not-allowed opacity-75'}`}
-                          style={{ backgroundColor: color }}
-                        />
-                      ))}
-                    </div>
-                    <div className="mt-1.5 flex justify-between text-[8px] text-neutral-500">
-                      <span>Background</span><span>Text</span><span>Accent</span><span>Highlight</span>
-                    </div>
-                  </section>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-2.5 text-[10px] leading-relaxed text-neutral-500">
-              {colorTargetLabel ? `Color swatches apply directly to the ${colorTargetLabel}.` : 'Select text, a shape, graphic, photo, QR code, or drawing to apply the palette colors.'}
-            </div>
-          </div>
-        )}
-
         {activeTab === 'elements' && (
           <div className="space-y-4">
             <ElementsLibraryPanel
