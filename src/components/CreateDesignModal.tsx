@@ -46,6 +46,16 @@ const themes = [
   { name: 'Sapphire Night', color: '#111C35', accent: '#D9B86B' },
   { name: 'Marigold', color: '#FFF2D4', accent: '#B96A18' },
   { name: 'Blush Garden', color: '#F9EDF0', accent: '#B57683' },
+  { name: 'Champagne & Sage', color: '#F4F1E7', accent: '#70836A' },
+  { name: 'Dusty Rose & Wine', color: '#F3E4E6', accent: '#762F43' },
+  { name: 'Terracotta & Sand', color: '#F2E3D5', accent: '#A6533C' },
+  { name: 'Midnight & Champagne', color: '#171B2E', accent: '#D8C49A' },
+  { name: 'Peacock Teal', color: '#0D3B3B', accent: '#D2A65A' },
+  { name: 'Lavender & Silver', color: '#F0ECF6', accent: '#80718F' },
+  { name: 'Peach Blossom', color: '#FFF0E8', accent: '#D87962' },
+  { name: 'Plum & Antique Gold', color: '#302033', accent: '#C7A66A' },
+  { name: 'Olive & Cream', color: '#EAEBDD', accent: '#697246' },
+  { name: 'Black Tie Gold', color: '#171513', accent: '#D2AF61' },
 ];
 
 const previewRatio: Record<AspectRatioType, string> = {
@@ -111,7 +121,7 @@ export const CreateDesignModal: React.FC<CreateDesignModalProps> = ({ isOpen, on
 
             <section>
               <h3 className="text-sm font-bold text-white">What are you celebrating?</h3>
-              <p className="mt-1 text-[11px] text-neutral-500">This labels your new project. You can change everything in the editor.</p>
+              <p className="mt-1 text-[11px] text-neutral-500">Sets the project name (for example, “Untitled Shubh Vivah”). It does not add artwork or animation; your canvas stays blank.</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {occasions.map((item) => {
                   const Icon = item.icon;
@@ -123,7 +133,7 @@ export const CreateDesignModal: React.FC<CreateDesignModalProps> = ({ isOpen, on
 
             <section>
               <div className="flex items-end justify-between gap-3">
-                <div><h3 className="text-sm font-bold text-white">Pick a color direction</h3><p className="mt-1 text-[11px] text-neutral-500">Start with a coordinated background. Change it any time.</p></div>
+                <div><h3 className="text-sm font-bold text-white">Pick a color direction</h3><p className="mt-1 text-[11px] text-neutral-500">Sets the blank canvas background. The small accent swatch is a preview cue; you can add matching details in the editor.</p></div>
                 <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[.035] px-3 py-2 text-[10px] font-semibold text-neutral-300 hover:border-amber-300/40 hover:text-white"><span className="h-4 w-4 rounded-full border border-white/30" style={{ backgroundColor }} /><span>Custom color</span><input type="color" value={backgroundColor} onChange={(event) => { setBackgroundColor(event.target.value); setThemeName('Custom color'); }} className="sr-only" /></label>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
