@@ -122,15 +122,6 @@ export const MAIN_ELEMENT_CATEGORIES: CategoryTileMeta[] = [
     badgeText: '30 Frames',
     description: 'iPhone, royal envelope, acrylic standee, wax-seal card & easel',
   },
-  {
-    id: '3d',
-    label: '3D Objects',
-    hindiSub: '3D मॉडल (30)',
-    targetCount: 30,
-    accentGradient: 'from-amber-500/30 to-red-900/40',
-    badgeText: '30 3D',
-    description: 'Interactive 360° rotatable 3D Kalash, Lotus, Rings, Crown & Gems',
-  },
 ];
 
 export const SHAPE_SUBCATEGORIES: ShapeSubcategoryMeta[] = [
@@ -185,5 +176,4 @@ export const SEARCH_SYNONYMS: Record<string, string[]> = {
   arrow: ['pointer', 'direction', 'chevron', 'flow', 'line'],
   video: ['clip', 'movie', 'motion', 'loop', 'animation', 'footage', 'background video'],
   mockup: ['device', 'phone', 'card', 'envelope', 'stationery', 'preview', 'display'],
-  '3d': ['model', 'three-dimensional', 'cube', 'sphere', 'sculpture', 'webgl', 'object'],
 };

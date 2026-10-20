@@ -10961,5 +10961,19 @@ export const MODELS3D_LIBRARY_ITEMS: Model3DAssetItem[] = [
       "swirl",
       "sculpture"
     ]
+  },
+  {
+    "id": "celebration-cake-01",
+    "name": "Rose Quartz Celebration Cake",
+    "category": "3d",
+    "subcategory": "wedding",
+    "geometryType": "celebration-cake",
+    "primaryColor": "#E78AA7",
+    "secondaryColor": "#E8B667",
+    "metalness": 0.02,
+    "roughness": 0.42,
+    "defaultPitch": -12,
+    "defaultYaw": -18,
+    "tags": ["3d", "cake", "birthday", "celebration", "rose", "wedding", "dessert"]
   }
 ];

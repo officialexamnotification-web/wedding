@@ -76,7 +76,6 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
     'shape-lines-05',
     'graphic-celebration-festive-01',
     'frame-01',
-    'model3d-01',
   ]);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([
     'graphic-flowers-botanicals-01',
@@ -537,32 +536,6 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
         break;
       }
 
-      case '3d': {
-        const m3 = item as Model3DAssetItem;
-        onAddElement({
-          id: uid,
-          type: 'model3d',
-          modelId: m3.id,
-          modelName: m3.name,
-          geometryType: m3.geometryType,
-          primaryColor: m3.primaryColor,
-          secondaryColor: m3.secondaryColor,
-          metalness: m3.metalness,
-          roughness: m3.roughness,
-          pitch: m3.defaultPitch,
-          yaw: m3.defaultYaw,
-          roll: 0,
-          autoRotate: true,
-          x: cx - 95,
-          y: cy - 95,
-          width: 190,
-          height: 190,
-          rotation: 0,
-          opacity: 1,
-          zIndex: 38,
-        });
-        break;
-      }
     }
   };
 
@@ -834,7 +807,18 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
                     <stop offset="100%" stopColor={m3.secondaryColor} />
                   </radialGradient>
                 </defs>
-                {m3.geometryType === 'ring-torus' ? (
+                {m3.geometryType === 'celebration-cake' ? (
+                  <g>
+                    <ellipse cx="50" cy="82" rx="37" ry="10" fill="#d6a264" />
+                    <path d="M13 42h74v39c-15 10-59 10-74 0z" fill={`url(#${gId})`} stroke="#fff1d9" strokeWidth="2" />
+                    <path d="M23 25h54v29c-12 8-42 8-54 0z" fill="#f8d6c4" stroke="#fff1d9" strokeWidth="2" />
+                    <ellipse cx="50" cy="25" rx="27" ry="9" fill="#eda0b5" />
+                    <ellipse cx="50" cy="42" rx="37" ry="11" fill="#ed91aa" />
+                    <path d="M18 42c4 12 8 2 12 1 4 12 8 2 12 2 4 12 8 2 12 2 4 12 8 2 12 2 4 12 8 2 12 1" fill="none" stroke="#fff1d9" strokeWidth="2" />
+                    <g fill="#b72b52" stroke="#fff1d9" strokeWidth="1"><circle cx="38" cy="24" r="4"/><circle cx="50" cy="20" r="4"/><circle cx="62" cy="24" r="4"/></g>
+                    <circle cx="50" cy="41" r="5" fill="#f8d3df" stroke="#fff1d9" strokeWidth="1.5" />
+                  </g>
+                ) : m3.geometryType === 'ring-torus' ? (
                   <g>
                     <ellipse cx="50" cy="58" rx="32" ry="20" fill="none" stroke={`url(#${gId})`} strokeWidth="9" />
                     <polygon points="50,14 62,28 50,38 38,28" fill="#E0F2FE" stroke={m3.primaryColor} strokeWidth="2" />
@@ -865,7 +849,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
                 ) : m3.geometryType === 'diamond-gem' ? (
                   <g fill={`url(#${gId})`} stroke="#FEF3C7" strokeWidth="1.4" strokeLinejoin="round">
                     <polygon points="28,22 72,22 90,42 50,88 10,42" />
-                    <polyline points="10,42 90,42 M28,22 38,42 50,88 62,42 72,22" fill="none" />
+                    <path d="M10 42H90 M28 22L38 42L50 88L62 42L72 22" fill="none" />
                   </g>
                 ) : m3.geometryType === 'sphere-orb' ? (
                   <g>

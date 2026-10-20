@@ -19,8 +19,7 @@ export type MainElementCategoryId =
   | 'sheets'
   | 'tables'
   | 'animations'
-  | 'mockups'
-  | '3d';
+  | 'mockups';
 
 export type ShapeSubcategoryId =
   | 'lines'
@@ -247,7 +246,8 @@ export interface Model3DAssetItem {
     | 'heart-crystal'
     | 'chandelier-3d'
     | 'drum-dhol'
-    | 'helix-spiral';
+    | 'helix-spiral'
+    | 'celebration-cake';
   primaryColor: string;
   secondaryColor: string;
   metalness: number;

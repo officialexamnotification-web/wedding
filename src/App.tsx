@@ -21,6 +21,7 @@ import {
 } from './types/editor';
 import { INITIAL_TEMPLATES } from './data/templates';
 import { generateQrDataUrl } from './utils/qrHelper';
+import { ensureTextContrastOnAll } from './utils/colorContrast';
 import { Navbar } from './components/Navbar';
 import { Sidebar, AUDIO_TRACKS } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
@@ -33,6 +34,7 @@ import { Homepage } from './components/Homepage';
 import { PhotoAdjustModal } from './components/PhotoAdjustModal';
 import { VideoCardModal } from './components/VideoCardModal';
 import { SlideFilmstrip } from './components/SlideFilmstrip';
+import { BlankDesignOptions } from './components/CreateDesignModal';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'editor'>('home');
@@ -40,6 +42,7 @@ export default function App() {
   const [aspectRatio, setAspectRatio] = useState<AspectRatioType>('portrait-story');
   const [pages, setPages] = useState<CardPage[]>(INITIAL_TEMPLATES[0].pages);
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
+  const [canvasFitRequest, setCanvasFitRequest] = useState(0);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [zoom, setZoom] = useState<number>(() => {
     if (window.innerWidth < 640) return 0.5;
@@ -260,6 +263,7 @@ export default function App() {
     setCurrentPageIndex(safeIndex);
     setSelectedElementId(null);
     commitPages(updatedPages);
+    setCanvasFitRequest((request) => request + 1);
   };
 
   // Add new element to current page
@@ -395,6 +399,9 @@ export default function App() {
   // Canva Brand Kit 1-Click Restyle
   const handleApplyBrandKit = (kit: BrandKit) => {
     const bgGrad = `radial-gradient(circle at 50% 25%, ${kit.primaryColors[1]} 0%, ${kit.primaryColors[0]} 100%)`;
+    const brandBackgrounds = [kit.primaryColors[0], kit.primaryColors[1]];
+    const readableHeading = ensureTextContrastOnAll(kit.primaryColors[3], brandBackgrounds);
+    const readableBody = ensureTextContrastOnAll(kit.primaryColors[4] || '#FFFFFF', brandBackgrounds);
     const updated = pages.map((page, idx) => {
       if (idx !== currentPageIndex) return page;
       return {
@@ -407,7 +414,7 @@ export default function App() {
             const isLarge = t.fontSize >= 24;
             return {
               ...t,
-              color: isLarge ? kit.primaryColors[3] : kit.primaryColors[4] || '#FFFFFF',
+              color: isLarge ? readableHeading : readableBody,
               fontFamily: isLarge ? kit.headingFont : kit.bodyFont,
             };
           }
@@ -934,7 +941,32 @@ export default function App() {
     setCurrentView('editor');
   };
 
-  const handleOpenBlankFromHome = () => {
+  const handleOpenBlankFromHome = ({ aspectRatio, backgroundColor, occasion, themeName }: BlankDesignOptions) => {
+    const occasionNames: Record<string, string> = {
+      wedding: 'Shubh Vivah',
+      housewarming: 'Griha Pravesh',
+      'sangeet-mehendi': 'Sangeet & Haldi',
+      birthday: 'Birthday',
+      'baby-shower': 'Godh Bharai',
+      anniversary: 'Anniversary',
+    };
+    const pageTitle = `${CANVAS_SIZES[aspectRatio].name} · ${themeName}`;
+    const blankPages: CardPage[] = [{
+      id: `blank-design-${Date.now()}`,
+      title: pageTitle,
+      backgroundType: 'color',
+      backgroundValue: backgroundColor,
+      elements: [],
+    }];
+    setTitle(`Untitled ${occasionNames[occasion] || 'Invitation'}`);
+    setAspectRatio(aspectRatio);
+    setCurrentPageIndex(0);
+    setSelectedElementId(null);
+    setPages(blankPages);
+    latestPagesRef.current = blankPages;
+    setHistory([blankPages]);
+    setHistoryIndex(0);
+    setCanvasFitRequest((request) => request + 1);
     setCurrentView('editor');
   };
 
@@ -1104,6 +1136,7 @@ export default function App() {
 
           <Canvas
             aspectRatio={aspectRatio}
+            fitRequest={canvasFitRequest}
             backgroundType={currentPage?.backgroundType || 'gradient'}
             backgroundValue={currentPage?.backgroundValue || '#171717'}
             elements={currentPage?.elements || []}

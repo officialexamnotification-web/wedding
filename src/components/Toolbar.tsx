@@ -44,6 +44,8 @@ import {
   Info,
   Square,
   Upload,
+  RotateCcw,
+  RotateCw,
 } from 'lucide-react';
 import {
   CanvasItem,
@@ -62,7 +64,6 @@ import {
   FormElement,
   SheetElement,
   MockupElement,
-  Model3DElement,
   VideoElement,
   AudioElement,
   AspectRatioType,
@@ -342,7 +343,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     );
   }
 
-  if (!selectedElement) return null;
+  if (!selectedElement) {
+    return (
+      <div className="h-12 shrink-0 bg-neutral-900/80 border-b border-neutral-800 px-4 flex items-center text-xs text-neutral-500 select-none">
+        Select an item on the card to customize it · Double-click text to edit inline
+      </div>
+    );
+  }
 
   const isText = selectedElement.type === 'text';
   const isImage = selectedElement.type === 'image';
@@ -359,7 +366,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const isForm = selectedElement.type === 'form';
   const isSheet = selectedElement.type === 'sheet';
   const isMockup = selectedElement.type === 'mockup';
-  const isModel3d = selectedElement.type === 'model3d';
   const isVideo = selectedElement.type === 'video';
   const isAudio = selectedElement.type === 'audio';
   const isLocked = !!selectedElement.locked;
@@ -1293,40 +1299,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               value={(selectedElement as MockupElement).caption || ""}
               onChange={(e) => onUpdateElement({ caption: e.target.value }, true)}
               className="bg-neutral-900 border border-neutral-700 rounded px-2 py-0.5 text-xs text-neutral-200 w-36"
-            />
-          </div>
-        )}
-
-        {/* ================= 3D MODEL CONTROLS (PITCH / YAW / ROLL / COLOR) ================= */}
-        {isModel3d && (
-          <div className="flex items-center gap-2 bg-neutral-800/90 px-2.5 py-1 rounded-lg border border-neutral-700 shrink-0">
-            <span className="text-[10px] text-amber-300 font-bold">3D Tilt X:</span>
-            <input
-              type="range"
-              min="-60"
-              max="60"
-              disabled={isLocked}
-              value={(selectedElement as Model3DElement).pitch || 15}
-              onChange={(e) => onUpdateElement({ pitch: parseInt(e.target.value, 10) }, true)}
-              className="w-14 accent-amber-400"
-            />
-            <span className="text-[10px] text-amber-300 font-bold">Spin Y:</span>
-            <input
-              type="range"
-              min="-180"
-              max="180"
-              disabled={isLocked}
-              value={(selectedElement as Model3DElement).yaw || 25}
-              onChange={(e) => onUpdateElement({ yaw: parseInt(e.target.value, 10) }, true)}
-              className="w-14 accent-amber-400"
-            />
-            <input
-              type="color"
-              disabled={isLocked}
-              value={(selectedElement as Model3DElement).primaryColor || "#F59E0B"}
-              onChange={(e) => onUpdateElement({ primaryColor: e.target.value }, true)}
-              className="w-5 h-5 rounded border-0 bg-transparent cursor-pointer"
-              title="3D Shader Primary Color"
             />
           </div>
         )}

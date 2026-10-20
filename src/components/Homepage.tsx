@@ -51,6 +51,7 @@ import {
   BarcodeElement,
 } from '../types/editor';
 import { INITIAL_TEMPLATES, TEMPLATE_CATEGORIES } from '../data/templates';
+import { BlankDesignOptions, CreateDesignModal } from './CreateDesignModal';
 import {
   getImageCssFilter,
   getImageMaskStyle,
@@ -65,7 +66,7 @@ import {
 
 interface HomepageProps {
   onOpenEditorWithTemplate: (template: CardTemplate, targetSlideIndex?: number) => void;
-  onOpenBlankEditor: () => void;
+  onOpenBlankEditor: (options: BlankDesignOptions) => void;
   onOpenAnalysis?: () => void;
   onOpenVideoCard: (template?: CardTemplate) => void;
 }
@@ -346,6 +347,8 @@ const MiniCardArtwork: React.FC<{
   );
 };
 
+const HOMEPAGE_FEATURED_COUNT = 12;
+
 export const Homepage: React.FC<HomepageProps> = ({
   onOpenEditorWithTemplate,
   onOpenBlankEditor,
@@ -353,10 +356,18 @@ export const Homepage: React.FC<HomepageProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showAllTemplates, setShowAllTemplates] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<CardTemplate | null>(null);
   const [previewSlideIdx, setPreviewSlideIdx] = useState<number>(0);
+  const [isCreateDesignOpen, setIsCreateDesignOpen] = useState(false);
   // Per-card active slide index in the Signature Collection grid
   const [activeCardSlides, setActiveCardSlides] = useState<Record<string, number>>({});
+
+  const openCreateDesign = () => setIsCreateDesignOpen(true);
+  const createBlankDesign = (options: BlankDesignOptions) => {
+    setIsCreateDesignOpen(false);
+    onOpenBlankEditor(options);
+  };
 
   // Circular Categories with real event photography & bespoke vector icons
   const HOME_CATEGORIES = [
@@ -366,7 +377,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'शुभ विवाह निमंत्रण',
       icon: Crown, 
       image: '/images/wedding_couple_1791965341379.jpg',
-      count: '180+ Royal Designs', 
+      count: '30 Royal Designs', 
     },
     { 
       id: 'housewarming', 
@@ -374,7 +385,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'गृह प्रवेश एवं वास्तु पूजा',
       icon: RoyalKalashIcon, 
       image: '/images/griha_pravesh_1791965341528.jpg',
-      count: '95+ Sacred Designs', 
+      count: '30 Sacred Designs', 
     },
     { 
       id: 'sangeet-mehendi', 
@@ -382,7 +393,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'संगीत, हल्दी व मेहंदी',
       icon: Music, 
       image: '/images/sangeet_haldi_1791965342768.jpg',
-      count: '75+ Festive Designs', 
+      count: '30 Festive Designs', 
     },
     { 
       id: 'birthday', 
@@ -390,7 +401,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'जन्मदिन उत्सव',
       icon: Sparkles, 
       image: '/images/baby_birthday_1791965343318.jpg',
-      count: '120+ Luxe Designs', 
+      count: '30 Luxe Designs', 
     },
     { 
       id: 'baby-shower', 
@@ -398,7 +409,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'गोद भराई एवं नामकरण',
       icon: Heart, 
       image: '/images/baby_birthday_1791965343318.jpg',
-      count: '60+ Pastel Designs', 
+      count: '30 Pastel Designs', 
     },
     { 
       id: 'anniversary', 
@@ -406,7 +417,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'विवाह वर्षगांठ',
       icon: Gem, 
       image: '/images/wedding_couple_1791965341379.jpg',
-      count: '50+ Jubilee Designs', 
+      count: '30 Jubilee Designs', 
     },
   ];
 
@@ -419,6 +430,10 @@ export const Homepage: React.FC<HomepageProps> = ({
       t.category.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
   });
+  const isFeaturedHomeView = selectedCategory === 'all' && !searchQuery.trim() && !showAllTemplates;
+  const visibleTemplates = isFeaturedHomeView
+    ? filteredTemplates.slice(0, HOMEPAGE_FEATURED_COUNT)
+    : filteredTemplates;
 
   const scrollToCatalog = (category?: string) => {
     if (category) setSelectedCategory(category);
@@ -515,7 +530,7 @@ export const Homepage: React.FC<HomepageProps> = ({
             </nav>
 
             <button
-              onClick={onOpenBlankEditor}
+              onClick={openCreateDesign}
               className="px-4 py-2.5 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-110 text-neutral-950 font-bold text-xs rounded-xl shadow-md shadow-amber-500/20 transition-all hover:scale-[1.02] flex items-center gap-2 cursor-pointer"
             >
               <Palette className="w-3.5 h-3.5" />
@@ -566,7 +581,7 @@ export const Homepage: React.FC<HomepageProps> = ({
               </button>
 
               <button
-                onClick={onOpenBlankEditor}
+                onClick={openCreateDesign}
                 className="w-full sm:w-auto px-5 py-3.5 bg-neutral-900/70 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 font-medium text-sm rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Palette className="w-4 h-4 text-amber-400" />
@@ -756,11 +771,13 @@ export const Homepage: React.FC<HomepageProps> = ({
                 Signature Invitation Collection
               </h2>
               <span className="text-[11px] font-cinzel text-amber-200 font-bold bg-[#17090e] px-3 py-1 rounded-full border border-amber-400/35 shadow-inner">
-                {filteredTemplates.length} Couture Suites
+                {isFeaturedHomeView
+                  ? `${visibleTemplates.length} Featured • ${filteredTemplates.length} Total`
+                  : `${filteredTemplates.length} Couture Suites`}
               </span>
             </div>
             <p className="text-neutral-400 text-xs sm:text-sm max-w-2xl">
-              Every card below is rendered live with authentic Devanagari calligraphy, 24K gold borders, and scannable Google Maps QR. Click slide numbers on multi-page suites to inspect each ceremony card.
+              Choose a celebration, compare original artwork styles, then open any card to edit its names, dates and venue. Select slide numbers on video suites to browse each ceremony page.
             </p>
           </div>
 
@@ -771,7 +788,10 @@ export const Homepage: React.FC<HomepageProps> = ({
               return (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => {
+                    setSelectedCategory(cat.id);
+                    if (cat.id !== 'all') setShowAllTemplates(false);
+                  }}
                   className={`text-xs whitespace-nowrap px-4 py-2 rounded-full font-medium transition-all cursor-pointer ${
                     active
                       ? 'bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-neutral-950 font-bold shadow-lg shadow-amber-500/20 scale-[1.02]'
@@ -787,7 +807,7 @@ export const Homepage: React.FC<HomepageProps> = ({
 
         {/* Luxury Showcase Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredTemplates.map((template) => {
+          {visibleTemplates.map((template) => {
             const meta = SUITE_SHOWCASE_META[template.id] || {
               cleanTitle: template.title.replace(/\s*\(.*?\)\s*/g, ''),
               hindiSubtitle: 'शाही डिजिटल निमंत्रण पत्र',
@@ -997,6 +1017,35 @@ export const Homepage: React.FC<HomepageProps> = ({
             );
           })}
         </div>
+
+        {isFeaturedHomeView && filteredTemplates.length > visibleTemplates.length && (
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <span className="text-xs text-neutral-400">
+              Showing {visibleTemplates.length} featured designs from the full collection
+            </span>
+            <button
+              onClick={() => setShowAllTemplates(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-amber-400/50 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 px-5 py-3 text-sm font-bold text-neutral-950 shadow-lg shadow-amber-500/15 transition hover:brightness-110"
+            >
+              View all {filteredTemplates.length} templates
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {showAllTemplates && selectedCategory === 'all' && !searchQuery.trim() && (
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={() => {
+                setShowAllTemplates(false);
+                document.getElementById('template-catalog')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-300 transition hover:border-amber-400/50 hover:text-amber-200"
+            >
+              Show featured designs
+            </button>
+          </div>
+        )}
       </section>
 
       {/* 6. HOW IT WORKS (Ultra-Luxe Royal 4-Step Process) */}
@@ -1358,7 +1407,7 @@ export const Homepage: React.FC<HomepageProps> = ({
 
             <div className="flex flex-col sm:flex-row items-center gap-3.5 w-full sm:w-auto relative z-10">
               <button
-                onClick={onOpenBlankEditor}
+                onClick={openCreateDesign}
                 className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-110 text-neutral-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-amber-500/20 transition-all hover:scale-[1.02] flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Palette className="w-4 h-4" />
@@ -1555,7 +1604,7 @@ export const Homepage: React.FC<HomepageProps> = ({
               <ul className="space-y-2.5 text-xs text-neutral-400">
                 <li>
                   <button
-                    onClick={onOpenBlankEditor}
+                    onClick={openCreateDesign}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <QrCode className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1564,7 +1613,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </li>
                 <li>
                   <button
-                    onClick={onOpenBlankEditor}
+                    onClick={openCreateDesign}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <Languages className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1573,7 +1622,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </li>
                 <li>
                   <button
-                    onClick={onOpenBlankEditor}
+                    onClick={openCreateDesign}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <ImageIcon className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1582,7 +1631,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </li>
                 <li>
                   <button
-                    onClick={onOpenBlankEditor}
+                    onClick={openCreateDesign}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <Calendar className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1591,7 +1640,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </li>
                 <li>
                   <button
-                    onClick={onOpenBlankEditor}
+                    onClick={openCreateDesign}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <Printer className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1737,6 +1786,11 @@ export const Homepage: React.FC<HomepageProps> = ({
           </div>
         </div>
       )}
+      <CreateDesignModal
+        isOpen={isCreateDesignOpen}
+        onClose={() => setIsCreateDesignOpen(false)}
+        onCreate={createBlankDesign}
+      />
     </div>
   );
 };

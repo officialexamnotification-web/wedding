@@ -1,4 +1,5 @@
 import { CardTemplate, ImageElement, TextElement } from '../types/editor';
+import { ensureTextContrast } from '../utils/colorContrast';
 
 type WeddingPalette = {
   ink: string;
@@ -50,6 +51,12 @@ function createWeddingTemplate(input: {
   category?: CardTemplate['category'];
   thumbnailGradient: string;
 }): CardTemplate {
+  const palette: WeddingPalette = {
+    ...input.palette,
+    ink: ensureTextContrast(input.palette.ink, input.palette.background),
+    accent: ensureTextContrast(input.palette.accent, input.palette.background),
+    soft: ensureTextContrast(input.palette.soft, input.palette.background),
+  };
   const image: ImageElement = {
     id: `${input.id}-artwork`,
     type: 'image',
@@ -79,17 +86,17 @@ function createWeddingTemplate(input: {
         id: `${input.id}-page-1`,
         title: 'Wedding Invitation',
         backgroundType: 'color',
-        backgroundValue: input.palette.background,
+        backgroundValue: palette.background,
         elements: [
           image,
-          makeText(`${input.id}-blessing`, 'WITH THE BLESSINGS OF OUR FAMILIES', 151, 22, "'Cinzel', serif", 10, input.palette.accent, 2.1, '600'),
-          makeText(`${input.id}-invite-line`, 'joyfully invite you to celebrate the wedding of', 208, 26, "'Cormorant Garamond', serif", 17, input.palette.ink),
-          makeText(`${input.id}-names`, input.names || 'Aarav & Meera', 245, 58, input.accentFont || "'Great Vibes', cursive", 40, input.palette.ink),
-          makeText(`${input.id}-ceremony`, input.ceremony || 'THE WEDDING CEREMONY', 322, 26, "'Cinzel', serif", 13, input.palette.accent, 1.6, '600'),
-          makeText(`${input.id}-date`, 'SATURDAY  ·  21 FEBRUARY 2027', 370, 24, "'Montserrat', sans-serif", 11, input.palette.ink, 1.3, '600'),
-          makeText(`${input.id}-time`, 'Ceremony at 6:30 in the evening', 403, 24, "'Cormorant Garamond', serif", 17, input.palette.ink),
-          makeText(`${input.id}-venue`, 'THE ROYAL COURTYARD  ·  JAIPUR', 454, 24, "'Cinzel', serif", 10, input.palette.accent, 1.1, '600'),
-          makeText(`${input.id}-rsvp`, 'Kindly reply by 10 February 2027', 565, 22, "'Cormorant Garamond', serif", 15, input.palette.soft),
+          makeText(`${input.id}-blessing`, 'WITH THE BLESSINGS OF OUR FAMILIES', 151, 22, "'Cinzel', serif", 10, palette.accent, 2.1, '600'),
+          makeText(`${input.id}-invite-line`, 'joyfully invite you to celebrate the wedding of', 208, 26, "'Cormorant Garamond', serif", 17, palette.ink),
+          makeText(`${input.id}-names`, input.names || 'Aarav & Meera', 245, 58, input.accentFont || "'Great Vibes', cursive", 40, palette.ink),
+          makeText(`${input.id}-ceremony`, input.ceremony || 'THE WEDDING CEREMONY', 322, 26, "'Cinzel', serif", 13, palette.accent, 1.6, '600'),
+          makeText(`${input.id}-date`, 'SATURDAY  ·  21 FEBRUARY 2027', 370, 24, "'Montserrat', sans-serif", 11, palette.ink, 1.3, '600'),
+          makeText(`${input.id}-time`, 'Ceremony at 6:30 in the evening', 403, 24, "'Cormorant Garamond', serif", 17, palette.ink),
+          makeText(`${input.id}-venue`, 'THE ROYAL COURTYARD  ·  JAIPUR', 454, 24, "'Cinzel', serif", 10, palette.accent, 1.1, '600'),
+          makeText(`${input.id}-rsvp`, 'Kindly reply by 10 February 2027', 565, 22, "'Cormorant Garamond', serif", 15, palette.soft),
         ],
       },
     ],

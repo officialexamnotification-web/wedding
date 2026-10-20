@@ -23,7 +23,6 @@ import {
   SHEETS_LIBRARY_ITEMS,
   TABLES_LIBRARY_ITEMS,
   MOCKUPS_LIBRARY_ITEMS,
-  MODELS3D_LIBRARY_ITEMS,
 } from './mediaInteractiveManifest';
 import { PREMIUM_WEDDING_ELEMENTS } from './premiumWedding';
 
@@ -46,7 +45,6 @@ export {
   SHEETS_LIBRARY_ITEMS,
   TABLES_LIBRARY_ITEMS,
   MOCKUPS_LIBRARY_ITEMS,
-  MODELS3D_LIBRARY_ITEMS,
 };
 
 export const ALL_UNIVERSAL_ELEMENTS: UniversalElementItem[] = [
@@ -64,7 +62,6 @@ export const ALL_UNIVERSAL_ELEMENTS: UniversalElementItem[] = [
   ...TABLES_LIBRARY_ITEMS,
   ...ANIMATIONS_LIBRARY_ITEMS,
   ...MOCKUPS_LIBRARY_ITEMS,
-  ...MODELS3D_LIBRARY_ITEMS,
 ];
 
 export function getItemsByCategory(catId: MainElementCategoryId): UniversalElementItem[] {
@@ -95,8 +92,6 @@ export function getItemsByCategory(catId: MainElementCategoryId): UniversalEleme
       return ANIMATIONS_LIBRARY_ITEMS;
     case 'mockups':
       return MOCKUPS_LIBRARY_ITEMS;
-    case '3d':
-      return MODELS3D_LIBRARY_ITEMS;
     default:
       return [];
   }
@@ -163,7 +158,6 @@ export function validateCatalogueIntegrity() {
     tables: TABLES_LIBRARY_ITEMS.length,
     animations: ANIMATIONS_LIBRARY_ITEMS.length,
     mockups: MOCKUPS_LIBRARY_ITEMS.length,
-    '3d': MODELS3D_LIBRARY_ITEMS.length,
   };
 
   const total = Object.values(counts).reduce((a, b) => a + b, 0);

@@ -460,7 +460,7 @@ export const BRAND_KITS: BrandKit[] = [
   {
     id: 'haldi-marigold',
     name: 'Sangeet & Haldi Marigold',
-    primaryColors: ['#7C2D12', '#F59E0B', '#FEF08A', '#FFFBEB', '#BE123C'],
+    primaryColors: ['#7C2D12', '#9A3412', '#F59E0B', '#FEF08A', '#FFFBEB'],
     headingFont: "'Rozha One', serif",
     subheadingFont: "'Kalam', cursive",
     bodyFont: "'Playfair Display', serif",

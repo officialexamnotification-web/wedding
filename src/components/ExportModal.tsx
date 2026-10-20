@@ -643,8 +643,29 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         }
       }
 
-      // 3D MODEL / VIDEO / AUDIO ELEMENTS
-      else if (elem.type === 'model3d' || elem.type === 'video' || elem.type === 'audio') {
+      // Render selected 3D models to transparent artwork for the final card export.
+      else if (elem.type === 'model3d') {
+        try {
+          const { renderModel3DToDataUrl } = await import('./RealisticModel3D');
+          const modelImage = new Image();
+          modelImage.src = renderModel3DToDataUrl(elem as Model3DElement, Math.max(320, Math.min(1024, Math.round(Math.max(elem.width, elem.height) * scale))));
+          await new Promise<void>((resolve, reject) => {
+            modelImage.onload = () => resolve();
+            modelImage.onerror = () => reject(new Error('3D artwork could not be rendered'));
+          });
+          ctx.drawImage(modelImage, elem.x, elem.y, elem.width, elem.height);
+        } catch {
+          ctx.fillStyle = 'rgba(24, 16, 8, 0.85)';
+          ctx.fillRect(elem.x, elem.y, elem.width, elem.height);
+          ctx.fillStyle = '#FDE68A';
+          ctx.font = 'bold 11px Cinzel, serif';
+          ctx.textAlign = 'center';
+          ctx.fillText((elem as Model3DElement).modelName || '3D Object', elem.x + elem.width / 2, elem.y + elem.height / 2 + 4);
+        }
+      }
+
+      // VIDEO / AUDIO ELEMENTS
+      else if (elem.type === 'video' || elem.type === 'audio') {
         ctx.fillStyle = 'rgba(24, 16, 8, 0.85)';
         ctx.fillRect(elem.x, elem.y, elem.width, elem.height);
         ctx.strokeStyle = '#D4AF37';
@@ -654,9 +675,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         ctx.font = 'bold 11px Cinzel, serif';
         ctx.textAlign = 'center';
         const label =
-          elem.type === 'model3d'
-            ? (elem as Model3DElement).modelName
-            : elem.type === 'video'
+          elem.type === 'video'
             ? (elem as VideoElement).videoName
             : (elem as AudioElement).trackName;
         ctx.fillText(label || elem.type.toUpperCase(), elem.x + elem.width / 2, elem.y + elem.height / 2 + 4);
