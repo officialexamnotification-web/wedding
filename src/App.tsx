@@ -14,6 +14,7 @@ import {
   TextElement,
   ShapeElement,
   StickerElement,
+  VideoElement,
   BrandKit,
   AudioTrack,
   AudioClipSettings,
@@ -58,6 +59,9 @@ export default function App() {
   const [showSafeZones, setShowSafeZones] = useState<boolean>(true);
   const [copiedStyle, setCopiedStyle] = useState<Partial<CanvasItem> | null>(null);
   const [activeAudioTrack, setActiveAudioTrack] = useState<AudioTrack>(AUDIO_TRACKS[0]);
+  const [customAudioTracks, setCustomAudioTracks] = useState<AudioTrack[]>([]);
+  const [customVideoUploads, setCustomVideoUploads] = useState<VideoElement[]>([]);
+  const audioTracks = [...AUDIO_TRACKS, ...customAudioTracks];
   const [audioClip, setAudioClip] = useState<AudioClipSettings>({
     startSec: 0,
     durationSec: null,
@@ -101,6 +105,8 @@ export default function App() {
       audioTrackId: activeAudioTrack.id,
       audioClip,
       audioClips,
+      customAudioTracks,
+      customVideoUploads,
     };
     const next = [newProj, ...savedProjects.slice(0, 14)];
     setSavedProjects(next);
@@ -114,8 +120,11 @@ export default function App() {
   const handleLoadProject = (proj: SavedProject) => {
     setTitle(proj.title);
     setAspectRatio(proj.aspectRatio);
+    const restoredCustomTracks = proj.customAudioTracks ?? [];
+    setCustomAudioTracks(restoredCustomTracks);
+    setCustomVideoUploads(proj.customVideoUploads ?? []);
     const restoredTrack = proj.audioTrackId
-      ? AUDIO_TRACKS.find((track) => track.id === proj.audioTrackId)
+      ? [...AUDIO_TRACKS, ...restoredCustomTracks].find((track) => track.id === proj.audioTrackId)
       : undefined;
     if (restoredTrack) setActiveAudioTrack(restoredTrack);
     if (proj.audioClip) setAudioClip(proj.audioClip);
@@ -1174,6 +1183,7 @@ export default function App() {
           onClearDrawings={handleClearDrawings}
           onApplyBrandKit={handleApplyBrandKit}
           activeAudioTrackId={activeAudioTrack.id}
+          availableAudioTracks={audioTracks}
           audioScopeDuration={(() => {
             const selectedClip = audioClips.find((clip) => clip.id === selectedAudioClipId);
             if (selectedClip?.pageIndex === null) return pages.reduce((sum, page) => sum + (page.duration || 4.5), 0);
@@ -1196,6 +1206,9 @@ export default function App() {
             });
             setSelectedAudioClipId(id);
           }}
+          onRegisterCustomAudioTrack={(track) => setCustomAudioTracks((tracks) => [...tracks.filter((item) => item.id !== track.id), track])}
+          availableVideoUploads={customVideoUploads}
+          onRegisterCustomVideoUpload={(video) => setCustomVideoUploads((videos) => [video, ...videos.filter((item) => item.id !== video.id)])}
           audioClip={audioClip}
           onUpdateAudioClip={handleUpdateAudioClipSettings}
           savedProjects={savedProjects}
@@ -1279,12 +1292,12 @@ export default function App() {
               activeAudioTrack={activeAudioTrack}
               audioClip={audioClip}
               audioClips={audioClips}
-              audioTracks={AUDIO_TRACKS}
+              audioTracks={audioTracks}
               selectedAudioClipId={selectedAudioClipId}
               onSelectAudioClip={(clip) => {
                 setSelectedAudioClipId(clip.id);
                 setAudioClip(clip.settings);
-                const track = AUDIO_TRACKS.find((item) => item.id === clip.trackId);
+                const track = audioTracks.find((item) => item.id === clip.trackId);
                 if (track) setActiveAudioTrack(track);
                 if (clip.pageIndex !== null) setCurrentPageIndex(clip.pageIndex);
               }}
@@ -1345,7 +1358,7 @@ export default function App() {
         activeAudioTrack={activeAudioTrack}
         audioClip={audioClip}
         audioClips={audioClips}
-        audioTracks={AUDIO_TRACKS}
+        audioTracks={audioTracks}
       />
 
       <AnalysisModal isOpen={isAnalysisOpen} onClose={() => setIsAnalysisOpen(false)} />

@@ -681,6 +681,33 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         }
       }
 
+      // Uploaded video layers export their current decoded frame in still images.
+      else if (elem.type === 'video' && (elem as VideoElement).mediaSrc) {
+        const video = document.createElement('video');
+        video.src = (elem as VideoElement).mediaSrc!;
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = 'auto';
+        await new Promise<void>((resolve) => {
+          video.onloadeddata = () => resolve();
+          video.onerror = () => resolve();
+          window.setTimeout(resolve, 4000);
+        });
+        try {
+          ctx.save();
+          ctx.beginPath();
+          const videoElem = elem as VideoElement;
+          const radius = Math.max(0, videoElem.borderRadius ?? 10);
+          ctx.roundRect(elem.x, elem.y, elem.width, elem.height, radius);
+          ctx.clip();
+          if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) ctx.drawImage(video, elem.x, elem.y, elem.width, elem.height);
+          ctx.restore();
+          ctx.strokeStyle = videoElem.borderColor || '#D4AF37';
+          ctx.lineWidth = videoElem.borderWidth || 1;
+          ctx.strokeRect(elem.x, elem.y, elem.width, elem.height);
+        } catch { /* retain the rest of the card if the browser cannot decode this video */ }
+      }
+
       // VIDEO / AUDIO ELEMENTS
       else if (elem.type === 'video' || elem.type === 'audio') {
         ctx.fillStyle = 'rgba(24, 16, 8, 0.85)';
@@ -772,6 +799,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     setExportError(null);
     let audioContext: AudioContext | null = null;
     const sources: AudioBufferSourceNode[] = [];
+    const mediaAudioSources: MediaElementAudioSourceNode[] = [];
     let recorder: MediaRecorder | null = null;
     let stream: MediaStream | null = null;
 
@@ -802,6 +830,24 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             image: await loadRender({ ...page, elements: [element] }, 'transparent'),
           }))),
       })));
+      const videoLayers = await Promise.all(pages.map(async (page) => {
+        const layers = page.elements.filter((element): element is VideoElement => element.type === 'video' && !!element.mediaSrc && !element.hidden);
+        return Promise.all(layers.map(async (element) => {
+          const video = document.createElement('video');
+          video.src = element.mediaSrc!;
+          video.muted = element.isMuted ?? true;
+          video.loop = element.loop ?? true;
+          video.playsInline = true;
+          video.preload = 'auto';
+          await new Promise<void>((resolve) => {
+            video.onloadeddata = () => resolve();
+            video.onerror = () => resolve();
+            window.setTimeout(resolve, 5000);
+          });
+          if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) void video.play().catch(() => undefined);
+          return { element, video };
+        }));
+      }));
 
       const canvas = document.createElement('canvas');
       canvas.width = dimensions.width * renderScale;
@@ -814,7 +860,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       const audioDurationSec = pages.reduce((sum, page) => sum + (page.duration || 4.5), 0);
       let audioDestination: MediaStreamAudioDestinationNode | null = null;
 
-      if (audioClips.length > 0) {
+      if (audioClips.length > 0 || videoLayers.some((pageLayers) => pageLayers.some(({ element }) => !element.isMuted))) {
         audioContext = new AudioContext();
         await audioContext.resume();
         audioDestination = audioContext.createMediaStreamDestination();
@@ -859,6 +905,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           sourceNode.start(startAt, safeSourceStart);
           sourceNode.stop(startAt + audibleDuration);
         }
+        for (const pageLayers of videoLayers) {
+          for (const { element, video } of pageLayers) {
+            if (element.isMuted ?? true) continue;
+            const mediaSource = audioContext.createMediaElementSource(video);
+            mediaSource.connect(audioDestination);
+            mediaAudioSources.push(mediaSource);
+          }
+        }
         for (const track of audioDestination.stream.getAudioTracks()) videoStream.addTrack(track);
       }
 
@@ -886,6 +940,20 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         const rendered = renderedPages[index];
         target.clearRect(0, 0, canvas.width, canvas.height);
         target.drawImage(rendered.base, 0, 0, canvas.width, canvas.height);
+        for (const { element, video } of videoLayers[index]) {
+          if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) continue;
+          target.save();
+          target.globalAlpha = element.opacity ?? 1;
+          const centerX = (element.x + element.width / 2) * renderScale;
+          const centerY = (element.y + element.height / 2) * renderScale;
+          target.translate(centerX, centerY);
+          target.rotate(((element.rotation || 0) * Math.PI) / 180);
+          target.beginPath();
+          target.roundRect(-element.width * renderScale / 2, -element.height * renderScale / 2, element.width * renderScale, element.height * renderScale, (element.borderRadius ?? 10) * renderScale);
+          target.clip();
+          target.drawImage(video, -element.width * renderScale / 2, -element.height * renderScale / 2, element.width * renderScale, element.height * renderScale);
+          target.restore();
+        }
         for (const layer of rendered.text) {
           const { element, order, image } = layer;
           const kind = element.animation || 'none';
@@ -1137,6 +1205,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     } finally {
       if (recorder?.state === 'recording') recorder.stop();
       sources.forEach((sourceNode) => { try { sourceNode.stop(); } catch { /* already stopped */ } });
+      mediaAudioSources.forEach((sourceNode) => sourceNode.disconnect());
       stream?.getTracks().forEach((track) => track.stop());
       if (audioContext && audioContext.state !== 'closed') await audioContext.close();
       setDownloading(false);

@@ -42,6 +42,63 @@
     -webkit-text-fill-color: transparent;
   }
 
+  .brand-mark-shine {
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(110deg, #a87518 0%, #f2cf6e 28%, #fff4c4 48%, #d9a931 68%, #fff0a8 82%, #a87518 100%);
+    background-size: 240% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 3px rgb(231 187 74 / 35%));
+    animation: brand-mark-sheen 3.8s ease-in-out infinite;
+  }
+
+  .brand-logo-badge {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .brand-logo-badge::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border-radius: inherit;
+    background: linear-gradient(112deg, transparent 38%, rgb(255 247 207 / 8%) 45%, rgb(255 248 218 / 38%) 50%, rgb(247 204 91 / 15%) 55%, transparent 63%);
+    background-size: 260% 100%;
+    animation: brand-badge-flare 4.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes brand-mark-sheen {
+    0%, 100% {
+      background-position: 100% 50%;
+      filter: drop-shadow(0 0 3px rgb(231 187 74 / 35%));
+    }
+    44% {
+      background-position: 0% 50%;
+      filter: drop-shadow(0 0 7px rgb(255 236 164 / 90%)) drop-shadow(0 0 13px rgb(244 202 88 / 58%));
+    }
+    55% {
+      background-position: 0% 50%;
+      filter: drop-shadow(0 0 3px rgb(231 187 74 / 35%));
+    }
+  }
+
+  @keyframes brand-badge-flare {
+    0%, 68%, 100% { background-position: 140% 50%; opacity: 0; }
+    75% { opacity: 0.8; }
+    89% { background-position: -40% 50%; opacity: 0.55; }
+    94% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brand-mark-shine,
+    .brand-logo-badge::after { animation: none; }
+  }
+
   .ruby-gradient {
     background: linear-gradient(135deg, #800020 0%, #4a0012 100%);
   }

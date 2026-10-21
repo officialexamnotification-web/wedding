@@ -381,7 +381,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Shubh Vivah', 
       hindi: 'शुभ विवाह निमंत्रण',
       icon: Crown, 
-      image: '/images/wedding_couple_1791965341379.jpg',
+      image: '/images/photo-library/wedding-palace-stairs-02.webp',
       count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'wedding').length} Royal Designs`,
     },
     { 
@@ -389,7 +389,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Griha Pravesh', 
       hindi: 'गृह प्रवेश एवं वास्तु पूजा',
       icon: RoyalKalashIcon, 
-      image: '/images/griha_pravesh_1791965341528.jpg',
+      image: '/images/photo-library/home-courtyard-kalash-02.webp',
       count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'housewarming').length} Sacred Designs`,
     },
     { 
@@ -397,7 +397,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Sangeet & Haldi', 
       hindi: 'संगीत, हल्दी व मेहंदी',
       icon: Music, 
-      image: '/images/sangeet_haldi_1791965342768.jpg',
+      image: '/images/photo-library/sangeet-genda-evening-06.webp',
       count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'sangeet-mehendi').length} Festive Designs`,
     },
     { 
@@ -405,7 +405,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Birthday Celebration', 
       hindi: 'जन्मदिन उत्सव',
       icon: Sparkles, 
-      image: '/images/baby_birthday_1791965343318.jpg',
+      image: '/images/photo-library/birthday-little-star-08.webp',
       count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'birthday').length} Luxe Designs`,
     },
     { 
@@ -413,7 +413,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Godh Bharai', 
       hindi: 'गोद भराई एवं नामकरण',
       icon: Heart, 
-      image: '/images/baby_birthday_1791965343318.jpg',
+      image: '/images/photo-library/godh-bloom-portrait-01.webp',
       count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'baby-shower').length} Pastel Designs`,
     },
     { 
@@ -421,7 +421,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Royal Anniversary', 
       hindi: 'विवाह वर्षगांठ',
       icon: Gem, 
-      image: '/images/wedding_couple_1791965341379.jpg',
+      image: '/images/photo-library/anniversary-evergreen-together-07.webp',
       count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'anniversary').length} Jubilee Designs`,
     },
   ];
@@ -471,9 +471,9 @@ export const Homepage: React.FC<HomepageProps> = ({
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex items-center gap-3.5 cursor-pointer group"
           >
-            <div className="w-11 h-11 rounded-xl p-[1.5px] bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
-              <div className="w-full h-full rounded-[10px] bg-[#14070b] flex items-center justify-center">
-                <span className="font-cinzel gold-text-gradient font-black text-xl">नि</span>
+            <div className="brand-logo-badge w-11 h-11 rounded-xl p-[1.5px] bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+              <div className="w-full h-full rounded-[10px] bg-[#14070b] flex items-center justify-center overflow-visible">
+                <span className="font-tiro brand-mark-shine inline-flex h-full w-full items-center justify-center text-[24px] font-bold leading-none translate-y-px">नि</span>
               </div>
             </div>
             <div>
@@ -558,13 +558,13 @@ export const Homepage: React.FC<HomepageProps> = ({
               <span>भारत का प्रीमियम राजसी डिजिटल निमंत्रण स्टूडियो</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-neutral-100 tracking-tight leading-[1.15]">
-              Craft Heirloom <br />
-              <span className="gold-text-gradient font-cinzel">Royal Invitations</span> in Minutes
+            <h1 className="max-w-2xl mx-auto lg:mx-0 font-cinzel text-4xl sm:text-5xl lg:text-[3.45rem] font-semibold text-neutral-100 tracking-wide leading-[1.18]">
+              A Royal Invitation<br />
+              <span className="gold-text-gradient">Made Timeless</span>
             </h1>
 
             <p className="text-neutral-400 text-sm sm:text-base max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              Design luxury digital cards & multi-slide video invitations for <strong className="text-neutral-200">Shubh Vivah, Griha Pravesh, Sangeet & Milestone Celebrations</strong>. Personalize in Hindi or English with scannable <strong className="text-amber-300">Google Maps Venue QR codes</strong>.
+              Thoughtfully designed for your most cherished celebrations. Personalize in Hindi or English, add a <strong className="text-amber-300">Google Maps venue QR</strong>, and share a beautifully finished invitation with family and friends.
             </p>
 
             {/* Hero CTAs */}
@@ -1480,9 +1480,9 @@ export const Homepage: React.FC<HomepageProps> = ({
             {/* Brand Column (5 cols on desktop) */}
             <div className="lg:col-span-5 space-y-5 pr-0 lg:pr-8">
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl p-[1.5px] bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-lg shadow-amber-500/20">
+                <div className="brand-logo-badge w-11 h-11 rounded-xl p-[1.5px] bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-lg shadow-amber-500/20">
                   <div className="w-full h-full rounded-[10px] bg-[#14070b] flex items-center justify-center">
-                    <span className="font-cinzel gold-text-gradient font-black text-xl">नि</span>
+                    <span className="font-tiro brand-mark-shine inline-flex h-full w-full items-center justify-center text-xl font-bold leading-none">नि</span>
                   </div>
                 </div>
                 <div>

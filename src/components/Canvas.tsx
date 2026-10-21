@@ -1536,6 +1536,23 @@ export function renderModel3DVisual(m3: Model3DElement) {
 }
 // Render Canva Motion Video Loop Element
 export function renderVideoVisual(vd: VideoElement) {
+  if (vd.mediaSrc) {
+    return (
+      <div className="relative h-full w-full overflow-hidden bg-black" style={{ borderRadius: `${vd.borderRadius ?? 10}px`, border: `${vd.borderWidth ?? 1}px solid ${vd.borderColor || '#D4AF37'}` }}>
+        <video
+          src={vd.mediaSrc}
+          className="h-full w-full object-cover"
+          autoPlay={vd.isPlaying}
+          muted={vd.isMuted ?? true}
+          loop={vd.loop ?? true}
+          playsInline
+          preload="metadata"
+          style={{ pointerEvents: 'none' }}
+        />
+        <div className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/80 to-transparent px-2 pb-1.5 pt-4 text-[10px] text-white/90">{vd.videoName}</div>
+      </div>
+    );
+  }
   const dur = 3.2 / (vd.playbackSpeed || 1);
   return (
     <div

@@ -102,9 +102,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Brand Icon */}
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg p-[1px] bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-lg shadow-amber-500/20 shrink-0">
+          <div className="brand-logo-badge w-7 h-7 sm:w-8 sm:h-8 rounded-lg p-[1px] bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-lg shadow-amber-500/20 shrink-0">
             <div className="w-full h-full rounded-[7px] bg-[#14070b] flex items-center justify-center">
-              <span className="font-cinzel gold-text-gradient font-black text-sm sm:text-base">नि</span>
+              <span className="font-tiro brand-mark-shine inline-flex h-full w-full items-center justify-center text-[17px] font-bold leading-none">नि</span>
             </div>
           </div>
         </div>

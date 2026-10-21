@@ -164,7 +164,11 @@ interface SidebarProps {
   onClearDrawings?: () => void;
   onApplyBrandKit?: (kit: BrandKit) => void;
   activeAudioTrackId?: string;
+  availableAudioTracks?: AudioTrack[];
   onSelectAudioTrack?: (track: AudioTrack) => void;
+  onRegisterCustomAudioTrack?: (track: AudioTrack) => void;
+  availableVideoUploads?: VideoElement[];
+  onRegisterCustomVideoUpload?: (video: VideoElement) => void;
   audioClip?: AudioClipSettings;
   audioScopeDuration?: number;
   onUpdateAudioClip?: (updates: Partial<AudioClipSettings>) => void;
@@ -609,7 +613,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onClearDrawings,
   onApplyBrandKit,
   activeAudioTrackId = 'at-the-palace-gates',
+  availableAudioTracks = AUDIO_TRACKS,
   onSelectAudioTrack,
+  onRegisterCustomAudioTrack,
+  availableVideoUploads = [],
+  onRegisterCustomVideoUpload,
   audioClip = { startSec: 0, durationSec: null, volume: 0.45, fadeInSec: 0, fadeOutSec: 0, loop: true },
   audioScopeDuration,
   onUpdateAudioClip,
@@ -731,7 +739,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const totalDuration = pages.reduce((sum, p) => sum + (p.duration || 4.5), 0);
-  const selectedAudioTrack = AUDIO_TRACKS.find((track) => track.id === activeAudioTrackId) || AUDIO_TRACKS[0];
+  const selectedAudioTrack = availableAudioTracks.find((track) => track.id === activeAudioTrackId) || availableAudioTracks[0] || AUDIO_TRACKS[0];
   const activeAudioScopeDuration = Math.max(0.25, audioScopeDuration ?? totalDuration);
   const effectiveAudioDuration = Math.max(0.25, Math.min(audioClip.durationSec ?? activeAudioScopeDuration, activeAudioScopeDuration));
   const maxAudioStart = audioSourceDuration > 0 ? Math.max(0, audioSourceDuration - 0.1) : 999;
@@ -2257,10 +2265,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-semibold text-neutral-100">Uploads</h3>
-              <p className="text-xs text-neutral-400">
-                Add your own images here. Click to place one on the card, or drag it onto a frame.
-              </p>
+              <p className="text-xs text-neutral-400">Upload files to your library first, then add them to the card when you’re ready.</p>
             </div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-300">Photos</div>
             <label className="w-full py-5 border-2 border-dashed border-amber-500/40 hover:border-amber-400 rounded-xl flex flex-col items-center justify-center gap-1.5 cursor-pointer bg-amber-500/5 hover:bg-amber-500/10 transition">
               <Upload className="w-5 h-5 text-amber-400" />
               <span className="text-xs font-bold text-amber-200">Upload Image</span>
@@ -2350,6 +2357,157 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <p className="text-xs text-neutral-400">Your uploaded images will appear here.</p>
               </div>
             )}
+            <div className="border-t border-neutral-800 pt-4 space-y-3">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-300">Audio</div>
+                <p className="mt-1 text-[11px] text-neutral-400">Upload a song to your library first. Add it to a slide’s music timeline when you’re ready.</p>
+              </div>
+              <label className="w-full rounded-xl border border-violet-400/30 bg-violet-500/5 px-3 py-3 flex items-center gap-3 cursor-pointer hover:bg-violet-500/10 hover:border-violet-300/50 transition">
+                <Music className="h-5 w-5 text-violet-300" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-semibold text-neutral-100">Upload audio</span>
+                  <span className="block text-[10px] text-neutral-400">MP3, WAV, M4A, AAC or OGG · up to 15 MB</span>
+                </span>
+                <Upload className="h-4 w-4 text-neutral-400" />
+                <input
+                  type="file"
+                  accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/ogg,.mp3,.wav,.m4a,.aac,.ogg"
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.currentTarget.files?.[0];
+                    event.currentTarget.value = '';
+                    if (!file) return;
+                    if (file.size > 15 * 1024 * 1024) {
+                      window.alert('Audio file is too large. Choose a file up to 15 MB.');
+                      return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      if (typeof reader.result !== 'string') return;
+                      const track: AudioTrack = {
+                        id: `upload-${Date.now()}`,
+                        name: file.name.replace(/\.[^.]+$/, ''),
+                        category: 'bollywood',
+                        ragaNotes: [],
+                        tempo: 110,
+                        description: 'Uploaded audio',
+                        audioUrl: reader.result,
+                      };
+                      onRegisterCustomAudioTrack?.(track);
+                    };
+                    reader.onerror = () => window.alert('Could not read this audio file. Please try another file.');
+                    reader.readAsDataURL(file);
+                  }}
+                />
+              </label>
+              {availableAudioTracks.some((track) => track.id.startsWith('upload-')) && (
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Your audio uploads</h4>
+                  {availableAudioTracks.filter((track) => track.id.startsWith('upload-')).map((track) => (
+                    <div key={track.id} className="flex items-center gap-2 rounded-lg border border-violet-400/20 bg-neutral-900/80 p-2.5">
+                      <Music className="h-4 w-4 shrink-0 text-violet-300" />
+                      <span className="min-w-0 flex-1 truncate text-xs text-neutral-200" title={track.name}>{track.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => onSelectAudioTrack?.(track)}
+                        className="shrink-0 rounded-md border border-violet-300/30 px-2.5 py-1.5 text-[10px] font-semibold text-violet-200 transition hover:bg-violet-400/15"
+                      >
+                        Add to music
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="border-t border-neutral-800 pt-4 space-y-3">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-300">Video</div>
+                <p className="mt-1 text-[11px] text-neutral-400">Upload a clip to your library first. Add it to the card only when you choose.</p>
+              </div>
+              <label className="w-full rounded-xl border border-sky-400/30 bg-sky-500/5 px-3 py-3 flex items-center gap-3 cursor-pointer hover:bg-sky-500/10 hover:border-sky-300/50 transition">
+                <Film className="h-5 w-5 text-sky-300" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-semibold text-neutral-100">Upload video</span>
+                  <span className="block text-[10px] text-neutral-400">MP4 or WebM · up to 50 MB</span>
+                </span>
+                <Upload className="h-4 w-4 text-neutral-400" />
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm,.mp4,.webm"
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.currentTarget.files?.[0];
+                    event.currentTarget.value = '';
+                    if (!file) return;
+                    if (file.size > 50 * 1024 * 1024) {
+                      window.alert('Video file is too large. Choose a file up to 50 MB.');
+                      return;
+                    }
+                    if (!/\.(mp4|webm)$/i.test(file.name)) {
+                      window.alert('Choose an MP4 or WebM video.');
+                      return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      if (typeof reader.result !== 'string') return;
+                      const uploadId = `uploaded-${Date.now()}`;
+                      const video: VideoElement = {
+                        id: uploadId,
+                        type: 'video',
+                        videoId: uploadId,
+                        videoName: file.name.replace(/\.[^.]+$/, ''),
+                        mediaSrc: reader.result,
+                        visualTheme: 'uploaded-video',
+                        primaryColor: '#D4AF37',
+                        secondaryColor: '#F8E7B0',
+                        bgGradient: '#160e12',
+                        isPlaying: true,
+                        isMuted: true,
+                        loop: true,
+                        playbackSpeed: 1,
+                        borderRadius: 10,
+                        borderColor: '#D4AF37',
+                        borderWidth: 1,
+                        x: 0,
+                        y: 0,
+                        width: 260,
+                        height: 180,
+                        rotation: 0,
+                        opacity: 1,
+                        zIndex: 1,
+                      };
+                      onRegisterCustomVideoUpload?.(video);
+                    };
+                    reader.onerror = () => window.alert('Could not read this video file. Please try another file.');
+                    reader.readAsDataURL(file);
+                  }}
+                />
+              </label>
+              {availableVideoUploads.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Your video uploads</h4>
+                  {availableVideoUploads.map((video) => (
+                    <div key={video.id} className="flex items-center gap-2 rounded-lg border border-sky-400/20 bg-neutral-900/80 p-2.5">
+                      <Film className="h-4 w-4 shrink-0 text-sky-300" />
+                      <span className="min-w-0 flex-1 truncate text-xs text-neutral-200" title={video.videoName}>{video.videoName}</span>
+                      <button
+                        type="button"
+                        onClick={() => onAddElement({
+                          ...video,
+                          id: `uploaded-video-element-${Date.now()}`,
+                          x: Math.round((dimensions.width - 260) / 2),
+                          y: Math.round((dimensions.height - 180) / 2),
+                          zIndex: Math.max(0, ...(currentPage?.elements || []).map((element) => element.zIndex || 0)) + 1,
+                        })}
+                        className="shrink-0 rounded-md border border-sky-300/30 px-2.5 py-1.5 text-[10px] font-semibold text-sky-200 transition hover:bg-sky-400/15"
+                      >
+                        Add to card
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -2957,7 +3115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div className="space-y-2.5">
-              {AUDIO_TRACKS.map((track) => {
+              {availableAudioTracks.map((track) => {
                 const isSelected = activeAudioTrackId === track.id;
                 const isPlayingThis = playingTrackId === track.id;
                 return (

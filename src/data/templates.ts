@@ -2,6 +2,7 @@ import { CardTemplate } from '../types/editor';
 import { PREMIUM_WEDDING_TEMPLATES } from './premiumWeddingTemplates';
 import { CELEBRATION_TEMPLATES } from './celebrationTemplates';
 import { FRAMED_CELEBRATION_TEMPLATES } from './framedCelebrationTemplates';
+import { GOLD_VELVET_TEMPLATES } from './goldVelvetTemplates';
 
 export const TEMPLATE_CATEGORIES = [
   { id: 'all', label: 'All Designs' },
@@ -11,6 +12,7 @@ export const TEMPLATE_CATEGORIES = [
   { id: 'birthday', label: 'Birthday Celebration' },
   { id: 'baby-shower', label: 'Godh Bharai / Naamkaran' },
   { id: 'anniversary', label: 'Royal Anniversary' },
+  { id: 'gold-velvet', label: '24K Gold Foil & Velvet' },
 ] as const;
 
 export const INITIAL_TEMPLATES: CardTemplate[] = [
@@ -3900,4 +3902,5 @@ export const INITIAL_TEMPLATES: CardTemplate[] = [
   ...PREMIUM_WEDDING_TEMPLATES,
   ...CELEBRATION_TEMPLATES,
   ...FRAMED_CELEBRATION_TEMPLATES,
+  ...GOLD_VELVET_TEMPLATES,
 ];

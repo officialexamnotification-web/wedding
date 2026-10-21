@@ -512,6 +512,8 @@ export interface VideoElement extends BaseElement {
   type: 'video';
   videoId: string;
   videoName: string;
+  /** User-uploaded video source. Library motion elements leave this unset. */
+  mediaSrc?: string;
   visualTheme: string;
   primaryColor: string;
   secondaryColor: string;
@@ -680,6 +682,8 @@ export interface SavedProject {
   audioTrackId?: string;
   audioClip?: AudioClipSettings;
   audioClips?: AudioTimelineClip[];
+  customAudioTracks?: AudioTrack[];
+  customVideoUploads?: VideoElement[];
 }
 
 export interface CustomGuide {
@@ -697,7 +701,8 @@ export interface CardTemplate {
     | 'birthday'
     | 'baby-shower'
     | 'sangeet-mehendi'
-    | 'anniversary';
+    | 'anniversary'
+    | 'gold-velvet';
   aspectRatio: AspectRatioType;
   tags: string[];
   thumbnailGradient: string;

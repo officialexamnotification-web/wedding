@@ -55,8 +55,6 @@ export const ALL_UNIVERSAL_ELEMENTS: UniversalElementItem[] = [
   ...GRAPHICS_LIBRARY_ITEMS,
   ...CANVA_DECORATIVE_ITEMS,
   ...PHOTOS_LIBRARY_ITEMS,
-  ...VIDEOS_LIBRARY_ITEMS,
-  ...AUDIO_LIBRARY_ITEMS,
   ...FRAMES_LIBRARY_ITEMS,
   ...GRIDS_LIBRARY_ITEMS,
   ...CHARTS_LIBRARY_ITEMS,
@@ -76,9 +74,9 @@ export function getItemsByCategory(catId: MainElementCategoryId): UniversalEleme
     case 'photos':
       return PHOTOS_LIBRARY_ITEMS;
     case 'videos':
-      return VIDEOS_LIBRARY_ITEMS;
+      return [];
     case 'audio':
-      return AUDIO_LIBRARY_ITEMS;
+      return [];
     case 'frames':
       return FRAMES_LIBRARY_ITEMS;
     case 'grids':
