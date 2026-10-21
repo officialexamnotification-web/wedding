@@ -1272,25 +1272,39 @@ export function evaluateSheetCell(raw: string | number, allCells: (string | numb
 // Render Canva Clipping Frame Element (30 Masks)
 export function renderFrameVisual(fr: FrameElement) {
   const clipId = `canvas-frame-clip-${fr.id}`;
+  const cssFrameClip = fr.frameId === 'frame-01'
+    ? 'polygon(10% 96%, 10% 38%, 10.5% 31%, 13% 25%, 20% 19%, 31% 13%, 42% 8%, 50% 4%, 58% 8%, 69% 13%, 80% 19%, 87% 25%, 89.5% 31%, 90% 38%, 90% 96%)'
+    : fr.frameId === 'frame-04' || fr.frameId === 'frame-05'
+    ? 'ellipse(42% 48% at 50% 50%)'
+    : fr.frameId === 'frame-13'
+    ? 'inset(0 round 999px)'
+    : `url(#${clipId})`;
   return (
     <div className="w-full h-full relative pointer-events-none select-none">
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
         <defs>
-          <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
-            <g dangerouslySetInnerHTML={{ __html: fr.clipPathSvg }} />
+        <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+          <g fill="#fff" dangerouslySetInnerHTML={{ __html: fr.clipPathSvg }} />
           </clipPath>
         </defs>
-        <g clipPath={`url(#${clipId})`}>
-          <rect width="100" height="100" fill={fr.placeholderColor || "#2A0A12"} />
-          <image
-            href={fr.imageSrc || "/images/wedding_couple_1791965341379.jpg"}
-            x={-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetX || 0)}
-            y={-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetY || 0)}
-            width={100 * (fr.imageScale || 1)}
-            height={100 * (fr.imageScale || 1)}
-            preserveAspectRatio="xMidYMid slice"
+      <foreignObject x="0" y="0" width="100" height="100">
+        <div style={{
+          width: '100%', height: '100%', overflow: 'hidden', background: fr.placeholderColor || '#2A0A12',
+          clipPath: cssFrameClip,
+        }}>
+          <img
+            src={fr.imageSrc || "/images/wedding_couple_1791965341379.jpg"}
+            alt=""
+            draggable={false}
+            style={{
+              position: 'relative', display: 'block', maxWidth: 'none', objectFit: 'cover',
+              width: `${100 * (fr.imageScale || 1)}%`, height: `${100 * (fr.imageScale || 1)}%`,
+              left: `${-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetX || 0)}%`,
+              top: `${-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetY || 0)}%`,
+            }}
           />
-        </g>
+        </div>
+      </foreignObject>
         {fr.borderSvg && (
           <g
             style={{ color: fr.borderColor || "#D4AF37" }}
@@ -1653,6 +1667,7 @@ export const Canvas: React.FC<CanvasProps> = ({
 
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
   const [editingShapeTextId, setEditingShapeTextId] = useState<string | null>(null);
+  const [dropTargetFrameId, setDropTargetFrameId] = useState<string | null>(null);
   const didModifyRef = useRef<boolean>(false);
 
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
@@ -1804,6 +1819,79 @@ export const Canvas: React.FC<CanvasProps> = ({
       .find((element) => element?.dataset.canvasItemId);
     const id = hitElement?.dataset.canvasItemId;
     return id ? elements.find((element) => element.id === id) || null : null;
+  };
+
+  const getCanvasFrameAtPoint = (clientX: number, clientY: number) => {
+    const frameIds = document
+      .elementsFromPoint(clientX, clientY)
+      .map((element) => element.closest<HTMLElement>('[data-canvas-item-id]')?.dataset.canvasItemId)
+      .filter((id): id is string => !!id);
+    return frameIds.map((id) => elements.find((element) => element.id === id))
+      .find((element): element is FrameElement => element?.type === 'frame') || null;
+  };
+
+  const getDroppedImage = (event: React.DragEvent) =>
+    event.dataTransfer.getData('application/x-wedding-media') || event.dataTransfer.getData('text/plain');
+
+  const handleMediaDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    const transferTypes = Array.from(event.dataTransfer.types);
+    const hasWeddingMedia = transferTypes.includes('application/x-wedding-media') || transferTypes.includes('text/plain');
+    if (!hasWeddingMedia) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    const target = getCanvasFrameAtPoint(event.clientX, event.clientY);
+    setDropTargetFrameId(target?.id || null);
+  };
+
+  const handleMediaDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    const src = getDroppedImage(event);
+    if (!src || !onAddElement) return;
+    event.preventDefault();
+    const target = getCanvasFrameAtPoint(event.clientX, event.clientY);
+    if (target) {
+      onUpdateElement(target.id, {
+        imageSrc: src,
+        imageScale: 1,
+        imageOffsetX: 0,
+        imageOffsetY: 0,
+      }, true);
+      onSelectElement(target.id);
+    } else {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        const scaleX = rect.width / dimensions.width;
+        const scaleY = rect.height / dimensions.height;
+        const dropX = (event.clientX - rect.left) / scaleX;
+        const dropY = (event.clientY - rect.top) / scaleY;
+        const sourceImage = new Image();
+        sourceImage.onload = () => {
+          const fit = Math.min(240 / sourceImage.naturalWidth, 280 / sourceImage.naturalHeight, 1);
+          const width = Math.max(1, sourceImage.naturalWidth * fit);
+          const height = Math.max(1, sourceImage.naturalHeight * fit);
+          const image: ImageElement = {
+            id: `img-upload-${Date.now()}`,
+            type: 'image',
+            src,
+            mask: 'none',
+            borderWidth: 0,
+            borderColor: '#D4AF37',
+            borderRadius: 0,
+            objectFit: 'cover',
+            x: Math.max(0, Math.min(dimensions.width - width, dropX - width / 2)),
+            y: Math.max(0, Math.min(dimensions.height - height, dropY - height / 2)),
+            width,
+            height,
+            rotation: 0,
+            opacity: 1,
+            zIndex: Math.max(0, ...elements.map((element) => element.zIndex || 0)) + 1,
+          };
+          onAddElement(image);
+          onSelectElement(image.id);
+        };
+        sourceImage.src = src;
+      }
+    }
+    setDropTargetFrameId(null);
   };
 
   // Start element dragging (Mouse)
@@ -2261,6 +2349,9 @@ export const Canvas: React.FC<CanvasProps> = ({
       zIndex: elem.zIndex,
       mixBlendMode: elem.blendMode || 'normal',
       filter: dropShadowFilter,
+      outline: dropTargetFrameId === elem.id ? '3px solid #8B5CF6' : undefined,
+      outlineOffset: dropTargetFrameId === elem.id ? '3px' : undefined,
+      boxShadow: dropTargetFrameId === elem.id ? '0 0 0 6px rgba(139,92,246,.2)' : undefined,
       cursor: drawBrush?.isEnabled
         ? 'crosshair'
         : copiedStyle
@@ -2833,6 +2924,11 @@ export const Canvas: React.FC<CanvasProps> = ({
           onMouseDown={handleDrawPointerDown}
           onMouseMove={handleDrawPointerMove}
           onMouseUp={handleDrawPointerUp}
+          onDragOver={handleMediaDragOver}
+          onDragLeave={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropTargetFrameId(null);
+          }}
+          onDrop={handleMediaDrop}
           className={`relative rounded-2xl shadow-2xl shadow-black/90 overflow-hidden border border-amber-500/40 ring-1 ring-amber-400/25 ${
             drawBrush?.isEnabled ? 'cursor-crosshair' : ''
           }`}

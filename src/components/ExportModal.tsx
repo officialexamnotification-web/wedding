@@ -918,14 +918,18 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         const transition = pages[pageIndex].transition || 'fade';
         const t = Math.max(0, Math.min(1, pageProgress));
         context.clearRect(0, 0, canvas.width, canvas.height);
-        if (pageIndex === 0 || t >= 1) {
+        if (t >= 1 || transition === 'none') {
           context.drawImage(frameCanvas, 0, 0);
           return;
         }
-        drawPage(context, pageIndex - 1, pages[pageIndex - 1].duration || 6);
-        if (transition === 'slide') {
-          drawPage(context, pageIndex - 1, pages[pageIndex - 1].duration || 6);
-          context.drawImage(frameCanvas, canvas.width * (1 - t), 0);
+        context.fillStyle = '#100b12';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        if (pageIndex > 0) drawPage(context, pageIndex - 1, pages[pageIndex - 1].duration || 6);
+        if (transition === 'slide' || transition === 'push') {
+          if (transition === 'push' && pageIndex > 0) {
+            context.drawImage(renderedPages[pageIndex - 1].base, -canvas.width * t, 0, canvas.width, canvas.height);
+          }
+          context.drawImage(frameCanvas, canvas.width * (1 - t), 0, canvas.width, canvas.height);
         } else if (transition === 'zoom') {
           context.globalAlpha = t;
           const zoom = 0.92 + t * 0.08;
@@ -940,6 +944,130 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           context.rect(canvas.width / 2 - half, 0, half * 2, canvas.height);
           context.clip();
           context.drawImage(frameCanvas, 0, 0);
+          context.restore();
+        } else if (transition === 'wipe') {
+          context.save();
+          context.beginPath();
+          context.rect(0, 0, canvas.width * t, canvas.height);
+          context.clip();
+          context.drawImage(frameCanvas, 0, 0);
+          context.restore();
+        } else if (transition === 'flip') {
+          if (pageIndex > 0 && t < 0.5) {
+            context.save();
+            const scaleX = Math.max(0.01, 1 - t * 2);
+            context.translate(canvas.width / 2, 0);
+            context.scale(scaleX, 1);
+            context.drawImage(renderedPages[pageIndex - 1].base, -canvas.width / 2, 0, canvas.width, canvas.height);
+            context.restore();
+          } else {
+            context.save();
+            const scaleX = Math.max(0.01, (t - 0.5) * 2);
+            context.translate(canvas.width / 2, 0);
+            context.scale(scaleX, 1);
+            context.drawImage(frameCanvas, -canvas.width / 2, 0, canvas.width, canvas.height);
+            context.restore();
+          }
+        } else if (transition === 'blur') {
+          context.save();
+          context.globalAlpha = t;
+          context.filter = `blur(${(1 - t) * 14}px)`;
+          context.drawImage(frameCanvas, 0, 0);
+          context.restore();
+        } else if (transition === 'rotate') {
+          context.save();
+          context.globalAlpha = t;
+          const scale = 0.88 + 0.12 * t;
+          context.translate(canvas.width / 2, canvas.height / 2);
+          context.rotate((1 - t) * -0.12);
+          context.scale(scale, scale);
+          context.drawImage(frameCanvas, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+          context.restore();
+        } else if (transition === 'stack' || transition === 'match-move') {
+          context.save();
+          context.globalAlpha = transition === 'stack' ? Math.min(1, t * 1.35) : t;
+          const scale = transition === 'stack' ? 0.88 + 0.12 * t : 1.06 - 0.06 * t;
+          const offsetY = transition === 'stack' ? (1 - t) * canvas.height * 0.035 : (1 - t) * canvas.height * 0.015;
+          const width = canvas.width * scale;
+          const height = canvas.height * scale;
+          context.drawImage(frameCanvas, (canvas.width - width) / 2, (canvas.height - height) / 2 + offsetY, width, height);
+          context.restore();
+        } else if (transition === 'chop') {
+          context.save();
+          const strips = 8;
+          const stripWidth = canvas.width / strips;
+          for (let strip = 0; strip < strips; strip++) {
+            const local = Math.max(0, Math.min(1, (t - (strip % 2) * 0.09) / 0.91));
+            const revealHeight = canvas.height * local;
+            if (revealHeight <= 0) continue;
+            const y = strip % 2 === 0 ? 0 : canvas.height - revealHeight;
+            context.drawImage(frameCanvas, strip * stripWidth, y, stripWidth + 1, revealHeight, strip * stripWidth, y, stripWidth + 1, revealHeight);
+          }
+          context.restore();
+        } else if (transition === 'iris') {
+          context.save();
+          context.beginPath();
+          context.arc(canvas.width / 2, canvas.height / 2, Math.hypot(canvas.width, canvas.height) * t * 0.52, 0, Math.PI * 2);
+          context.clip();
+          context.drawImage(frameCanvas, 0, 0);
+          context.restore();
+        } else if (transition === 'vertical-wipe') {
+          context.save();
+          context.beginPath();
+          context.rect(0, canvas.height * (1 - t), canvas.width, canvas.height * t);
+          context.clip();
+          context.drawImage(frameCanvas, 0, 0);
+          context.restore();
+        } else if (transition === 'cross-zoom') {
+          context.save();
+          context.globalAlpha = t;
+          context.filter = `blur(${(1 - t) * 8}px)`;
+          const scale = 1.16 - 0.16 * t;
+          const width = canvas.width * scale;
+          const height = canvas.height * scale;
+          context.drawImage(frameCanvas, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+          context.restore();
+        } else if (transition === 'page-turn') {
+          context.save();
+          const revealWidth = Math.max(1, canvas.width * t);
+          context.beginPath();
+          context.rect(0, 0, revealWidth, canvas.height);
+          context.clip();
+          context.drawImage(frameCanvas, 0, 0);
+          context.restore();
+          if (t < 1) {
+            const foldX = canvas.width * t;
+            const shadeWidth = Math.max(1, canvas.width * 0.055);
+            const fold = context.createLinearGradient(foldX - shadeWidth, 0, foldX + shadeWidth, 0);
+            fold.addColorStop(0, 'rgba(18,10,7,0)');
+            fold.addColorStop(0.48, `rgba(18,10,7,${0.28 * (1 - t)})`);
+            fold.addColorStop(1, 'rgba(255,240,205,0)');
+            context.fillStyle = fold;
+            context.fillRect(foldX - shadeWidth, 0, shadeWidth * 2, canvas.height);
+          }
+        } else if (transition === 'light-sweep') {
+          context.save();
+          context.globalAlpha = t;
+          context.drawImage(frameCanvas, 0, 0);
+          const centerX = canvas.width * (t * 1.35 - 0.15);
+          const halfWidth = canvas.width * 0.13;
+          const sweep = context.createLinearGradient(centerX - halfWidth, 0, centerX + halfWidth, 0);
+          const glow = Math.max(0, 0.52 * (1 - Math.abs(t - 0.55) / 0.55));
+          sweep.addColorStop(0, 'rgba(255,230,160,0)');
+          sweep.addColorStop(0.5, `rgba(255,239,190,${glow})`);
+          sweep.addColorStop(1, 'rgba(255,230,160,0)');
+          context.globalAlpha = 1;
+          context.fillStyle = sweep;
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.restore();
+        } else if (transition === 'panorama') {
+          context.save();
+          context.globalAlpha = t;
+          const scale = 1.08 - 0.08 * t;
+          const width = canvas.width * scale;
+          const height = canvas.height * scale;
+          const x = (canvas.width - width) / 2 + canvas.width * 0.1 * (1 - t);
+          context.drawImage(frameCanvas, x, (canvas.height - height) / 2, width, height);
           context.restore();
         } else {
           context.globalAlpha = t;

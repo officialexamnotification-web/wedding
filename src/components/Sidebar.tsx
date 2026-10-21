@@ -1006,6 +1006,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onAddElement(newImg);
   };
 
+  const handleUseUploadedPhoto = (url: string) => {
+    // Clicking an upload adds a regular, editable photo. Dragging onto a frame
+    // is the gesture that fills the frame.
+    handleAddPhoto(url, 'none');
+  };
+
   // Add Canva Table Element (Wedding Itinerary / Menu / Seating)
   const handleAddTable = (presetType: 'itinerary' | 'menu' | 'seating') => {
     let rows: string[][] = [];
@@ -2223,7 +2229,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <label className="w-full py-4 border-2 border-dashed border-amber-500/40 hover:border-amber-400 rounded-xl flex flex-col items-center justify-center gap-1.5 cursor-pointer bg-amber-500/5 hover:bg-amber-500/10 transition">
                 <Upload className="w-5 h-5 text-amber-400" />
                 <span className="text-xs font-bold text-amber-200">Upload Photo from Device</span>
-                <span className="text-[10px] text-neutral-400">Supports PNG, JPG, WebP</span>
+                <span className="text-[10px] text-neutral-400">Upload, then drag onto a frame or the canvas</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -2236,11 +2242,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         if (event.target?.result) {
                           const dataUrl = event.target.result as string;
                           setUploadedPhotos((prev) => [dataUrl, ...prev]);
-                          handleAddPhoto(dataUrl, 'arch');
                         }
                       };
                       reader.readAsDataURL(file);
                     }
+                    e.currentTarget.value = '';
                   }}
                 />
               </label>
@@ -2257,7 +2263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   onClick={() => {
                     if (customPhotoUrl) {
-                      handleAddPhoto(customPhotoUrl, 'arch');
+                      handleAddPhoto(customPhotoUrl, 'none');
                       setCustomPhotoUrl('');
                     }
                   }}
@@ -2272,16 +2278,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {uploadedPhotos.length > 0 && (
               <div>
                 <h4 className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-2">
-                  Your Uploaded Photos
+                  Your Uploads <span className="normal-case tracking-normal text-neutral-400">· click to add, drag onto a frame to fit</span>
                 </h4>
                 <div className="grid grid-cols-2 gap-2">
                   {uploadedPhotos.map((src, i) => (
                     <div
                       key={i}
-                      onClick={() => handleAddPhoto(src, 'arch')}
-                      className="cursor-pointer rounded-lg overflow-hidden border border-amber-500/40 hover:border-amber-400 bg-neutral-800"
+                      draggable
+                      onClick={() => handleUseUploadedPhoto(src)}
+                      onDragStart={(event) => {
+                        event.dataTransfer.setData('application/x-wedding-media', src);
+                        event.dataTransfer.setData('text/plain', src);
+                        event.dataTransfer.effectAllowed = 'copy';
+                      }}
+                      title="Click to add as a normal image, or drag onto a frame to fit it"
+                      className="cursor-pointer active:cursor-grabbing rounded-lg overflow-hidden border border-amber-500/40 hover:border-amber-400 bg-neutral-800"
                     >
-                      <img src={src} alt="Uploaded" className="w-full h-24 object-cover" />
+                      <img src={src} alt={`Uploaded photo ${i + 1}`} className="w-full h-24 object-cover pointer-events-none" />
+                      <div className="px-2 py-1 text-[10px] text-neutral-300">
+                        Click to add normally · drag to a frame to fit
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleUseUploadedPhoto(src);
+                        }}
+                        className="w-full px-2 py-1.5 text-[10px] font-semibold text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 border-t border-amber-500/20"
+                      >
+                        Add normally
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -2328,8 +2354,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 ].map((sample, i) => (
                   <div
                     key={i}
-                    onClick={() => handleAddPhoto(sample.url, sample.mask)}
-                    className="group cursor-pointer rounded-lg overflow-hidden border border-neutral-700 hover:border-amber-400 bg-neutral-800 transition"
+                    onClick={() => handleAddPhoto(sample.url, 'none')}
+                    draggable
+                    onDragStart={(event) => {
+                      event.dataTransfer.setData('application/x-wedding-media', sample.url);
+                      event.dataTransfer.setData('text/plain', sample.url);
+                      event.dataTransfer.effectAllowed = 'copy';
+                    }}
+                    title="Click to add a normal image, or drag onto a frame to fit it"
+                    className="group cursor-grab active:cursor-grabbing rounded-lg overflow-hidden border border-neutral-700 hover:border-amber-400 bg-neutral-800 transition"
                   >
                     <img
                       src={sample.url}

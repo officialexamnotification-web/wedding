@@ -589,9 +589,20 @@ export type PageTransitionType =
   | 'zoom'
   | 'royal-curtain'
   | 'sparkle'
+  | 'push'
+  | 'wipe'
+  | 'flip'
+  | 'blur'
+  | 'rotate'
   | 'stack'
   | 'chop'
-  | 'match-move';
+  | 'match-move'
+  | 'iris'
+  | 'vertical-wipe'
+  | 'cross-zoom'
+  | 'page-turn'
+  | 'light-sweep'
+  | 'panorama';
 
 export interface CardPage {
   id: string;

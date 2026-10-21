@@ -50,9 +50,6 @@ import {
 import {
   CanvasItem,
   CanvasDimensions,
-  FrameElement,
-  GridElement,
-  MockupElement,
 } from '../types/editor';
 
 interface ElementsLibraryPanelProps {
@@ -211,24 +208,8 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
 
       case 'photos': {
         const p = item as PhotoAssetItem;
-        // If user currently has a Frame, Grid, or Mockup selected on canvas, drop the photo straight into it!
-        if (selectedElement && onUpdateElement) {
-          if (selectedElement.type === 'frame') {
-            onUpdateElement(selectedElement.id, { imageSrc: p.src } as Partial<FrameElement>);
-            return;
-          }
-          if (selectedElement.type === 'mockup') {
-            onUpdateElement(selectedElement.id, { contentImageSrc: p.src } as Partial<MockupElement>);
-            return;
-          }
-          if (selectedElement.type === 'grid') {
-            const gr = selectedElement as GridElement;
-            const nextImgs = [...(gr.images || [])];
-            nextImgs.unshift(p.src);
-            onUpdateElement(selectedElement.id, { images: nextImgs.slice(0, 9) } as Partial<GridElement>);
-            return;
-          }
-        }
+        // Clicking always creates a regular photo. Frame filling is done by
+        // dragging the thumbnail onto the frame on the canvas.
         const w = p.aspectRatio === 'landscape' ? 240 : 180;
         const h = p.aspectRatio === 'portrait' ? 230 : 180;
         onAddElement({
@@ -236,9 +217,9 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
           type: 'image',
           src: p.src,
           alt: p.name,
-          mask: 'rounded',
-          borderRadius: 12,
-          borderWidth: 2,
+          mask: 'none',
+          borderRadius: 0,
+          borderWidth: 0,
           borderColor: '#D4AF37',
           filter: p.filterCSS && p.filterCSS !== 'none' ? p.filterCSS : undefined,
           x: cx - Math.round(w / 2),
@@ -568,6 +549,13 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
       <div
         key={item.id}
         onClick={() => handleInsertItem(item)}
+        draggable={item.category === 'photos'}
+        onDragStart={item.category === 'photos' ? (event) => {
+          const src = (item as PhotoAssetItem).src;
+          event.dataTransfer.setData('application/x-wedding-media', src);
+          event.dataTransfer.setData('text/plain', src);
+          event.dataTransfer.effectAllowed = 'copy';
+        } : undefined}
         title={`${item.name} — Click to add to canvas`}
         className={`group relative rounded-xl border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/70 hover:bg-neutral-800 transition-all cursor-pointer flex flex-col items-center justify-between overflow-hidden ${
           compact ? 'p-2 min-h-[94px]' : 'p-2.5 min-h-[118px]'
@@ -1005,7 +993,7 @@ export const ElementsLibraryPanel: React.FC<ElementsLibraryPanelProps> = ({
           <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-[11px] text-emerald-200 flex items-center justify-between">
             <span>
               <Check className="w-3.5 h-3.5 inline mr-1 text-emerald-400" />
-              <strong>{selectedElement.type.toUpperCase()} selected:</strong> Click any Photo to drop it inside!
+              <strong>{selectedElement.type.toUpperCase()} selected:</strong> Drag a photo here to fill it. Clicking adds a normal image.
             </span>
             {activeCategory !== 'photos' && (
               <button

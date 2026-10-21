@@ -117,16 +117,30 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   const clipTimelineStartSec = timelineClip?.timelineStartSec ?? (timelineClip?.pageIndex === null ? 0 : pageStartSec);
   const audioScopeEndSec = timelineClip?.pageIndex === null ? invitationDurationSec : pageStartSec + currentPageDurationSec;
   const musicDurationSec = Math.max(0.25, Math.min(currentAudioClip.durationSec ?? (audioScopeEndSec - clipTimelineStartSec), audioScopeEndSec - clipTimelineStartSec));
-  const pageTransition = currentIndex === 0 ? 'none' : (currentSlide?.transition || 'fade');
-  const pageTransitionAnimation = pageTransition === 'slide'
-    ? 'invitation-page-slide 720ms cubic-bezier(.22,1,.36,1) both'
-    : pageTransition === 'zoom'
-    ? 'invitation-page-zoom 720ms cubic-bezier(.22,1,.36,1) both'
-    : pageTransition === 'royal-curtain'
-    ? 'invitation-page-curtain 850ms cubic-bezier(.22,1,.36,1) both'
-    : pageTransition === 'sparkle'
-    ? 'invitation-page-sparkle 900ms ease-out both'
-    : 'invitation-page-fade 550ms ease-out both';
+  const pageTransition = currentSlide?.transition || 'fade';
+  const transitionAnimations: Record<string, string | undefined> = {
+    none: undefined,
+    fade: 'invitation-page-fade 550ms ease-out both',
+    slide: 'invitation-page-slide 720ms cubic-bezier(.22,1,.36,1) both',
+    zoom: 'invitation-page-zoom 720ms cubic-bezier(.22,1,.36,1) both',
+    'royal-curtain': 'invitation-page-curtain 850ms cubic-bezier(.22,1,.36,1) both',
+    sparkle: 'invitation-page-sparkle 900ms ease-out both',
+    push: 'invitation-page-push 720ms cubic-bezier(.22,1,.36,1) both',
+    wipe: 'invitation-page-wipe 780ms cubic-bezier(.22,1,.36,1) both',
+    flip: 'invitation-page-flip 760ms cubic-bezier(.22,1,.36,1) both',
+    blur: 'invitation-page-blur 760ms ease-out both',
+    rotate: 'invitation-page-rotate 780ms cubic-bezier(.22,1,.36,1) both',
+    stack: 'invitation-page-stack 720ms cubic-bezier(.22,1,.36,1) both',
+    chop: 'invitation-page-chop 800ms cubic-bezier(.22,1,.36,1) both',
+    'match-move': 'invitation-page-match 760ms cubic-bezier(.22,1,.36,1) both',
+    iris: 'invitation-page-iris 820ms cubic-bezier(.22,1,.36,1) both',
+    'vertical-wipe': 'invitation-page-vertical-wipe 780ms cubic-bezier(.22,1,.36,1) both',
+    'cross-zoom': 'invitation-page-cross-zoom 820ms cubic-bezier(.22,1,.36,1) both',
+    'page-turn': 'invitation-page-turn 850ms cubic-bezier(.22,1,.36,1) both',
+    'light-sweep': 'invitation-page-light-sweep 900ms ease-out both',
+    panorama: 'invitation-page-panorama 850ms cubic-bezier(.22,1,.36,1) both',
+  };
+  const pageTransitionAnimation = transitionAnimations[pageTransition] ?? transitionAnimations.fade;
 
   useEffect(() => {
     clipElapsedRef.current = 0;
@@ -399,7 +413,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                     background: currentSlide.backgroundValue,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    animation: pageTransition === 'none' ? undefined : pageTransitionAnimation,
+                    animation: pageTransitionAnimation,
                   }}
                 >
                   <div

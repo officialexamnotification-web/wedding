@@ -376,13 +376,29 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
                     })
                   }
                   className="bg-transparent text-[11px] text-neutral-200 outline-none cursor-pointer"
-                  title="Canva Page Transition Effect"
+                  aria-label="Transition for selected page, including the opening page"
+                  title="Choose how the selected page enters. Page 1 transitions in from the opening frame."
                 >
+                  <option value="none" className="bg-neutral-900">No Transition</option>
                   <option value="fade" className="bg-neutral-900">Transition: Dissolve</option>
                   <option value="slide" className="bg-neutral-900">Transition: Slide</option>
                   <option value="zoom" className="bg-neutral-900">Transition: Royal Zoom</option>
                   <option value="royal-curtain" className="bg-neutral-900">Transition: Palace Curtain</option>
                   <option value="sparkle" className="bg-neutral-900">Transition: Gold Sparkle</option>
+                  <option value="push" className="bg-neutral-900">Transition: Push</option>
+                  <option value="wipe" className="bg-neutral-900">Transition: Wipe</option>
+                  <option value="flip" className="bg-neutral-900">Transition: Flip</option>
+                  <option value="blur" className="bg-neutral-900">Transition: Soft Blur</option>
+                  <option value="rotate" className="bg-neutral-900">Transition: Rotate</option>
+                  <option value="stack" className="bg-neutral-900">Transition: Stacked Cards</option>
+                  <option value="chop" className="bg-neutral-900">Transition: Shutter</option>
+                  <option value="match-move" className="bg-neutral-900">Transition: Match Move</option>
+                  <option value="iris" className="bg-neutral-900">Transition: Iris Reveal</option>
+                  <option value="vertical-wipe" className="bg-neutral-900">Transition: Vertical Reveal</option>
+                  <option value="cross-zoom" className="bg-neutral-900">Transition: Cross Zoom</option>
+                  <option value="page-turn" className="bg-neutral-900">Transition: Page Turn</option>
+                  <option value="light-sweep" className="bg-neutral-900">Transition: Light Sweep</option>
+                  <option value="panorama" className="bg-neutral-900">Transition: Panorama</option>
                 </select>
               </div>
             </div>
