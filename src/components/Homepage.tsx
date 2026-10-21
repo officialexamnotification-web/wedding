@@ -1698,6 +1698,20 @@ export const Homepage: React.FC<HomepageProps> = ({
               </span>
             </div>
           </div>
+
+          <nav aria-label="Invitation guides and site information" className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-neutral-800/70 pt-5 text-[10px] text-neutral-500">
+            <a href="/wedding-invitations/" className="hover:text-amber-300 transition-colors">Wedding Invitations</a>
+            <a href="/griha-pravesh-invitations/" className="hover:text-amber-300 transition-colors">Griha Pravesh</a>
+            <a href="/sangeet-haldi-invitations/" className="hover:text-amber-300 transition-colors">Sangeet & Haldi</a>
+            <a href="/birthday-invitations/" className="hover:text-amber-300 transition-colors">Birthday Invitations</a>
+            <a href="/godh-bharai-invitations/" className="hover:text-amber-300 transition-colors">Godh Bharai</a>
+            <a href="/anniversary-invitations/" className="hover:text-amber-300 transition-colors">Anniversary</a>
+            <span aria-hidden="true" className="text-neutral-700">|</span>
+            <a href="/about/" className="hover:text-amber-300 transition-colors">About</a>
+            <a href="/contact/" className="hover:text-amber-300 transition-colors">Contact</a>
+            <a href="/privacy/" className="hover:text-amber-300 transition-colors">Privacy</a>
+            <a href="/terms/" className="hover:text-amber-300 transition-colors">Terms</a>
+          </nav>
         </div>
       </footer>
 
