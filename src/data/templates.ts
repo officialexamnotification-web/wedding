@@ -1,6 +1,7 @@
 import { CardTemplate } from '../types/editor';
 import { PREMIUM_WEDDING_TEMPLATES } from './premiumWeddingTemplates';
 import { CELEBRATION_TEMPLATES } from './celebrationTemplates';
+import { FRAMED_CELEBRATION_TEMPLATES } from './framedCelebrationTemplates';
 
 export const TEMPLATE_CATEGORIES = [
   { id: 'all', label: 'All Designs' },
@@ -3898,4 +3899,5 @@ export const INITIAL_TEMPLATES: CardTemplate[] = [
   },
   ...PREMIUM_WEDDING_TEMPLATES,
   ...CELEBRATION_TEMPLATES,
+  ...FRAMED_CELEBRATION_TEMPLATES,
 ];

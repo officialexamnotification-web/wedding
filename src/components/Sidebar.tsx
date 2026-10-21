@@ -95,6 +95,33 @@ import {
   renderShapeVisual,
 } from './Canvas';
 import { ElementsLibraryPanel } from './ElementsLibraryPanel';
+import { PHOTOS_LIBRARY_ITEMS } from '../data/elements/mediaInteractiveManifest';
+
+const TEMPLATE_FRAME_PHOTOS = INITIAL_TEMPLATES.flatMap((template) =>
+  template.pages.flatMap((page) =>
+    page.elements
+      .filter((element): element is FrameElement => element.type === 'frame' && Boolean((element as FrameElement).imageSrc))
+      .map((element, index) => ({
+        id: `template-photo-${template.id}-${element.id}`,
+        name: `${template.title} · Photo ${index + 1}`,
+        category: 'photos' as const,
+        subcategory: template.category,
+        src: element.imageSrc,
+        aspectRatio: 'portrait' as const,
+        tags: ['photo', 'frame', template.category, ...template.tags],
+      }))
+  )
+);
+
+const UNIQUE_PHOTO_LIBRARY_ITEMS = (() => {
+  const seenSources = new Set<string>();
+  return [...TEMPLATE_FRAME_PHOTOS, ...PHOTOS_LIBRARY_ITEMS].filter((photo) => {
+    const sourceKey = photo.src.trim().split(/[?#]/, 1)[0].replace(/\\/g, '/').toLowerCase();
+    if (seenSources.has(sourceKey)) return false;
+    seenSources.add(sourceKey);
+    return true;
+  });
+})();
 
 export type SidebarTab =
   | 'templates'
@@ -102,6 +129,7 @@ export type SidebarTab =
   | 'text'
   | 'brand'
   | 'photos'
+  | 'uploads'
   | 'tools'
   | 'projects'
   | 'apps'
@@ -611,6 +639,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [stickerCategory, setStickerCategory] = useState<string>('all');
   const [stickerSearch, setStickerSearch] = useState<string>('');
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const [photoSearch, setPhotoSearch] = useState('');
+  const [photoCategory, setPhotoCategory] = useState('all');
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
   const [audioSourceDuration, setAudioSourceDuration] = useState(0);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -1195,12 +1225,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return matchesCat && matchesSearch;
   });
 
+  const photoCategories = Array.from(new Set(UNIQUE_PHOTO_LIBRARY_ITEMS.map((photo) => photo.subcategory))).sort();
+  const filteredPhotos = UNIQUE_PHOTO_LIBRARY_ITEMS.filter((photo) => {
+    const matchesCategory = photoCategory === 'all' || photo.subcategory === photoCategory;
+    const searchText = `${photo.name} ${photo.subcategory} ${photo.tags.join(' ')}`.toLowerCase();
+    return matchesCategory && searchText.includes(photoSearch.trim().toLowerCase());
+  });
+
   const TABS_CONFIG = [
     { id: 'templates' as SidebarTab, label: 'Design', icon: LayoutTemplate },
     { id: 'elements' as SidebarTab, label: 'Elements', icon: Shapes },
     { id: 'text' as SidebarTab, label: 'Text', icon: Type },
     { id: 'brand' as SidebarTab, label: 'Brand', icon: Crown },
-    { id: 'photos' as SidebarTab, label: 'Uploads', icon: ImageIcon },
+    { id: 'photos' as SidebarTab, label: 'Photos', icon: ImageIcon },
+    { id: 'uploads' as SidebarTab, label: 'Uploads', icon: Upload },
     { id: 'audio' as SidebarTab, label: 'Music', icon: Music },
     { id: 'tools' as SidebarTab, label: 'Tools', icon: Wand2 },
     { id: 'projects' as SidebarTab, label: 'Projects', icon: FolderKanban },
@@ -2214,76 +2252,69 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* ================= 5. PHOTOS & UPLOADS TAB ================= */}
-        {activeTab === 'photos' && (
+        {/* ================= 5. UPLOADS TAB ================= */}
+        {activeTab === 'uploads' && (
           <div className="space-y-4">
             <div>
-              <h3 className="text-sm font-semibold text-neutral-100">Uploads & Celebration Photos</h3>
+              <h3 className="text-sm font-semibold text-neutral-100">Uploads</h3>
               <p className="text-xs text-neutral-400">
-                Upload from device or add with royal arch, heart, polaroid or circle frames
+                Add your own images here. Click to place one on the card, or drag it onto a frame.
               </p>
             </div>
-
-            <div className="space-y-2.5">
-              {/* File upload */}
-              <label className="w-full py-4 border-2 border-dashed border-amber-500/40 hover:border-amber-400 rounded-xl flex flex-col items-center justify-center gap-1.5 cursor-pointer bg-amber-500/5 hover:bg-amber-500/10 transition">
-                <Upload className="w-5 h-5 text-amber-400" />
-                <span className="text-xs font-bold text-amber-200">Upload Photo from Device</span>
-                <span className="text-[10px] text-neutral-400">Upload, then drag onto a frame or the canvas</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (event) => {
-                        if (event.target?.result) {
-                          const dataUrl = event.target.result as string;
-                          setUploadedPhotos((prev) => [dataUrl, ...prev]);
-                        }
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                    e.currentTarget.value = '';
-                  }}
-                />
-              </label>
-
-              {/* Paste URL */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={customPhotoUrl}
-                  onChange={(e) => setCustomPhotoUrl(e.target.value)}
-                  placeholder="Or paste direct image URL..."
-                  className="flex-1 bg-neutral-800 text-xs px-3 py-2 rounded-lg border border-neutral-700 focus:border-amber-500 outline-none text-neutral-200"
-                />
-                <button
-                  onClick={() => {
-                    if (customPhotoUrl) {
-                      handleAddPhoto(customPhotoUrl, 'none');
-                      setCustomPhotoUrl('');
-                    }
-                  }}
-                  className="px-3 py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs rounded-lg"
-                >
-                  Add
-                </button>
-              </div>
+            <label className="w-full py-5 border-2 border-dashed border-amber-500/40 hover:border-amber-400 rounded-xl flex flex-col items-center justify-center gap-1.5 cursor-pointer bg-amber-500/5 hover:bg-amber-500/10 transition">
+              <Upload className="w-5 h-5 text-amber-400" />
+              <span className="text-xs font-bold text-amber-200">Upload Image</span>
+              <span className="text-[10px] text-neutral-400">Choose an image from your device</span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (loadEvent) => {
+                      if (loadEvent.target?.result) {
+                        const dataUrl = loadEvent.target.result as string;
+                        setUploadedPhotos((previous) => [dataUrl, ...previous]);
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                  event.currentTarget.value = '';
+                }}
+              />
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customPhotoUrl}
+                onChange={(event) => setCustomPhotoUrl(event.target.value)}
+                placeholder="Paste an image URL..."
+                className="flex-1 bg-neutral-800 text-xs px-3 py-2 rounded-lg border border-neutral-700 focus:border-amber-500 outline-none text-neutral-200"
+              />
+              <button
+                onClick={() => {
+                  if (customPhotoUrl.trim()) {
+                    setUploadedPhotos((previous) => [customPhotoUrl.trim(), ...previous]);
+                    setCustomPhotoUrl('');
+                  }
+                }}
+                className="px-3 py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs rounded-lg"
+              >
+                Add URL
+              </button>
             </div>
-
-            {/* Uploaded Photos Gallery */}
-            {uploadedPhotos.length > 0 && (
+            {uploadedPhotos.length > 0 ? (
               <div>
                 <h4 className="text-xs font-semibold text-amber-300 uppercase tracking-wider mb-2">
-                  Your Uploads <span className="normal-case tracking-normal text-neutral-400">· click to add, drag onto a frame to fit</span>
+                  Your uploads <span className="normal-case tracking-normal text-neutral-400">· click to add, drag onto a frame to fit</span>
                 </h4>
                 <div className="grid grid-cols-2 gap-2">
-                  {uploadedPhotos.map((src, i) => (
+                  {uploadedPhotos.map((src, index) => (
                     <div
-                      key={i}
+                      key={`${src.slice(0, 64)}-${index}`}
+                      className="group relative cursor-grab active:cursor-grabbing rounded-lg overflow-hidden border border-amber-500/40 hover:border-amber-400 bg-neutral-800"
                       draggable
                       onClick={() => handleUseUploadedPhoto(src)}
                       onDragStart={(event) => {
@@ -2291,90 +2322,115 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         event.dataTransfer.setData('text/plain', src);
                         event.dataTransfer.effectAllowed = 'copy';
                       }}
-                      title="Click to add as a normal image, or drag onto a frame to fit it"
-                      className="cursor-pointer active:cursor-grabbing rounded-lg overflow-hidden border border-amber-500/40 hover:border-amber-400 bg-neutral-800"
+                      title="Click to add to the card, or drag onto a photo frame"
                     >
-                      <img src={src} alt={`Uploaded photo ${i + 1}`} className="w-full h-24 object-cover pointer-events-none" />
-                      <div className="px-2 py-1 text-[10px] text-neutral-300">
-                        Click to add normally · drag to a frame to fit
-                      </div>
+                      <img src={src} alt={`Uploaded image ${index + 1}`} className="w-full h-24 object-cover pointer-events-none" />
                       <button
                         type="button"
+                        aria-label={`Delete uploaded image ${index + 1}`}
+                        title="Remove from uploads"
                         onClick={(event) => {
                           event.stopPropagation();
-                          handleUseUploadedPhoto(src);
+                          setUploadedPhotos((previous) => previous.filter((_, photoIndex) => photoIndex !== index));
                         }}
-                        className="w-full px-2 py-1.5 text-[10px] font-semibold text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 border-t border-amber-500/20"
+                        onDragStart={(event) => event.stopPropagation()}
+                        draggable={false}
+                        className="absolute right-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-md border border-white/15 bg-neutral-950/80 text-neutral-200 opacity-100 shadow transition hover:border-red-400/60 hover:bg-red-500 hover:text-white sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
                       >
-                        Add normally
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
+                      <div className="px-2 py-1 text-[10px] text-neutral-300">Click to add · drag to a frame</div>
                     </div>
                   ))}
                 </div>
               </div>
+            ) : (
+              <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-8 text-center">
+                <ImageIcon className="mx-auto mb-2 h-6 w-6 text-neutral-600" />
+                <p className="text-xs text-neutral-400">Your uploaded images will appear here.</p>
+              </div>
             )}
+          </div>
+        )}
 
-            {/* Sample Celebration Photos */}
+        {/* ================= 6. PHOTOS LIBRARY TAB ================= */}
+        {activeTab === 'photos' && (
+          <div className="space-y-4">
             <div>
-              <h4 className="text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
-                Royal Stock Photos & Backdrops
-              </h4>
+              <h3 className="text-sm font-semibold text-neutral-100">Photos</h3>
+              <p className="text-xs text-neutral-400">
+                Browse unique website photos, then click to add or drag one into a frame
+              </p>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-xs font-semibold text-neutral-300 uppercase tracking-wider">
+                  Photo library
+                </h4>
+                <span className="text-[10px] text-neutral-500">{filteredPhotos.length} unique photos</span>
+              </div>
+              <div className="relative mb-2">
+                <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-neutral-500" />
+                <input
+                  type="search"
+                  value={photoSearch}
+                  onChange={(event) => setPhotoSearch(event.target.value)}
+                  placeholder="Search photos, occasions, styles..."
+                  className="w-full rounded-lg border border-neutral-700 bg-neutral-900 py-2 pl-8 pr-3 text-xs text-neutral-200 outline-none focus:border-amber-500"
+                  aria-label="Search photos"
+                />
+              </div>
+              <div className="flex gap-1.5 overflow-x-auto pb-2">
+                <button
+                  type="button"
+                  onClick={() => setPhotoCategory('all')}
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold ${photoCategory === 'all' ? 'bg-amber-400 text-neutral-950' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'}`}
+                >
+                  All photos
+                </button>
+                {photoCategories.map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setPhotoCategory(category)}
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold capitalize ${photoCategory === category ? 'bg-amber-400 text-neutral-950' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'}`}
+                  >
+                    {category.replace(/-/g, ' ')}
+                  </button>
+                ))}
+              </div>
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  {
-                    url: '/images/wedding_couple_1791965341379.jpg',
-                    label: 'Wedding Couple',
-                    mask: 'arch' as const,
-                  },
-                  {
-                    url: '/images/sangeet_haldi_1791965342768.jpg',
-                    label: 'Haldi & Sangeet',
-                    mask: 'heart' as const,
-                  },
-                  {
-                    url: '/images/griha_pravesh_1791965341528.jpg',
-                    label: 'Griha Pravesh',
-                    mask: 'rounded' as const,
-                  },
-                  {
-                    url: '/images/baby_birthday_1791965343318.jpg',
-                    label: 'Birthday Celebration',
-                    mask: 'circle' as const,
-                  },
-                  {
-                    url: '/images/royal_mandap_cover.webp',
-                    label: 'Royal Mandap Art',
-                    mask: 'arch' as const,
-                  },
-                  {
-                    url: '/images/royal_vivah_peacocks.webp',
-                    label: 'Peacock Palace',
-                    mask: 'rounded' as const,
-                  },
-                ].map((sample, i) => (
+                {filteredPhotos.map((photo) => (
                   <div
-                    key={i}
-                    onClick={() => handleAddPhoto(sample.url, 'none')}
+                    key={photo.id}
+                    onClick={() => handleAddPhoto(photo.src, 'none', photo.name)}
                     draggable
                     onDragStart={(event) => {
-                      event.dataTransfer.setData('application/x-wedding-media', sample.url);
-                      event.dataTransfer.setData('text/plain', sample.url);
+                      event.dataTransfer.setData('application/x-wedding-media', photo.src);
+                      event.dataTransfer.setData('text/plain', photo.src);
                       event.dataTransfer.effectAllowed = 'copy';
                     }}
-                    title="Click to add a normal image, or drag onto a frame to fit it"
-                    className="group cursor-grab active:cursor-grabbing rounded-lg overflow-hidden border border-neutral-700 hover:border-amber-400 bg-neutral-800 transition"
+                    title="Click to add to the card, or drag onto a photo frame"
+                    className="group cursor-grab active:cursor-grabbing overflow-hidden rounded-lg border border-neutral-700 bg-neutral-800 transition hover:border-amber-400"
                   >
                     <img
-                      src={sample.url}
-                      alt={sample.label}
-                      referrerPolicy="no-referrer"
-                      className="w-full h-24 object-cover group-hover:scale-105 transition duration-300"
+                      src={photo.src}
+                      alt={photo.name}
+                      loading="lazy"
+                      draggable={false}
+                      style={{ filter: photo.filterCSS || 'none' }}
+                      className="pointer-events-none h-24 w-full object-cover transition duration-300 group-hover:scale-105"
                     />
-                    <div className="p-1.5 text-center text-[10px] text-neutral-300 font-medium">
-                      + {sample.label}
+                    <div className="px-2 py-1.5">
+                      <div className="truncate text-[10px] font-medium text-neutral-200">{photo.name}</div>
+                      <div className="text-[9px] capitalize text-neutral-500">{photo.subcategory.replace(/-/g, ' ')}</div>
                     </div>
                   </div>
                 ))}
+                {filteredPhotos.length === 0 && (
+                  <p className="col-span-2 py-8 text-center text-xs text-neutral-500">No photos match this search.</p>
+                )}
               </div>
             </div>
           </div>

@@ -1270,17 +1270,31 @@ export function evaluateSheetCell(raw: string | number, allCells: (string | numb
 }
 
 // Render Canva Clipping Frame Element (30 Masks)
-export function renderFrameVisual(fr: FrameElement) {
+export function renderFrameVisual(
+  fr: FrameElement,
+  onPhotoMouseDown?: (event: React.MouseEvent) => void,
+  onPhotoTouchStart?: (event: React.TouchEvent) => void,
+) {
   const clipId = `canvas-frame-clip-${fr.id}`;
-  const cssFrameClip = fr.frameId === 'frame-01'
-    ? 'polygon(10% 96%, 10% 38%, 10.5% 31%, 13% 25%, 20% 19%, 31% 13%, 42% 8%, 50% 4%, 58% 8%, 69% 13%, 80% 19%, 87% 25%, 89.5% 31%, 90% 38%, 90% 96%)'
-    : fr.frameId === 'frame-04' || fr.frameId === 'frame-05'
-    ? 'ellipse(42% 48% at 50% 50%)'
-    : fr.frameId === 'frame-13'
-    ? 'inset(0 round 999px)'
-    : `url(#${clipId})`;
+  const cssFrameClipById: Record<string, string> = {
+    'frame-01': 'polygon(10% 96%, 10% 38%, 10.5% 31%, 13% 25%, 20% 19%, 31% 13%, 42% 8%, 50% 4%, 58% 8%, 69% 13%, 80% 19%, 87% 25%, 89.5% 31%, 90% 38%, 90% 96%)',
+    'frame-02': 'polygon(12% 95%, 12% 42%, 13% 34%, 18% 25%, 28% 18%, 38% 10%, 50% 4%, 62% 10%, 72% 18%, 82% 25%, 87% 34%, 88% 42%, 88% 95%)',
+    'frame-03': 'polygon(50% 4%, 68% 17%, 86% 38%, 86% 67%, 73% 87%, 50% 96%, 27% 87%, 14% 67%, 14% 38%, 32% 17%)',
+    'frame-04': 'circle(42% at 50% 50%)',
+    'frame-05': 'ellipse(38% 45% at 50% 50%)',
+    'frame-06': 'polygon(50% 6%, 94% 50%, 50% 94%, 6% 50%)',
+    'frame-07': 'polygon(30% 5%, 70% 5%, 95% 30%, 95% 70%, 70% 95%, 30% 95%, 5% 70%, 5% 30%)',
+    'frame-08': 'polygon(50% 4%, 93% 27%, 93% 73%, 50% 96%, 7% 73%, 7% 27%)',
+    'frame-09': 'polygon(50% 92%, 32% 78%, 12% 56%, 8% 39%, 15% 23%, 30% 15%, 43% 18%, 50% 28%, 57% 18%, 70% 15%, 85% 23%, 92% 39%, 88% 56%, 68% 78%)',
+    'frame-10': 'polygon(50% 4%, 61% 16%, 78% 10%, 80% 27%, 95% 33%, 87% 49%, 95% 65%, 80% 71%, 78% 88%, 61% 82%, 50% 95%, 39% 82%, 22% 88%, 20% 71%, 5% 65%, 13% 49%, 5% 33%, 20% 27%, 22% 10%, 39% 16%)',
+    'frame-11': 'inset(8% 10% 22% round 3%)',
+    'frame-12': 'inset(7% round 18%)',
+    'frame-13': 'inset(4% 16% round 999px)',
+    'frame-14': 'polygon(8% 96%, 8% 48%, 9% 37%, 15% 27%, 26% 19%, 37% 13%, 46% 7%, 50% 2%, 54% 7%, 63% 13%, 74% 19%, 85% 27%, 91% 37%, 92% 48%, 92% 96%)',
+  };
+  const cssFrameClip = cssFrameClipById[fr.frameId] || `url(#${clipId})`;
   return (
-    <div className="w-full h-full relative pointer-events-none select-none">
+    <div className="w-full h-full relative select-none">
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
         <defs>
         <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
@@ -1291,18 +1305,37 @@ export function renderFrameVisual(fr: FrameElement) {
         <div style={{
           width: '100%', height: '100%', overflow: 'hidden', background: fr.placeholderColor || '#2A0A12',
           clipPath: cssFrameClip,
-        }}>
-          <img
-            src={fr.imageSrc || "/images/wedding_couple_1791965341379.jpg"}
-            alt=""
-            draggable={false}
-            style={{
-              position: 'relative', display: 'block', maxWidth: 'none', objectFit: 'cover',
-              width: `${100 * (fr.imageScale || 1)}%`, height: `${100 * (fr.imageScale || 1)}%`,
-              left: `${-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetX || 0)}%`,
-              top: `${-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetY || 0)}%`,
-            }}
-          />
+        }}
+          onMouseDown={onPhotoMouseDown}
+          onTouchStart={onPhotoTouchStart}
+        >
+          {fr.naturalImageFit && fr.imageSrc ? (
+            <img
+              src={fr.imageSrc}
+              alt=""
+              draggable={false}
+              style={{
+                position: 'relative', display: 'block', width: '100%', height: '100%', maxWidth: 'none',
+                objectFit: 'cover',
+                objectPosition: '50% 50%',
+                transform: `translate(${fr.imageOffsetX || 0}%, ${fr.imageOffsetY || 0}%) scale(${fr.imageScale || 1})`,
+                transformOrigin: 'center center',
+                cursor: onPhotoMouseDown ? 'grab' : 'default', touchAction: 'none',
+              }}
+            />
+          ) : (
+            <img
+              src={fr.imageSrc || "/images/wedding_couple_1791965341379.jpg"}
+              alt=""
+              draggable={false}
+              style={{
+                position: 'relative', display: 'block', maxWidth: 'none', objectFit: 'cover',
+                width: `${100 * (fr.imageScale || 1)}%`, height: `${100 * (fr.imageScale || 1)}%`,
+                left: `${-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetX || 0)}%`,
+                top: `${-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetY || 0)}%`,
+              }}
+            />
+          )}
         </div>
       </foreignObject>
         {fr.borderSvg && (
@@ -1314,6 +1347,21 @@ export function renderFrameVisual(fr: FrameElement) {
       </svg>
     </div>
   );
+}
+
+function applyFramePhotoPanStyle(
+  image: HTMLImageElement,
+  frame: FrameElement,
+  offsetX: number,
+  offsetY: number,
+) {
+  if (frame.naturalImageFit) {
+    image.style.transform = `translate(${offsetX}%, ${offsetY}%) scale(${frame.imageScale || 1})`;
+  } else {
+    const scale = frame.imageScale || 1;
+    image.style.left = `${-50 * (scale - 1) + offsetX}%`;
+    image.style.top = `${-50 * (scale - 1) + offsetY}%`;
+  }
 }
 
 // Render Canva Interactive Form Element (RSVP / Poll / Meal Choice)
@@ -1626,6 +1674,7 @@ export const Canvas: React.FC<CanvasProps> = ({
   const lastObservedCanvasSizeRef = useRef<{ width: number; height: number } | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
+  const [framePhotoAdjustId, setFramePhotoAdjustId] = useState<string | null>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   const [resizeHandle, setResizeHandle] = useState<string | null>(null);
@@ -1946,6 +1995,105 @@ export const Canvas: React.FC<CanvasProps> = ({
         fontSize: elem.type === 'text' ? (elem as TextElement).fontSize : undefined,
       });
     }
+  };
+
+  const handleFramePhotoMouseDown = (e: React.MouseEvent, frame: FrameElement) => {
+    if (drawBrush?.isEnabled || frame.locked) return;
+    e.preventDefault();
+    e.stopPropagation();
+    onSelectElement(frame.id);
+    const image = e.currentTarget.querySelector('img');
+    if (!image) return;
+    const start = {
+      id: frame.id,
+      x: e.clientX,
+      y: e.clientY,
+      offsetX: frame.imageOffsetX || 0,
+      offsetY: frame.imageOffsetY || 0,
+    };
+    let moved = false;
+    let latestOffsetX = start.offsetX;
+    let latestOffsetY = start.offsetY;
+    let pendingFrame = 0;
+    image.style.cursor = 'grabbing';
+    const renderPendingPan = () => {
+      pendingFrame = 0;
+      applyFramePhotoPanStyle(image, frame, latestOffsetX, latestOffsetY);
+    };
+    const handleMove = (event: MouseEvent) => {
+      const deltaX = ((event.clientX - start.x) / zoom / Math.max(frame.width, 1)) * 100;
+      const deltaY = ((event.clientY - start.y) / zoom / Math.max(frame.height, 1)) * 100;
+      if (Math.abs(deltaX) + Math.abs(deltaY) < 0.15) return;
+      moved = true;
+      const panLimit = Math.max(0, ((frame.imageScale || 1) - 1) * 50);
+      latestOffsetX = Math.max(-panLimit, Math.min(panLimit, start.offsetX + deltaX));
+      latestOffsetY = Math.max(-panLimit, Math.min(panLimit, start.offsetY + deltaY));
+      if (!pendingFrame) pendingFrame = window.requestAnimationFrame(renderPendingPan);
+    };
+    const handleEnd = () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleEnd);
+      if (pendingFrame) window.cancelAnimationFrame(pendingFrame);
+      if (moved) {
+        renderPendingPan();
+        onUpdateElement(frame.id, { imageOffsetX: latestOffsetX, imageOffsetY: latestOffsetY }, true);
+      }
+      image.style.cursor = 'grab';
+    };
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+  };
+
+  const handleFramePhotoTouchStart = (e: React.TouchEvent, frame: FrameElement) => {
+    if (drawBrush?.isEnabled || frame.locked || e.touches.length !== 1) return;
+    e.stopPropagation();
+    const touch = e.touches[0];
+    const image = e.currentTarget.querySelector('img');
+    if (!image) return;
+    const start = {
+      id: frame.id,
+      x: touch.clientX,
+      y: touch.clientY,
+      offsetX: frame.imageOffsetX || 0,
+      offsetY: frame.imageOffsetY || 0,
+    };
+    onSelectElement(frame.id);
+    let moved = false;
+    let latestOffsetX = start.offsetX;
+    let latestOffsetY = start.offsetY;
+    let pendingFrame = 0;
+    image.style.cursor = 'grabbing';
+    const renderPendingPan = () => {
+      pendingFrame = 0;
+      applyFramePhotoPanStyle(image, frame, latestOffsetX, latestOffsetY);
+    };
+    const handleMove = (event: TouchEvent) => {
+      if (event.touches.length !== 1) return;
+      event.preventDefault();
+      const activeTouch = event.touches[0];
+      const deltaX = ((activeTouch.clientX - start.x) / zoom / Math.max(frame.width, 1)) * 100;
+      const deltaY = ((activeTouch.clientY - start.y) / zoom / Math.max(frame.height, 1)) * 100;
+      if (Math.abs(deltaX) + Math.abs(deltaY) < 0.15) return;
+      moved = true;
+      const panLimit = Math.max(0, ((frame.imageScale || 1) - 1) * 50);
+      latestOffsetX = Math.max(-panLimit, Math.min(panLimit, start.offsetX + deltaX));
+      latestOffsetY = Math.max(-panLimit, Math.min(panLimit, start.offsetY + deltaY));
+      if (!pendingFrame) pendingFrame = window.requestAnimationFrame(renderPendingPan);
+    };
+    const handleEnd = () => {
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchend', handleEnd);
+      window.removeEventListener('touchcancel', handleEnd);
+      if (pendingFrame) window.cancelAnimationFrame(pendingFrame);
+      if (moved) {
+        renderPendingPan();
+        onUpdateElement(frame.id, { imageOffsetX: latestOffsetX, imageOffsetY: latestOffsetY }, true);
+      }
+      image.style.cursor = 'grab';
+    };
+    window.addEventListener('touchmove', handleMove, { passive: false });
+    window.addEventListener('touchend', handleEnd);
+    window.addEventListener('touchcancel', handleEnd);
   };
 
   // Start element resizing (Mouse)
@@ -2507,7 +2655,11 @@ export const Canvas: React.FC<CanvasProps> = ({
           {elem.type === 'barcode' && renderBarcodeVisual(elem as BarcodeElement)}
 
           {/* Render CLIPPING FRAME */}
-          {elem.type === 'frame' && renderFrameVisual(elem as FrameElement)}
+          {elem.type === 'frame' && renderFrameVisual(
+            elem as FrameElement,
+            framePhotoAdjustId === elem.id ? (event) => handleFramePhotoMouseDown(event, elem as FrameElement) : undefined,
+            framePhotoAdjustId === elem.id ? (event) => handleFramePhotoTouchStart(event, elem as FrameElement) : undefined,
+          )}
 
           {/* Render INTERACTIVE FORM */}
           {elem.type === 'form' && renderFormVisual(elem as FormElement, onUpdateElement)}
@@ -2679,6 +2831,72 @@ export const Canvas: React.FC<CanvasProps> = ({
                 >
                   <Crop className="w-3.5 h-3.5" />
                 </button>
+              )}
+              {elem.type === 'frame' && !isLocked && (elem as FrameElement).imageSrc && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      const nextMode = framePhotoAdjustId !== elem.id;
+                      if (nextMode) {
+                        onUpdateElement(elem.id, {
+                          naturalImageFit: true,
+                          imageScale: Math.max(1.2, (elem as FrameElement).imageScale || 1),
+                        }, true);
+                      }
+                      setFramePhotoAdjustId(nextMode ? elem.id : null);
+                    }}
+                    className={`flex items-center gap-1 px-1.5 py-1 rounded-full transition ${
+                      framePhotoAdjustId === elem.id
+                        ? 'bg-amber-400 text-neutral-950'
+                        : 'hover:bg-neutral-800 hover:text-amber-300'
+                    }`}
+                    title={framePhotoAdjustId === elem.id ? 'Done adjusting photo; drag photo in any direction' : 'Adjust photo inside frame'}
+                    aria-label={framePhotoAdjustId === elem.id ? 'Done adjusting photo' : 'Adjust photo inside frame'}
+                  >
+                    <Crop className="w-3.5 h-3.5" />
+                    {framePhotoAdjustId === elem.id && <span className="text-[10px] font-semibold">Photo</span>}
+                  </button>
+                  {framePhotoAdjustId === elem.id && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          const frame = elem as FrameElement;
+                          const nextScale = Math.max(1.2, (frame.imageScale || 1.2) - 0.1);
+                          const panLimit = (nextScale - 1) * 50;
+                          onUpdateElement(elem.id, {
+                            imageScale: nextScale,
+                            imageOffsetX: Math.max(-panLimit, Math.min(panLimit, frame.imageOffsetX || 0)),
+                            imageOffsetY: Math.max(-panLimit, Math.min(panLimit, frame.imageOffsetY || 0)),
+                          }, true);
+                        }}
+                        className="grid h-5 w-5 place-items-center rounded-full hover:bg-neutral-800"
+                        title="Zoom photo out"
+                        aria-label="Zoom photo out"
+                      >
+                        <ZoomOut className="h-3 w-3" />
+                      </button>
+                      <span className="min-w-8 text-center text-[9px] tabular-nums">
+                        {Math.round(((elem as FrameElement).imageScale || 1.2) * 100)}%
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          const frame = elem as FrameElement;
+                          onUpdateElement(elem.id, { imageScale: Math.min(3, (frame.imageScale || 1.2) + 0.1) }, true);
+                        }}
+                        className="grid h-5 w-5 place-items-center rounded-full hover:bg-neutral-800"
+                        title="Zoom photo in"
+                        aria-label="Zoom photo in"
+                      >
+                        <ZoomIn className="h-3 w-3" />
+                      </button>
+                    </>
+                  )}
+                </div>
               )}
               {!isLocked && (
                 <button

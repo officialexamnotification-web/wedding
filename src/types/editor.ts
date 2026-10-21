@@ -430,6 +430,7 @@ export interface FrameElement extends BaseElement {
   imageScale: number; // 0.8 to 3.0
   imageOffsetX: number; // -50 to 50
   imageOffsetY: number; // -50 to 50
+  naturalImageFit?: boolean; // Keep the full photo visible without stretching; softly fill unused frame area.
   borderColor: string;
   borderWidth: number;
   placeholderColor?: string;

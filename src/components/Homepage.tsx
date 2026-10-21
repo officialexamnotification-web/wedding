@@ -39,6 +39,7 @@ import {
   CardPage,
   CANVAS_SIZES,
   ImageElement,
+  FrameElement,
   ShapeElement,
   StickerElement,
   TextElement,
@@ -62,6 +63,7 @@ import {
   renderGridVisual,
   renderCountdownVisual,
   renderBarcodeVisual,
+  renderFrameVisual,
 } from './Canvas';
 
 interface HomepageProps {
@@ -289,6 +291,7 @@ const MiniCardArtwork: React.FC<{
                     ))}
                   </svg>
                 )}
+                {elem.type === 'frame' && renderFrameVisual(elem as FrameElement)}
                 {elem.type === 'image' && (
                   <div
                     className="w-full h-full overflow-hidden relative"
@@ -379,7 +382,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'शुभ विवाह निमंत्रण',
       icon: Crown, 
       image: '/images/wedding_couple_1791965341379.jpg',
-      count: '30 Royal Designs', 
+      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'wedding').length} Royal Designs`,
     },
     { 
       id: 'housewarming', 
@@ -387,7 +390,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'गृह प्रवेश एवं वास्तु पूजा',
       icon: RoyalKalashIcon, 
       image: '/images/griha_pravesh_1791965341528.jpg',
-      count: '30 Sacred Designs', 
+      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'housewarming').length} Sacred Designs`,
     },
     { 
       id: 'sangeet-mehendi', 
@@ -395,7 +398,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'संगीत, हल्दी व मेहंदी',
       icon: Music, 
       image: '/images/sangeet_haldi_1791965342768.jpg',
-      count: '30 Festive Designs', 
+      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'sangeet-mehendi').length} Festive Designs`,
     },
     { 
       id: 'birthday', 
@@ -403,7 +406,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'जन्मदिन उत्सव',
       icon: Sparkles, 
       image: '/images/baby_birthday_1791965343318.jpg',
-      count: '30 Luxe Designs', 
+      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'birthday').length} Luxe Designs`,
     },
     { 
       id: 'baby-shower', 
@@ -411,7 +414,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'गोद भराई एवं नामकरण',
       icon: Heart, 
       image: '/images/baby_birthday_1791965343318.jpg',
-      count: '30 Pastel Designs', 
+      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'baby-shower').length} Pastel Designs`,
     },
     { 
       id: 'anniversary', 
@@ -419,7 +422,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'विवाह वर्षगांठ',
       icon: Gem, 
       image: '/images/wedding_couple_1791965341379.jpg',
-      count: '30 Jubilee Designs', 
+      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'anniversary').length} Jubilee Designs`,
     },
   ];
 
