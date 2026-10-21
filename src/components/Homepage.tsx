@@ -473,7 +473,7 @@ export const Homepage: React.FC<HomepageProps> = ({
         </span>
         <span className="text-amber-500/50">•</span>
         <span className="hidden sm:inline text-neutral-300">
-          Bespoke Indian Digital Invitations & Multi-Slide Video Suites • 300 DPI Print & WhatsApp 4K Ready
+          Bespoke Indian Digital Invitations & Multi-Slide Video Suites • High-Resolution Digital Exports
         </span>
         <span className="sm:hidden text-neutral-300">
           Royal Digital Cards & Multi-Slide Video Suites
@@ -959,7 +959,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                   ) : (
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 border border-neutral-800 text-[9px] text-neutral-400 whitespace-nowrap">
                       <RoyalLotusIcon className="w-3 h-3 text-amber-400" />
-                      <span>Single-Page Heirloom Card • 300 DPI Ready</span>
+                      <span>Single-Page Heirloom Card • High-Resolution Export</span>
                     </div>
                   )}
                 </div>
@@ -1128,7 +1128,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                   step: '04',
                   hindi: 'चतुर्थ चरण • साझा करें',
                   title: 'Export HD & Share',
-                  desc: 'Download watermark-free 300 DPI PDF, PNG, or share directly with guests on WhatsApp.',
+                  desc: 'Download a high-resolution PDF or PNG, or share directly with guests on WhatsApp.',
                   icon: Send,
                   highlights: ['100% Watermark-Free Export', 'WhatsApp 9:16 Fullscreen HD'],
                 },
@@ -1238,9 +1238,9 @@ export const Homepage: React.FC<HomepageProps> = ({
             },
             {
               icon: Printer,
-              title: '300 DPI Print-Ready Output',
+              title: 'High-Resolution Export',
               hindi: 'हाई-डेफिनिशन प्रिंट क्वालिटी',
-              desc: 'Export high-resolution PDF and lossless PNG files with optional bleed guides for physical luxury card printing.',
+              desc: 'Export a high-resolution PDF or PNG. Confirm final size and print suitability with your print provider.',
               badge: 'Press Ready',
             },
             {
@@ -1383,7 +1383,7 @@ export const Homepage: React.FC<HomepageProps> = ({
             },
             {
               q: 'Are downloaded invitations completely free of watermarks?',
-              a: 'Every single PNG, JPG, and 300 DPI PDF export is 100% watermark-free so your family invitation maintains complete royal dignity.',
+              a: 'Exports are created without an added Nimantran watermark. Check the selected format and preview before sharing or printing.',
             },
             {
               q: 'What is the 5-Slide Royal Video Invitation Suite?',
@@ -1456,7 +1456,7 @@ export const Homepage: React.FC<HomepageProps> = ({
               },
               {
                 icon: Printer,
-                title: '300 DPI Press & 4K Ready',
+                title: 'High-Resolution Downloads',
                 sub: 'Lossless PDF, PNG & WhatsApp Story HD',
               },
               {
@@ -1668,7 +1668,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <Printer className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
-                    <span>300 DPI Print Export</span>
+                    <span>High-Resolution Export</span>
                   </button>
                 </li>
               </ul>
@@ -1699,18 +1699,11 @@ export const Homepage: React.FC<HomepageProps> = ({
             </div>
           </div>
 
-          <nav aria-label="Invitation guides and site information" className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-neutral-800/70 pt-5 text-[10px] text-neutral-500">
-            <a href="/wedding-invitations/" className="hover:text-amber-300 transition-colors">Wedding Invitations</a>
-            <a href="/griha-pravesh-invitations/" className="hover:text-amber-300 transition-colors">Griha Pravesh</a>
-            <a href="/sangeet-haldi-invitations/" className="hover:text-amber-300 transition-colors">Sangeet & Haldi</a>
-            <a href="/birthday-invitations/" className="hover:text-amber-300 transition-colors">Birthday Invitations</a>
-            <a href="/godh-bharai-invitations/" className="hover:text-amber-300 transition-colors">Godh Bharai</a>
-            <a href="/anniversary-invitations/" className="hover:text-amber-300 transition-colors">Anniversary</a>
-            <span aria-hidden="true" className="text-neutral-700">|</span>
-            <a href="/about/" className="hover:text-amber-300 transition-colors">About</a>
-            <a href="/contact/" className="hover:text-amber-300 transition-colors">Contact</a>
-            <a href="/privacy/" className="hover:text-amber-300 transition-colors">Privacy</a>
-            <a href="/terms/" className="hover:text-amber-300 transition-colors">Terms</a>
+          <nav aria-label="Company and policy pages" className="mt-7 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 border-t border-amber-500/15 pt-5 text-[11px] font-medium tracking-[0.12em] text-neutral-300 sm:text-xs">
+            <a href="/about/" className="font-cinzel transition-colors duration-200 hover:text-amber-300 focus-visible:text-amber-300">About</a>
+            <a href="/contact/" className="font-cinzel transition-colors duration-200 hover:text-amber-300 focus-visible:text-amber-300">Contact</a>
+            <a href="/privacy/" className="font-cinzel transition-colors duration-200 hover:text-amber-300 focus-visible:text-amber-300">Privacy</a>
+            <a href="/terms/" className="font-cinzel transition-colors duration-200 hover:text-amber-300 focus-visible:text-amber-300">Terms</a>
           </nav>
         </div>
       </footer>

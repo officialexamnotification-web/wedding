@@ -48,7 +48,7 @@ export const CANVAS_SIZES: Record<AspectRatioType, CanvasDimensions> = {
     height: 735,
     name: 'A4 Royal Print',
     ratioLabel: 'A4',
-    recommendedFor: '300 DPI Press Print, Boxed Wedding Invitations',
+    recommendedFor: 'High-resolution print drafts, boxed wedding invitations',
   },
   'whatsapp-banner': {
     width: 720,

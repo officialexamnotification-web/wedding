@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { X, Sparkles, Copy, Check, Plus, RefreshCw, BookOpen } from 'lucide-react';
-import { PRESET_WORDINGS, generateAiWording, WordingSnippet } from '../utils/aiWording';
+import { PRESET_WORDINGS, generateInvitationWording, WordingSnippet } from '../utils/invitationWording';
 
-interface AiCopyModalProps {
+interface WordingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onInsertText: (text: string, font: string, size: number) => void;
 }
 
-export const AiCopyModal: React.FC<AiCopyModalProps> = ({ isOpen, onClose, onInsertText }) => {
+export const WordingModal: React.FC<WordingModalProps> = ({ isOpen, onClose, onInsertText }) => {
   const [activeTab, setActiveTab] = useState<'generate' | 'presets'>('generate');
   const [eventType, setEventType] = useState('Royal Indian Wedding');
   const [names, setNames] = useState('Vikramaditya & Ananya');
@@ -26,7 +26,7 @@ export const AiCopyModal: React.FC<AiCopyModalProps> = ({ isOpen, onClose, onIns
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const result = await generateAiWording(eventType, names, tone, language, notes);
+      const result = await generateInvitationWording(eventType, names, tone, language, notes);
       setGeneratedText(result);
     } catch (err) {
       console.error(err);
@@ -59,10 +59,10 @@ export const AiCopyModal: React.FC<AiCopyModalProps> = ({ isOpen, onClose, onIns
             </div>
             <div>
               <h3 className="text-sm font-bold text-neutral-100">
-                AI Invitation Copywriter & Traditional Shlokas
+                Invitation Wording & Traditional Shlokas
               </h3>
               <p className="text-[11px] text-neutral-400">
-                Generate authentic Sanskrit shlokas, Hindi quotes, and royal wedding invitations
+                Choose curated Sanskrit shlokas, Hindi wording, and invitation messages
               </p>
             </div>
           </div>
@@ -85,7 +85,7 @@ export const AiCopyModal: React.FC<AiCopyModalProps> = ({ isOpen, onClose, onIns
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>AI Smart Generator</span>
+            <span>Curated Wording</span>
           </button>
           <button
             onClick={() => setActiveTab('presets')}
@@ -174,7 +174,7 @@ export const AiCopyModal: React.FC<AiCopyModalProps> = ({ isOpen, onClose, onIns
                 ) : (
                   <>
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>Generate AI Invitation Text</span>
+                    <span>Create Invitation Wording</span>
                   </>
                 )}
               </button>

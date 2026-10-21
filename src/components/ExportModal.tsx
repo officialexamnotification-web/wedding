@@ -1411,7 +1411,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 className="w-full min-w-0 bg-neutral-950 text-neutral-100 font-medium px-2.5 py-2 rounded-lg border border-white/10 outline-none focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/10"
               >
                 <option value={1}>1x Standard Web</option>
-                <option value={2}>2x Retina HD (300 DPI)</option>
+                <option value={2}>2× High Resolution</option>
                 <option value={3}>3x Ultra Print Studio</option>
               </select>
             </label>

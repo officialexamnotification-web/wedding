@@ -206,7 +206,7 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose })
                 <div className="p-3.5 rounded-xl bg-neutral-800/60 border border-neutral-700/60">
                   <div className="font-semibold text-neutral-200 mb-1">Export Resolution</div>
                   <p className="text-neutral-400 text-[11px]">
-                    During download, the canvas renders at 2x or 3x pixel ratio, producing crisp 300 DPI exports suitable for professional offset printing and high-res mobile displays.
+                    During download, the canvas can render at an increased pixel scale for sharper digital exports. Print size and quality depend on the final dimensions and your printer settings.
                   </p>
                 </div>
               </div>
@@ -252,10 +252,10 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose })
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 font-medium text-neutral-200">AI Copywriting Assistant</td>
+                      <td className="py-2 px-3 font-medium text-neutral-200">Invitation Wording Suggestions</td>
                       <td className="py-2 px-3 text-neutral-500">Not available</td>
                       <td className="py-2 px-3 text-emerald-400 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Built-in AI Wedding & Shloka wording generator
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Curated local wedding wording and shloka library
                       </td>
                     </tr>
                     <tr>

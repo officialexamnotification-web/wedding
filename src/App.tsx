@@ -32,7 +32,7 @@ import { Canvas } from './components/Canvas';
 import { PreviewModal } from './components/PreviewModal';
 import { ExportModal } from './components/ExportModal';
 import { AnalysisModal } from './components/AnalysisModal';
-import { AiCopyModal } from './components/AiCopyModal';
+import { WordingModal } from './components/WordingModal';
 import { Homepage } from './components/Homepage';
 import { PhotoAdjustModal } from './components/PhotoAdjustModal';
 import { VideoCardModal } from './components/VideoCardModal';
@@ -1434,7 +1434,7 @@ export default function App() {
         }}
       />
 
-      <AiCopyModal
+      <WordingModal
         isOpen={isAiCopyOpen}
         onClose={() => setIsAiCopyOpen(false)}
         onInsertText={(text, font, size) => {

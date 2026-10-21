@@ -2006,7 +2006,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className="w-full py-2.5 px-3 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 hover:brightness-110 text-white font-bold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 transition"
               >
                 <Wand2 className="w-4 h-4" />
-                <span>AI wording & shloka</span>
+                <span>Wording & shloka</span>
               </button>
             )}
 

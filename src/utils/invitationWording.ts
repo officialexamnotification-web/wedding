@@ -1,5 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
-
 export interface WordingSnippet {
   id: string;
   category: string;
@@ -81,47 +79,31 @@ export const PRESET_WORDINGS: WordingSnippet[] = [
   },
 ];
 
-export async function generateAiWording(
+export async function generateInvitationWording(
   eventType: string,
   names: string,
   tone: string,
   language: string,
   customNotes?: string
 ): Promise<string> {
-  const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (window as any).GEMINI_API_KEY;
+  // Suggestions are composed locally from the curated copy library.
+  const event = eventType.toLowerCase();
+  let wording: string;
 
-  if (!apiKey) {
-    // Return high quality curated wording based on inputs
-    if (eventType.toLowerCase().includes('wedding') || eventType.toLowerCase().includes('vivah')) {
-      if (language === 'hindi') {
-        return `|| श्री गणेशाय नमः ||\nमान्यवर, परमपिता परमेश्वर की असीम कृपा से ${names || 'वर एवं वधू'} का पावन परिणय संस्कार संपन्न होने जा रहा है।\nइस पुनीत एवं मांगलिक अवसर पर आपकी गरिमामयी उपस्थिति एवं पावन आशीर्वाद हमारे लिए अत्यंत हर्ष का विषय होगा।\n\nदर्शनाभिलाषी: समस्त परिवार`;
-      }
-      return `Two lives, two hearts, joined together in friendship, united forever in love.\nTogether with their families, ${names || 'The Bride & Groom'} joyfully invite you to celebrate their union and share in the blessing of marriage.\nYour presence and blessings will make our special day complete.`;
-    }
-
-    if (eventType.toLowerCase().includes('griha') || eventType.toLowerCase().includes('house')) {
-      return `|| ॐ श्री गणेशाय नमः ||\nWith the blessings of God and our elders, we have found a place to call home.\nWe warmly invite you to join us for our Griha Pravesh Pooja followed by Mahaprasad.\nHosted with love by ${names || 'The Family'}.`;
-    }
-
-    return `Join us as we celebrate the special celebration of ${names || 'Our Loved Ones'}!\nMark your calendars for an unforgettable day filled with laughter, love, and cherished memories.`;
+  if (event.includes('wedding') || event.includes('vivah')) {
+    wording = language === 'hindi'
+      ? `॥ श्री गणेशाय नमः ॥\nपरिवारजनों के स्नेह और बड़ों के आशीर्वाद सहित, ${names || 'वर-वधू'} के शुभ विवाह में आपकी गरिमामयी उपस्थिति सादर आमंत्रित है।\nआपका स्नेह और आशीर्वाद हमारे लिए अमूल्य होगा।`
+      : `Together with their families, ${names || 'the couple'} invite you to celebrate their wedding.\nJoin us for a joyful occasion filled with love, family and cherished memories.\nYour presence and blessings will mean so much.`;
+  } else if (event.includes('griha') || event.includes('house')) {
+    wording = language === 'hindi'
+      ? `॥ ॐ श्री गणेशाय नमः ॥\nअपने नए घर के शुभारंभ पर ${names || 'हमारा परिवार'} आपको सपरिवार आमंत्रित करता है।\nगृह प्रवेश पूजा और इस आनंद के अवसर पर आपका स्वागत है।`
+      : `With the blessings of our families, ${names || 'we'} warmly invite you to celebrate our new home.\nPlease join us for the Griha Pravesh ceremony and a joyful gathering.`;
+  } else {
+    const occasion = eventType || 'special occasion';
+    wording = `With warm wishes, ${names || 'our family'} invite you to celebrate ${occasion}.\nJoin us for a lovely gathering and a day to remember.`;
   }
 
-  try {
-    const ai = new GoogleGenAI({ apiKey });
-    const prompt = `You are an expert Indian invitation card copywriter. Write a concise, beautiful, and culturally appropriate ${tone} invitation card text for ${eventType}.
-Names / Hosts: ${names}
-Language: ${language}
-Additional Notes: ${customNotes || 'None'}
-Keep it within 3-5 lines, formatted cleanly with line breaks, suitable for direct placement onto a luxury invitation card. Do not include markdown code fences or conversational filler.`;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-    });
-
-    return response.text?.trim() || 'Join us to celebrate this joyous occasion!';
-  } catch (err) {
-    console.warn('Gemini API call failed, falling back to curated wording', err);
-    return `|| श्री गणेशाय नमः ||\nTogether with their families, ${names || 'Our Family'} cordially invites you to grace the auspicious occasion with your presence and blessings.`;
-  }
+  const notes = customNotes?.trim();
+  const style = tone?.trim();
+  return [style ? `${style} style` : '', wording, notes ? `\n${notes}` : ''].filter(Boolean).join('\n');
 }
