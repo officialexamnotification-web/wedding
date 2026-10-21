@@ -82,7 +82,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const generateCanvasImage = async (
     page: CardPage,
     format: 'png' | 'jpeg' = 'png',
-    scaleFactor: number = exportScale
+    scaleFactor: number = exportScale,
+    renderMode: 'all' | 'page' | 'transparent' = 'all'
   ): Promise<string> => {
     const scale = scaleFactor;
     const canvas = document.createElement('canvas');
@@ -94,12 +95,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     ctx.scale(scale, scale);
 
     // 1. Draw Background
-    if (
+    if (renderMode !== 'transparent' && (
       page.backgroundType === 'image' ||
       page.backgroundValue.startsWith('http') ||
       page.backgroundValue.startsWith('/') ||
       page.backgroundValue.startsWith('data:image')
-    ) {
+    )) {
       try {
         const bgImg = new Image();
         bgImg.crossOrigin = 'anonymous';
@@ -113,10 +114,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         ctx.fillStyle = '#1c0308';
         ctx.fillRect(0, 0, dimensions.width, dimensions.height);
       }
-    } else if (
+    } else if (renderMode !== 'transparent' && (
       page.backgroundValue.startsWith('radial-gradient') ||
       page.backgroundValue.startsWith('linear-gradient')
-    ) {
+    )) {
       const grad = ctx.createLinearGradient(0, 0, 0, dimensions.height);
       if (page.backgroundValue.includes('#0d3826') || page.backgroundValue.includes('emerald')) {
         grad.addColorStop(0, '#0d3826');
@@ -149,7 +150,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       }
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, dimensions.width, dimensions.height);
-    } else {
+    } else if (renderMode !== 'transparent') {
       ctx.fillStyle = page.backgroundValue || '#171717';
       ctx.fillRect(0, 0, dimensions.width, dimensions.height);
     }
@@ -157,6 +158,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     // 2. Draw Elements sorted by zIndex
     const sorted = [...page.elements]
       .filter((e) => !e.hidden)
+      .filter((e) => renderMode === 'all' || (renderMode === 'page' ? e.type !== 'text' : e.type === 'text'))
       .sort((a, b) => (a.zIndex || 1) - (b.zIndex || 1));
 
     for (const elem of sorted) {
@@ -182,7 +184,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           ctx.fillRect(t.x, t.y, t.width, t.height);
         }
         const fontName = t.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
-        ctx.font = `${t.fontWeight === 'bold' ? 'bold ' : ''}${
+        const fontWeight = t.fontWeight === 'bold' ? 'bold' : t.fontWeight || '500';
+        ctx.font = `${fontWeight} ${
           t.fontStyle === 'italic' ? 'italic ' : ''
         }${t.fontSize}px "${fontName}", serif`;
         ctx.fillStyle = t.effectType === 'hollow' ? 'transparent' : t.color || '#FFF';
@@ -778,8 +781,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       }
 
       const renderScale = Math.min(exportScale, 2);
-      const renderedPages = await Promise.all(pages.map(async (page) => {
-        const dataUrl = await generateCanvasImage(page, 'png', renderScale);
+      const loadRender = async (page: CardPage, mode: 'page' | 'transparent') => {
+        const dataUrl = await generateCanvasImage(page, 'png', renderScale, mode);
         if (!dataUrl) throw new Error(`Could not render “${page.title}”.`);
         const image = new Image();
         image.src = dataUrl;
@@ -788,7 +791,17 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           image.onerror = () => reject(new Error(`Could not load “${page.title}” for video export.`));
         });
         return image;
-      }));
+      };
+      const renderedPages = await Promise.all(pages.map(async (page) => ({
+        base: await loadRender(page, 'page'),
+        text: await Promise.all(page.elements
+          .filter((element): element is TextElement => element.type === 'text' && !element.hidden)
+          .map(async (element, order) => ({
+            element,
+            order,
+            image: await loadRender({ ...page, elements: [element] }, 'transparent'),
+          }))),
+      })));
 
       const canvas = document.createElement('canvas');
       canvas.width = dimensions.width * renderScale;
@@ -863,6 +876,95 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
       const pageDurations = pages.map((page) => page.duration || 4.5);
       const totalDurationSec = pageDurations.reduce((sum, duration) => sum + duration, 0);
+      const frameCanvas = document.createElement('canvas');
+      frameCanvas.width = canvas.width;
+      frameCanvas.height = canvas.height;
+      const frameContext = frameCanvas.getContext('2d');
+      if (!frameContext) throw new Error('Could not initialize the animation renderer.');
+
+      const drawPage = (target: CanvasRenderingContext2D, index: number, elapsedSec: number) => {
+        const rendered = renderedPages[index];
+        target.clearRect(0, 0, canvas.width, canvas.height);
+        target.drawImage(rendered.base, 0, 0, canvas.width, canvas.height);
+        for (const layer of rendered.text) {
+          const { element, order, image } = layer;
+          const kind = element.animation || 'none';
+          const stagger = Math.min(0.9, order * 0.13);
+          const duration = 1.35 / Math.max(0.6, element.animationSpeed || 1);
+          const progress = kind === 'none' ? 1 : Math.max(0, Math.min(1, (elapsedSec - stagger) / duration));
+          if (progress <= 0) continue;
+          const alpha = kind === 'fade' || kind === 'rise' || kind === 'pan' || kind === 'wipe' || kind === 'typewriter' ? progress : 1;
+          const translateY = kind === 'rise' ? (1 - progress) * element.height * 0.45 : 0;
+          const translateX = kind === 'pan' ? (1 - progress) * -element.width * 0.45 : 0;
+          const scale = kind === 'pop' ? 0.86 + progress * 0.14 : 1;
+          target.save();
+          target.globalAlpha = alpha;
+          if (kind === 'wipe') {
+            target.beginPath();
+            target.rect(element.x * renderScale, element.y * renderScale, element.width * renderScale * progress, element.height * renderScale);
+            target.clip();
+          }
+          const cx = (element.x + element.width / 2) * renderScale;
+          const cy = (element.y + element.height / 2) * renderScale;
+          target.translate(cx + translateX * renderScale, cy + translateY * renderScale);
+          target.scale(scale, scale);
+          target.drawImage(image, -cx, -cy, canvas.width, canvas.height);
+          target.restore();
+        }
+      };
+
+      const drawPageTransition = (pageIndex: number, pageProgress: number, pageElapsed: number) => {
+        drawPage(frameContext, pageIndex, pageElapsed);
+        const transition = pages[pageIndex].transition || 'fade';
+        const t = Math.max(0, Math.min(1, pageProgress));
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        if (pageIndex === 0 || t >= 1) {
+          context.drawImage(frameCanvas, 0, 0);
+          return;
+        }
+        drawPage(context, pageIndex - 1, pages[pageIndex - 1].duration || 6);
+        if (transition === 'slide') {
+          drawPage(context, pageIndex - 1, pages[pageIndex - 1].duration || 6);
+          context.drawImage(frameCanvas, canvas.width * (1 - t), 0);
+        } else if (transition === 'zoom') {
+          context.globalAlpha = t;
+          const zoom = 0.92 + t * 0.08;
+          const w = canvas.width * zoom;
+          const h = canvas.height * zoom;
+          context.drawImage(frameCanvas, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+          context.globalAlpha = 1;
+        } else if (transition === 'royal-curtain') {
+          context.save();
+          context.beginPath();
+          const half = canvas.width * t / 2;
+          context.rect(canvas.width / 2 - half, 0, half * 2, canvas.height);
+          context.clip();
+          context.drawImage(frameCanvas, 0, 0);
+          context.restore();
+        } else {
+          context.globalAlpha = t;
+          context.drawImage(frameCanvas, 0, 0);
+          context.globalAlpha = 1;
+          if (transition === 'sparkle' && t < 1) {
+            context.save();
+            context.globalCompositeOperation = 'lighter';
+            const sparkleCount = 22;
+            for (let i = 0; i < sparkleCount; i++) {
+              const phase = (t * 1.7 + i / sparkleCount) % 1;
+              const x = ((i * 137.5) % canvas.width);
+              const y = ((i * 83.7 + phase * canvas.height) % canvas.height);
+              const radius = (2 + (i % 3)) * (1 - phase * 0.45);
+              context.globalAlpha = (1 - phase) * 0.8;
+              context.fillStyle = i % 4 === 0 ? '#FFF2B2' : '#E7B944';
+              context.beginPath();
+              context.arc(x, y, radius, 0, Math.PI * 2);
+              context.fill();
+            }
+            context.restore();
+          }
+        }
+      };
+
       const drawFrame = (elapsedSec: number) => {
         let pageIndex = 0;
         let pageStart = 0;
@@ -874,14 +976,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         const progress = Math.max(0, Math.min(1, (elapsedSec - pageStart) / pageDuration));
         const page = pages[pageIndex];
         const transitionDuration = Math.min(0.55, pageDuration * 0.2);
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        if (pageIndex > 0 && page.transition !== 'none' && progress < transitionDuration / pageDuration) {
-          context.globalAlpha = 1;
-          context.drawImage(renderedPages[pageIndex - 1], 0, 0, canvas.width, canvas.height);
-          context.globalAlpha = Math.min(1, progress * pageDuration / transitionDuration);
-        } else context.globalAlpha = 1;
-        context.drawImage(renderedPages[pageIndex], 0, 0, canvas.width, canvas.height);
-        context.globalAlpha = 1;
+        const transitionProgress = page.transition === 'none' ? 1 : Math.min(1, progress * pageDuration / transitionDuration);
+        drawPageTransition(pageIndex, transitionProgress, elapsedSec - pageStart);
       };
 
       drawFrame(0);

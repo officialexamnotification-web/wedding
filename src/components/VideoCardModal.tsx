@@ -117,6 +117,16 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   const clipTimelineStartSec = timelineClip?.timelineStartSec ?? (timelineClip?.pageIndex === null ? 0 : pageStartSec);
   const audioScopeEndSec = timelineClip?.pageIndex === null ? invitationDurationSec : pageStartSec + currentPageDurationSec;
   const musicDurationSec = Math.max(0.25, Math.min(currentAudioClip.durationSec ?? (audioScopeEndSec - clipTimelineStartSec), audioScopeEndSec - clipTimelineStartSec));
+  const pageTransition = currentIndex === 0 ? 'none' : (currentSlide?.transition || 'fade');
+  const pageTransitionAnimation = pageTransition === 'slide'
+    ? 'invitation-page-slide 720ms cubic-bezier(.22,1,.36,1) both'
+    : pageTransition === 'zoom'
+    ? 'invitation-page-zoom 720ms cubic-bezier(.22,1,.36,1) both'
+    : pageTransition === 'royal-curtain'
+    ? 'invitation-page-curtain 850ms cubic-bezier(.22,1,.36,1) both'
+    : pageTransition === 'sparkle'
+    ? 'invitation-page-sparkle 900ms ease-out both'
+    : 'invitation-page-fade 550ms ease-out both';
 
   useEffect(() => {
     clipElapsedRef.current = 0;
@@ -311,14 +321,14 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-neutral-100">
-                  Digital Video Invitation Sequence (ई-पत्रिका वीडियो)
+                  {title || 'Digital Video Invitation'}
                 </h3>
                 <span className="text-[10px] text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1">
                   <Music className="w-3 h-3" /> {track.name}
                 </span>
               </div>
               <p className="text-[11px] text-neutral-400">
-                Cover → Haldi & Sangeet → Mandap Pheras → Grand Reception → Thank You
+                {pages.map((page) => page.title.replace(/^Page\s+\d+\s*[—-]\s*/i, '')).join('  →  ')}
               </p>
             </div>
           </div>
@@ -371,20 +381,25 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
 
           {/* Phone Frame for Video Story with Ken Burns effect */}
           {(() => {
-            const frameWidth = 320;
+            const frameWidth = Math.min(
+              320,
+              Math.floor(window.innerHeight * 0.58 * (dimensions.width / dimensions.height))
+            );
             const scale = frameWidth / dimensions.width;
             const frameHeight = Math.round(dimensions.height * scale);
             return (
               <div
                 className="relative rounded-[32px] overflow-hidden border-4 border-neutral-800 shadow-2xl ring-2 ring-amber-500/30 bg-neutral-900"
-                style={{ width: `${frameWidth}px`, height: `${frameHeight}px` }}
+                style={{ width: `${frameWidth}px`, height: `${frameHeight}px`, maxWidth: '100%', maxHeight: '100%' }}
               >
                 <div
+                  key={`page-transition-${currentIndex}-${pageTransition}`}
                   className="w-full h-full relative overflow-hidden transition-all duration-500"
                   style={{
                     background: currentSlide.backgroundValue,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
+                    animation: pageTransition === 'none' ? undefined : pageTransitionAnimation,
                   }}
                 >
                   <div
@@ -407,7 +422,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                       {[...currentSlide.elements]
                         .filter((el) => !el.hidden)
                         .sort((a, b) => (a.zIndex || 1) - (b.zIndex || 1))
-                        .map((elem) => {
+                        .map((elem, elementIndex) => {
                           const flipTransform = `${elem.flipX ? ' scaleX(-1)' : ''}${
                             elem.flipY ? ' scaleY(-1)' : ''
                           }`;
@@ -426,7 +441,15 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                                 mixBlendMode: elem.blendMode || 'normal',
                               }}
                             >
-                              <div className="w-full h-full" style={getElementAnimationStyle(elem)}>
+                              <div className="w-full h-full" style={{
+                                ...getElementAnimationStyle(elem),
+                                animationDelay: elem.animation && elem.animation !== 'none'
+                                  ? `${Math.min(elementIndex * 0.13, 0.9)}s`
+                                  : undefined,
+                                animationDuration: elem.animation && elem.animation !== 'none'
+                                  ? `${1.35 / Math.max(0.6, elem.animationSpeed || 1)}s`
+                                  : undefined,
+                              }}>
                               {elem.type === 'text' && (
                                 <div className="w-full h-full flex flex-col justify-center select-none">
                                   {renderTextVisual(elem as TextElement)}
