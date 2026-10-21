@@ -195,7 +195,7 @@ export const PhotoAdjustModal: React.FC<PhotoAdjustModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-neutral-100">
-                Canva Pro Photo Studio: Magic Edit, Filters & Frames (फ़ोटो स्टूडियो)
+                Nimantran Photo Studio: Magic Edit, Filters & Frames (फ़ोटो स्टूडियो)
               </h3>
               <p className="text-[11px] text-neutral-400">
                 Magic Cutout Spotlight, 12 Filter Presets, Color Grading, Crop & Royal Frames
@@ -254,7 +254,7 @@ export const PhotoAdjustModal: React.FC<PhotoAdjustModalProps> = ({
             {/* Quick 1-Click Action Buttons */}
             <div className="flex-1 space-y-2.5 w-full">
               <span className="text-xs font-semibold text-amber-300 block">
-                Canva Magic Studio Actions:
+                Quick Photo Actions:
               </span>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
@@ -321,7 +321,7 @@ export const PhotoAdjustModal: React.FC<PhotoAdjustModalProps> = ({
           <div className="space-y-2 pt-2 border-t border-neutral-800">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-300">
               <Sun className="w-3.5 h-3.5" />
-              <span>Canva Photo Filters (12 Presets):</span>
+              <span>Photo Filters (12 Presets):</span>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {FILTER_PRESETS.map((fp) => (
@@ -567,7 +567,7 @@ export const PhotoAdjustModal: React.FC<PhotoAdjustModalProps> = ({
           <div className="space-y-2 pt-3 border-t border-neutral-800">
             <label className="text-xs text-amber-300 font-semibold flex items-center gap-1.5">
               <Frame className="w-3.5 h-3.5" />
-              <span>Canva Frame Mask Shape (11 Shapes):</span>
+              <span>Frame Mask Shape (11 Shapes):</span>
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {[

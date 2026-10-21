@@ -32,6 +32,10 @@ const designs: VelvetDesign[] = [
   { name: 'Indigo Moonlit Mandap', base: '#171D43', shade: '#070918', textGold: '#FFF0C2', accentFont: "'Cormorant Garamond', serif", layout: 2 },
   { name: 'Ruby Kundan Heirloom', base: '#500D1D', shade: '#21050D', textGold: '#FFF0C4', accentFont: "'Great Vibes', cursive", layout: 3 },
   { name: 'Burgundy Grand Durbar', base: '#4A1014', shade: '#1B0608', textGold: '#FFF2C6', accentFont: "'Great Vibes', cursive", layout: 4 },
+  { name: 'Oxblood Mughal Jharokha', base: '#4B0715', shade: '#20050C', textGold: '#F8D98C', accentFont: "'Great Vibes', cursive", layout: 5 },
+  { name: 'Vermilion Toran Heirloom', base: '#7B1018', shade: '#39070D', textGold: '#FFE9AA', accentFont: "'Cormorant Garamond', serif", layout: 6 },
+  { name: 'Ruby Deco Sunburst', base: '#650B13', shade: '#29050A', textGold: '#FFE8A0', accentFont: "'Cinzel', serif", layout: 7 },
+  { name: 'Maroon Lotus Paisley', base: '#4A0B1A', shade: '#1E050C', textGold: '#F5D58A', accentFont: "'Tangerine', cursive", layout: 8 },
 ];
 
 const text = (
@@ -91,6 +95,10 @@ function makeTemplate(design: VelvetDesign, index: number): CardTemplate {
     { top: 132, intro: 217, names: 262, event: 340, date: 389, venue: 466 },
     { top: 120, intro: 207, names: 251, event: 329, date: 378, venue: 457 },
     { top: 126, intro: 212, names: 256, event: 334, date: 383, venue: 461 },
+    { top: 113, intro: 199, names: 246, event: 329, date: 378, venue: 457 },
+    { top: 145, intro: 219, names: 263, event: 342, date: 389, venue: 468 },
+    { top: 99, intro: 187, names: 241, event: 322, date: 371, venue: 450 },
+    { top: 130, intro: 216, names: 259, event: 338, date: 386, venue: 465 },
   ];
   const layout = layouts[design.layout];
   const elements = [

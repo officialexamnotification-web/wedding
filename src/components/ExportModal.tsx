@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
   Download,
@@ -39,6 +39,7 @@ import {
   AudioTrack,
   AudioClipSettings,
   AudioTimelineClip,
+  CardTemplate,
 } from '../types/editor';
 import { evaluateSheetCell } from './Canvas';
 
@@ -53,6 +54,7 @@ interface ExportModalProps {
   audioClip?: AudioClipSettings;
   audioClips?: AudioTimelineClip[];
   audioTracks?: AudioTrack[];
+  occasionCategory?: CardTemplate['category'];
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
@@ -66,17 +68,59 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   audioClip = { startSec: 0, durationSec: null, volume: 0.45, fadeInSec: 0, fadeOutSec: 0, loop: true },
   audioClips = [],
   audioTracks = [],
+  occasionCategory,
 }) => {
   const [downloading, setDownloading] = useState(false);
   const [selectedExportPage, setSelectedExportPage] = useState<number>(currentPageIndex);
   const [exportScale, setExportScale] = useState<number>(2); // 1x, 2x Retina, 3x Ultra Print
   const [copied, setCopied] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [preparedVideo, setPreparedVideo] = useState<File | null>(null);
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
+  const [greetingMessage, setGreetingMessage] = useState('');
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
+
+  const invitationTitle = title
+    .replace(/\s*\((?:\d+\s*[- ]?\s*(?:page|slide)s?\s*(?:sequence|suite)?|sequence|suite)[^)]*\)\s*$/i, '')
+    .replace(/\s*[-–—]\s*\d+\s*[- ]?\s*(?:page|slide)s?\s*(?:sequence|suite)?\s*$/i, '')
+    .trim();
+  const normalizedTitle = title.toLowerCase();
+  const inferredOccasion = normalizedTitle.includes('birthday') || normalizedTitle.includes('janmadin')
+    ? 'birthday'
+    : normalizedTitle.includes('griha') || normalizedTitle.includes('housewarming') || normalizedTitle.includes('vastu')
+      ? 'housewarming'
+      : normalizedTitle.includes('godh') || normalizedTitle.includes('baby shower') || normalizedTitle.includes('naamkaran')
+        ? 'baby'
+        : normalizedTitle.includes('sangeet') || normalizedTitle.includes('mehendi') || normalizedTitle.includes('haldi')
+          ? 'festive'
+          : normalizedTitle.includes('anniversary') || normalizedTitle.includes('jubilee')
+            ? 'anniversary'
+            : 'wedding';
+  const occasion = occasionCategory === 'birthday' ? 'birthday'
+    : occasionCategory === 'housewarming' ? 'housewarming'
+      : occasionCategory === 'baby-shower' ? 'baby'
+        : occasionCategory === 'sangeet-mehendi' ? 'festive'
+          : occasionCategory === 'anniversary' ? 'anniversary'
+            : occasionCategory ? 'wedding' : inferredOccasion;
+  const occasionMessages: Record<string, string> = {
+    wedding: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${invitationTitle}.\n\nWe would be delighted by your presence and blessings.\n\nWith warm regards,\nThe Family`,
+    housewarming: `✨ You’re invited! ✨\n\nPlease join us for ${invitationTitle} and bless our new home.\n\nWe look forward to celebrating this special occasion with you.\n\nWith warm regards,\nThe Family`,
+    birthday: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${invitationTitle}.\n\nWe look forward to sharing a joyful occasion with you.`,
+    baby: `✨ You’re invited! ✨\n\nPlease join us for ${invitationTitle}.\n\nYour good wishes will make this special occasion even more meaningful.\n\nWith warm regards,\nThe Family`,
+    festive: `✨ You’re invited! ✨\n\nPlease join us for ${invitationTitle}.\n\nWe look forward to celebrating an evening of music and happiness with you.`,
+    anniversary: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${invitationTitle} and this special milestone.\n\nWe look forward to celebrating with you.`,
+  };
+  const defaultMessage = occasionMessages[occasion];
+
+  useEffect(() => {
+    setGreetingMessage(defaultMessage);
+    setPreparedVideo(null);
+    setShareStatus(null);
+  }, [title, occasion]);
 
   if (!isOpen) return null;
 
-  const sampleMessage = `✨ *You Are Cordially Invited!* ✨\n\n${title}\n\nJoin us in celebrating this joyous milestone with our loved ones.\n\n📅 Please find the complete invitation details on our digital card.\n📍 Venue & Google Maps Navigation included.\n\nWarm Regards & Blessings!`;
+  const sampleMessage = greetingMessage || defaultMessage;
 
   // Render any CardPage accurately into high-res offscreen HTML5 Canvas
   const generateCanvasImage = async (
@@ -793,10 +837,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     }
   };
 
-  const handleDownloadVideo = async () => {
+  const handleDownloadVideo = async (prepareForShare = false) => {
     if (!pages.length) return;
     setDownloading(true);
     setExportError(null);
+    setShareStatus(null);
     let audioContext: AudioContext | null = null;
     const sources: AudioBufferSourceNode[] = [];
     const mediaAudioSources: MediaElementAudioSourceNode[] = [];
@@ -916,9 +961,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         for (const track of audioDestination.stream.getAudioTracks()) videoStream.addTrack(track);
       }
 
-      const mimeType = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
+      const mimeType = [
+        'video/mp4;codecs="avc1.42E01E,mp4a.40.2"',
+        'video/mp4',
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm',
+      ]
         .find((candidate) => MediaRecorder.isTypeSupported(candidate));
-      if (!mimeType) throw new Error('This browser cannot encode a WebM video. Please use the latest Chrome or Edge.');
+      if (!mimeType) throw new Error('This browser cannot encode an invitation video. Please use an updated browser.');
 
       const chunks: BlobPart[] = [];
       recorder = new MediaRecorder(videoStream, { mimeType, videoBitsPerSecond: 5_000_000 });
@@ -1192,10 +1243,17 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       });
       const blob = await recording;
       const safeTitle = title.trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'invitation';
+      const extension = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
+      const fileName = `${safeTitle}-invitation.${extension}`;
+      if (prepareForShare) {
+        setPreparedVideo(new File([blob], fileName, { type: mimeType.split(';')[0] }));
+        setShareStatus('Video is ready. Tap “Share video file” and choose WhatsApp in your device share menu.');
+        return;
+      }
       const downloadUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = `${safeTitle}-invitation-with-music.webm`;
+      link.download = fileName;
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 30_000);
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#D4AF37', '#FFEAA7', '#FFD700', '#C41E3A'] });
@@ -1215,6 +1273,74 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const handleShareWhatsApp = () => {
     const url = `https://wa.me/?text=${encodeURIComponent(sampleMessage)}`;
     window.open(url, '_blank');
+  };
+
+  const handleShareVideoFile = async () => {
+    if (!preparedVideo) return;
+    const shareData: ShareData = {
+      title,
+      text: sampleMessage,
+      files: [preparedVideo],
+    };
+
+    if (!navigator.share || !navigator.canShare?.({ files: [preparedVideo] })) {
+      const downloadUrl = URL.createObjectURL(preparedVideo);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = preparedVideo.name;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 30_000);
+      setShareStatus('This browser cannot attach files directly. The video was downloaded; attach it in WhatsApp.');
+      return;
+    }
+
+    try {
+      await navigator.share(shareData);
+      setShareStatus('Share menu opened. Choose WhatsApp to send the video and invitation message.');
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        setShareStatus('Sharing was cancelled. Your prepared video is still ready.');
+        return;
+      }
+      setExportError(error instanceof Error ? error.message : 'Could not share the video file.');
+    }
+  };
+
+  const handleShareCardImage = async () => {
+    const page = pages[selectedExportPage] || pages[0];
+    if (!page) return;
+    setShareStatus(null);
+    setExportError(null);
+    setDownloading(true);
+    try {
+      const dataUrl = await generateCanvasImage(page, 'png', exportScale, 'all');
+      const imageBlob = await (await fetch(dataUrl)).blob();
+      const safeTitle = title.trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'invitation';
+      const file = new File([imageBlob], `${safeTitle}-card.png`, { type: 'image/png' });
+      const shareData: ShareData = { title, text: sampleMessage, files: [file] };
+
+      if (!navigator.share || !navigator.canShare?.({ files: [file] })) {
+        const downloadUrl = URL.createObjectURL(file);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = file.name;
+        link.click();
+        window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 30_000);
+        setShareStatus('This browser cannot attach an image directly. The card was downloaded; attach it in WhatsApp with the greeting.');
+        return;
+      }
+
+      await navigator.share(shareData);
+      setShareStatus('Share menu opened. Choose WhatsApp to send the card image with its greeting.');
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        setShareStatus('Sharing was cancelled. Your card is unchanged.');
+      } else {
+        setExportError(error instanceof Error ? error.message : 'Could not prepare the card image.');
+      }
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handleCopyMessage = () => {
@@ -1397,27 +1523,54 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </section>
 
           {/* WhatsApp Direct Share Section */}
-          <section className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+          <section className="rounded-xl border border-emerald-400/20 bg-emerald-400/[0.035] p-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 shrink-0 rounded-lg bg-emerald-400/10 flex items-center justify-center">
                   <Share2 className="w-4 h-4 text-emerald-300" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-neutral-100">Share with WhatsApp</h4>
-                  <p className="mt-0.5 text-[10px] text-neutral-500">Open WhatsApp with your invitation message.</p>
+                  <h4 className="text-xs font-semibold text-neutral-100">Send the invitation video</h4>
+                  <p className="mt-0.5 text-[10px] text-neutral-400">Prepare the video, then choose WhatsApp from your device’s share menu.</p>
                 </div>
               </div>
               <button
-                onClick={handleShareWhatsApp}
-                className="shrink-0 py-2 px-3 bg-[#25D366] hover:bg-[#20ba59] text-neutral-950 font-semibold text-[11px] rounded-lg transition flex items-center justify-center gap-2"
+                onClick={() => preparedVideo ? void handleShareVideoFile() : void handleDownloadVideo(true)}
+                disabled={downloading}
+                className="shrink-0 py-2 px-3 bg-[#25D366] hover:bg-[#20ba59] disabled:opacity-60 text-neutral-950 font-semibold text-[11px] rounded-lg transition flex items-center justify-center gap-2"
               >
-                <Share2 className="w-4 h-4" />
-                Continue to WhatsApp
+                {preparedVideo ? <Share2 className="w-4 h-4" /> : <Film className="w-4 h-4" />}
+                {downloading ? 'Preparing video…' : preparedVideo ? 'Share video file' : 'Prepare video to share'}
+              </button>
+            </div>
+            {shareStatus && <p role="status" className="mt-2 text-[10px] text-emerald-200">{shareStatus}</p>}
+            <p className="mt-1.5 text-[10px] text-neutral-500">Choose WhatsApp from your device’s share menu when file sharing is supported. Otherwise, download the video and attach it in WhatsApp.</p>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-white/10 pt-3">
+              <button
+                onClick={() => void handleShareCardImage()}
+                disabled={downloading || !pages.length}
+                className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2.5 text-left text-[11px] font-semibold text-neutral-100 hover:border-amber-300/40 disabled:opacity-50"
+              >
+                <span className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-amber-300" /> Share selected card + greeting</span>
+                <span className="mt-1 block pl-6 text-[10px] font-normal text-neutral-400">Sends the chosen page as an image, without video.</span>
+              </button>
+              <button
+                onClick={handleShareWhatsApp}
+                className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2.5 text-left text-[11px] font-semibold text-neutral-100 hover:border-emerald-300/40"
+              >
+                <span className="flex items-center gap-2"><Share2 className="h-4 w-4 text-emerald-300" /> Send greeting only</span>
+                <span className="mt-1 block pl-6 text-[10px] font-normal text-neutral-400">Opens WhatsApp with the invitation message, no attachment.</span>
               </button>
             </div>
             <details className="mt-2 group">
-              <summary className="cursor-pointer select-none text-[10px] text-neutral-400 hover:text-neutral-200">Preview or copy message</summary>
+              <summary className="cursor-pointer select-none text-[10px] text-neutral-400 hover:text-neutral-200">Edit or copy the {occasion} greeting</summary>
+              <textarea
+                value={sampleMessage}
+                onChange={(event) => setGreetingMessage(event.target.value)}
+                aria-label="Invitation greeting message"
+                rows={5}
+                className="mt-2 w-full resize-y rounded-lg border border-white/10 bg-neutral-950 p-2.5 text-[11px] leading-relaxed text-neutral-200 outline-none focus:border-amber-400/50"
+              />
               <div className="mt-1.5 flex items-center justify-end">
                 <button
                   onClick={handleCopyMessage}
@@ -1426,9 +1579,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                   {copied ? 'Copied!' : 'Copy message'}
                 </button>
-              </div>
-              <div className="p-2.5 mt-1 bg-neutral-950 rounded-lg border border-white/10 text-[11px] text-neutral-300 whitespace-pre-line max-h-24 overflow-y-auto">
-                {sampleMessage}
               </div>
             </details>
           </section>

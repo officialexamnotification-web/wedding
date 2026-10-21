@@ -415,7 +415,7 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
                 ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold'
                 : 'bg-neutral-800 hover:bg-neutral-750 border-neutral-700 text-neutral-300'
             }`}
-            title="Canva Ceremony Notes"
+            title="Ceremony Notes"
           >
             <FileText className="w-3.5 h-3.5" />
             <span className="hidden md:inline">Notes</span>
@@ -425,7 +425,7 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
           <button
             onClick={() => setIsGridViewOpen(true)}
             className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-750 border border-neutral-700 text-neutral-300 hover:text-amber-300 text-xs flex items-center gap-1 transition"
-            title="Canva Multi-Page Grid View"
+            title="Multi-Page Grid View"
           >
             <LayoutGrid className="w-3.5 h-3.5" />
             <span className="hidden md:inline">Grid View</span>
@@ -723,7 +723,7 @@ export const SlideFilmstrip: React.FC<SlideFilmstripProps> = ({
             <div className="flex items-center gap-2.5">
               <LayoutGrid className="w-5 h-5 text-amber-400" />
               <h3 className="text-base font-bold text-neutral-100">
-                Canva Grid View ({pages.length} Pages)
+                Invitation Grid View ({pages.length} Pages)
               </h3>
             </div>
             <div className="flex items-center gap-2">

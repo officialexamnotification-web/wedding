@@ -86,6 +86,7 @@ import {
   GridLayoutVariant,
 } from '../types/editor';
 import { TEMPLATE_CATEGORIES, INITIAL_TEMPLATES } from '../data/templates';
+import { SHLOKA_LIBRARY, type ShlokaCategory } from '../data/shlokaLibrary';
 import { STICKER_CATEGORIES, STICKERS, StickerDefinition } from '../data/stickers';
 import { BACKGROUNDS } from '../data/backgrounds';
 import { generateQrDataUrl } from '../utils/qrHelper';
@@ -139,6 +140,8 @@ export type SidebarTab =
   | 'slides';
 
 interface SidebarProps {
+  initialActiveTab?: SidebarTab;
+  initialElementSubTab?: 'frames' | 'tables';
   aspectRatio: AspectRatioType;
   onSelectTemplate: (template: CardTemplate) => void;
   onAddElement: (elem: CanvasItem) => void;
@@ -589,6 +592,8 @@ const CANVA_FONT_COMBINATIONS = [
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
+  initialActiveTab = 'templates',
+  initialElementSubTab,
   aspectRatio,
   onSelectTemplate,
   onAddElement,
@@ -633,14 +638,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   showSafeZones = false,
   onToggleSafeZones,
 }) => {
-  const [activeTab, setActiveTab] = useState<SidebarTab>('templates');
+  const [activeTab, setActiveTab] = useState<SidebarTab>(initialActiveTab);
   const [activeToolTab, setActiveToolTab] = useState<
     'draw' | 'audio' | 'backgrounds' | 'layers' | 'guides'
   >('backgrounds');
   const [designSubTab, setDesignSubTab] = useState<'templates' | 'layouts' | 'styles'>('templates');
   const [elementSubTab, setElementSubTab] = useState<
     'all' | 'shapes' | 'frames' | 'grids' | 'tables' | 'charts' | 'stickers'
-  >('all');
+  >(initialElementSubTab || 'all');
   // Open the customization panel with the editor so available tools are visible immediately.
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [templateCategory, setTemplateCategory] = useState<string>('all');
@@ -650,6 +655,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [photoSearch, setPhotoSearch] = useState('');
   const [photoCategory, setPhotoCategory] = useState('all');
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
+  const [shlokaSearch, setShlokaSearch] = useState('');
+  const [shlokaCategory, setShlokaCategory] = useState<'All' | ShlokaCategory>('All');
   const [audioSourceDuration, setAudioSourceDuration] = useState(0);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -2092,52 +2099,66 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div className="pt-2 border-t border-neutral-800">
-              <h4 className="text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
-                Traditional Auspicious Shlokas
-              </h4>
-              <div className="space-y-2">
-                {[
-                  {
-                    label: 'Ganesh Vandana',
-                    text: '॥ श्री गणेशाय नमः ॥',
-                    font: "'Tiro Devanagari Hindi', serif",
-                    size: 18,
-                  },
-                  {
-                    label: 'Vakratunda Mahakaya',
-                    text: 'वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ।\nनिर्विघ्नं कुरु मे देव सर्वकार्येषु सर्वदा॥',
-                    font: "'Tiro Devanagari Hindi', serif",
-                    size: 14,
-                  },
-                  {
-                    label: 'Mangalam Bhagwan Vishnu',
-                    text: 'मंगलम् भगवान विष्णुः मंगलम् गरुड़ध्वजः।\nमंगलम् पुण्डरीकाक्षः मंगलाय तनो हरिः॥',
-                    font: "'Tiro Devanagari Hindi', serif",
-                    size: 14,
-                  },
-                  {
-                    label: 'Urdu / Royal Shayari',
-                    text: 'जश्न-ए-मोहब्बत में आपकी शिरकत हमारे लिए बायस-ए-मसर्रत होगी',
-                    font: "'Tiro Devanagari Hindi', serif",
-                    size: 14,
-                  },
-                ].map((item, i) => (
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-xs font-semibold text-neutral-300 uppercase tracking-wider">
+                  Hindi & Sanskrit Shlokas
+                </h4>
+                <span className="text-[10px] text-amber-300">{SHLOKA_LIBRARY.length} unique</span>
+              </div>
+              <p className="text-[11px] text-neutral-400 mb-3">Search by verse or choose a collection. Click any verse to add it to your card.</p>
+              <label className="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-900 px-2.5 mb-2.5 focus-within:border-amber-400">
+                <Search className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                <input
+                  value={shlokaSearch}
+                  onChange={(event) => setShlokaSearch(event.target.value)}
+                  placeholder="Search shlokas"
+                  className="w-full bg-transparent py-2 text-xs text-neutral-100 outline-none placeholder:text-neutral-500"
+                />
+              </label>
+              <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-thin">
+                {(['All', ...Array.from(new Set(SHLOKA_LIBRARY.map((item) => item.category)))] as Array<'All' | ShlokaCategory>).map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setShlokaCategory(category)}
+                    className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] transition ${shlokaCategory === category ? 'border-amber-400 bg-amber-400/15 text-amber-200' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200'}`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+              <div className="space-y-2 max-h-[48vh] overflow-y-auto pr-1">
+                {SHLOKA_LIBRARY.filter((item) => {
+                  const matchesCategory = shlokaCategory === 'All' || item.category === shlokaCategory;
+                  const query = shlokaSearch.trim().toLocaleLowerCase();
+                  const matchesQuery = !query || `${item.title} ${item.text} ${item.source || ''}`.toLocaleLowerCase().includes(query);
+                  return matchesCategory && matchesQuery;
+                }).map((item) => (
                   <div
-                    key={i}
-                    onClick={() =>
-                      handleAddText(item.text, item.font, item.size, 'bold', '#FFEAA7')
-                    }
+                    key={item.id}
+                    onClick={() => {
+                      const fontSize = item.language === 'hindi' ? 15 : 14;
+                      const maxCharsPerLine = Math.max(18, Math.floor(Math.min(dimensions.width - 60, 360) / (fontSize * 0.56)));
+                      const estimatedLines = item.text.split('\n').reduce((total, line) => total + Math.max(1, Math.ceil(Array.from(line).length / maxCharsPerLine)), 0);
+                      handleAddText(item.text, "'Tiro Devanagari Hindi', serif", fontSize, 'bold', '#FFEAA7', { height: Math.max(48, estimatedLines * fontSize * 1.55 + 12) });
+                    }}
                     className="p-2.5 rounded-xl border border-neutral-700 hover:border-amber-400 bg-neutral-800/60 hover:bg-neutral-800 cursor-pointer transition"
                   >
                     <div className="flex items-center justify-between text-[10px] text-amber-400 mb-1">
-                      <span>{item.label}</span>
+                      <span>{item.title}</span>
                       <span className="text-neutral-400">+ Click to Add</span>
                     </div>
                     <p className="text-xs text-neutral-200 whitespace-pre-line font-tiro leading-relaxed">
                       {item.text}
                     </p>
+                    <div className="mt-1 flex items-center justify-between gap-2 text-[9px] text-neutral-500">
+                      <span>{item.category} · {item.language === 'hindi' ? 'Hindi' : 'Sanskrit'}</span>
+                      {item.source && <span>{item.source}</span>}
+                    </div>
                   </div>
                 ))}
+                {SHLOKA_LIBRARY.filter((item) => (shlokaCategory === 'All' || item.category === shlokaCategory) && (!shlokaSearch.trim() || `${item.title} ${item.text} ${item.source || ''}`.toLocaleLowerCase().includes(shlokaSearch.trim().toLocaleLowerCase()))).length === 0 && (
+                  <p className="rounded-lg border border-dashed border-neutral-700 p-4 text-center text-xs text-neutral-500">No matching shlokas. Try another search.</p>
+                )}
               </div>
             </div>
           </div>

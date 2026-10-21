@@ -7,6 +7,8 @@ export interface BlankDesignOptions {
   backgroundColor: string;
   occasion: string;
   themeName: string;
+  initialSidebarTab?: 'apps' | 'text' | 'elements';
+  initialElementSubTab?: 'frames' | 'tables';
 }
 
 interface CreateDesignModalProps {

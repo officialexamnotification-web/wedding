@@ -69,6 +69,7 @@ import {
 interface HomepageProps {
   onOpenEditorWithTemplate: (template: CardTemplate, targetSlideIndex?: number) => void;
   onOpenBlankEditor: (options: BlankDesignOptions) => void;
+  onOpenPrintExport: (template: CardTemplate) => void;
   onOpenAnalysis?: () => void;
   onOpenVideoCard: (template?: CardTemplate) => void;
 }
@@ -353,10 +354,12 @@ const MiniCardArtwork: React.FC<{
 };
 
 const HOMEPAGE_FEATURED_COUNT = 12;
+type StudioIntent = Pick<BlankDesignOptions, 'initialSidebarTab' | 'initialElementSubTab'>;
 
 export const Homepage: React.FC<HomepageProps> = ({
   onOpenEditorWithTemplate,
   onOpenBlankEditor,
+  onOpenPrintExport,
   onOpenVideoCard,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -365,13 +368,27 @@ export const Homepage: React.FC<HomepageProps> = ({
   const [previewTemplate, setPreviewTemplate] = useState<CardTemplate | null>(null);
   const [previewSlideIdx, setPreviewSlideIdx] = useState<number>(0);
   const [isCreateDesignOpen, setIsCreateDesignOpen] = useState(false);
+  const [studioIntent, setStudioIntent] = useState<StudioIntent>({});
   // Per-card active slide index in the Signature Collection grid
   const [activeCardSlides, setActiveCardSlides] = useState<Record<string, number>>({});
 
-  const openCreateDesign = () => setIsCreateDesignOpen(true);
+  const openCreateDesign = (intent: StudioIntent = {}) => {
+    setStudioIntent(intent);
+    setIsCreateDesignOpen(true);
+  };
   const createBlankDesign = (options: BlankDesignOptions) => {
     setIsCreateDesignOpen(false);
-    onOpenBlankEditor(options);
+    onOpenBlankEditor({ ...options, ...studioIntent });
+    setStudioIntent({});
+  };
+  const openAtelierFeature = (intent: StudioIntent) => {
+    onOpenBlankEditor({
+      aspectRatio: 'portrait-story',
+      backgroundColor: '#FFF8EA',
+      occasion: 'wedding',
+      themeName: 'Ivory & Gold',
+      ...intent,
+    });
   };
 
   // Circular Categories with real event photography & bespoke vector icons
@@ -1529,6 +1546,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                   { id: 'birthday', label: 'Milestone Birthday', icon: Sparkles },
                   { id: 'baby-shower', label: 'Godh Bharai Suite', icon: Heart },
                   { id: 'anniversary', label: 'Jubilee Anniversary', icon: Gem },
+                  { id: 'gold-velvet', label: '24K Gold Foil & Velvet', icon: Gem },
                 ].map((item) => {
                   const ItemIcon = item.icon;
                   return (
@@ -1610,7 +1628,7 @@ export const Homepage: React.FC<HomepageProps> = ({
               <ul className="space-y-2.5 text-xs text-neutral-400">
                 <li>
                   <button
-                    onClick={openCreateDesign}
+                    onClick={() => openAtelierFeature({ initialSidebarTab: 'apps' })}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <QrCode className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1619,7 +1637,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </li>
                 <li>
                   <button
-                    onClick={openCreateDesign}
+                    onClick={() => openAtelierFeature({ initialSidebarTab: 'text' })}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <Languages className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1628,7 +1646,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </li>
                 <li>
                   <button
-                    onClick={openCreateDesign}
+                    onClick={() => openAtelierFeature({ initialSidebarTab: 'elements', initialElementSubTab: 'frames' })}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <ImageIcon className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1637,7 +1655,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </li>
                 <li>
                   <button
-                    onClick={openCreateDesign}
+                    onClick={() => openAtelierFeature({ initialSidebarTab: 'elements', initialElementSubTab: 'tables' })}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <Calendar className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1646,7 +1664,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </li>
                 <li>
                   <button
-                    onClick={openCreateDesign}
+                    onClick={() => onOpenPrintExport(INITIAL_TEMPLATES[0])}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <Printer className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1794,7 +1812,10 @@ export const Homepage: React.FC<HomepageProps> = ({
       )}
       <CreateDesignModal
         isOpen={isCreateDesignOpen}
-        onClose={() => setIsCreateDesignOpen(false)}
+        onClose={() => {
+          setIsCreateDesignOpen(false);
+          setStudioIntent({});
+        }}
         onCreate={createBlankDesign}
       />
     </div>

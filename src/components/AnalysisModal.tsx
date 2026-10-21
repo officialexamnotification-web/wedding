@@ -124,7 +124,7 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose })
                     Indian Cultural Assets
                   </div>
                   <p className="text-neutral-400 text-[11px]">
-                    Unlike Western tools (Canva/Paperless Post), it features pre-packaged Hindu/Indian symbols: Ganesha, Kalash, Om, Swastik, Doli, Shehnai, and Sanskrit shlokas.
+                    It features pre-packaged Hindu and Indian symbols: Ganesha, Kalash, Om, Swastik, Doli, Shehnai, and Sanskrit shlokas.
                   </p>
                 </div>
               </div>

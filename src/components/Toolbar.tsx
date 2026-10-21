@@ -319,7 +319,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <div className="flex items-center gap-3">
           <span className="px-2.5 py-1 rounded-full bg-amber-500 text-neutral-950 font-bold text-[11px] flex items-center gap-1.5 shadow">
             <Sparkles className="w-3.5 h-3.5" />
-            Canva Draw Mode Active ({drawBrush.brushType.toUpperCase()})
+            Drawing Mode Active ({drawBrush.brushType.toUpperCase()})
           </span>
           <div className="flex items-center gap-2 text-neutral-300">
             <span>Color:</span>
@@ -574,7 +574,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               className={`bg-neutral-800 hover:bg-neutral-750 text-xs text-neutral-100 rounded-lg px-2.5 py-1.5 border flex items-center justify-between gap-2 w-36 sm:w-44 shrink-0 transition ${
                 openPopover === 'font' ? 'border-amber-400 text-amber-300' : 'border-neutral-700'
               }`}
-              title="Canva Font Picker with Live Typography Preview"
+              title="Font Picker with Live Typography Preview"
             >
               <span
                 className="truncate"
@@ -825,7 +825,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold'
                   : 'bg-neutral-800 border-neutral-700 text-neutral-200 hover:text-white'
               }`}
-              title="Canva Text Effects (Shadow, Lift, Hollow, Splice, Neon, Glitch, Pill)"
+              title="Text Effects (Shadow, Lift, Hollow, Splice, Neon, Glitch, Pill)"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span>Effects</span>
@@ -855,7 +855,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               disabled={isLocked}
               onClick={onOpenPhotoAdjust}
               className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-r from-amber-500/25 to-amber-500/15 hover:from-amber-500/35 hover:to-amber-500/25 text-amber-300 font-semibold rounded-lg border border-amber-500/50 transition shrink-0 shadow-sm"
-              title="Open Canva Edit Photo Studio (Magic BG Remover, Filters, Adjust, Frames)"
+              title="Open Photo Studio (Background, Filters, Adjust, Frames)"
             >
               <Wand2 className="w-3.5 h-3.5 text-amber-400" />
               <span>Edit Photo</span>
@@ -1414,7 +1414,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold'
               : 'bg-neutral-800 hover:bg-neutral-750 text-neutral-200 border-neutral-700'
           }`}
-          title="Canva Motion Animations (Rise, Pan, Breathe, Pop, Drift)"
+          title="Motion Animations (Rise, Pan, Breathe, Pop, Drift)"
         >
           <Play className="w-3 h-3 text-amber-400 fill-amber-400" />
           <span className="hidden md:inline">
@@ -1544,7 +1544,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {openPopover === 'font' && isText && (
             <div className="absolute left-3 top-13 w-80 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-3 z-50 space-y-2 max-h-96 overflow-y-auto">
               <div className="text-[11px] font-bold text-amber-300 uppercase tracking-wider px-1 pb-1 border-b border-neutral-800">
-                Canva Royal Font Library
+                Nimantran Royal Font Library
               </div>
               {FONT_OPTIONS.map((f) => {
                 const isSelected = (selectedElement as TextElement).fontFamily === f.family;
@@ -1582,7 +1582,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <div className="absolute left-28 top-13 w-76 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-3 text-xs">
               <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
                 <span className="font-bold text-amber-300 uppercase tracking-wider text-[11px]">
-                  Canva Color & Gold Foil Studio
+                  Color & Gold Foil Studio
                 </span>
                 <input
                   type="color"
@@ -1661,7 +1661,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <div className="absolute right-3 top-13 w-84 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-4 text-xs animate-in fade-in zoom-in-95 duration-100">
               <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
                 <span className="font-bold text-amber-300 uppercase tracking-wider text-[11px]">
-                  Canva Position & Arrange
+                  Position & Arrange
                 </span>
                 <span className="text-[10px] font-mono text-neutral-400">
                   Z-Layer: #{selectedElement.zIndex || 1}
@@ -1871,7 +1871,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {openPopover === 'spacing' && isText && (
             <div className="absolute left-64 top-13 w-68 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-4 text-xs">
               <div className="font-bold text-amber-300 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5">
-                Canva Typography Spacing
+                Typography Spacing
               </div>
               <div className="space-y-1.5">
                 <div className="flex justify-between">
@@ -1940,7 +1940,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {openPopover === 'effects' && isText && (
             <div className="absolute left-48 sm:left-72 top-13 w-88 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-4 text-xs max-h-[82vh] overflow-y-auto">
               <div className="font-bold text-amber-300 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5 flex items-center justify-between">
-                <span>Canva Pro Text Effects (10 Styles)</span>
+                <span>Premium Text Effects (10 Styles)</span>
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               </div>
 
@@ -2079,7 +2079,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <div className="absolute left-64 top-13 w-72 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-4 text-xs">
               <div className="flex items-center justify-between border-b border-neutral-800 pb-1.5">
                 <span className="font-bold text-amber-300 uppercase tracking-wider text-[11px]">
-                  Canva Curved Text (Arch)
+                  Curved Text (Arch)
                 </span>
                 <span className="font-mono text-amber-300">
                   {(selectedElement as TextElement).curveRadius || 0}°
@@ -2344,7 +2344,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {openPopover === 'border' && (isImage || isShape) && (
             <div className="absolute left-40 top-13 w-76 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-3.5 text-xs">
               <div className="font-bold text-amber-300 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5">
-                Canva Border Style & Corner Radius
+                Border Style & Corner Radius
               </div>
 
               <div className="grid grid-cols-4 gap-1.5">
@@ -2462,7 +2462,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {openPopover === 'shape-text' && isShape && (
             <div className="absolute left-32 top-13 w-76 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-3 text-xs">
               <div className="font-bold text-amber-300 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5">
-                Canva Shape Inner Text
+                Shape Inner Text
               </div>
               <input
                 type="text"
@@ -2578,7 +2578,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {openPopover === 'link' && (
             <div className="absolute right-16 top-13 w-76 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-3 text-xs">
               <div className="font-bold text-amber-300 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5">
-                Canva Clickable Link (URL / RSVP)
+                Clickable Link (URL / RSVP)
               </div>
               <input
                 type="text"
@@ -2605,7 +2605,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {openPopover === 'table-edit' && isTable && (
             <div className="absolute left-10 top-13 w-96 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-3 text-xs max-h-[80vh] overflow-y-auto">
               <div className="font-bold text-amber-300 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5 flex items-center justify-between">
-                <span>Canva Table Data & Style Editor</span>
+                <span>Table Data & Style Editor</span>
                 <Table2 className="w-3.5 h-3.5 text-amber-400" />
               </div>
 
@@ -2655,7 +2655,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {openPopover === 'chart-edit' && isChart && (
             <div className="absolute left-10 top-13 w-88 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-3 text-xs max-h-[80vh] overflow-y-auto">
               <div className="font-bold text-amber-300 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5">
-                Canva Chart Data & Labels
+                Chart Data & Labels
               </div>
               <input
                 type="text"
@@ -2710,7 +2710,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {openPopover === 'grid-edit' && isGrid && (
             <div className="absolute left-10 top-13 w-84 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-3 text-xs">
               <div className="font-bold text-amber-300 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5">
-                Canva Collage Grid Layout & Photos
+                Collage Grid Layout & Photos
               </div>
               <select
                 value={(selectedElement as GridElement).gridLayout}
@@ -2832,7 +2832,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {openPopover === 'info' && (
             <div className="absolute right-8 top-13 w-72 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl p-4 z-50 space-y-2.5 text-xs">
               <div className="font-bold text-amber-300 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5">
-                Canva Element Info & Accessibility
+                Element Info & Accessibility
               </div>
               <div className="text-[11px] text-neutral-400 space-y-1 font-mono">
                 <div>ID: {selectedElement.id}</div>

@@ -68,6 +68,7 @@ interface VideoCardModalProps {
   audioClip?: AudioClipSettings;
   audioClips?: AudioTimelineClip[];
   onCustomizeInEditor: (targetSlideIndex?: number) => void;
+  onShareVideo?: () => void;
 }
 
 export const VideoCardModal: React.FC<VideoCardModalProps> = ({
@@ -80,6 +81,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   audioClip = { startSec: 0, durationSec: null, volume: 0.45, fadeInSec: 0, fadeOutSec: 0, loop: true },
   audioClips = [],
   onCustomizeInEditor,
+  onShareVideo,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -314,11 +316,6 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [isOpen]);
-
-  const handleShareWhatsApp = () => {
-    const msg = `✨ *Watch Our Royal Digital Video Invitation Card* ✨\n\n${title}\n\n🎬 Watch the complete ${pages.length}-Page Celebration Sequence:\n1. Royal Cover Page\n2. Haldi & Sangeet Celebration\n3. Sacred Mandap & Vedic Pheras\n4. Grand Reception & Google Maps Venue QR\n5. Thank You & Warm Blessings\n\nWarm Regards & Blessings!`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-  };
 
   if (!isOpen) return null;
 
@@ -655,11 +652,12 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
           </div>
 
           <button
-            onClick={handleShareWhatsApp}
+            onClick={onShareVideo}
+            disabled={!onShareVideo}
             className="px-3.5 py-2 bg-[#25D366] hover:bg-[#20ba59] text-neutral-950 font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
           >
             <Share2 className="w-3.5 h-3.5" />
-            <span>Share Video Invite</span>
+            <span>Export & Share Video</span>
           </button>
         </div>
       </div>

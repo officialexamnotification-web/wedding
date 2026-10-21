@@ -26,7 +26,7 @@ import { INITIAL_TEMPLATES } from './data/templates';
 import { generateQrDataUrl } from './utils/qrHelper';
 import { ensureTextContrastOnAll } from './utils/colorContrast';
 import { Navbar } from './components/Navbar';
-import { Sidebar, AUDIO_TRACKS } from './components/Sidebar';
+import { Sidebar, AUDIO_TRACKS, type SidebarTab } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
 import { Canvas } from './components/Canvas';
 import { PreviewModal } from './components/PreviewModal';
@@ -39,9 +39,23 @@ import { VideoCardModal } from './components/VideoCardModal';
 import { SlideFilmstrip } from './components/SlideFilmstrip';
 import { BlankDesignOptions } from './components/CreateDesignModal';
 
+const inferInvitationCategory = (label: string): CardTemplate['category'] => {
+  const value = label.toLowerCase();
+  if (value.includes('birthday') || value.includes('janmadin')) return 'birthday';
+  if (value.includes('griha') || value.includes('housewarming') || value.includes('vastu')) return 'housewarming';
+  if (value.includes('godh') || value.includes('baby shower') || value.includes('naamkaran')) return 'baby-shower';
+  if (value.includes('sangeet') || value.includes('mehendi') || value.includes('haldi')) return 'sangeet-mehendi';
+  if (value.includes('anniversary') || value.includes('jubilee')) return 'anniversary';
+  if (value.includes('gold') || value.includes('velvet')) return 'gold-velvet';
+  return 'wedding';
+};
+
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'editor'>('home');
+  const [pendingSidebarTab, setPendingSidebarTab] = useState<SidebarTab>('templates');
+  const [pendingElementSubTab, setPendingElementSubTab] = useState<'frames' | 'tables' | undefined>();
   const [title, setTitle] = useState<string>('Royal Heritage Shubh Vivah');
+  const [invitationCategory, setInvitationCategory] = useState<CardTemplate['category']>(INITIAL_TEMPLATES[0].category);
   const [aspectRatio, setAspectRatio] = useState<AspectRatioType>('portrait-story');
   const [pages, setPages] = useState<CardPage[]>(INITIAL_TEMPLATES[0].pages);
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
@@ -119,6 +133,7 @@ export default function App() {
 
   const handleLoadProject = (proj: SavedProject) => {
     setTitle(proj.title);
+    setInvitationCategory(inferInvitationCategory(proj.title));
     setAspectRatio(proj.aspectRatio);
     const restoredCustomTracks = proj.customAudioTracks ?? [];
     setCustomAudioTracks(restoredCustomTracks);
@@ -281,6 +296,7 @@ export default function App() {
   // Handle template selection
   const handleSelectTemplate = async (template: CardTemplate, targetSlideIndex: number = 0) => {
     setTitle(template.title);
+    setInvitationCategory(template.category);
     setAspectRatio(template.aspectRatio);
 
     const updatedPages = await Promise.all(
@@ -1027,7 +1043,7 @@ export default function App() {
     setCurrentView('editor');
   };
 
-  const handleOpenBlankFromHome = ({ aspectRatio, backgroundColor, occasion, themeName }: BlankDesignOptions) => {
+  const handleOpenBlankFromHome = ({ aspectRatio, backgroundColor, occasion, themeName, initialSidebarTab, initialElementSubTab }: BlankDesignOptions) => {
     const occasionNames: Record<string, string> = {
       wedding: 'Shubh Vivah',
       housewarming: 'Griha Pravesh',
@@ -1045,6 +1061,7 @@ export default function App() {
       elements: [],
     }];
     setTitle(`Untitled ${occasionNames[occasion] || 'Invitation'}`);
+    setInvitationCategory(occasion as CardTemplate['category']);
     setAspectRatio(aspectRatio);
     setCurrentPageIndex(0);
     setSelectedElementId(null);
@@ -1053,6 +1070,8 @@ export default function App() {
     setHistory([blankPages]);
     setHistoryIndex(0);
     setCanvasFitRequest((request) => request + 1);
+    setPendingSidebarTab(initialSidebarTab || 'templates');
+    setPendingElementSubTab(initialElementSubTab);
     setCurrentView('editor');
   };
 
@@ -1065,6 +1084,11 @@ export default function App() {
         <Homepage
           onOpenEditorWithTemplate={handleOpenFromHome}
           onOpenBlankEditor={handleOpenBlankFromHome}
+          onOpenPrintExport={async (template) => {
+            await handleSelectTemplate(template);
+            setCurrentView('editor');
+            setIsExportOpen(true);
+          }}
           onOpenAnalysis={() => setIsAnalysisOpen(true)}
           onOpenVideoCard={(template) => {
             setVideoModalTemplate(template || INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0]);
@@ -1096,6 +1120,13 @@ export default function App() {
           activeAudioTrack={activeAudioTrack}
           audioClip={audioClip}
           audioClips={videoModalTemplate ? [] : audioClips}
+          onShareVideo={async () => {
+            const targetTmpl = videoModalTemplate || INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0];
+            await handleSelectTemplate(targetTmpl);
+            setCurrentView('editor');
+            setIsVideoModalOpen(false);
+            setIsExportOpen(true);
+          }}
           onCustomizeInEditor={async (targetSlideIndex = 0) => {
             const targetTmpl = videoModalTemplate || INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0];
             await handleSelectTemplate(targetTmpl, targetSlideIndex);
@@ -1158,6 +1189,8 @@ export default function App() {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Responsive Customization Studio (Desktop 12-Tab Left Rail + Flyout Drawer, Mobile Bottom Dock + Sheet) */}
         <Sidebar
+          initialActiveTab={pendingSidebarTab}
+          initialElementSubTab={pendingElementSubTab}
           aspectRatio={aspectRatio}
           onSelectTemplate={handleSelectTemplate}
           onAddElement={handleAddElement}
@@ -1359,6 +1392,7 @@ export default function App() {
         audioClip={audioClip}
         audioClips={audioClips}
         audioTracks={audioTracks}
+        occasionCategory={invitationCategory}
       />
 
       <AnalysisModal isOpen={isAnalysisOpen} onClose={() => setIsAnalysisOpen(false)} />
@@ -1388,6 +1422,10 @@ export default function App() {
         activeAudioTrack={activeAudioTrack}
         audioClip={audioClip}
         audioClips={audioClips}
+        onShareVideo={() => {
+          setIsVideoModalOpen(false);
+          setIsExportOpen(true);
+        }}
         onCustomizeInEditor={(targetSlideIndex = 0) => {
           setIsVideoModalOpen(false);
           if (targetSlideIndex >= 0 && targetSlideIndex < pages.length) {
