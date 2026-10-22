@@ -86,6 +86,7 @@ import {
   GridLayoutVariant,
 } from '../types/editor';
 import { TEMPLATE_CATEGORIES, INITIAL_TEMPLATES } from '../data/templates';
+import { AUDIO_TRACKS } from '../data/audioTracks';
 import { SHLOKA_LIBRARY, type ShlokaCategory } from '../data/shlokaLibrary';
 import { STICKER_CATEGORIES, STICKERS, StickerDefinition } from '../data/stickers';
 import { BACKGROUNDS } from '../data/backgrounds';
@@ -2576,7 +2577,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       alt={photo.name}
                       loading="lazy"
                       draggable={false}
-                      style={{ filter: photo.filterCSS || 'none' }}
+                      style={{ filter: ('filterCSS' in photo && photo.filterCSS) || 'none' }}
                       className="pointer-events-none h-24 w-full object-cover transition duration-300 group-hover:scale-105"
                     />
                     <div className="px-2 py-1.5">

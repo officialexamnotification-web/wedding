@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Bold,
   Italic,
@@ -287,6 +287,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onDistributeElements,
   onAnimateAllPageElements,
 }) => {
+  const currentTextFontSize = selectedElement?.type === 'text' ? selectedElement.fontSize : null;
+  const [fontSizeDraft, setFontSizeDraft] = useState(
+    currentTextFontSize === null ? '' : String(currentTextFontSize),
+  );
+  const [isEditingFontSize, setIsEditingFontSize] = useState(false);
+  const fontSizeBeforeEdit = useRef<number | null>(currentTextFontSize);
+
+  useEffect(() => {
+    if (isEditingFontSize) return;
+    setFontSizeDraft(currentTextFontSize === null ? '' : String(currentTextFontSize));
+  }, [selectedElement?.id, currentTextFontSize, isEditingFontSize]);
+
   const [openPopover, setOpenPopover] = useState<
     | 'none'
     | 'font'
@@ -369,6 +381,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const isVideo = selectedElement.type === 'video';
   const isAudio = selectedElement.type === 'audio';
   const isLocked = !!selectedElement.locked;
+  const normalizeFontSize = (value: number) =>
+    Math.round(Math.min(160, Math.max(8, value)) * 10) / 10;
+  const applyFontSize = (value: number, commitToHistory: boolean) => {
+    const fontSize = normalizeFontSize(value);
+    setFontSizeDraft(String(fontSize));
+    onUpdateElement({ fontSize }, commitToHistory);
+  };
 
   // Apply Canva Text Effect Preset
   const handleSelectTextEffect = (effect: TextEffectType) => {
@@ -589,38 +608,57 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <div className="flex items-center bg-neutral-800 rounded-lg border border-neutral-700 overflow-hidden shrink-0">
               <button
                 disabled={isLocked}
-                onClick={() =>
-                  onUpdateElement(
-                    {
-                      fontSize: Math.max(8, (selectedElement as TextElement).fontSize - 2),
-                    },
-                    true
-                  )
-                }
+                onClick={() => applyFontSize((selectedElement as TextElement).fontSize - 2, true)}
                 className="px-2 py-1 hover:bg-neutral-700 text-neutral-300 font-bold"
+                aria-label="Decrease text size"
+                title="Decrease text size"
               >
                 −
               </button>
               <input
                 disabled={isLocked}
-                type="number"
-                value={(selectedElement as TextElement).fontSize}
-                onChange={(e) =>
-                  onUpdateElement({ fontSize: Math.max(8, parseInt(e.target.value) || 12) }, true)
-                }
-                className="w-10 text-center bg-transparent outline-none text-xs font-mono"
+                type="text"
+                inputMode="decimal"
+                value={fontSizeDraft}
+                onFocus={() => {
+                  fontSizeBeforeEdit.current = (selectedElement as TextElement).fontSize;
+                  setIsEditingFontSize(true);
+                }}
+                onChange={(e) => {
+                  const rawValue = e.target.value;
+                  setFontSizeDraft(rawValue);
+                  if (rawValue.trim() === '') return;
+                  const parsedSize = Number(rawValue);
+                  if (Number.isFinite(parsedSize)) {
+                    onUpdateElement({ fontSize: normalizeFontSize(parsedSize) });
+                  }
+                }}
+                onBlur={(e) => {
+                  const rawValue = e.currentTarget.value.trim();
+                  const parsedSize = rawValue === '' ? NaN : Number(rawValue);
+                  const currentSize = (selectedElement as TextElement).fontSize;
+                  const finalSize = normalizeFontSize(
+                    Number.isFinite(parsedSize) ? parsedSize : currentSize,
+                  );
+                  setFontSizeDraft(String(finalSize));
+                  if (finalSize !== (fontSizeBeforeEdit.current ?? currentSize)) {
+                    onUpdateElement({ fontSize: finalSize }, true);
+                  }
+                  setIsEditingFontSize(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') e.currentTarget.blur();
+                }}
+                className="w-12 text-center bg-transparent outline-none text-xs font-mono"
+                aria-label="Text size in pixels"
+                title="Text size in pixels (8–160)"
               />
               <button
                 disabled={isLocked}
-                onClick={() =>
-                  onUpdateElement(
-                    {
-                      fontSize: Math.min(160, (selectedElement as TextElement).fontSize + 2),
-                    },
-                    true
-                  )
-                }
+                onClick={() => applyFontSize((selectedElement as TextElement).fontSize + 2, true)}
                 className="px-2 py-1 hover:bg-neutral-700 text-neutral-300 font-bold"
+                aria-label="Increase text size"
+                title="Increase text size"
               >
                 +
               </button>

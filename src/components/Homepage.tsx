@@ -573,7 +573,7 @@ export const Homepage: React.FC<HomepageProps> = ({
             </nav>
 
             <button
-              onClick={openCreateDesign}
+              onClick={() => openCreateDesign()}
               className="px-4 py-2.5 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-110 text-neutral-950 font-bold text-xs rounded-xl shadow-md shadow-amber-500/20 transition-all hover:scale-[1.02] flex items-center gap-2 cursor-pointer"
             >
               <Palette className="w-3.5 h-3.5" />
@@ -624,7 +624,7 @@ export const Homepage: React.FC<HomepageProps> = ({
               </button>
 
               <button
-                onClick={openCreateDesign}
+                onClick={() => openCreateDesign()}
                 className="w-full sm:w-auto px-5 py-3.5 bg-neutral-900/70 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 font-medium text-sm rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Palette className="w-4 h-4 text-amber-400" />
@@ -1463,7 +1463,7 @@ export const Homepage: React.FC<HomepageProps> = ({
 
             <div className="flex flex-col sm:flex-row items-center gap-3.5 w-full sm:w-auto relative z-10">
               <button
-                onClick={openCreateDesign}
+                onClick={() => openCreateDesign()}
                 className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-110 text-neutral-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-amber-500/20 transition-all hover:scale-[1.02] flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Palette className="w-4 h-4" />

@@ -3,12 +3,13 @@ import { FRAMES_LIBRARY_ITEMS } from './elements/framesGridsManifest';
 import { ensureTextContrast } from '../utils/colorContrast';
 
 type Occasion = CardTemplate['category'];
+type CelebrationOccasion = Exclude<Occasion, 'gold-velvet'>;
 type Palette = { background: string; ink: string; gold: string; soft: string };
 type FrameSlot = { x: number; y: number; width: number; height: number; frameId: string; rotation?: number };
 type Layout = { frames: FrameSlot[]; text: { introY: number; nameY: number; eventY: number; detailsY: number; venueY: number; nameSize?: number; } };
 
 type Collection = {
-  category: Occasion;
+  category: CelebrationOccasion;
   label: string;
   titles: string[];
   palette: Palette[];
@@ -147,7 +148,7 @@ const collections: Collection[] = [
 
 // Every category alternates refined paper palettes with five richer, full-color
 // stocks. Gold foil and high-contrast type keep the darker cards readable.
-const coloredPalettes: Record<Occasion, Palette[]> = {
+const coloredPalettes: Record<CelebrationOccasion, Palette[]> = {
   wedding: [
     { background: '#3B1524', ink: '#FFF3E3', gold: '#E5C16C', soft: '#D4A2A9' }, { background: '#17382F', ink: '#F7F1DB', gold: '#D4B56A', soft: '#B5C7A8' },
     { background: '#1D2B49', ink: '#F9F3E6', gold: '#D8B966', soft: '#A9B4C8' }, { background: '#522437', ink: '#FFF0E6', gold: '#E5BE6C', soft: '#E3A7B8' },
@@ -182,7 +183,7 @@ const coloredPalettes: Record<Occasion, Palette[]> = {
 
 // Occasion-specific frame treatments make the same photo layouts feel authored
 // for their celebration instead of reusing one generic border everywhere.
-const categoryFrameStyles: Record<Occasion, string[]> = {
+const categoryFrameStyles: Record<CelebrationOccasion, string[]> = {
   wedding: ['frame-01', 'frame-02', 'frame-05', 'frame-14', 'frame-11', 'frame-03', 'frame-12', 'frame-13', 'frame-16', 'frame-01'],
   housewarming: ['frame-02', 'frame-16', 'frame-14', 'frame-01', 'frame-05', 'frame-18', 'frame-03', 'frame-15', 'frame-17', 'frame-16'],
   'sangeet-mehendi': ['frame-11', 'frame-06', 'frame-13', 'frame-15', 'frame-20', 'frame-07', 'frame-04', 'frame-11', 'frame-08', 'frame-16'],
@@ -191,7 +192,7 @@ const categoryFrameStyles: Record<Occasion, string[]> = {
   anniversary: ['frame-05', 'frame-04', 'frame-09', 'frame-11', 'frame-06', 'frame-19', 'frame-14', 'frame-18', 'frame-03', 'frame-07'],
 };
 
-const colorfulCategoryFrameStyles: Record<Occasion, string[]> = {
+const colorfulCategoryFrameStyles: Record<CelebrationOccasion, string[]> = {
   wedding: ['frame-16', 'frame-23', 'frame-24', 'frame-25', 'frame-26', 'frame-27', 'frame-29', 'frame-21', 'frame-22', 'frame-28'],
   housewarming: ['frame-17', 'frame-18', 'frame-19', 'frame-25', 'frame-26', 'frame-29', 'frame-27', 'frame-21', 'frame-23', 'frame-28'],
   'sangeet-mehendi': ['frame-20', 'frame-22', 'frame-24', 'frame-26', 'frame-28', 'frame-30', 'frame-23', 'frame-27', 'frame-21', 'frame-25'],
