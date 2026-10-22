@@ -12,6 +12,7 @@ type CategoryDesigns = {
   event: string;
   hosts: string;
   photos: string[];
+  artwork: string[];
   motif: string;
   palettes: Palette[];
 };
@@ -92,100 +93,56 @@ const velvetPalettes = [
 const categories: CategoryDesigns[] = [
   {
     category: 'wedding', label: 'Shubh Vivah', names: ['Ivory Jharokha Vows','Mughal Garden Promise','Rosewater Mandap','Peacock Courtyard','Saffron Heirloom','Moonlit Pheras','Lotus Palace Union','The Kundan Vows','Jade Garden Wedding','Velvet Shehnai Night','Champagne Jharokha','Ruby Rajwada Vows','The Mogra Ceremony','Golden Hour Pheras','Pichwai Wedding Story'],
-    intro: 'TOGETHER WITH OUR FAMILIES', event: 'THE WEDDING CELEBRATION', hosts: 'Aarav & Meera', motif: 'mandap', photos: ['wedding-jharokha-sunrise-01.webp','wedding-palace-stairs-02.webp','wedding-lotus-pond-03.webp','wedding-mandap-vows-04.webp','wedding-coastal-ceremony-05.webp'], palettes: weddingPalettes,
+    intro: 'TOGETHER WITH OUR FAMILIES', event: 'THE WEDDING CELEBRATION', hosts: 'Aarav & Meera', motif: 'mandap', photos: ['wedding-jharokha-sunrise-01.webp','wedding-palace-stairs-02.webp','wedding-lotus-pond-03.webp','wedding-mandap-vows-04.webp','wedding-coastal-ceremony-05.webp'], artwork: Array.from({ length: 15 }, (_, i) => `/images/templates/square/wedding/${String(i + 1).padStart(2, '0')}.webp`), palettes: weddingPalettes,
   },
   {
     category: 'housewarming', label: 'Griha Pravesh', names: ['Aangan of Light','The First Diya','Mango Toran Welcome','Vastu Garden Blessing','Sacred Threshold','Lotus Doorway','Shubh Aangan','Mogra at Home','The New Home Story','Kalash & Courtyard','Sunlit Griha','Tulsi Blessings','Rangoli Welcome','The Ivory Haveli','Auspicious Beginnings'],
-    intro: 'WITH THE BLESSINGS OF OUR ELDERS', event: 'GRIHA PRAVESH & PUJA', hosts: 'The Sharma Family', motif: 'kalash', photos: ['home-diya-entry-01.webp','home-courtyard-kalash-02.webp','home-first-breakfast-03.webp','home-balcony-garden-04.webp','home-vastu-puja-05.webp'], palettes: grihaPalettes,
+    intro: 'WITH THE BLESSINGS OF OUR ELDERS', event: 'GRIHA PRAVESH & PUJA', hosts: 'The Sharma Family', motif: 'kalash', photos: ['home-diya-entry-01.webp','home-courtyard-kalash-02.webp','home-first-breakfast-03.webp','home-balcony-garden-04.webp','home-vastu-puja-05.webp'], artwork: Array.from({ length: 15 }, (_, i) => `/images/templates/square/housewarming/${String(i + 1).padStart(2, '0')}.webp`), palettes: grihaPalettes,
   },
   {
     category: 'sangeet-mehendi', label: 'Sangeet & Haldi', names: ['Marigold Mehfil','Rang Raas Night','Dhol & Dandiya','Saffron Beats','Mogra Music Soirée','Henna Garden Party','Genda Phool Glow','The Golden Dhol','Mehendi Afterglow','Rang Barse Celebration','Sunset Sangeet','Haldi in Bloom','The Courtyard Jashn','Neon Raas Royale','Sitar & Shimmer'],
-    intro: 'A NIGHT OF MUSIC & CELEBRATION', event: 'SANGEET & HALDI', hosts: 'Aarav & Meera', motif: 'dhol', photos: ['sangeet-garden-dance-01.webp','sangeet-mirror-mehendi-02.webp','sangeet-dhol-courtyard-03.webp','sangeet-haldi-sunlight-04.webp','sangeet-raas-terrace-05.webp'], palettes: sangeetPalettes,
+    intro: 'A NIGHT OF MUSIC & CELEBRATION', event: 'SANGEET & HALDI', hosts: 'Aarav & Meera', motif: 'dhol', photos: ['sangeet-garden-dance-01.webp','sangeet-mirror-mehendi-02.webp','sangeet-dhol-courtyard-03.webp','sangeet-haldi-sunlight-04.webp','sangeet-raas-terrace-05.webp'], artwork: Array.from({ length: 15 }, (_, i) => `/images/templates/square/sangeet-mehendi/${String(i + 1).padStart(2, '0')}.webp`), palettes: sangeetPalettes,
   },
   {
     category: 'birthday', label: 'Birthday Celebration', names: ['Little Star Gala','Golden Balloon Brunch','Confetti & Cake','A Year in Bloom','The Birthday Atelier','Moonlight Candles','Pastel Party Club','Royal Birthday Soirée','Wildflower Wishes','Sparkle & Sprinkles','The Grand Birthday','Daisy Garden Party','Midnight Celebration','Pearl Balloon Story','A Wish in Gold'],
-    intro: 'COME CELEBRATE A VERY SPECIAL DAY', event: 'BIRTHDAY CELEBRATION', hosts: 'Aarav Turns One', motif: 'cake', photos: ['birthday-garden-brunch-01.webp','birthday-carnival-02.webp','birthday-cake-candles-03.webp','birthday-poolside-party-04.webp','birthday-studio-confetti-05.webp'], palettes: birthdayPalettes,
+    intro: 'COME CELEBRATE A VERY SPECIAL DAY', event: 'BIRTHDAY CELEBRATION', hosts: 'Aarav Turns One', motif: 'cake', photos: ['birthday-garden-brunch-01.webp','birthday-carnival-02.webp','birthday-cake-candles-03.webp','birthday-poolside-party-04.webp','birthday-studio-confetti-05.webp'], artwork: Array.from({ length: 15 }, (_, i) => `/images/templates/square/birthday/${String(i + 1).padStart(2, '0')}.webp`), palettes: birthdayPalettes,
   },
   {
     category: 'baby-shower', label: 'Godh Bharai', names: ['Little Moon Blessing','Peach Petal Godh Bharai','Maa & Mogra','The Nesting Soirée','A Little Bloom','Cloud Nine Blessings','Blush Lotus Gathering','Cradle & Chandni','Tiny Toes Celebration','The Golden Cradle','Pastel Peacock Blessing','A New Little Light','Garden of Beginnings','Sweet Pea Celebration','Moonstone Naamkaran'],
-    intro: 'WITH JOYFUL HEARTS & LOVING BLESSINGS', event: 'GODH BHARAI CELEBRATION', hosts: 'A Little One Is on the Way', motif: 'cradle', photos: ['godh-bloom-portrait-01.webp','godh-cradle-blessings-02.webp','godh-moon-mogra-03.webp','godh-peach-petal-04.webp','godh-little-light-05.webp'], palettes: babyPalettes,
+    intro: 'WITH JOYFUL HEARTS & LOVING BLESSINGS', event: 'GODH BHARAI CELEBRATION', hosts: 'A Little One Is on the Way', motif: 'cradle', photos: ['godh-bloom-portrait-01.webp','godh-cradle-blessings-02.webp','godh-moon-mogra-03.webp','godh-peach-petal-04.webp','godh-little-light-05.webp'], artwork: Array.from({ length: 15 }, (_, i) => `/images/templates/square/baby-shower/${String(i + 1).padStart(2, '0')}.webp`), palettes: babyPalettes,
   },
   {
     category: 'anniversary', label: 'Royal Anniversary', names: ['Pearl & Petals','A Lifetime in Light','Ruby Rose Evening','Golden Years Together','Still in Bloom','The Silver Chapter','Champagne & Memories','Jade Jubilee','Forever in Jaipur','The Heirloom Dance','Sapphire Years','A Love in Bloom','Velvet Anniversary','Timeless Together','The Pearl Soirée'],
-    intro: 'A BEAUTIFUL STORY, STILL BEING WRITTEN', event: 'ANNIVERSARY CELEBRATION', hosts: 'Vikram & Ananya', motif: 'rings', photos: ['anniversary-pearl-petals-01.webp','anniversary-lifetime-light-02.webp','anniversary-ruby-album-03.webp','anniversary-golden-vows-04.webp','anniversary-still-us-05.webp'], palettes: anniversaryPalettes,
+    intro: 'A BEAUTIFUL STORY, STILL BEING WRITTEN', event: 'ANNIVERSARY CELEBRATION', hosts: 'Vikram & Ananya', motif: 'rings', photos: ['anniversary-pearl-petals-01.webp','anniversary-lifetime-light-02.webp','anniversary-ruby-album-03.webp','anniversary-golden-vows-04.webp','anniversary-still-us-05.webp'], artwork: Array.from({ length: 15 }, (_, i) => `/images/templates/square/anniversary/${String(i + 1).padStart(2, '0')}.webp`), palettes: anniversaryPalettes,
   },
   {
     category: 'gold-velvet', label: '24K Gold Foil & Velvet', names: ['Oxblood Mughal Jharokha','Ruby Deco Heirloom','Burgundy Lotus Soirée','Vermilion Toran','Garnet Palace Vows','Crimson Kundan Night','Maroon Peacock Darbar','The Scarlet Sheesh Mahal','Velvet Rose Jashn','Heirloom in Gold','Rajwada Crimson','The Golden Arch','Mughal Velvet Garden','Ruby Mandap Royale','Noor of the Durbar'],
-    intro: 'A ROYAL CELEBRATION', event: 'A NIGHT TO REMEMBER', hosts: 'Aarav & Meera', motif: 'peacock', photos: ['wedding-sunset-terrace-10.webp','wedding-night-terrace-08.webp','wedding-mehendi-portrait-06.webp','wedding-ivory-studio-07.webp','wedding-floral-garden-09.webp'], palettes: velvetPalettes,
+    intro: 'A ROYAL CELEBRATION', event: 'A NIGHT TO REMEMBER', hosts: 'Aarav & Meera', motif: 'peacock', photos: ['wedding-sunset-terrace-10.webp','wedding-night-terrace-08.webp','wedding-mehendi-portrait-06.webp','wedding-ivory-studio-07.webp','wedding-floral-garden-09.webp'], artwork: Array.from({ length: 15 }, (_, i) => `/images/templates/square/gold-velvet/${String(i + 1).padStart(2, '0')}.webp`), palettes: velvetPalettes,
   },
 ];
 
-const photoLayouts = [2, 5, 8, 11, 14];
+const photoLayouts = [2, 4, 8, 11, 14];
 const frameIds = ['frame-01', 'frame-05', 'frame-12', 'frame-14', 'frame-19'];
 const photoSlots = [
-  [{ x: 154, y: 78, width: 292, height: 190 }],
+  [{ x: 202, y: 92, width: 196, height: 196 }],
   [{ x: 62, y: 144, width: 222, height: 300 }],
   [{ x: 190, y: 92, width: 220, height: 220 }],
   [{ x: 66, y: 108, width: 202, height: 174 }, { x: 332, y: 108, width: 202, height: 174 }],
-  [{ x: 184, y: 64, width: 232, height: 236 }],
+  [{ x: 362, y: 326, width: 176, height: 204 }],
 ];
-const motifMarkup: Record<string, string> = {
-  mandap: '<path d="M0 90V42Q0 8 50 0q50 8 50 42v48M12 90V44Q12 22 50 14q38 8 38 30v46M20 90v-24m60 24V66M50 0v-12"/><path d="M5 55h14m62 0h14"/>',
-  kalash: '<path d="M50 8c-12 17-11 26 0 31 11-5 12-14 0-31Zm-26 34h52M31 42c2 18 8 34 19 44 11-10 17-26 19-44m-34 15h30m-28 14h26M18 36c-10-13-10-23-6-31 13 4 22 14 25 28m20 0c3-14 12-24 25-28 4 8 4 18-6 31"/>',
-  dhol: '<path d="M27 25h46l15 15v30L73 85H27L12 70V40l15-15Zm0 0v60m46-60v60M12 40l76 30M12 70l76-30M25 15 8 5m67 10 17-10"/>',
-  cake: '<path d="M16 54h68v34H16zM24 38h52v16H24zM50 38V20m0 0c-10-13-2-22 0-28 3 6 10 15 0 28Zm-20 0V27m0 0c-8-10-2-16 0-21 2 5 8 11 0 21Zm40 0V27m0 0c-8-10-2-16 0-21 2 5 8 11 0 21Z"/><path d="M16 68q9-9 17 0t17 0 17 0 17 0"/>',
-  cradle: '<path d="M18 47h64l-7 28H25l-7-28Zm8 28v13m48-13v13M24 47c5-19 16-29 26-29s21 10 26 29M50 18V7m-9 10c-8-7-8-14-5-20 8 3 13 8 13 16m10 4c8-7 8-14 5-20-8 3-13 8-13 16"/>',
-  rings: '<circle cx="39" cy="50" r="24"/><circle cx="61" cy="50" r="24"/><path d="m50 19 5 7-5 7-5-7 5-7Zm-34 65h68"/>',
-  peacock: '<path d="M50 15c12 12 17 27 14 42-2 11-8 19-14 25-6-6-12-14-14-25-3-15 2-30 14-42Zm0 0c-8 7-18 11-29 10 4 11 13 18 26 21m3-31c8 7 18 11 29 10-4 11-13 18-26 21M50 82v14m-12 0h24"/><circle cx="50" cy="44" r="4"/>',
-};
-
-const squareSvg = (palette: Palette, motif: string, variant: number) => {
-  const patternId = `sq-pattern-${variant}`;
-  const light = variant % 3 === 0 ? palette.soft : palette.gold;
-  const frame = variant % 5;
-  const border = frame === 0
-    ? '<rect x="20" y="20" width="560" height="560" rx="28"/><rect x="30" y="30" width="540" height="540" rx="22" stroke-dasharray="2 7"/>'
-    : frame === 1
-      ? '<path d="M48 120V48h135m234 0h135v72M48 480v72h135m234 0h135v-72"/><path d="M65 128V65h110m240 0h110v63M65 472v63h110m240 0h110v-63"/>'
-      : frame === 2
-        ? '<rect x="24" y="24" width="552" height="552" rx="276"/><rect x="36" y="36" width="528" height="528" rx="264" stroke-dasharray="3 8"/>'
-        : frame === 3
-          ? '<path d="M34 90Q34 34 90 34h420q56 0 56 56v420q0 56-56 56H90q-56 0-56-56Z"/><path d="M49 101q0-37 37-37h428q37 0 37 37v398q0 37-37 37H86q-37 0-37-37Z"/>'
-          : '<path d="M42 42h516v516H42zM58 58h484v484H58z"/><path d="M42 160q58 0 58-58m400 0q0 58 58 58M42 440q58 0 58 58m400 0q0-58 58-58"/>';
-  const ornament = frame === 2
-    ? '<circle cx="300" cy="300" r="206"/><circle cx="300" cy="300" r="190" stroke-dasharray="1 8"/>'
-    : `<path d="M62 174q38-72 110-110M538 174q-38-72-110-110M62 426q38 72 110 110M538 426q-38 72-110 110"/><path d="M90 180q42-58 88-82m332 82q-42-58-88-82M90 420q42 58 88 82m332-82q-42 58-88 82"/>`;
-  const stars = Array.from({ length: 12 }, (_, i) => {
-    const x = 92 + ((i * 173 + variant * 37) % 416);
-    const y = 72 + ((i * 127 + variant * 61) % 456);
-    const radius = i % 3 === 0 ? 3 : 1.8;
-    return `<circle cx="${x}" cy="${y}" r="${radius}"/>`;
-  }).join('');
-  const embellishment = [
-    '<path d="M300 34v82m-24-58h48M300 484v82m-24-58h48"/><circle cx="300" cy="42" r="7"/><circle cx="300" cy="558" r="7"/>',
-    '<path d="M82 300h64m308 0h64M300 82v64m0 308v64"/><path d="m300 70 9 18-9 18-9-18 9-18Zm0 416 9 18-9 18-9-18 9-18Z"/>',
-    '<path d="M80 220q40-46 80 0t80 0m200 0q40-46 80 0M80 380q40 46 80 0t80 0m200 0q40 46 80 0"/>',
-    '<path d="M88 104v392m424-392v392" stroke-dasharray="1 8"/><circle cx="88" cy="88" r="8"/><circle cx="512" cy="88" r="8"/><circle cx="88" cy="512" r="8"/><circle cx="512" cy="512" r="8"/>',
-    '<path d="M300 72c-18 20-18 36 0 50 18-14 18-30 0-50Zm-31 30h62m-31 318c-18 20-18 36 0 50 18-14 18-30 0-50Zm-31 30h62"/>',
-    '<path d="M80 118h150M370 118h150M80 482h150m140 0h150"/><circle cx="300" cy="118" r="4"/><circle cx="300" cy="482" r="4"/>',
-    '<path d="M150 300h70m160 0h70M300 150v70m0 160v70"/><circle cx="300" cy="300" r="168" stroke-dasharray="2 10"/>',
-  ][variant % 7];
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600"><defs><linearGradient id="sq-bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${palette.background}"/><stop offset=".54" stop-color="${palette.shade}"/><stop offset="1" stop-color="${palette.background}"/></linearGradient><radialGradient id="sq-glow"><stop stop-color="${light}" stop-opacity=".22"/><stop offset="1" stop-color="${light}" stop-opacity="0"/></radialGradient><pattern id="${patternId}" width="17" height="17" patternUnits="userSpaceOnUse"><path d="M0 8.5h17M8.5 0v17" stroke="${palette.gold}" stroke-opacity=".055" stroke-width=".5"/><circle cx="8.5" cy="8.5" r="1" fill="${palette.gold}" fill-opacity=".14"/></pattern></defs><rect width="600" height="600" fill="url(#sq-bg)"/><rect width="600" height="600" fill="url(#sq-glow)"/><rect width="600" height="600" fill="url(#${patternId})"/><g fill="none" stroke="${palette.gold}" stroke-width="1.4" opacity=".85">${border}${ornament}${embellishment}</g><g fill="none" stroke="${palette.gold}" stroke-width="1.1" opacity=".68" transform="translate(252 100) scale(.48)">${motifMarkup[motif]}</g><g fill="${palette.gold}" opacity=".8">${stars}</g><g fill="none" stroke="${palette.paper}" stroke-opacity=".12"><path d="M52 300h76m344 0h76"/><circle cx="300" cy="300" r="245"/></g></svg>`)}`;
-};
-
 function textLayer(id: string, text: string, x: number, y: number, width: number, height: number, size: number, color: string, font: string, weight: TextElement['fontWeight'] = 'normal', spacing = 0, align: TextElement['textAlign'] = 'center'): TextElement {
   return { id, type: 'text', text, fontFamily: font, fontSize: size, color, fontWeight: weight, fontStyle: 'normal', textAlign: align, letterSpacing: spacing, lineHeight: 1.16, x, y, width, height, rotation: 0, opacity: 1, zIndex: 7 };
 }
 
 const photoIntro = (category: SquareCategory) => category === 'wedding' || category === 'gold-velvet' ? 'A MOMENT TO TREASURE' : category === 'housewarming' ? 'A NEW HOME, A NEW BEGINNING' : category === 'sangeet-mehendi' ? 'MEMORIES IN THE MAKING' : category === 'birthday' ? 'A DAY FULL OF JOY' : category === 'baby-shower' ? 'A LITTLE ONE, SO MUCH LOVE' : 'A BEAUTIFUL LIFE TOGETHER';
 const frameIdsByCategory: Record<SquareCategory, string[]> = {
-  wedding: ['frame-01','frame-02','frame-05','frame-12','frame-14'],
-  housewarming: ['frame-02','frame-16','frame-17','frame-05','frame-19'],
-  'sangeet-mehendi': ['frame-11','frame-06','frame-13','frame-15','frame-20'],
-  birthday: ['frame-10','frame-04','frame-11','frame-20','frame-12'],
-  'baby-shower': ['frame-05','frame-15','frame-03','frame-17','frame-18'],
-  anniversary: ['frame-05','frame-04','frame-09','frame-14','frame-18'],
-  'gold-velvet': ['frame-01','frame-14','frame-12','frame-19','frame-05'],
+  wedding: ['frame-01','frame-01','frame-04','frame-02','frame-14'],
+  housewarming: ['frame-02','frame-02','frame-04','frame-05','frame-19'],
+  'sangeet-mehendi': ['frame-14','frame-01','frame-04','frame-02','frame-20'],
+  birthday: ['frame-04','frame-05','frame-04','frame-05','frame-12'],
+  'baby-shower': ['frame-05','frame-05','frame-04','frame-02','frame-18'],
+  anniversary: ['frame-05','frame-05','frame-04','frame-02','frame-18'],
+  'gold-velvet': ['frame-02','frame-01','frame-04','frame-02','frame-05'],
 };
 
 function makeSquareTemplate(collection: CategoryDesigns, index: number): CardTemplate {
@@ -195,7 +152,7 @@ function makeSquareTemplate(collection: CategoryDesigns, index: number): CardTem
   const isPhotoTemplate = photoLayouts.includes(index);
   const photoLayoutIndex = photoLayouts.indexOf(index);
   const background: ImageElement = {
-    id: `${id}-artwork`, type: 'image', src: squareSvg(palette, collection.motif, index + Object.keys(frameIdsByCategory).indexOf(collection.category) * 15),
+    id: `${id}-artwork`, type: 'image', src: collection.artwork[index],
     alt: `${name} original square invitation artwork with decorative border`, mask: 'none', x: 0, y: 0, width: 600, height: 600,
     rotation: 0, opacity: 1, zIndex: 1, objectFit: 'cover', locked: true,
   };
@@ -221,19 +178,19 @@ function makeSquareTemplate(collection: CategoryDesigns, index: number): CardTem
   const ink = ensureTextContrast(palette.ink, palette.background);
   const gold = ensureTextContrast(palette.gold, palette.background);
   const editorialAlign: TextElement['textAlign'] = !isPhotoTemplate && (index % 5 === 1 || index % 5 === 3) ? 'left' : 'center';
-  const textX = isPhotoTemplate && photoLayoutIndex === 1 ? 310 : editorialAlign === 'left' ? 76 : 52;
-  const textWidth = isPhotoTemplate && photoLayoutIndex === 1 ? 238 : editorialAlign === 'left' ? 448 : 496;
+  const textX = isPhotoTemplate && photoLayoutIndex === 1 ? 310 : isPhotoTemplate && photoLayoutIndex === 4 ? 56 : editorialAlign === 'left' ? 76 : 52;
+  const textWidth = isPhotoTemplate && photoLayoutIndex === 1 ? 238 : isPhotoTemplate && photoLayoutIndex === 4 ? 280 : editorialAlign === 'left' ? 448 : 496;
   const layout = isPhotoTemplate ? photoLayoutIndex : index % 5;
   const top = isPhotoTemplate
-    ? [294, 104, 326, 304, 316][photoLayoutIndex]
+    ? [316, 104, 326, 304, 98][photoLayoutIndex]
     : [122, 118, 126, 124, 132][layout];
   const titleY = isPhotoTemplate
-    ? [top + 42, 191, 362, 334, 344][photoLayoutIndex]
+    ? [top + 42, 191, 362, 334, 150][photoLayoutIndex]
     : [top + 42, top + 56, top + 40, top + 50, top + 36][layout];
   const detailsY = isPhotoTemplate
-    ? [top + 146, 342, 464, 438, 446][photoLayoutIndex]
+    ? [top + 146, 342, 464, 438, 274][photoLayoutIndex]
     : [titleY + 132, titleY + 126, titleY + 132, titleY + 126, titleY + 134][layout];
-  const compact = isPhotoTemplate && photoLayoutIndex === 1;
+  const compact = isPhotoTemplate && (photoLayoutIndex === 1 || photoLayoutIndex === 4);
   const displayEvent = collection.category === 'gold-velvet' ? 'THE ROYAL CELEBRATION' : collection.event;
   const titleFonts = ["'Cormorant Garamond', serif", "'Playfair Display', serif", "'Cinzel', serif", "'Great Vibes', cursive", "'Bodoni Moda', serif"];
   const titleSize = compact ? 28 : [42, 38, 40, 44, 40][layout];
@@ -258,6 +215,5 @@ function makeSquareTemplate(collection: CategoryDesigns, index: number): CardTem
 }
 
 export const SQUARE_TEMPLATES: CardTemplate[] = categories.flatMap((category) => {
-  const existingSquareCount = category.category === 'birthday' ? 1 : 0;
-  return category.names.slice(0, 15 - existingSquareCount).map((_, index) => makeSquareTemplate(category, index));
+  return category.names.slice(0, 15).map((_, index) => makeSquareTemplate(category, index));
 });
