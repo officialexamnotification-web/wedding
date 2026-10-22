@@ -707,4 +707,6 @@ export interface CardTemplate {
   tags: string[];
   thumbnailGradient: string;
   pages: CardPage[];
+  /** Optional per-page audio clips bundled with this template. */
+  audioClips?: AudioTimelineClip[];
 }

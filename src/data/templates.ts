@@ -1,9 +1,281 @@
-import { CardTemplate } from '../types/editor';
+import type { AudioTimelineClip, CardTemplate, ImageElement, ShapeElement, TextElement } from '../types/editor';
 import { PREMIUM_WEDDING_TEMPLATES } from './premiumWeddingTemplates';
 import { CELEBRATION_TEMPLATES } from './celebrationTemplates';
 import { FRAMED_CELEBRATION_TEMPLATES } from './framedCelebrationTemplates';
 import { GOLD_VELVET_TEMPLATES } from './goldVelvetTemplates';
 import { SQUARE_TEMPLATES } from './squareTemplates';
+
+const soundscapeText = (
+  id: string,
+  text: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  options: Partial<TextElement> = {}
+): TextElement => ({
+  id,
+  type: 'text',
+  text,
+  fontFamily: "'Cormorant Garamond', serif",
+  fontSize: 19,
+  color: '#FFF3D5',
+  fontWeight: '500',
+  fontStyle: 'normal',
+  textAlign: 'center',
+  verticalAlign: 'middle',
+  letterSpacing: 0.5,
+  lineHeight: 1.15,
+  x,
+  y,
+  width,
+  height,
+  rotation: 0,
+  opacity: 1,
+  zIndex: 4,
+  animation: 'rise',
+  animationSpeed: 0.82,
+  animationTiming: 'enter',
+  ...options,
+});
+
+const soundscapePhoto = (
+  id: string,
+  src: string,
+  alt: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  objectFit: ImageElement['objectFit'] = 'cover'
+): ImageElement => ({
+  id,
+  type: 'image',
+  src,
+  alt,
+  altText: alt,
+  mask: 'arch',
+  borderWidth: 0,
+  borderColor: '#D5B263',
+  borderRadius: 18,
+  objectFit,
+  scale: 1,
+  offsetX: 0,
+  offsetY: 0,
+  x,
+  y,
+  width,
+  height,
+  rotation: 0,
+  opacity: 1,
+  zIndex: 2,
+  animation: 'fade',
+  animationSpeed: 0.72,
+  animationTiming: 'enter',
+});
+
+const soundscapePhotoFrame = (
+  id: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): ShapeElement => ({
+  id,
+  type: 'shape',
+  shapeType: 'ornate-border',
+  strokeColor: '#E4C16D',
+  strokeWidth: 2,
+  fillColor: 'transparent',
+  x,
+  y,
+  width,
+  height,
+  rotation: 0,
+  opacity: 1,
+  zIndex: 3,
+  svgPath: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="${id}-gold" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#FFF2C5"/><stop offset=".28" stop-color="#D2A64A"/>
+        <stop offset=".52" stop-color="#FFF0B2"/><stop offset=".76" stop-color="#A66D22"/>
+        <stop offset="1" stop-color="#F6D984"/>
+      </linearGradient>
+      <filter id="${id}-glow" x="-30%" y="-20%" width="160%" height="150%">
+        <feGaussianBlur stdDeviation="1.1" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <path d="M5 100V51C5 24 25 5 50 5s45 19 45 46v49" fill="none" stroke="#210C10" stroke-width="9"/>
+    <path d="M5 100V51C5 24 25 5 50 5s45 19 45 46v49" fill="none" stroke="url(#${id}-gold)" stroke-width="4.2" filter="url(#${id}-glow)"/>
+    <path d="M9 100V52C9 27 27 9 50 9s41 18 41 43v48" fill="none" stroke="#FFF0BA" stroke-width=".85" opacity=".9"/>
+    <path d="M13 100V54C13 30 30 13 50 13s37 17 37 41v46" fill="none" stroke="#B9802D" stroke-width=".7" opacity=".9"/>
+    <path d="M18 100V56C18 34 33 18 50 18s32 16 32 38v44" fill="none" stroke="#F5DB91" stroke-width=".45" opacity=".6"/>
+    <g fill="none" stroke="url(#${id}-gold)" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 38c5-2 7-6 5-9-2-3-5-1-3 2 2 3 7 3 10 0 3-3 2-6 0-7-2-1-4 2-2 4 2 2 6 1 8-2"/>
+      <path d="M7 62c5 1 8 4 7 7-1 3-5 2-4-1 1-3 6-5 9-3 3 2 3 6 1 7-2 1-4-1-3-3 1-2 5-3 8-1"/>
+      <path d="M7 86c5-1 9 1 9 4 0 3-4 3-4 0 0-3 4-6 8-5 3 1 5 4 3 6-2 2-4 0-3-2 1-2 4-3 7-2"/>
+      <path d="M93 38c-5-2-7-6-5-9 2-3 5-1 3 2-2 3-7 3-10 0-3-3-2-6 0-7 2-1 4 2 2 4-2 2-6 1-8-2"/>
+      <path d="M93 62c-5 1-8 4-7 7 1 3 5 2 4-1-1-3-6-5-9-3-3 2-3 6-1 7 2 1 4-1 3-3-1-2-5-3-8-1"/>
+      <path d="M93 86c-5-1-9 1-9 4 0 3 4 3 4 0 0-3-4-6-8-5-3 1-5 4-3 6 2 2 4 0 3-2-1-2-4-3-7-2"/>
+    </g>
+    <g fill="#F5D98F" stroke="#6C431A" stroke-width=".45">
+      <path d="M50 1l2.4 3.4L56 5.5l-3.6 1.2L50 10l-2.4-3.3L44 5.5l3.6-1.1z"/>
+      <circle cx="50" cy="12.8" r="1.1"/><circle cx="7.2" cy="50" r="1.1"/><circle cx="92.8" cy="50" r="1.1"/>
+      <path d="M8 91l1.3 1.8 2.2.7-2.2.7L8 96l-1.3-1.8-2.2-.7 2.2-.7z"/>
+      <path d="M92 91l1.3 1.8 2.2.7-2.2.7L92 96l-1.3-1.8-2.2-.7 2.2-.7z"/>
+    </g>
+    <g fill="none" stroke="#F8E5B1" stroke-width=".55" opacity=".85">
+      <path d="M39 5h6m10 0h6M39 95h6m10 0h6"/>
+      <circle cx="50" cy="5" r="2.2"/><circle cx="50" cy="95" r="1.6"/>
+    </g>
+  </svg>`,
+});
+
+const soundscapeFrame = (id: string, inset: number): ShapeElement => ({
+  id,
+  type: 'shape',
+  shapeType: 'gold-frame',
+  strokeColor: '#C99C4B',
+  strokeWidth: inset === 20 ? 2 : 1,
+  fillColor: 'transparent',
+  borderRadius: 14,
+  x: inset,
+  y: inset,
+  width: 450 - inset * 2,
+  height: 800 - inset * 2,
+  rotation: 0,
+  opacity: inset === 20 ? 0.9 : 0.45,
+  zIndex: 1,
+});
+
+const soundscapeAudioClips: AudioTimelineClip[] = [
+  { id: 'marigold-hour-track-1', trackId: 'under-the-marigold-arch-grand', pageIndex: 0, timelineStartSec: 0, settings: { startSec: 82, sourceEndSec: 89, durationSec: 7, volume: 0.34, fadeInSec: 0.45, fadeOutSec: 0.8, loop: false } },
+  { id: 'marigold-hour-track-2', trackId: 'the-gilded-threshold', pageIndex: 1, timelineStartSec: 7, settings: { startSec: 74, sourceEndSec: 81, durationSec: 7, volume: 0.32, fadeInSec: 0.45, fadeOutSec: 0.8, loop: false } },
+  { id: 'marigold-hour-track-3', trackId: 'morning-of-our-promise', pageIndex: 2, timelineStartSec: 14, settings: { startSec: 86, sourceEndSec: 93, durationSec: 7, volume: 0.32, fadeInSec: 0.45, fadeOutSec: 0.8, loop: false } },
+  { id: 'marigold-hour-track-4', trackId: 'marigold-and-saffron', pageIndex: 3, timelineStartSec: 21, settings: { startSec: 25, sourceEndSec: 32, durationSec: 7, volume: 0.34, fadeInSec: 0.45, fadeOutSec: 0.8, loop: false } },
+  { id: 'marigold-hour-track-5', trackId: 'toast-in-the-garden', pageIndex: 4, timelineStartSec: 28, settings: { startSec: 24, sourceEndSec: 31, durationSec: 7, volume: 0.32, fadeInSec: 0.45, fadeOutSec: 0.8, loop: false } },
+];
+
+const ROYAL_MARIGOLD_HOUR: CardTemplate = {
+  id: 'royal-marigold-hour-wedding-story',
+  title: 'The Marigold Hour · Royal Wedding Story',
+  category: 'wedding',
+  aspectRatio: 'portrait-story',
+  tags: ['Video Invitation', '5-Page Wedding Story', 'Photo Frames', 'Animated Typography', 'Original Music per Page', 'Royal Maroon & Gold'],
+  thumbnailGradient: 'from-amber-600 via-rose-800 to-amber-950',
+  audioClips: soundscapeAudioClips,
+  pages: [
+    {
+      id: 'marigold-hour-cover',
+      title: '01 · The Invitation',
+      backgroundType: 'gradient',
+      backgroundValue: 'linear-gradient(155deg, #16070d 0%, #501326 53%, #1c0710 100%)',
+      duration: 7,
+      transition: 'light-sweep',
+      elements: [
+        soundscapeFrame('mh-cover-frame-outer', 20),
+        soundscapeFrame('mh-cover-frame-inner', 29),
+        soundscapePhoto('mh-cover-photo', '/images/photo-library/wedding-jharokha-sunrise-01.webp', 'A couple framed by a palace jharokha at sunrise', 67, 100, 316, 246, 'contain'),
+        soundscapePhotoFrame('mh-cover-photo-gold-arch', 67, 100, 316, 246),
+        soundscapeText('mh-cover-blessing', '॥ श्री गणेशाय नमः ॥', 45, 52, 360, 30, { fontFamily: "'Tiro Devanagari Hindi', serif", fontSize: 17, color: '#E6C77C', animation: 'fade', letterSpacing: 1.5 }),
+        soundscapeText('mh-cover-families', 'TOGETHER WITH OUR FAMILIES', 48, 362, 354, 24, { fontFamily: "'Montserrat', sans-serif", fontSize: 10, color: '#E8CA86', fontWeight: '600', letterSpacing: 2.1, animation: 'wipe' }),
+        soundscapeText('mh-cover-title', 'THE WEDDING OF', 48, 397, 354, 26, { fontFamily: "'Montserrat', sans-serif", fontSize: 12, color: '#F8EACB', fontWeight: '600', letterSpacing: 3, animation: 'baseline' }),
+        soundscapeText('mh-cover-aarav', 'Aarav Sharma', 35, 437, 380, 52, { fontFamily: "'Great Vibes', cursive", fontSize: 43, color: '#FFF4D7', animation: 'rise' }),
+        soundscapeText('mh-cover-ampersand', '&', 45, 483, 360, 33, { fontSize: 27, color: '#DDB45E', fontStyle: 'italic', animation: 'fade' }),
+        soundscapeText('mh-cover-meera', 'Meera Verma', 35, 516, 380, 53, { fontFamily: "'Great Vibes', cursive", fontSize: 43, color: '#FFF4D7', animation: 'rise' }),
+        soundscapeText('mh-cover-year', 'WEDDING INVITATION   ·   2027', 48, 590, 354, 24, { fontFamily: "'Montserrat', sans-serif", fontSize: 10, color: '#E6C77C', fontWeight: '600', letterSpacing: 1.6, animation: 'fade' }),
+        soundscapeText('mh-cover-ornament', '✦     ❧     ✦', 80, 630, 290, 30, { fontSize: 18, color: '#CDA556', animation: 'breathe', animationTiming: 'loop' }),
+      ],
+    },
+    {
+      id: 'marigold-hour-invitation',
+      title: '02 · With the Blessings of Our Families',
+      backgroundType: 'gradient',
+      backgroundValue: 'linear-gradient(145deg, #200912 0%, #3b1020 50%, #17070d 100%)',
+      duration: 7,
+      transition: 'royal-curtain',
+      elements: [
+        soundscapeFrame('mh-invite-frame-outer', 20),
+        soundscapeFrame('mh-invite-frame-inner', 29),
+        soundscapePhoto('mh-invite-photo', '/images/photo-library/wedding-palace-stairs-02.webp', 'Wedding couple at a heritage palace staircase', 90, 94, 270, 200, 'contain'),
+        soundscapePhotoFrame('mh-invite-photo-gold-arch', 90, 94, 270, 200),
+        soundscapeText('mh-invite-blessing', 'WITH THE BLESSINGS OF GOD\nAND OUR BELOVED ELDERS', 48, 46, 354, 40, { fontFamily: "'Montserrat', sans-serif", fontSize: 10, color: '#E8CA86', fontWeight: '600', letterSpacing: 1.3, animation: 'fade' }),
+        soundscapeText('mh-invite-copy', 'We cordially invite you to join us\nin celebrating the wedding of', 48, 312, 354, 48, { fontSize: 19, color: '#F4E9D5', animation: 'wipe' }),
+        soundscapeText('mh-invite-aarav', 'Aarav Sharma', 44, 370, 172, 42, { fontFamily: "'Cormorant Garamond', serif", fontSize: 27, color: '#F3D88E', fontWeight: '600', animation: 'rise' }),
+        soundscapeText('mh-invite-aarav-parents', 'Son of Mr. Rajesh Sharma\n& Mrs. Sunita Sharma', 43, 415, 174, 43, { fontSize: 13, color: '#F7EEDC', lineHeight: 1.25, animation: 'fade' }),
+        soundscapeText('mh-invite-and', 'AND', 196, 460, 58, 25, { fontFamily: "'Montserrat', sans-serif", fontSize: 10, color: '#D8AF5B', fontWeight: '700', letterSpacing: 2, animation: 'pop' }),
+        soundscapeText('mh-invite-meera', 'Meera Verma', 234, 370, 172, 42, { fontFamily: "'Cormorant Garamond', serif", fontSize: 27, color: '#F3D88E', fontWeight: '600', animation: 'rise' }),
+        soundscapeText('mh-invite-meera-parents', 'Daughter of Mr. Amit Verma\n& Mrs. Pooja Verma', 233, 415, 174, 43, { fontSize: 13, color: '#F7EEDC', lineHeight: 1.25, animation: 'fade' }),
+        soundscapeText('mh-invite-close', 'Your presence and blessings\nwill make our celebration special.', 50, 514, 350, 44, { fontSize: 17, color: '#FFF3D5', fontStyle: 'italic', animation: 'rise' }),
+        soundscapeText('mh-invite-date', '20 FEBRUARY 2027  ·  LUCKNOW', 50, 578, 350, 25, { fontFamily: "'Montserrat', sans-serif", fontSize: 9, color: '#D9B869', fontWeight: '600', letterSpacing: 1.5, animation: 'typewriter' }),
+      ],
+    },
+    {
+      id: 'marigold-hour-ceremony',
+      title: '03 · Wedding Ceremony',
+      backgroundType: 'gradient',
+      backgroundValue: 'linear-gradient(150deg, #18080d 0%, #35101d 55%, #13070c 100%)',
+      duration: 7,
+      transition: 'page-turn',
+      elements: [
+        soundscapeFrame('mh-ceremony-frame-outer', 20),
+        soundscapeFrame('mh-ceremony-frame-inner', 29),
+        soundscapePhoto('mh-ceremony-photo', '/images/photo-library/wedding-mandap-vows-04.webp', 'A wedding ceremony beneath a flower-adorned mandap', 70, 119, 310, 235, 'contain'),
+        soundscapePhotoFrame('mh-ceremony-photo-gold-arch', 70, 119, 310, 235),
+        soundscapeText('mh-ceremony-title', 'WEDDING CEREMONY', 50, 59, 350, 30, { fontFamily: "'Montserrat', sans-serif", fontSize: 13, color: '#E8C878', fontWeight: '700', letterSpacing: 2.7, animation: 'wipe' }),
+        soundscapeText('mh-ceremony-date', 'Saturday, 20 February 2027', 50, 374, 350, 33, { fontSize: 22, color: '#FFF0D0', animation: 'rise' }),
+        soundscapeText('mh-ceremony-muhurat-label', 'SHUBH MUHURAT', 50, 428, 350, 22, { fontFamily: "'Montserrat', sans-serif", fontSize: 10, color: '#DAB45F', fontWeight: '700', letterSpacing: 2, animation: 'fade' }),
+        soundscapeText('mh-ceremony-muhurat-time', '7:30 PM Onwards', 50, 453, 350, 35, { fontSize: 23, color: '#FFF4DF', animation: 'rise' }),
+        soundscapeText('mh-ceremony-venue-label', 'VENUE', 50, 506, 350, 22, { fontFamily: "'Montserrat', sans-serif", fontSize: 10, color: '#DAB45F', fontWeight: '700', letterSpacing: 2, animation: 'fade' }),
+        soundscapeText('mh-ceremony-venue', 'The Royal Palace\nLucknow, Uttar Pradesh', 50, 531, 350, 48, { fontSize: 20, color: '#FFF0D0', lineHeight: 1.2, animation: 'rise' }),
+        soundscapeText('mh-ceremony-close', 'We look forward to celebrating\nthis auspicious occasion with you.', 50, 603, 350, 44, { fontSize: 16, color: '#E8D8C1', fontStyle: 'italic', animation: 'fade' }),
+      ],
+    },
+    {
+      id: 'marigold-hour-reception',
+      title: '04 · Reception',
+      backgroundType: 'gradient',
+      backgroundValue: 'linear-gradient(145deg, #17070d 0%, #4a1620 52%, #19080c 100%)',
+      duration: 7,
+      transition: 'cross-zoom',
+      elements: [
+        soundscapeFrame('mh-reception-frame-outer', 20),
+        soundscapeFrame('mh-reception-frame-inner', 29),
+        soundscapePhoto('mh-reception-photo', '/images/photo-library/wedding-coastal-ceremony-05.webp', 'A romantic wedding celebration in warm evening light', 88, 143, 274, 207),
+        soundscapePhotoFrame('mh-reception-photo-gold-arch', 88, 143, 274, 207),
+        soundscapeText('mh-reception-title', 'RECEPTION', 50, 54, 350, 31, { fontFamily: "'Montserrat', sans-serif", fontSize: 14, color: '#E8C878', fontWeight: '700', letterSpacing: 3, animation: 'baseline' }),
+        soundscapeText('mh-reception-subtitle', 'An Evening of Love & Celebration', 50, 91, 350, 31, { fontSize: 20, color: '#FFF0D0', fontStyle: 'italic', animation: 'rise' }),
+        soundscapeText('mh-reception-date', 'Sunday, 21 February 2027', 50, 378, 350, 32, { fontSize: 22, color: '#FFF0D0', animation: 'rise' }),
+        soundscapeText('mh-reception-time-label', 'TIME', 50, 421, 350, 22, { fontFamily: "'Montserrat', sans-serif", fontSize: 10, color: '#DAB45F', fontWeight: '700', letterSpacing: 2, animation: 'fade' }),
+        soundscapeText('mh-reception-time', '6:30 PM Onwards', 50, 444, 350, 30, { fontSize: 21, color: '#FFF4DF', animation: 'rise' }),
+        soundscapeText('mh-reception-venue', 'THE GRAND ORCHID  ·  LUCKNOW', 50, 492, 350, 25, { fontFamily: "'Montserrat', sans-serif", fontSize: 10, color: '#F0D795', fontWeight: '600', letterSpacing: 1.3, animation: 'wipe' }),
+        soundscapeText('mh-reception-dinner', 'Dinner & Celebration', 50, 530, 350, 30, { fontSize: 19, color: '#FFF0D0', animation: 'rise' }),
+        soundscapeText('mh-reception-close', 'We warmly invite you to join us\nfor an evening of joy and togetherness.', 50, 585, 350, 48, { fontSize: 16, color: '#E8D8C1', fontStyle: 'italic', animation: 'fade' }),
+      ],
+    },
+    {
+      id: 'marigold-hour-thank-you',
+      title: '05 · With Love & Gratitude',
+      backgroundType: 'gradient',
+      backgroundValue: 'linear-gradient(150deg, #19070d 0%, #45131e 52%, #17070d 100%)',
+      duration: 7,
+      transition: 'panorama',
+      elements: [
+        soundscapeFrame('mh-thanks-frame-outer', 20),
+        soundscapeFrame('mh-thanks-frame-inner', 29),
+        soundscapePhoto('mh-thanks-photo', '/images/photo-library/wedding-floral-garden-09.webp', 'Newlyweds sharing a quiet moment in a garden', 94, 139, 262, 222),
+        soundscapePhotoFrame('mh-thanks-photo-gold-arch', 94, 139, 262, 222),
+        soundscapeText('mh-thanks-title', 'THANK YOU', 50, 64, 350, 36, { fontFamily: "'Montserrat', sans-serif", fontSize: 15, color: '#E8C878', fontWeight: '700', letterSpacing: 3, animation: 'wipe' }),
+        soundscapeText('mh-thanks-message', 'For being a part of\nour happiness and celebration.', 50, 389, 350, 52, { fontSize: 23, color: '#FFF0D0', animation: 'rise' }),
+        soundscapeText('mh-thanks-blessings', 'Your love and blessings\nmean the world to us.', 50, 461, 350, 45, { fontSize: 19, color: '#F0DFC5', fontStyle: 'italic', animation: 'fade' }),
+        soundscapeText('mh-thanks-family-label', 'WITH LOVE,', 50, 531, 350, 22, { fontFamily: "'Montserrat', sans-serif", fontSize: 10, color: '#DAB45F', fontWeight: '700', letterSpacing: 2, animation: 'baseline' }),
+        soundscapeText('mh-thanks-family', 'The Sharma & Verma Family', 50, 554, 350, 32, { fontSize: 21, color: '#FFF2D7', animation: 'rise' }),
+        soundscapeText('mh-thanks-final', 'A new beginning,\na lifetime of togetherness.', 50, 613, 350, 46, { fontSize: 19, color: '#E8C878', fontStyle: 'italic', animation: 'fade' }),
+        soundscapeText('mh-thanks-ornament', '✦     ❧     ✦', 80, 676, 290, 28, { fontSize: 18, color: '#CDA556', animation: 'breathe', animationTiming: 'loop' }),
+      ],
+    },
+  ],
+};
 
 export const TEMPLATE_CATEGORIES = [
   { id: 'all', label: 'All Designs' },
@@ -1422,6 +1694,7 @@ export const INITIAL_TEMPLATES: CardTemplate[] = [
       },
     ],
   },
+  ROYAL_MARIGOLD_HOUR,
   // 2. Complete 5-Page Royal Indian Video Wedding Invitation Sequence
   {
     id: 'royal-indian-video-wedding',

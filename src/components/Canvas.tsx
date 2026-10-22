@@ -2739,6 +2739,7 @@ export const Canvas: React.FC<CanvasProps> = ({
               }`}
               style={{
                 ...getImageMaskStyle(elem as ImageElement),
+                backgroundColor: (elem as ImageElement).objectFit === 'contain' ? '#2b111a' : undefined,
                 borderWidth:
                   (elem as ImageElement).mask === 'phone-mockup'
                     ? '4px'
@@ -2750,6 +2751,15 @@ export const Canvas: React.FC<CanvasProps> = ({
                 filter: getImageCssFilter(elem as ImageElement),
               }}
             >
+              {(elem as ImageElement).objectFit === 'contain' && (
+                <img
+                  src={(elem as ImageElement).src}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full pointer-events-none"
+                  style={{ objectFit: 'cover', filter: 'blur(14px) brightness(0.62)', transform: 'scale(1.08)' }}
+                />
+              )}
               {(elem as ImageElement).mask === 'phone-mockup' && (
                 <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-black rounded-full z-20" />
               )}

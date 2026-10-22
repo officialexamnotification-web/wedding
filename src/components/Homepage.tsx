@@ -121,6 +121,14 @@ const SUITE_SHOWCASE_META: Record<
     palette: string[];
   }
 > = {
+  'royal-marigold-hour-wedding-story': {
+    cleanTitle: 'The Marigold Hour',
+    hindiSubtitle: 'राजसी पाँच-पृष्ठ विवाह कहानी',
+    editionTag: '5-Slide Music Story',
+    coupleOrHighlight: 'Aarav & Meera',
+    venueOrDetail: 'Five distinct instrumental cues',
+    palette: ['#501326', '#D5B263', '#FFF3D5', '#17070D'],
+  },
   'royal-lakeside-wedding': {
     cleanTitle: 'Royal Lakeside Palace Suite',
     hindiSubtitle: 'शाही उदयपुर लेक पैलेस विवाह निमंत्रण',
@@ -298,20 +306,31 @@ const MiniCardArtwork: React.FC<{
                     className="w-full h-full overflow-hidden relative"
                     style={{
                       ...getImageMaskStyle(elem as ImageElement),
+                backgroundColor: (elem as ImageElement).objectFit === 'contain' ? '#2b111a' : undefined,
                       borderWidth: `${(elem as ImageElement).borderWidth || 0}px`,
                       borderColor: (elem as ImageElement).borderColor || '#D4AF37',
                       borderStyle: 'solid',
                       filter: getImageCssFilter(elem as ImageElement),
                     }}
                   >
+                    {(elem as ImageElement).objectFit === 'contain' && (
+                      <img
+                        src={(elem as ImageElement).src}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 w-full h-full pointer-events-none"
+                        style={{ objectFit: 'cover', filter: 'blur(14px) brightness(0.62)', transform: 'scale(1.08)' }}
+                      />
+                    )}
                     <img
                       src={(elem as ImageElement).src}
                       alt={(elem as ImageElement).alt || 'Invitation Artwork'}
                       referrerPolicy="no-referrer"
                       loading="lazy"
                       decoding="async"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full"
                       style={{
+                        objectFit: (elem as ImageElement).objectFit || 'cover',
                         transform: `scale(${
                           (elem as ImageElement).scale || 1
                         }) translate(${(elem as ImageElement).offsetX || 0}%, ${
@@ -757,7 +776,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                       referrerPolicy="no-referrer"
                       loading="lazy"
                       decoding="async"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full"
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
                   </div>
@@ -848,6 +867,7 @@ export const Homepage: React.FC<HomepageProps> = ({
             const currentPage = template.pages[activeSlideIdx] || template.pages[0];
             const isMultiSlide = template.pages.length > 1;
             const hasQr = template.pages.some((p) => p.elements.some((e) => e.type === 'qr'));
+            const audioClipCount = template.audioClips?.length ?? 0;
 
             return (
               <div
@@ -870,12 +890,20 @@ export const Homepage: React.FC<HomepageProps> = ({
                       <span>{meta.editionTag}</span>
                     </span>
 
-                    {hasQr && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-[9px] font-medium text-amber-300">
-                        <QrCode className="w-2.5 h-2.5 text-amber-400" />
-                        <span>Live GPS QR</span>
-                      </span>
-                    )}
+                    <span className="flex items-center gap-1.5">
+                      {audioClipCount > 0 && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/25 text-[9px] font-medium text-emerald-200">
+                          <Music className="w-2.5 h-2.5 text-emerald-300" />
+                          <span>{audioClipCount} original cues</span>
+                        </span>
+                      )}
+                      {hasQr && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-[9px] font-medium text-amber-300">
+                          <QrCode className="w-2.5 h-2.5 text-amber-400" />
+                          <span>Live GPS QR</span>
+                        </span>
+                      )}
+                    </span>
                   </div>
 
                   {/* Authentic Miniature Invitation Frame */}

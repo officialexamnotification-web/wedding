@@ -58,6 +58,65 @@ interface ExportModalProps {
 }
 
 type GreetingLanguage = 'en' | 'hi';
+type VideoQuality = '1080p' | '4k';
+
+const tracePhotoMask = (
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  mask: ImageElement['mask'],
+  radius = 18,
+) => {
+  context.beginPath();
+  if (mask === 'circle') {
+    context.ellipse(x + width / 2, y + height / 2, width / 2, height / 2, 0, 0, Math.PI * 2);
+  } else if (mask === 'arch') {
+    context.moveTo(x, y + height);
+    context.lineTo(x, y + height * 0.52);
+    context.bezierCurveTo(x, y + height * 0.22, x + width * 0.19, y, x + width / 2, y);
+    context.bezierCurveTo(x + width * 0.81, y, x + width, y + height * 0.22, x + width, y + height * 0.52);
+    context.lineTo(x + width, y + height);
+    context.closePath();
+  } else if (mask === 'diamond') {
+    context.moveTo(x + width / 2, y);
+    context.lineTo(x + width, y + height / 2);
+    context.lineTo(x + width / 2, y + height);
+    context.lineTo(x, y + height / 2);
+    context.closePath();
+  } else if (mask === 'heart') {
+    context.moveTo(x + width / 2, y + height * 0.96);
+    context.bezierCurveTo(x + width * 0.38, y + height * 0.82, x, y + height * 0.56, x, y + height * 0.3);
+    context.bezierCurveTo(x, y - height * 0.02, x + width * 0.38, y - height * 0.03, x + width / 2, y + height * 0.2);
+    context.bezierCurveTo(x + width * 0.62, y - height * 0.03, x + width, y - height * 0.02, x + width, y + height * 0.3);
+    context.bezierCurveTo(x + width, y + height * 0.56, x + width * 0.62, y + height * 0.82, x + width / 2, y + height * 0.96);
+    context.closePath();
+  } else if (mask === 'octagon' || mask === 'hexagon') {
+    const inset = mask === 'hexagon' ? width * 0.25 : width * 0.29;
+    context.moveTo(x + inset, y);
+    context.lineTo(x + width - inset, y);
+    context.lineTo(x + width, y + height / 2);
+    context.lineTo(x + width - inset, y + height);
+    context.lineTo(x + inset, y + height);
+    context.lineTo(x, y + height / 2);
+    context.closePath();
+  } else if (mask === 'rounded' || mask === 'polaroid') {
+    const r = Math.max(0, Math.min(radius, width / 2, height / 2));
+    context.moveTo(x + r, y);
+    context.lineTo(x + width - r, y);
+    context.quadraticCurveTo(x + width, y, x + width, y + r);
+    context.lineTo(x + width, y + height - r);
+    context.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+    context.lineTo(x + r, y + height);
+    context.quadraticCurveTo(x, y + height, x, y + height - r);
+    context.lineTo(x, y + r);
+    context.quadraticCurveTo(x, y, x + r, y);
+    context.closePath();
+  } else {
+    context.rect(x, y, width, height);
+  }
+};
 
 const getGreetingMessage = (occasion: string, language: GreetingLanguage) => {
   const messages: Record<GreetingLanguage, Record<string, string>> = {
@@ -104,7 +163,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [greetingMessage, setGreetingMessage] = useState('');
   const [greetingLanguage, setGreetingLanguage] = useState<GreetingLanguage>('en');
+  const [videoQuality, setVideoQuality] = useState<VideoQuality>('1080p');
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
+  const videoShortEdge = videoQuality === '4k' ? 2160 : 1080;
+  const videoOutputScale = videoShortEdge / Math.min(dimensions.width, dimensions.height);
+  const videoOutputWidth = Math.round(dimensions.width * videoOutputScale / 2) * 2;
+  const videoOutputHeight = Math.round(dimensions.height * videoOutputScale / 2) * 2;
 
   const invitationTitle = title
     .replace(/\s*\((?:\d+\s*[- ]?\s*(?:page|slide)s?\s*(?:sequence|suite)?|sequence|suite)[^)]*\)\s*$/i, '')
@@ -314,46 +378,47 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           } catch {
             // fallback
           }
-        } else
-        ctx.strokeStyle = s.strokeColor || '#D4AF37';
-        ctx.lineWidth = s.strokeWidth || 2;
-        if (s.fillColor && s.fillColor !== 'transparent') {
-          ctx.fillStyle = s.fillColor;
-          ctx.fillRect(s.x, s.y, s.width, s.height);
-        }
-        if (s.shapeType === 'divider-line') {
-          ctx.beginPath();
-          ctx.moveTo(s.x, s.y + s.height / 2);
-          ctx.lineTo(s.x + s.width, s.y + s.height / 2);
-          ctx.stroke();
-        } else if (
-          s.shapeType === 'circle' ||
-          s.shapeType === 'royal-badge' ||
-          s.shapeType === 'scallop-badge' ||
-          s.shapeType === 'mandala-ring'
-        ) {
-          ctx.beginPath();
-          ctx.ellipse(
-            s.x + s.width / 2,
-            s.y + s.height / 2,
-            s.width / 2,
-            s.height / 2,
-            0,
-            0,
-            Math.PI * 2
-          );
-          ctx.stroke();
         } else {
-          ctx.strokeRect(s.x, s.y, s.width, s.height);
-          if (s.shapeType === 'gold-frame' || s.shapeType === 'ornate-border') {
-            ctx.strokeRect(s.x + 5, s.y + 5, s.width - 10, s.height - 10);
+          ctx.strokeStyle = s.strokeColor || '#D4AF37';
+          ctx.lineWidth = s.strokeWidth || 2;
+          if (s.fillColor && s.fillColor !== 'transparent') {
+            ctx.fillStyle = s.fillColor;
+            ctx.fillRect(s.x, s.y, s.width, s.height);
           }
-        }
-        if (s.innerText) {
-          ctx.fillStyle = s.innerTextColor || '#FFF2C6';
-          ctx.font = `bold ${s.innerFontSize || 13}px Cinzel, serif`;
-          ctx.textAlign = 'center';
-          ctx.fillText(s.innerText, s.x + s.width / 2, s.y + s.height / 2 + 4);
+          if (s.shapeType === 'divider-line') {
+            ctx.beginPath();
+            ctx.moveTo(s.x, s.y + s.height / 2);
+            ctx.lineTo(s.x + s.width, s.y + s.height / 2);
+            ctx.stroke();
+          } else if (
+            s.shapeType === 'circle' ||
+            s.shapeType === 'royal-badge' ||
+            s.shapeType === 'scallop-badge' ||
+            s.shapeType === 'mandala-ring'
+          ) {
+            ctx.beginPath();
+            ctx.ellipse(
+              s.x + s.width / 2,
+              s.y + s.height / 2,
+              s.width / 2,
+              s.height / 2,
+              0,
+              0,
+              Math.PI * 2
+            );
+            ctx.stroke();
+          } else {
+            ctx.strokeRect(s.x, s.y, s.width, s.height);
+            if (s.shapeType === 'gold-frame' || s.shapeType === 'ornate-border') {
+              ctx.strokeRect(s.x + 5, s.y + 5, s.width - 10, s.height - 10);
+            }
+          }
+          if (s.innerText) {
+            ctx.fillStyle = s.innerTextColor || '#FFF2C6';
+            ctx.font = `bold ${s.innerFontSize || 13}px Cinzel, serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(s.innerText, s.x + s.width / 2, s.y + s.height / 2 + 4);
+          }
         }
       }
 
@@ -434,11 +499,62 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             img.onload = res;
             img.onerror = res;
           });
-          ctx.drawImage(img, im.x, im.y, im.width, im.height);
-          if (im.borderWidth && im.borderWidth > 0) {
+
+          const centerX = im.x + im.width / 2;
+          const centerY = im.y + im.height / 2;
+          const fit = im.objectFit || 'cover';
+          const baseScale = fit === 'contain'
+            ? Math.min(im.width / img.width, im.height / img.height)
+            : Math.max(im.width / img.width, im.height / img.height);
+          const drawImageAtFit = (requestedFit: 'cover' | 'contain' | 'fill', zoom = 1) => {
+            const fitScale = requestedFit === 'contain'
+              ? Math.min(im.width / img.width, im.height / img.height)
+              : Math.max(im.width / img.width, im.height / img.height);
+            const drawWidth = requestedFit === 'fill' ? im.width : img.width * fitScale * zoom;
+            const drawHeight = requestedFit === 'fill' ? im.height : img.height * fitScale * zoom;
+            const x = centerX - drawWidth / 2 + (im.offsetX || 0) * im.width / 100;
+            const y = centerY - drawHeight / 2 + (im.offsetY || 0) * im.height / 100;
+            ctx.drawImage(img, x, y, drawWidth, drawHeight);
+          };
+
+          ctx.save();
+          tracePhotoMask(ctx, im.x, im.y, im.width, im.height, im.mask, im.borderRadius);
+          ctx.clip();
+
+          if (fit === 'contain') {
+            ctx.save();
+            ctx.filter = 'blur(12px) brightness(0.62)';
+            ctx.globalAlpha *= 0.9;
+            drawImageAtFit('cover', 1.08);
+            ctx.restore();
+          }
+
+          const imageScale = Math.max(0.1, im.scale || 1);
+          const drawWidth = fit === 'fill' ? im.width * imageScale : img.width * baseScale * imageScale;
+          const drawHeight = fit === 'fill' ? im.height * imageScale : img.height * baseScale * imageScale;
+          const x = centerX - drawWidth / 2 + (im.offsetX || 0) * im.width / 100;
+          const y = centerY - drawHeight / 2 + (im.offsetY || 0) * im.height / 100;
+          ctx.save();
+          ctx.translate(centerX, centerY);
+          ctx.rotate(((im.rotationInside || 0) * Math.PI) / 180);
+          ctx.translate(-centerX, -centerY);
+          ctx.drawImage(img, x, y, drawWidth, drawHeight);
+          ctx.restore();
+
+          if ((im.vignette || 0) > 0) {
+            const vignette = ctx.createRadialGradient(centerX, centerY, Math.min(im.width, im.height) * 0.15, centerX, centerY, Math.max(im.width, im.height) * 0.72);
+            vignette.addColorStop(0, 'rgba(0,0,0,0)');
+            vignette.addColorStop(1, `rgba(0,0,0,${Math.min(0.9, (im.vignette || 0) / 100)})`);
+            ctx.fillStyle = vignette;
+            ctx.fillRect(im.x, im.y, im.width, im.height);
+          }
+          ctx.restore();
+
+          if (im.borderWidth && im.borderWidth > 0 && im.mask !== 'arch') {
+            tracePhotoMask(ctx, im.x, im.y, im.width, im.height, im.mask, im.borderRadius);
             ctx.strokeStyle = im.borderColor || '#D4AF37';
             ctx.lineWidth = im.borderWidth;
-            ctx.strokeRect(im.x, im.y, im.width, im.height);
+            ctx.stroke();
           }
         } catch (e) {
           console.warn('Image draw err', e);
@@ -871,7 +987,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         throw new Error('Video export is not supported in this browser. Please use the latest Chrome or Edge.');
       }
 
-      const renderScale = Math.min(exportScale, 2);
+      // Keep 1080p as the share-friendly default. 4K keeps the original ratio
+      // and uses a 3x source render to avoid allocating a full 4K bitmap for
+      // every animated text layer before encoding the final 4K frames.
+      const outputScale = videoOutputScale;
+      const renderScale = videoQuality === '4k' ? Math.min(outputScale, 3) : outputScale;
+      const outputWidth = videoOutputWidth;
+      const outputHeight = videoOutputHeight;
       const loadRender = async (page: CardPage, mode: 'page' | 'transparent') => {
         const dataUrl = await generateCanvasImage(page, 'png', renderScale, mode);
         if (!dataUrl) throw new Error(`Could not render “${page.title}”.`);
@@ -913,12 +1035,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       }));
 
       const canvas = document.createElement('canvas');
-      canvas.width = dimensions.width * renderScale;
-      canvas.height = dimensions.height * renderScale;
+      canvas.width = outputWidth;
+      canvas.height = outputHeight;
+      if (canvas.width !== outputWidth || canvas.height !== outputHeight) {
+        throw new Error('This browser cannot allocate the selected video size. Choose 1080p / 60 FPS and try again.');
+      }
       const context = canvas.getContext('2d');
-      if (!context) throw new Error('Could not initialize the video renderer.');
+      if (!context) throw new Error('Could not initialize the video renderer. Try 1080p / 60 FPS on this device.');
 
-      const videoStream = canvas.captureStream(30);
+      const videoStream = canvas.captureStream(60);
       stream = videoStream;
       const audioDurationSec = pages.reduce((sum, page) => sum + (page.duration || 4.5), 0);
       let audioDestination: MediaStreamAudioDestinationNode | null = null;
@@ -979,21 +1104,26 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         for (const track of audioDestination.stream.getAudioTracks()) videoStream.addTrack(track);
       }
 
-      const mimeType = [
-        'video/mp4;codecs="avc1.42E01E,mp4a.40.2"',
-        'video/mp4',
-        'video/webm;codecs=vp9,opus',
-        'video/webm;codecs=vp8,opus',
-        'video/webm',
-      ]
+      // Prefer a codec that can handle high resolutions. The old AVC level
+      // hint was capped too low for 1080p60 and 4K60 on some encoders.
+      const mimeCandidates = videoQuality === '4k'
+        ? ['video/webm;codecs=vp9,opus', 'video/mp4', 'video/webm;codecs=vp8,opus', 'video/webm']
+        : ['video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4;codecs="avc1.42E01E,mp4a.40.2"'];
+      const mimeType = mimeCandidates
         .find((candidate) => MediaRecorder.isTypeSupported(candidate));
       if (!mimeType) throw new Error('This browser cannot encode an invitation video. Please use an updated browser.');
 
       const chunks: BlobPart[] = [];
-      recorder = new MediaRecorder(videoStream, { mimeType, videoBitsPerSecond: 5_000_000 });
+      recorder = new MediaRecorder(videoStream, {
+        mimeType,
+        videoBitsPerSecond: videoQuality === '4k' ? 35_000_000 : 12_000_000,
+        audioBitsPerSecond: 192_000,
+      });
       const recording = new Promise<Blob>((resolve, reject) => {
         recorder!.ondataavailable = (event) => { if (event.data.size > 0) chunks.push(event.data); };
-        recorder!.onerror = () => reject(new Error('Video recording failed. Please try again.'));
+        recorder!.onerror = () => reject(new Error(videoQuality === '4k'
+          ? '4K / 60 FPS encoding failed on this device. Switch to 1080p / 60 FPS and try again.'
+          : 'Video recording failed. Please try again.'));
         recorder!.onstop = () => resolve(new Blob(chunks, { type: mimeType }));
       });
 
@@ -1013,14 +1143,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) continue;
           target.save();
           target.globalAlpha = element.opacity ?? 1;
-          const centerX = (element.x + element.width / 2) * renderScale;
-          const centerY = (element.y + element.height / 2) * renderScale;
+          const centerX = (element.x + element.width / 2) * outputScale;
+          const centerY = (element.y + element.height / 2) * outputScale;
           target.translate(centerX, centerY);
           target.rotate(((element.rotation || 0) * Math.PI) / 180);
           target.beginPath();
-          target.roundRect(-element.width * renderScale / 2, -element.height * renderScale / 2, element.width * renderScale, element.height * renderScale, (element.borderRadius ?? 10) * renderScale);
+          target.roundRect(-element.width * outputScale / 2, -element.height * outputScale / 2, element.width * outputScale, element.height * outputScale, (element.borderRadius ?? 10) * outputScale);
           target.clip();
-          target.drawImage(video, -element.width * renderScale / 2, -element.height * renderScale / 2, element.width * renderScale, element.height * renderScale);
+          target.drawImage(video, -element.width * outputScale / 2, -element.height * outputScale / 2, element.width * outputScale, element.height * outputScale);
           target.restore();
         }
         for (const layer of rendered.text) {
@@ -1038,12 +1168,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           target.globalAlpha = alpha;
           if (kind === 'wipe') {
             target.beginPath();
-            target.rect(element.x * renderScale, element.y * renderScale, element.width * renderScale * progress, element.height * renderScale);
+            target.rect(element.x * outputScale, element.y * outputScale, element.width * outputScale * progress, element.height * outputScale);
             target.clip();
           }
-          const cx = (element.x + element.width / 2) * renderScale;
-          const cy = (element.y + element.height / 2) * renderScale;
-          target.translate(cx + translateX * renderScale, cy + translateY * renderScale);
+          const cx = (element.x + element.width / 2) * outputScale;
+          const cy = (element.y + element.height / 2) * outputScale;
+          target.translate(cx + translateX * outputScale, cy + translateY * outputScale);
           target.scale(scale, scale);
           target.drawImage(image, -cx, -cy, canvas.width, canvas.height);
           target.restore();
@@ -1263,21 +1393,20 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       const safeTitle = title.trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'invitation';
       const extension = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
       const fileName = `${safeTitle}-invitation.${extension}`;
+      const videoFile = new File([blob], fileName, { type: mimeType.split(';')[0] });
+      setPreparedVideo(videoFile);
       if (prepareForShare) {
-        setPreparedVideo(new File([blob], fileName, { type: mimeType.split(';')[0] }));
         setShareStatus('Video is ready. Tap “Share video file” and choose WhatsApp in your device share menu.');
         return;
       }
-      const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = fileName;
-      link.click();
-      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 30_000);
+      setShareStatus('Your video is ready. Click “Save Animated Video” below to download it.');
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#D4AF37', '#FFEAA7', '#FFD700', '#C41E3A'] });
     } catch (error) {
       console.error('Video export failed', error);
-      setExportError(error instanceof Error ? error.message : 'Video export failed. Please try again.');
+      const message = error instanceof Error ? error.message : 'Video export failed. Please try again.';
+      setExportError(videoQuality === '4k' && !message.includes('1080p / 60 FPS')
+        ? `${message} If this device cannot finish 4K encoding, switch to 1080p / 60 FPS.`
+        : message);
     } finally {
       if (recorder?.state === 'recording') recorder.stop();
       sources.forEach((sourceNode) => { try { sourceNode.stop(); } catch { /* already stopped */ } });
@@ -1286,6 +1415,20 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       if (audioContext && audioContext.state !== 'closed') await audioContext.close();
       setDownloading(false);
     }
+  };
+
+  const handleDownloadPreparedVideo = () => {
+    if (!preparedVideo) return;
+    const downloadUrl = URL.createObjectURL(preparedVideo);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = preparedVideo.name;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 60_000);
+    setShareStatus('Download started. Check your browser downloads for the invitation video.');
   };
 
   const handleShareWhatsApp = () => {
@@ -1489,8 +1632,38 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <div className="mb-3">
               <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-300">Animated invitation</h4>
             </div>
+          <div className="mb-2.5 rounded-xl border border-white/10 bg-[#141312] p-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-[10px] font-medium text-neutral-300">Video resolution · 60 FPS</span>
+              <span className="text-[9px] text-neutral-500">{videoOutputWidth} × {videoOutputHeight}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { value: '1080p', title: '1080p · 60 FPS', detail: 'Recommended for sharing' },
+                { value: '4k', title: '4K · 60 FPS', detail: 'High resolution · large file' },
+              ] as const).map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={videoQuality === option.value}
+                  disabled={downloading}
+                  onClick={() => {
+                    setVideoQuality(option.value);
+                    setPreparedVideo(null);
+                    setShareStatus(null);
+                    setExportError(null);
+                  }}
+                  className={`rounded-lg border px-2.5 py-2 text-left transition disabled:opacity-50 ${videoQuality === option.value ? 'border-amber-300/50 bg-amber-300/10 text-amber-100' : 'border-white/10 bg-black/20 text-neutral-300 hover:border-white/20'}`}
+                >
+                  <span className="block text-[10px] font-semibold">{option.title}</span>
+                  <span className="mt-0.5 block text-[9px] text-neutral-500">{option.detail}</span>
+                </button>
+              ))}
+            </div>
+            {videoQuality === '4k' && <p className="mt-2 text-[9px] leading-relaxed text-amber-100/70">4K rendering needs more memory and may take longer. A recent desktop browser is recommended.</p>}
+          </div>
           <button
-            onClick={handleDownloadVideo}
+            onClick={() => preparedVideo ? handleDownloadPreparedVideo() : void handleDownloadVideo()}
             disabled={downloading}
             className="group w-full p-3 rounded-xl bg-gradient-to-r from-amber-400/10 to-amber-200/[0.03] hover:from-amber-400/15 hover:to-amber-200/[0.06] border border-amber-300/20 hover:border-amber-300/40 text-left transition flex items-center justify-between gap-3 disabled:opacity-60"
           >
@@ -1500,11 +1673,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-semibold text-neutral-100">
-                  {downloading ? 'Rendering invitation video…' : 'Download Animated Video'}
+                  {downloading ? 'Rendering invitation video…' : preparedVideo ? 'Save Animated Video' : 'Download Animated Video'}
                 </div>
                 <div className="text-[10px] text-neutral-400 flex items-center gap-1 mt-0.5">
                   <Music className="w-3 h-3 text-amber-300" />
-                  <span className="truncate">{activeAudioTrack?.name || 'No music'} · exact clip duration · WebM</span>
+                  <span className="truncate">{activeAudioTrack?.name || 'No music'} · {videoQuality === '4k' ? '4K' : '1080p'} · 60 FPS · MP4/WebM</span>
                 </div>
               </div>
             </div>

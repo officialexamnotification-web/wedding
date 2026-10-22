@@ -302,6 +302,16 @@ export default function App() {
     setInvitationCategory(template.category);
     setAspectRatio(template.aspectRatio);
 
+    const templateAudioClips = template.audioClips ?? [];
+    setAudioClips(templateAudioClips);
+    const firstTemplateClip = templateAudioClips[0];
+    setSelectedAudioClipId(firstTemplateClip?.id ?? null);
+    if (firstTemplateClip) {
+      const templateTrack = AUDIO_TRACKS.find((track) => track.id === firstTemplateClip.trackId);
+      if (templateTrack) setActiveAudioTrack(templateTrack);
+      setAudioClip(firstTemplateClip.settings);
+    }
+
     const updatedPages = await Promise.all(
       template.pages.map(async (page) => {
         const updatedElems = await Promise.all(
@@ -1121,9 +1131,13 @@ export default function App() {
               ? videoModalTemplate.aspectRatio
               : (INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0]).aspectRatio
           }
-          activeAudioTrack={activeAudioTrack}
-          audioClip={audioClip}
-          audioClips={videoModalTemplate ? [] : audioClips}
+          activeAudioTrack={
+            videoModalTemplate?.audioClips?.[0]
+              ? AUDIO_TRACKS.find((track) => track.id === videoModalTemplate.audioClips?.[0].trackId) || activeAudioTrack
+              : activeAudioTrack
+          }
+          audioClip={videoModalTemplate?.audioClips?.[0]?.settings || audioClip}
+          audioClips={videoModalTemplate?.audioClips ?? audioClips}
           onShareVideo={async () => {
             const targetTmpl = videoModalTemplate || INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0];
             await handleSelectTemplate(targetTmpl);

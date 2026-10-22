@@ -471,18 +471,29 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                                   className="w-full h-full overflow-hidden relative"
                                   style={{
                                     ...getImageMaskStyle(elem as ImageElement),
+                                    backgroundColor: '#2b111a',
                                     borderWidth: `${(elem as ImageElement).borderWidth || 0}px`,
                                     borderColor: (elem as ImageElement).borderColor || '#D4AF37',
                                     borderStyle: 'solid',
                                     filter: getImageCssFilter(elem as ImageElement),
                                   }}
                                 >
+                                  {(elem as ImageElement).objectFit === 'contain' && (
+                                    <img
+                                      src={(elem as ImageElement).src}
+                                      alt=""
+                                      aria-hidden="true"
+                                      className="absolute inset-0 w-full h-full pointer-events-none"
+                                      style={{ objectFit: 'cover', filter: 'blur(14px) brightness(0.62)', transform: 'scale(1.08)' }}
+                                    />
+                                  )}
                                   <img
                                     src={(elem as ImageElement).src}
                                     alt="Slide Photo"
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full"
                                     referrerPolicy="no-referrer"
                                     style={{
+                                      objectFit: (elem as ImageElement).objectFit || 'cover',
                                       transform: `scale(${
                                         (elem as ImageElement).scale || 1
                                       }) translate(${(elem as ImageElement).offsetX || 0}%, ${
