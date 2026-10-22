@@ -56,7 +56,7 @@ import {
   renderVideoVisual,
   renderAudioVisual,
 } from './Canvas';
-import { AUDIO_TRACKS } from './Sidebar';
+import { AUDIO_TRACKS } from '../data/audioTracks';
 
 interface VideoCardModalProps {
   isOpen: boolean;

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import {
   CardTemplate,
   CardPage,
@@ -25,19 +25,22 @@ import {
 import { INITIAL_TEMPLATES } from './data/templates';
 import { generateQrDataUrl } from './utils/qrHelper';
 import { ensureTextContrastOnAll } from './utils/colorContrast';
-import { Navbar } from './components/Navbar';
-import { Sidebar, AUDIO_TRACKS, type SidebarTab } from './components/Sidebar';
-import { Toolbar } from './components/Toolbar';
-import { Canvas } from './components/Canvas';
-import { PreviewModal } from './components/PreviewModal';
-import { ExportModal } from './components/ExportModal';
-import { AnalysisModal } from './components/AnalysisModal';
-import { WordingModal } from './components/WordingModal';
+import type { SidebarTab } from './components/Sidebar';
+import { AUDIO_TRACKS } from './data/audioTracks';
 import { Homepage } from './components/Homepage';
-import { PhotoAdjustModal } from './components/PhotoAdjustModal';
-import { VideoCardModal } from './components/VideoCardModal';
-import { SlideFilmstrip } from './components/SlideFilmstrip';
-import { BlankDesignOptions } from './components/CreateDesignModal';
+import type { BlankDesignOptions } from './components/CreateDesignModal';
+
+const Navbar = lazy(() => import('./components/Navbar').then((module) => ({ default: module.Navbar })));
+const Toolbar = lazy(() => import('./components/Toolbar').then((module) => ({ default: module.Toolbar })));
+const Sidebar = lazy(() => import('./components/Sidebar').then((module) => ({ default: module.Sidebar })));
+const Canvas = lazy(() => import('./components/Canvas').then((module) => ({ default: module.Canvas })));
+const PreviewModal = lazy(() => import('./components/PreviewModal').then((module) => ({ default: module.PreviewModal })));
+const ExportModal = lazy(() => import('./components/ExportModal').then((module) => ({ default: module.ExportModal })));
+const AnalysisModal = lazy(() => import('./components/AnalysisModal').then((module) => ({ default: module.AnalysisModal })));
+const WordingModal = lazy(() => import('./components/WordingModal').then((module) => ({ default: module.WordingModal })));
+const PhotoAdjustModal = lazy(() => import('./components/PhotoAdjustModal').then((module) => ({ default: module.PhotoAdjustModal })));
+const VideoCardModal = lazy(() => import('./components/VideoCardModal').then((module) => ({ default: module.VideoCardModal })));
+const SlideFilmstrip = lazy(() => import('./components/SlideFilmstrip').then((module) => ({ default: module.SlideFilmstrip })));
 
 const inferInvitationCategory = (label: string): CardTemplate['category'] => {
   const value = label.toLowerCase();
@@ -1095,8 +1098,9 @@ export default function App() {
             setIsVideoModalOpen(true);
           }}
         />
-        <AnalysisModal isOpen={isAnalysisOpen} onClose={() => setIsAnalysisOpen(false)} />
-        <VideoCardModal
+        <Suspense fallback={null}>
+        {isAnalysisOpen && <AnalysisModal isOpen={isAnalysisOpen} onClose={() => setIsAnalysisOpen(false)} />}
+        {isVideoModalOpen && <VideoCardModal
           isOpen={isVideoModalOpen}
           onClose={() => {
             setIsVideoModalOpen(false);
@@ -1134,7 +1138,8 @@ export default function App() {
             setIsVideoModalOpen(false);
             setVideoModalTemplate(null);
           }}
-        />
+        />}
+        </Suspense>
       </>
     );
   }
@@ -1151,6 +1156,7 @@ export default function App() {
   };
 
   return (
+    <Suspense fallback={<div className="flex h-screen w-screen items-center justify-center bg-neutral-950 text-neutral-300">Loading invitation studio…</div>}>
     <div className="flex flex-col h-screen w-screen bg-neutral-950 text-neutral-100 overflow-hidden font-sans">
       {/* Top Studio Navbar */}
       <Navbar
@@ -1372,16 +1378,16 @@ export default function App() {
       </div>
 
       {/* Modals */}
-      <PreviewModal
+      {isPreviewOpen && <PreviewModal
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         title={title}
         pages={pages}
         aspectRatio={aspectRatio}
         onOpenExport={() => setIsExportOpen(true)}
-      />
+      />}
 
-      <ExportModal
+      {isExportOpen && <ExportModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
         title={title}
@@ -1393,11 +1399,11 @@ export default function App() {
         audioClips={audioClips}
         audioTracks={audioTracks}
         occasionCategory={invitationCategory}
-      />
+      />}
 
-      <AnalysisModal isOpen={isAnalysisOpen} onClose={() => setIsAnalysisOpen(false)} />
+      {isAnalysisOpen && <AnalysisModal isOpen={isAnalysisOpen} onClose={() => setIsAnalysisOpen(false)} />}
 
-      <PhotoAdjustModal
+      {isPhotoAdjustOpen && <PhotoAdjustModal
         isOpen={isPhotoAdjustOpen}
         onClose={() => {
           setIsPhotoAdjustOpen(false);
@@ -1411,9 +1417,9 @@ export default function App() {
           }
         }}
         aspectRatio={aspectRatio}
-      />
+      />}
 
-      <VideoCardModal
+      {isVideoModalOpen && <VideoCardModal
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
         pages={pages}
@@ -1432,9 +1438,9 @@ export default function App() {
             setCurrentPageIndex(targetSlideIndex);
           }
         }}
-      />
+      />}
 
-      <WordingModal
+      {isAiCopyOpen && <WordingModal
         isOpen={isAiCopyOpen}
         onClose={() => setIsAiCopyOpen(false)}
         onInsertText={(text, font, size) => {
@@ -1460,7 +1466,8 @@ export default function App() {
           };
           handleAddElement(newElem);
         }}
-      />
+      />}
     </div>
+    </Suspense>
   );
 }
