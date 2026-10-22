@@ -149,7 +149,9 @@ function makeSquareTemplate(collection: CategoryDesigns, index: number): CardTem
   const name = collection.names[index];
   const id = `square-${collection.category}-${String(index + 1).padStart(2, '0')}`;
   const palette = collection.palettes[index];
-  const isPhotoTemplate = photoLayouts.includes(index);
+  const isIvoryJharokha = collection.category === 'wedding' && index === 0;
+  const isBirthdayWish = collection.category === 'birthday' && index === 14;
+  const isPhotoTemplate = photoLayouts.includes(index) && !isBirthdayWish;
   const photoLayoutIndex = photoLayouts.indexOf(index);
   const background: ImageElement = {
     id: `${id}-artwork`, type: 'image', src: collection.artwork[index],
@@ -175,8 +177,10 @@ function makeSquareTemplate(collection: CategoryDesigns, index: number): CardTem
     });
   }
 
-  const ink = ensureTextContrast(palette.ink, palette.background);
-  const gold = ensureTextContrast(palette.gold, palette.background);
+  // Generated artwork uses its own photographed/paper palette. These two light-paper
+  // compositions need explicit dark type colors rather than the original palette.
+  const ink = isIvoryJharokha || isBirthdayWish ? '#57232B' : ensureTextContrast(palette.ink, palette.background);
+  const gold = isIvoryJharokha || isBirthdayWish ? '#81511E' : ensureTextContrast(palette.gold, palette.background);
   const editorialAlign: TextElement['textAlign'] = !isPhotoTemplate && (index % 5 === 1 || index % 5 === 3) ? 'left' : 'center';
   const textX = isPhotoTemplate && photoLayoutIndex === 1 ? 310 : isPhotoTemplate && photoLayoutIndex === 4 ? 56 : editorialAlign === 'left' ? 76 : 52;
   const textWidth = isPhotoTemplate && photoLayoutIndex === 1 ? 238 : isPhotoTemplate && photoLayoutIndex === 4 ? 280 : editorialAlign === 'left' ? 448 : 496;
@@ -196,7 +200,25 @@ function makeSquareTemplate(collection: CategoryDesigns, index: number): CardTem
   const titleSize = compact ? 28 : [42, 38, 40, 44, 40][layout];
   const lineAlign = compact ? 'center' : isPhotoTemplate ? 'center' : editorialAlign;
 
-  elements.push(
+  if (isIvoryJharokha) {
+    elements.push(
+      textLayer(`${id}-intro`, 'TOGETHER WITH OUR FAMILIES', 56, 140, 352, 24, 15, gold, "'Montserrat', sans-serif", '700', .8),
+      textLayer(`${id}-names`, 'Aarav & Meera', 56, 177, 352, 70, 52, ink, "'Great Vibes', cursive", '600'),
+      textLayer(`${id}-event`, 'THE WEDDING CELEBRATION', 56, 250, 352, 32, 20, gold, "'Cinzel', serif", '700', .8),
+      textLayer(`${id}-date`, 'SATURDAY · 20 FEBRUARY 2027', 56, 302, 352, 28, 16, ink, "'Montserrat', sans-serif", '700', .3),
+      textLayer(`${id}-venue`, 'THE ROYAL COURTYARD · JAIPUR', 56, 340, 352, 28, 15, gold, "'Cinzel', serif", '700', .3),
+      textLayer(`${id}-closing`, 'With love, we look forward to celebrating with you', 94, 394, 276, 38, 18, ink, "'Cormorant Garamond', serif", '600'),
+    );
+  } else if (isBirthdayWish) {
+    elements.push(
+      textLayer(`${id}-intro`, 'COME CELEBRATE A VERY SPECIAL DAY', 75, 134, 310, 26, 15, gold, "'Montserrat', sans-serif", '700', .4),
+      textLayer(`${id}-names`, 'Aarav Turns One', 58, 153, 344, 66, 48, ink, "'Great Vibes', cursive", '600'),
+      textLayer(`${id}-event`, 'A WISH IN GOLD', 58, 225, 344, 32, 20, gold, "'Cinzel', serif", '700', 1),
+      textLayer(`${id}-date`, 'SATURDAY · 20 FEBRUARY 2027 · 7:30 PM', 58, 271, 344, 30, 15, ink, "'Montserrat', sans-serif", '700', 0),
+      textLayer(`${id}-venue`, 'THE CELEBRATION GARDEN · JAIPUR', 58, 309, 344, 28, 15, gold, "'Cinzel', serif", '700', .1),
+      textLayer(`${id}-closing`, 'Cake, candles and a little extra sparkle.', 74, 358, 312, 34, 18, ink, "'Cormorant Garamond', serif", '600'),
+    );
+  } else elements.push(
     textLayer(`${id}-intro`, isPhotoTemplate ? photoIntro(collection.category) : collection.intro, textX, top, textWidth, 22, compact ? 8 : 10, gold, "'Montserrat', sans-serif", '600', compact ? 1 : 1.5, lineAlign),
     textLayer(`${id}-names`, collection.hosts, textX, titleY, textWidth, compact ? 54 : 62, titleSize, ink, compact ? "'Great Vibes', cursive" : titleFonts[layout], '600', 0, lineAlign),
     textLayer(`${id}-event`, displayEvent, textX, titleY + (compact ? 61 : 70), textWidth, 25, compact ? 9 : 12, gold, "'Cinzel', serif", '700', compact ? .8 : 1.6, lineAlign),

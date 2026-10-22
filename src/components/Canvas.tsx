@@ -1291,53 +1291,56 @@ export function renderFrameVisual(
     'frame-12': 'inset(7% round 18%)',
     'frame-13': 'inset(4% 16% round 999px)',
     'frame-14': 'polygon(8% 96%, 8% 48%, 9% 37%, 15% 27%, 26% 19%, 37% 13%, 46% 7%, 50% 2%, 54% 7%, 63% 13%, 74% 19%, 85% 27%, 91% 37%, 92% 48%, 92% 96%)',
+    'frame-15': 'polygon(50% 6%, 60% 8%, 68% 16%, 72% 28%, 84% 28%, 92% 36%, 94% 50%, 92% 64%, 84% 72%, 72% 72%, 68% 84%, 60% 92%, 50% 94%, 40% 92%, 32% 84%, 28% 72%, 16% 72%, 8% 64%, 6% 50%, 8% 36%, 16% 28%, 28% 28%, 32% 16%, 40% 8%)',
+    'frame-16': 'polygon(50% 4%, 68% 20%, 86% 20%, 86% 38%, 96% 50%, 86% 62%, 86% 80%, 68% 80%, 50% 96%, 32% 80%, 14% 80%, 14% 62%, 4% 50%, 14% 38%, 14% 20%, 32% 20%)',
+    'frame-17': 'polygon(12% 10%, 88% 10%, 88% 48%, 86% 60%, 78% 72%, 66% 84%, 50% 96%, 34% 84%, 22% 72%, 14% 60%, 12% 48%)',
+    'frame-18': 'polygon(54% 8%, 70% 10%, 84% 20%, 92% 36%, 90% 58%, 84% 74%, 70% 88%, 50% 96%, 30% 92%, 14% 82%, 8% 66%, 8% 48%, 16% 32%, 32% 18%, 44% 10%)',
+    'frame-19': 'polygon(50% 5%, 62% 22%, 78% 42%, 88% 62%, 86% 76%, 78% 88%, 64% 95%, 50% 97%, 36% 95%, 22% 88%, 14% 76%, 12% 62%, 22% 42%, 38% 22%)',
+    'frame-20': 'inset(14% round 2%)',
+    'frame-21': 'polygon(20% 6%, 80% 6%, 94% 20%, 94% 80%, 80% 94%, 20% 94%, 6% 80%, 6% 20%)',
+    'frame-22': 'polygon(18% 6%, 82% 6%, 88% 8%, 92% 14%, 94% 20%, 94% 80%, 92% 86%, 88% 92%, 82% 94%, 18% 94%, 12% 92%, 8% 86%, 6% 80%, 6% 20%, 8% 14%, 12% 8%)',
+    'frame-23': 'polygon(54% 8%, 72% 10%, 86% 20%, 94% 36%, 92% 56%, 86% 74%, 72% 88%, 54% 94%, 34% 92%, 18% 84%, 8% 70%, 6% 50%, 10% 30%, 24% 14%, 40% 8%)',
+    'frame-24': 'polygon(50% 4%, 63% 24%, 85% 15%, 76% 37%, 96% 50%, 76% 63%, 85% 85%, 63% 76%, 50% 96%, 37% 76%, 15% 85%, 24% 63%, 4% 50%, 24% 37%, 15% 15%, 37% 24%)',
+    'frame-25': 'polygon(50% 5%, 95% 38%, 78% 92%, 22% 92%, 5% 38%)',
+    'frame-26': 'polygon(8% 94%, 8% 38%, 12% 24%, 20% 14%, 28% 10%, 36% 14%, 44% 24%, 48% 38%, 48% 94%, 52% 94%, 52% 38%, 56% 24%, 64% 14%, 72% 10%, 80% 14%, 88% 24%, 92% 38%, 92% 94%)',
+    'frame-27': 'polygon(6% 6%, 88% 6%, 94% 12%, 94% 94%, 12% 94%, 6% 88%)',
+    'frame-28': 'inset(8% 16% round 3%)',
+    'frame-29': 'inset(6% 20% round 12%)',
+    'frame-30': 'circle(40% at 50% 50%)',
   };
-  const cssFrameClip = cssFrameClipById[fr.frameId] || `url(#${clipId})`;
+  const cssFrameClip = cssFrameClipById[fr.frameId] || 'inset(6% round 12%)';
   return (
     <div className="w-full h-full relative select-none">
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
+      {/* Keep the photo in normal HTML layout so object-fit preserves its natural ratio.
+          The SVG is only used for the frame mask and decorative border. */}
+      <div
+        style={{
+          position: 'absolute', inset: 0, width: '100%', height: '100%',
+          overflow: 'hidden', background: fr.placeholderColor || '#2A0A12',
+          clipPath: cssFrameClip,
+        }}
+        onMouseDown={onPhotoMouseDown}
+        onTouchStart={onPhotoTouchStart}
+      >
+        <img
+          src={fr.imageSrc || "/images/wedding_couple_1791965341379.jpg"}
+          alt=""
+          draggable={false}
+          style={{
+            position: 'relative', display: 'block', width: '100%', height: '100%', maxWidth: 'none',
+            objectFit: 'cover', objectPosition: '50% 50%',
+            transform: `translate(${fr.imageOffsetX || 0}%, ${fr.imageOffsetY || 0}%) scale(${fr.imageScale || 1})`,
+            transformOrigin: 'center center',
+            cursor: onPhotoMouseDown ? 'grab' : 'default', touchAction: 'none',
+          }}
+        />
+      </div>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full overflow-visible pointer-events-none">
         <defs>
         <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
           <g fill="#fff" dangerouslySetInnerHTML={{ __html: fr.clipPathSvg }} />
           </clipPath>
         </defs>
-      <foreignObject x="0" y="0" width="100" height="100">
-        <div style={{
-          width: '100%', height: '100%', overflow: 'hidden', background: fr.placeholderColor || '#2A0A12',
-          clipPath: cssFrameClip,
-        }}
-          onMouseDown={onPhotoMouseDown}
-          onTouchStart={onPhotoTouchStart}
-        >
-          {fr.naturalImageFit && fr.imageSrc ? (
-            <img
-              src={fr.imageSrc}
-              alt=""
-              draggable={false}
-              style={{
-                position: 'relative', display: 'block', width: '100%', height: '100%', maxWidth: 'none',
-                objectFit: 'cover',
-                objectPosition: '50% 50%',
-                transform: `translate(${fr.imageOffsetX || 0}%, ${fr.imageOffsetY || 0}%) scale(${fr.imageScale || 1})`,
-                transformOrigin: 'center center',
-                cursor: onPhotoMouseDown ? 'grab' : 'default', touchAction: 'none',
-              }}
-            />
-          ) : (
-            <img
-              src={fr.imageSrc || "/images/wedding_couple_1791965341379.jpg"}
-              alt=""
-              draggable={false}
-              style={{
-                position: 'relative', display: 'block', maxWidth: 'none', objectFit: 'cover',
-                width: `${100 * (fr.imageScale || 1)}%`, height: `${100 * (fr.imageScale || 1)}%`,
-                left: `${-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetX || 0)}%`,
-                top: `${-50 * ((fr.imageScale || 1) - 1) + (fr.imageOffsetY || 0)}%`,
-              }}
-            />
-          )}
-        </div>
-      </foreignObject>
         {fr.borderSvg && (
           <g
             style={{ color: fr.borderColor || "#D4AF37" }}

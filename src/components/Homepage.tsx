@@ -445,7 +445,9 @@ export const Homepage: React.FC<HomepageProps> = ({
 
   // Filter templates
   const filteredTemplates = INITIAL_TEMPLATES.filter((t) => {
-    const matchesCat = selectedCategory === 'all' || t.category === selectedCategory;
+    const isPhotoFrame = t.tags.some((tag) => tag.toLowerCase().includes('photo frame'));
+    const matchesCat = selectedCategory === 'all'
+      || (selectedCategory === 'photo-frames' ? isPhotoFrame : t.category === selectedCategory);
     const matchesSearch = 
       t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -830,9 +832,12 @@ export const Homepage: React.FC<HomepageProps> = ({
         {/* Luxury Showcase Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {visibleTemplates.map((template) => {
+            const frameTitle = template.tags.some((tag) => tag.toLowerCase().includes('photo frame'))
+              ? template.title.replace(/\s+(Wedding|Griha Pravesh|Sangeet & Haldi|Birthday|Godh Bharai|Anniversary) Photo Frame Invitation$/i, '')
+              : null;
             const meta = SUITE_SHOWCASE_META[template.id] || {
-              cleanTitle: template.title.replace(/\s*\(.*?\)\s*/g, ''),
-              hindiSubtitle: 'शाही डिजिटल निमंत्रण पत्र',
+              cleanTitle: frameTitle || template.title.replace(/\s*\(.*?\)\s*/g, ''),
+              hindiSubtitle: frameTitle ? 'फोटो फ्रेम निमंत्रण' : 'शाही डिजिटल निमंत्रण पत्र',
               editionTag: template.pages.length > 1 ? `${template.pages.length}-Slide Video Suite` : 'Royal Card Suite',
               coupleOrHighlight: template.title,
               venueOrDetail: 'Custom Venue & Google Maps QR',

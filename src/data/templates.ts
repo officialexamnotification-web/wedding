@@ -13,6 +13,7 @@ export const TEMPLATE_CATEGORIES = [
   { id: 'birthday', label: 'Birthday Celebration' },
   { id: 'baby-shower', label: 'Godh Bharai / Naamkaran' },
   { id: 'anniversary', label: 'Royal Anniversary' },
+  { id: 'photo-frames', label: 'Photo Frames' },
   { id: 'gold-velvet', label: '24K Gold Foil & Velvet' },
 ] as const;
 

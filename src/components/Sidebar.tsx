@@ -1229,9 +1229,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   // Filter templates
-  const filteredTemplates = INITIAL_TEMPLATES.filter((t) =>
-    templateCategory === 'all' ? true : t.category === templateCategory
-  );
+  const filteredTemplates = INITIAL_TEMPLATES.filter((t) => {
+    if (templateCategory === 'all') return true;
+    if (templateCategory === 'photo-frames') {
+      return t.tags?.some((tag) => tag.toLowerCase().includes('photo frame')) ?? false;
+    }
+    return t.category === templateCategory;
+  });
 
   // Filter stickers
   const filteredStickers = STICKERS.filter((s) => {

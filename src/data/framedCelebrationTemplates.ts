@@ -38,6 +38,7 @@ const collections: Collection[] = [
       '/images/frame-templates/wedding-05.png', '/images/frame-templates/wedding-06.png',
       '/images/frame-templates/wedding-07.png', '/images/frame-templates/wedding-08.png',
       '/images/frame-templates/wedding-couple.png',
+      '/images/photo-library/wedding-heritage-editorial-02.png',
     ],
     motif: 'lotus', intro: 'WITH THE BLESSINGS OF OUR FAMILIES', names: 'Aarav & Meera', event: 'THE WEDDING CEREMONY', details: 'SATURDAY · 21 FEBRUARY 2027 · 6:30 PM', venue: 'THE ROYAL COURTYARD · JAIPUR',
   },
@@ -57,6 +58,7 @@ const collections: Collection[] = [
       '/images/frame-templates/griha-05.png', '/images/frame-templates/griha-06.png',
       '/images/frame-templates/griha-07.png', '/images/frame-templates/griha-08.png',
       '/images/frame-templates/griha-pravesh-family.png',
+      '/images/photo-library/griha-family-welcome-09.png',
     ],
     motif: 'kalash', intro: 'WITH THE BLESSINGS OF OUR ELDERS', names: 'The Sharma Family', event: 'GRIHA PRAVESH & VASTU PUJA', details: 'SUNDAY · 15 NOVEMBER 2026 · 9:00 AM', venue: 'SHIVAM RESIDENCY · GURUGRAM',
   },
@@ -76,6 +78,7 @@ const collections: Collection[] = [
       '/images/frame-templates/sangeet-05.png', '/images/frame-templates/sangeet-06.png',
       '/images/frame-templates/sangeet-07.png', '/images/frame-templates/sangeet-08.png',
       '/images/frame-templates/sangeet-celebration.png',
+      '/images/photo-library/sangeet-courtyard-dance-10.png',
     ],
     motif: 'dhol', intro: 'A NIGHT OF MUSIC, COLOUR & CELEBRATION', names: 'Aarav & Meera', event: 'SANGEET & MEHENDI NIGHT', details: 'SATURDAY · 21 NOVEMBER 2026 · 7:30 PM', venue: 'THE MARIGOLD COURTYARD · JAIPUR',
   },
@@ -94,12 +97,14 @@ const collections: Collection[] = [
       '/images/frame-templates/birthday-03.png', '/images/frame-templates/birthday-04.png',
       '/images/frame-templates/birthday-05.png', '/images/frame-templates/birthday-06.png',
       '/images/frame-templates/birthday-07.png', '/images/frame-templates/birthday-celebration.png',
+      '/images/photo-library/birthday-pastel-portrait-09.png',
+      '/images/photo-library/birthday-editorial-portrait-01.png',
     ],
     motif: 'stars', intro: 'COME CELEBRATE A VERY SPECIAL DAY', names: 'Aarav Turns One', event: 'BIRTHDAY CELEBRATION', details: 'SATURDAY · 10 OCTOBER 2026 · 5:30 PM', venue: 'CLUB EMERALD · MUMBAI',
   },
   {
     category: 'baby-shower', label: 'Godh Bharai',
-    titles: ['Little Moon Gathering', 'Blush Bloom Blessing', 'The Baby Shower Edit', 'A Sweet Arrival', 'Maa & Little One', 'Peach Petal Welcome', 'Tiny Toes Celebration', 'Cloud Nine Blessings', 'The Nesting Party', 'A New Bloom Begins'],
+    titles: ['Maa in Moonlight', 'Blush Petal Portrait', 'The Lotus Blessing', 'Cradle & Jasmine', 'Sage Garden Welcome', 'Noor Maa Keepsake', 'The Heirloom Blessing', 'Aangan of Grace', 'Peach & Pearl Blessing', 'Velvet Cradle Story'],
     palette: [
       { background: '#FFF1F0', ink: '#73495C', gold: '#C5A17B', soft: '#967684' }, { background: '#F4F1EA', ink: '#526057', gold: '#BDA27F', soft: '#7C857C' },
       { background: '#F7F0F8', ink: '#65516E', gold: '#C0A1B1', soft: '#897A92' }, { background: '#FFF3E9', ink: '#805746', gold: '#C8A077', soft: '#9B7866' },
@@ -108,10 +113,12 @@ const collections: Collection[] = [
       { background: '#FFF3F0', ink: '#815366', gold: '#C69F8C', soft: '#9D7987' }, { background: '#F4F1E8', ink: '#536154', gold: '#BBA37B', soft: '#7A8678' },
     ],
     photos: [
-      '/images/frame-templates/godh-01.png', '/images/frame-templates/godh-02.png',
-      '/images/frame-templates/godh-03.png', '/images/frame-templates/godh-04.png',
-      '/images/frame-templates/godh-05.png', '/images/frame-templates/godh-06.png',
-      '/images/frame-templates/godh-07.png', '/images/frame-templates/godh-bharai-family.png',
+      '/images/photo-library/godh-bloom-portrait-01.webp', '/images/photo-library/godh-cradle-blessings-02.webp',
+      '/images/photo-library/godh-moon-mogra-03.webp', '/images/photo-library/godh-peach-petal-04.webp',
+      '/images/photo-library/godh-little-light-05.webp', '/images/photo-library/godh-nesting-album-06.webp',
+      '/images/photo-library/godh-golden-cradle-07.webp', '/images/photo-library/godh-welcome-one-08.webp',
+      '/images/photo-library/godh-bharai-pastel-portrait-09.png',
+      '/images/photo-library/godh-baby-shower-couple-10.png',
     ],
     motif: 'moon', intro: 'WITH JOYFUL HEARTS & LOVING BLESSINGS', names: 'A Little One Is on the Way', event: 'GODH BHARAI CELEBRATION', details: 'SUNDAY · 21 FEBRUARY 2027 · 11:00 AM', venue: 'THE BLOSSOM GARDEN · JAIPUR',
   },
@@ -130,6 +137,9 @@ const collections: Collection[] = [
       '/images/frame-templates/anniversary-03.png', '/images/frame-templates/anniversary-04.png',
       '/images/frame-templates/anniversary-05.png', '/images/frame-templates/anniversary-06.png',
       '/images/frame-templates/anniversary-couple.png',
+      '/images/photo-library/anniversary-heritage-portrait-08.png',
+      '/images/photo-library/anniversary-candlelight-09.png',
+      '/images/photo-library/anniversary-heritage-vows-10.png',
     ],
     motif: 'infinity', intro: 'A BEAUTIFUL STORY, STILL BEING WRITTEN', names: 'Vikram & Ananya', event: 'ANNIVERSARY CELEBRATION', details: 'SUNDAY · 21 FEBRUARY 2027 · 7:00 PM', venue: 'THE HERITAGE COURTYARD · JAIPUR',
   },
@@ -177,7 +187,7 @@ const categoryFrameStyles: Record<Occasion, string[]> = {
   housewarming: ['frame-02', 'frame-16', 'frame-14', 'frame-01', 'frame-05', 'frame-18', 'frame-03', 'frame-15', 'frame-17', 'frame-16'],
   'sangeet-mehendi': ['frame-11', 'frame-06', 'frame-13', 'frame-15', 'frame-20', 'frame-07', 'frame-04', 'frame-11', 'frame-08', 'frame-16'],
   birthday: ['frame-10', 'frame-11', 'frame-20', 'frame-12', 'frame-04', 'frame-09', 'frame-13', 'frame-05', 'frame-06', 'frame-10'],
-  'baby-shower': ['frame-05', 'frame-15', 'frame-03', 'frame-16', 'frame-04', 'frame-09', 'frame-12', 'frame-17', 'frame-18', 'frame-03'],
+  'baby-shower': ['frame-05', 'frame-15', 'frame-03', 'frame-16', 'frame-04', 'frame-09', 'frame-12', 'frame-17', 'frame-18', 'frame-07'],
   anniversary: ['frame-05', 'frame-04', 'frame-09', 'frame-11', 'frame-06', 'frame-19', 'frame-14', 'frame-18', 'frame-03', 'frame-07'],
 };
 
@@ -230,7 +240,7 @@ const colorfulCollectionSpecs: Array<Omit<Collection, 'palette'> & { paletteOffs
   },
   {
     category: 'baby-shower', label: 'Godh Bharai', paletteOffset: 6,
-    titles: ['Little Bloom Portrait', 'Cradle Blessings', 'Moon & Mogra', 'Peach Petal Story', 'A Little Light', 'The Nesting Album', 'Golden Cradle', 'Welcome Little One'],
+    titles: ['Marigold Maa', 'The Rose Ceremony', 'Lotus Light Celebration', 'Noor Garden Portrait', 'Moonflower Blessings', 'The Sage Keepsake', 'Maa & Mogra', 'Little Heirloom Glow'],
     photos: Array.from({ length: 8 }, (_, i) => `/images/photo-library/godh-${['bloom-portrait-01', 'cradle-blessings-02', 'moon-mogra-03', 'peach-petal-04', 'little-light-05', 'nesting-album-06', 'golden-cradle-07', 'welcome-one-08'][i]}.webp`),
     motif: 'cradle', intro: 'WITH JOYFUL HEARTS & LOVING BLESSINGS', names: 'A Little One Is on the Way', event: 'GODH BHARAI CELEBRATION', details: 'SUNDAY · 21 FEBRUARY 2027 · 11:00 AM', venue: 'THE BLOSSOM GARDEN · JAIPUR',
   },
@@ -273,6 +283,49 @@ const colorfulLayouts: Layout[] = [
   { frames: [{ x: 76, y: 117, width: 151, height: 220, frameId: 'frame-14' }, { x: 273, y: 117, width: 151, height: 220, frameId: 'frame-13' }], text: { introY: 54, nameY: 376, eventY: 437, detailsY: 478, venueY: 546, nameSize: 36 } },
 ];
 
+// Every Godh Bharai photo frame gets its own portrait. The first 16 images
+// serve the classic layouts and the final 12 serve the colorful layouts.
+const babyShowerFramePhotos = [
+  '/images/photo-library/godh-bloom-portrait-01.webp',
+  '/images/photo-library/godh-cradle-blessings-02.webp',
+  '/images/photo-library/godh-moon-mogra-03.webp',
+  '/images/photo-library/godh-peach-petal-04.webp',
+  '/images/photo-library/godh-little-light-05.webp',
+  '/images/photo-library/godh-nesting-album-06.webp',
+  '/images/photo-library/godh-golden-cradle-07.webp',
+  '/images/photo-library/godh-welcome-one-08.webp',
+  '/images/photo-library/godh-bharai-pastel-portrait-09.png',
+  '/images/photo-library/godh-baby-shower-couple-10.png',
+  '/images/photo-library/godh-lavender-portrait-11.png',
+  '/images/photo-library/godh-teal-lotus-maternity-12.png',
+  '/images/photo-library/godh-plum-floral-maternity-13.png',
+  '/images/photo-library/godh-blush-home-portrait-14.png',
+  '/images/photo-library/godh-cradle-blush-15.png',
+  '/images/photo-library/godh-garden-couple-16.png',
+  '/images/photo-library/godh-midnight-jasmine-17.png',
+  '/images/photo-library/godh-maroon-swing-18.png',
+  '/images/photo-library/godh-blue-family-blessing-19.png',
+  '/images/photo-library/godh-marigold-garden-20.png',
+  '/images/photo-library/godh-sage-courtyard-21.png',
+  '/images/photo-library/godh-marigold-jhoola-22.png',
+  '/images/photo-library/godh-lotus-sister-blessing-23.png',
+  '/images/photo-library/godh-teal-family-blessing-24.png',
+  '/images/photo-library/godh-rose-arch-25.png',
+  '/images/photo-library/godh-bougainvillea-swing-26.png',
+  '/images/photo-library/godh-blue-couple-27.png',
+  '/images/photo-library/godh-emerald-aangan-28.png',
+];
+
+const babyShowerMotifs = ['cradle', 'lotus', 'moon', 'peacock', 'kalash', 'rings'];
+
+function babyShowerPhotoIndex(colorful: boolean, index: number, frameIndex: number) {
+  const priorSlots = (colorful ? colorfulLayouts : layouts)
+    .slice(0, index)
+    .reduce((count, layout) => count + layout.frames.length, 0);
+  const classicSlotCount = layouts.reduce((count, layout) => count + layout.frames.length, 0);
+  return (colorful ? classicSlotCount : 0) + priorSlots + frameIndex;
+}
+
 const thumbnailGradients = [
   'from-rose-100 via-pink-50 to-amber-100',
   'from-emerald-950 via-emerald-800 to-amber-700',
@@ -306,7 +359,10 @@ function svgData(svg: string) {
 }
 
 function backgroundArtwork(collection: Collection, palette: Palette, index: number, eventY: number, colorful = false) {
-  const motif = motifs[collection.motif];
+  const motifKey = collection.category === 'baby-shower'
+    ? babyShowerMotifs[(index + (colorful ? 2 : 0)) % babyShowerMotifs.length]
+    : collection.motif;
+  const motif = motifs[motifKey];
   const categoryIndex = collections.findIndex((item) => item.category === collection.category);
   const inset = 20 + ((index + categoryIndex) % 3) * 4;
   const pattern = (index + categoryIndex * 2) % 4;
@@ -395,10 +451,25 @@ function createFramedTemplate(collection: Collection, index: number, colorful = 
   layout.frames.forEach((slot, frameIndex) => {
     const frameId = colorful ? colorfulCategoryFrameStyles[collection.category][index] : categoryFrameStyles[collection.category][index];
     const definition = frameById.get(frameId) || frameById.get(slot.frameId) || frameById.get('frame-01')!;
+    // Reserve one distinct lead photo for every template. Extra frames get
+    // another category photo so a collage never repeats its own lead image.
+    const leadPhoto = !colorful && collection.category === 'wedding' && index === 0
+      ? '/images/photo-library/wedding-palace-couple-editorial-01.png'
+      : collection.photos[index % collection.photos.length];
+    const additionalUniquePhoto = !colorful && collection.category === 'wedding' && index === 9 && frameIndex === 1
+      ? '/images/photo-library/wedding-emerald-haveli-portrait-11.png'
+      : !colorful && collection.category === 'anniversary' && index === 7 && frameIndex === 1
+        ? '/images/photo-library/anniversary-garden-candlelight-11.png'
+        : undefined;
+    const samplePhoto = collection.category === 'baby-shower'
+      ? babyShowerFramePhotos[babyShowerPhotoIndex(colorful, index, frameIndex)]
+      : additionalUniquePhoto || (frameIndex === 0
+        ? leadPhoto
+        : collection.photos[(index + frameIndex) % collection.photos.length]);
     const frame: FrameElement = {
       id: `${id}-photo-${frameIndex + 1}`, type: 'frame', frameId: definition.id, frameName: definition.name,
       clipPathSvg: definition.clipPathSvg, borderSvg: definition.borderSvg,
-      imageSrc: collection.photos[(index + frameIndex) % collection.photos.length], imageScale: 1, imageOffsetX: 0, imageOffsetY: 0,
+      imageSrc: samplePhoto, imageScale: 1, imageOffsetX: 0, imageOffsetY: 0,
       naturalImageFit: true,
       borderColor: palette.gold, borderWidth: 2.5, placeholderColor: palette.background,
       x: slot.x, y: slot.y, width: slot.width, height: slot.height, rotation: slot.rotation || 0, opacity: 1, zIndex: 3 + frameIndex,
