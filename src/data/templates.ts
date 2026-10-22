@@ -3,6 +3,7 @@ import { PREMIUM_WEDDING_TEMPLATES } from './premiumWeddingTemplates';
 import { CELEBRATION_TEMPLATES } from './celebrationTemplates';
 import { FRAMED_CELEBRATION_TEMPLATES } from './framedCelebrationTemplates';
 import { GOLD_VELVET_TEMPLATES } from './goldVelvetTemplates';
+import { SQUARE_TEMPLATES } from './squareTemplates';
 
 export const TEMPLATE_CATEGORIES = [
   { id: 'all', label: 'All Designs' },
@@ -3903,4 +3904,5 @@ export const INITIAL_TEMPLATES: CardTemplate[] = [
   ...CELEBRATION_TEMPLATES,
   ...FRAMED_CELEBRATION_TEMPLATES,
   ...GOLD_VELVET_TEMPLATES,
+  ...SQUARE_TEMPLATES,
 ];
