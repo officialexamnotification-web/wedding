@@ -59,23 +59,23 @@ interface ExportModalProps {
 
 type GreetingLanguage = 'en' | 'hi';
 
-const getGreetingMessage = (occasion: string, title: string, language: GreetingLanguage) => {
+const getGreetingMessage = (occasion: string, language: GreetingLanguage) => {
   const messages: Record<GreetingLanguage, Record<string, string>> = {
     en: {
-      wedding: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${title}.\n\nWe would be delighted by your presence and blessings.\n\nWith warm regards,\nThe Family`,
-      housewarming: `✨ You’re invited! ✨\n\nPlease join us for ${title} and bless our new home.\n\nWe look forward to celebrating this special occasion with you.\n\nWith warm regards,\nThe Family`,
-      birthday: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${title}.\n\nWe look forward to sharing a joyful occasion with you.`,
-      baby: `✨ You’re invited! ✨\n\nPlease join us for ${title}.\n\nYour good wishes will make this special occasion even more meaningful.\n\nWith warm regards,\nThe Family`,
-      festive: `✨ You’re invited! ✨\n\nPlease join us for ${title}.\n\nWe look forward to celebrating an evening of music and happiness with you.`,
-      anniversary: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${title} and this special milestone.\n\nWe look forward to celebrating with you.`,
+      wedding: `✨ You’re invited! ✨\n\nTwo hearts, one beautiful journey. With love and blessings, we invite you to join us in celebrating the beginning of our forever.`,
+      housewarming: `✨ You’re invited! ✨\n\nWith hearts full of gratitude, we invite you to bless our new home and make this auspicious beginning even more special with your presence.`,
+      birthday: `✨ You’re invited! ✨\n\nA little more sparkle, a lot more joy, and memories to cherish forever. Join us as we celebrate a special day filled with love and laughter.`,
+      baby: `✨ You’re invited! ✨\n\nA little miracle is on the way, bringing a world of love and joy. Join us as we celebrate the beautiful journey of motherhood and shower the mother-to-be with blessings.`,
+      festive: `✨ You’re invited! ✨\n\nAn evening of music, colours, laughter, and love awaits. Join us as we celebrate the beautiful moments leading to a lifetime of togetherness.`,
+      anniversary: `✨ You’re invited! ✨\n\nCelebrating a love that grows more beautiful with every passing year. Join us for an elegant gathering filled with cherished memories, heartfelt moments, and everlasting love.`,
     },
     hi: {
-      wedding: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} की खुशी में हमारे साथ शामिल हों।\n\nआपकी उपस्थिति और शुभकामनाएँ हमारे लिए बहुत खास होंगी।\n\nसप्रेम,\nसमस्त परिवार`,
-      housewarming: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} के शुभ अवसर पर हमारे साथ शामिल हों और हमारे नए घर को आशीर्वाद दें।\n\nआपका स्वागत है।\n\nसप्रेम,\nसमस्त परिवार`,
-      birthday: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} की खुशी में हमारे साथ शामिल हों।\n\nआपके साथ यह दिन और भी खास बनेगा।`,
-      baby: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} की खुशी में हमारे साथ शामिल हों।\n\nआपका स्नेह और शुभकामनाएँ हमारे लिए बहुत खास हैं।\n\nसप्रेम,\nसमस्त परिवार`,
-      festive: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} के उत्सव में हमारे साथ शामिल हों।\n\nसंगीत और खुशियों से भरी इस शाम में आपका स्वागत है।`,
-      anniversary: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} की खुशी में हमारे साथ शामिल हों।\n\nआपके साथ यह खास दिन मनाकर हमें बहुत खुशी होगी।`,
+      wedding: `✨ You’re invited! ✨\n\nदो दिल, एक खूबसूरत सफ़र। प्रेम और आशीर्वाद के साथ, हम आपको अपने नए जीवन की शुरुआत के इस शुभ अवसर पर सादर आमंत्रित करते हैं।`,
+      housewarming: `✨ You’re invited! ✨\n\nकृतज्ञता और प्रसन्नता से भरे हृदय के साथ, हम आपको अपने नए घर के शुभ प्रवेश पर पधारकर इस मंगलमय शुरुआत को और भी खास बनाने हेतु सादर आमंत्रित करते हैं।`,
+      birthday: `✨ You’re invited! ✨\n\nथोड़ी और चमक, ढेर सारी खुशियाँ और हमेशा याद रहने वाले पल। प्रेम और मुस्कान से सजे इस खास दिन के जश्न में शामिल होने के लिए सादर आमंत्रित हैं।`,
+      baby: `✨ You’re invited! ✨\n\nनन्हा-सा चमत्कार हमारे जीवन में खुशियाँ और प्रेम लेकर आने वाला है। मातृत्व की इस खूबसूरत यात्रा का जश्न मनाने और होने वाली माँ को आशीर्वाद देने के लिए सादर आमंत्रित हैं।`,
+      festive: `✨ You’re invited! ✨\n\nसंगीत की धुनों, रंगों, हँसी और प्रेम से सजी एक शाम आपका इंतज़ार कर रही है। आइए, जीवनभर के साथ की खूबसूरत शुरुआत से पहले इन यादगार पलों का हिस्सा बनें।`,
+      anniversary: `✨ You’re invited! ✨\n\nउस प्रेम का उत्सव, जो हर गुजरते साल के साथ और भी खूबसूरत होता जाता है। यादगार लम्हों, आत्मीय पलों और अटूट प्रेम से सजी इस खास महफ़िल में आप सादर आमंत्रित हैं।`,
     },
   };
 
@@ -128,7 +128,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         : occasionCategory === 'sangeet-mehendi' ? 'festive'
           : occasionCategory === 'anniversary' ? 'anniversary'
             : occasionCategory ? 'wedding' : inferredOccasion;
-  const defaultMessage = getGreetingMessage(occasion, invitationTitle, greetingLanguage);
+  const defaultMessage = getGreetingMessage(occasion, greetingLanguage);
 
   useEffect(() => {
     setGreetingMessage(defaultMessage);
@@ -1572,7 +1572,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                       aria-pressed={greetingLanguage === language}
                       onClick={() => {
                         setGreetingLanguage(language);
-                        setGreetingMessage(getGreetingMessage(occasion, invitationTitle, language));
+                        setGreetingMessage(getGreetingMessage(occasion, language));
                       }}
                       className={`rounded px-3 py-1 text-[10px] font-medium transition ${greetingLanguage === language ? 'bg-amber-300 text-neutral-950' : 'text-neutral-400 hover:text-neutral-100'}`}
                     >
