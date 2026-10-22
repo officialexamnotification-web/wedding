@@ -57,6 +57,31 @@ interface ExportModalProps {
   occasionCategory?: CardTemplate['category'];
 }
 
+type GreetingLanguage = 'en' | 'hi';
+
+const getGreetingMessage = (occasion: string, title: string, language: GreetingLanguage) => {
+  const messages: Record<GreetingLanguage, Record<string, string>> = {
+    en: {
+      wedding: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${title}.\n\nWe would be delighted by your presence and blessings.\n\nWith warm regards,\nThe Family`,
+      housewarming: `✨ You’re invited! ✨\n\nPlease join us for ${title} and bless our new home.\n\nWe look forward to celebrating this special occasion with you.\n\nWith warm regards,\nThe Family`,
+      birthday: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${title}.\n\nWe look forward to sharing a joyful occasion with you.`,
+      baby: `✨ You’re invited! ✨\n\nPlease join us for ${title}.\n\nYour good wishes will make this special occasion even more meaningful.\n\nWith warm regards,\nThe Family`,
+      festive: `✨ You’re invited! ✨\n\nPlease join us for ${title}.\n\nWe look forward to celebrating an evening of music and happiness with you.`,
+      anniversary: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${title} and this special milestone.\n\nWe look forward to celebrating with you.`,
+    },
+    hi: {
+      wedding: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} की खुशी में हमारे साथ शामिल हों।\n\nआपकी उपस्थिति और शुभकामनाएँ हमारे लिए बहुत खास होंगी।\n\nसप्रेम,\nसमस्त परिवार`,
+      housewarming: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} के शुभ अवसर पर हमारे साथ शामिल हों और हमारे नए घर को आशीर्वाद दें।\n\nआपका स्वागत है।\n\nसप्रेम,\nसमस्त परिवार`,
+      birthday: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} की खुशी में हमारे साथ शामिल हों।\n\nआपके साथ यह दिन और भी खास बनेगा।`,
+      baby: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} की खुशी में हमारे साथ शामिल हों।\n\nआपका स्नेह और शुभकामनाएँ हमारे लिए बहुत खास हैं।\n\nसप्रेम,\nसमस्त परिवार`,
+      festive: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} के उत्सव में हमारे साथ शामिल हों।\n\nसंगीत और खुशियों से भरी इस शाम में आपका स्वागत है।`,
+      anniversary: `✨ सादर आमंत्रण! ✨\n\nकृपया ${title} की खुशी में हमारे साथ शामिल हों।\n\nआपके साथ यह खास दिन मनाकर हमें बहुत खुशी होगी।`,
+    },
+  };
+
+  return messages[language][occasion] || messages[language].wedding;
+};
+
 export const ExportModal: React.FC<ExportModalProps> = ({
   isOpen,
   onClose,
@@ -78,6 +103,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [preparedVideo, setPreparedVideo] = useState<File | null>(null);
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [greetingMessage, setGreetingMessage] = useState('');
+  const [greetingLanguage, setGreetingLanguage] = useState<GreetingLanguage>('en');
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
 
   const invitationTitle = title
@@ -102,21 +128,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         : occasionCategory === 'sangeet-mehendi' ? 'festive'
           : occasionCategory === 'anniversary' ? 'anniversary'
             : occasionCategory ? 'wedding' : inferredOccasion;
-  const occasionMessages: Record<string, string> = {
-    wedding: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${invitationTitle}.\n\nWe would be delighted by your presence and blessings.\n\nWith warm regards,\nThe Family`,
-    housewarming: `✨ You’re invited! ✨\n\nPlease join us for ${invitationTitle} and bless our new home.\n\nWe look forward to celebrating this special occasion with you.\n\nWith warm regards,\nThe Family`,
-    birthday: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${invitationTitle}.\n\nWe look forward to sharing a joyful occasion with you.`,
-    baby: `✨ You’re invited! ✨\n\nPlease join us for ${invitationTitle}.\n\nYour good wishes will make this special occasion even more meaningful.\n\nWith warm regards,\nThe Family`,
-    festive: `✨ You’re invited! ✨\n\nPlease join us for ${invitationTitle}.\n\nWe look forward to celebrating an evening of music and happiness with you.`,
-    anniversary: `✨ You’re invited! ✨\n\nPlease join us to celebrate ${invitationTitle} and this special milestone.\n\nWe look forward to celebrating with you.`,
-  };
-  const defaultMessage = occasionMessages[occasion];
+  const defaultMessage = getGreetingMessage(occasion, invitationTitle, greetingLanguage);
 
   useEffect(() => {
     setGreetingMessage(defaultMessage);
     setPreparedVideo(null);
     setShareStatus(null);
-  }, [title, occasion]);
+  }, [title, occasion, greetingLanguage]);
 
   if (!isOpen) return null;
 
@@ -1542,6 +1560,30 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 {preparedVideo ? <Share2 className="w-4 h-4" /> : <Film className="w-4 h-4" />}
                 {downloading ? 'Preparing video…' : preparedVideo ? 'Share video file' : 'Prepare video to share'}
               </button>
+            </div>
+            <div className="mt-3 flex flex-col gap-2 rounded-lg border border-white/10 bg-black/20 p-2.5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="mb-1.5 text-[10px] font-medium text-neutral-300">Greeting language</p>
+                <div className="inline-flex rounded-md border border-white/10 bg-neutral-950 p-0.5" aria-label="Choose greeting language">
+                  {([['en', 'English'], ['hi', 'हिन्दी']] as const).map(([language, label]) => (
+                    <button
+                      key={language}
+                      type="button"
+                      aria-pressed={greetingLanguage === language}
+                      onClick={() => {
+                        setGreetingLanguage(language);
+                        setGreetingMessage(getGreetingMessage(occasion, invitationTitle, language));
+                      }}
+                      className={`rounded px-3 py-1 text-[10px] font-medium transition ${greetingLanguage === language ? 'bg-amber-300 text-neutral-950' : 'text-neutral-400 hover:text-neutral-100'}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <p className="line-clamp-2 whitespace-pre-line text-[10px] leading-relaxed text-neutral-400 sm:max-w-[62%]" lang={greetingLanguage === 'hi' ? 'hi' : 'en'}>
+                {sampleMessage.split('\n').filter(Boolean).slice(0, 2).join('\n')}
+              </p>
             </div>
             {shareStatus && <p role="status" className="mt-2 text-[10px] text-emerald-200">{shareStatus}</p>}
             <p className="mt-1.5 text-[10px] text-neutral-500">Choose WhatsApp from your device’s share menu when file sharing is supported. Otherwise, download the video and attach it in WhatsApp.</p>
