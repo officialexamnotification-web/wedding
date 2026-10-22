@@ -5,6 +5,7 @@ import { FRAMED_CELEBRATION_TEMPLATES } from './framedCelebrationTemplates';
 import { GOLD_VELVET_TEMPLATES } from './goldVelvetTemplates';
 import { SQUARE_TEMPLATES } from './squareTemplates';
 import { FLORAL_WEDDING_TEMPLATES } from './floralWeddingTemplates';
+import { IMPORTED_WEDDING_TEMPLATES } from './importedWeddingTemplates';
 
 const soundscapeText = (
   id: string,
@@ -4181,4 +4182,5 @@ export const INITIAL_TEMPLATES: CardTemplate[] = [
   ...GOLD_VELVET_TEMPLATES,
   ...SQUARE_TEMPLATES,
   ...FLORAL_WEDDING_TEMPLATES,
+  ...IMPORTED_WEDDING_TEMPLATES,
 ];

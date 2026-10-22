@@ -709,31 +709,13 @@ export function renderShapeVisual(elem: ShapeElement) {
   }
 }
 
-function getTextFitFontSize(t: TextElement): number {
-  const availableWidth = Math.max(1, t.width - (t.backgroundPadding || 0) * 2 - 4);
-  const availableHeight = Math.max(1, t.height - (t.backgroundPadding || 0) * 2);
-  const lineHeight = Math.max(1, t.lineHeight || 1.2);
-  const hasWideGlyphs = /[\u0900-\u0dff\u3040-\u30ff\u3400-\u9fff]/.test(t.text);
-  const glyphWidth = hasWideGlyphs ? 0.68 : 0.56;
-  const tracking = Math.max(0, t.letterSpacing || 0);
-  const textLines = t.text.split(/\r?\n/);
-
-  for (let size = Math.max(7, t.fontSize); size >= 7; size -= 0.5) {
-    const charsPerLine = Math.max(1, Math.floor(availableWidth / (size * glyphWidth + tracking)));
-    const estimatedLines = textLines.reduce(
-      (count, line) => count + Math.max(1, Math.ceil(line.length / charsPerLine)),
-      0,
-    );
-    if (estimatedLines * size * lineHeight <= availableHeight + 1) return size;
-  }
-
-  return Math.min(7, t.fontSize);
-}
-
 export function renderTextVisual(t: TextElement) {
   const isHollow = t.effectType === 'hollow';
   const curve = t.curveRadius || 0;
-  const fittedFontSize = getTextFitFontSize(t);
+  // The toolbar's font size is an explicit user choice. Auto-fitting here was
+  // shrinking multiple different sizes to the same value, making size changes
+  // appear to have no effect in the canvas preview.
+  const renderedFontSize = Math.max(7, t.fontSize);
 
   // If Curved Text is active, render clean SVG textPath
   if (curve !== 0) {
@@ -756,7 +738,7 @@ export function renderTextVisual(t: TextElement) {
           strokeWidth={t.strokeWidth || 0}
           style={{
             fontFamily: t.fontFamily,
-            fontSize: `${fittedFontSize}px`,
+            fontSize: `${renderedFontSize}px`,
             fontWeight: t.fontWeight,
             fontStyle: t.fontStyle,
             letterSpacing: `${t.letterSpacing}px`,
@@ -776,7 +758,7 @@ export function renderTextVisual(t: TextElement) {
       className="whitespace-pre-line break-words w-full select-none"
       style={{
         fontFamily: t.fontFamily,
-        fontSize: `${fittedFontSize}px`,
+        fontSize: `${renderedFontSize}px`,
         color: isHollow ? 'transparent' : t.gradientText ? 'transparent' : t.color,
         backgroundImage: t.gradientText || undefined,
         WebkitBackgroundClip: t.gradientText ? 'text' : undefined,

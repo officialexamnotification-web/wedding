@@ -16,6 +16,9 @@ node_modules/
 .npm-cache/
 .wrangler
 
+# Original high-resolution inputs; optimized WebP assets are stored in public/templates/imported-wedding/
+/new template/
+
 # env
 .env
 .env.production

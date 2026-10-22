@@ -473,10 +473,13 @@ export const Homepage: React.FC<HomepageProps> = ({
       t.category.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
   });
+  const orderedTemplates = selectedCategory === 'photo-frames'
+    ? [...filteredTemplates].reverse()
+    : filteredTemplates;
   const isFeaturedHomeView = selectedCategory === 'all' && !searchQuery.trim() && !showAllTemplates;
   const visibleTemplates = isFeaturedHomeView
-    ? filteredTemplates.slice(0, HOMEPAGE_FEATURED_COUNT)
-    : filteredTemplates;
+    ? orderedTemplates.slice(0, HOMEPAGE_FEATURED_COUNT)
+    : orderedTemplates;
 
   const scrollToCatalog = (category?: string) => {
     if (category) setSelectedCategory(category);

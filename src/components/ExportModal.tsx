@@ -11,6 +11,7 @@ import {
   Sparkles,
   Music,
   Film,
+  Loader2,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { jsPDF } from 'jspdf';
@@ -160,6 +161,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [copied, setCopied] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [preparedVideo, setPreparedVideo] = useState<File | null>(null);
+  const [startingVideoDownload, setStartingVideoDownload] = useState(false);
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [greetingMessage, setGreetingMessage] = useState('');
   const [greetingLanguage, setGreetingLanguage] = useState<GreetingLanguage>('en');
@@ -971,6 +973,25 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     }
   };
 
+  const startVideoDownload = (videoFile: File, completionMessage: string) => {
+    if (startingVideoDownload) return;
+    setStartingVideoDownload(true);
+    setShareStatus('Starting video download…');
+    const downloadUrl = URL.createObjectURL(videoFile);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = videoFile.name;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 60_000);
+    window.setTimeout(() => {
+      setStartingVideoDownload(false);
+      setShareStatus(completionMessage);
+    }, 900);
+  };
+
   const handleDownloadVideo = async (prepareForShare = false) => {
     if (!pages.length) return;
     setDownloading(true);
@@ -994,7 +1015,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       const renderScale = videoQuality === '4k' ? Math.min(outputScale, 3) : outputScale;
       const outputWidth = videoOutputWidth;
       const outputHeight = videoOutputHeight;
-      const loadRender = async (page: CardPage, mode: 'page' | 'transparent') => {
+      const loadRender = async (page: CardPage, mode: 'all' | 'page' | 'transparent') => {
         const dataUrl = await generateCanvasImage(page, 'png', renderScale, mode);
         if (!dataUrl) throw new Error(`Could not render “${page.title}”.`);
         const image = new Image();
@@ -1005,16 +1026,34 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         });
         return image;
       };
-      const renderedPages = await Promise.all(pages.map(async (page) => ({
-        base: await loadRender(page, 'page'),
-        text: await Promise.all(page.elements
-          .filter((element): element is TextElement => element.type === 'text' && !element.hidden)
-          .map(async (element, order) => ({
+      const renderedPages: Array<{
+        base: CanvasImageSource;
+        text: Array<{ element: TextElement; order: number; image: HTMLImageElement }>;
+      }> = [];
+      // Render one page at a time to avoid holding every full-size transparent
+      // text layer in memory while exporting a multi-page invitation.
+      for (const page of pages) {
+        const textElements = page.elements
+          .filter((element): element is TextElement => element.type === 'text' && !element.hidden);
+        const hasVideo = page.elements.some((element) => element.type === 'video' && !!element.mediaSrc && !element.hidden);
+        const canFlattenText = !hasVideo && textElements.every((element) => !element.animation || element.animation === 'none');
+
+        if (canFlattenText) {
+          // Static typography does not need to be composited again on every
+          // animation frame. Rendering the complete page once also preserves
+          // the template's original z-order and avoids full-page text blits.
+          renderedPages.push({ base: await loadRender(page, 'all'), text: [] });
+          continue;
+        }
+
+        const base = await loadRender(page, 'page');
+        const text = await Promise.all(textElements.map(async (element, order) => ({
             element,
             order,
             image: await loadRender({ ...page, elements: [element] }, 'transparent'),
-          }))),
-      })));
+          })));
+        renderedPages.push({ base, text });
+      }
       const videoLayers = await Promise.all(pages.map(async (page) => {
         const layers = page.elements.filter((element): element is VideoElement => element.type === 'video' && !!element.mediaSrc && !element.hidden);
         return Promise.all(layers.map(async (element) => {
@@ -1104,11 +1143,26 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         for (const track of audioDestination.stream.getAudioTracks()) videoStream.addTrack(track);
       }
 
-      // Prefer a codec that can handle high resolutions. The old AVC level
-      // hint was capped too low for 1080p60 and 4K60 on some encoders.
-      const mimeCandidates = videoQuality === '4k'
-        ? ['video/webm;codecs=vp9,opus', 'video/mp4', 'video/webm;codecs=vp8,opus', 'video/webm']
-        : ['video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4;codecs="avc1.42E01E,mp4a.40.2"'];
+      // Prefer a standards-based H.264/AAC MP4 for phone and WhatsApp playback.
+      // A generic "video/mp4" previously selected VP9 inside an MP4 container
+      // in Chromium, which some mobile players scale or handle inconsistently.
+      const h264Mp4Candidates = videoQuality === '4k'
+        ? [
+            'video/mp4;codecs="avc1.640034,mp4a.40.2"', // H.264 High, Level 5.2 (4K60)
+            'video/mp4;codecs="avc1.640033,mp4a.40.2"', // H.264 High, Level 5.1
+          ]
+        : [
+            'video/mp4;codecs="avc1.64002A,mp4a.40.2"', // H.264 High, Level 4.2 (1080p60)
+            'video/mp4;codecs="avc1.4D402A,mp4a.40.2"', // H.264 Main, Level 4.2
+            'video/mp4;codecs="avc1.42E02A,mp4a.40.2"', // H.264 Baseline, Level 4.2
+          ];
+      const mimeCandidates = [
+        ...h264Mp4Candidates,
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm',
+        'video/mp4',
+      ];
       const mimeType = mimeCandidates
         .find((candidate) => MediaRecorder.isTypeSupported(candidate));
       if (!mimeType) throw new Error('This browser cannot encode an invitation video. Please use an updated browser.');
@@ -1181,14 +1235,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       };
 
       const drawPageTransition = (pageIndex: number, pageProgress: number, pageElapsed: number) => {
-        drawPage(frameContext, pageIndex, pageElapsed);
         const transition = pages[pageIndex].transition || 'fade';
         const t = Math.max(0, Math.min(1, pageProgress));
-        context.clearRect(0, 0, canvas.width, canvas.height);
         if (t >= 1 || transition === 'none') {
-          context.drawImage(frameCanvas, 0, 0);
+          drawPage(context, pageIndex, pageElapsed);
           return;
         }
+        drawPage(frameContext, pageIndex, pageElapsed);
+        context.clearRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = '#100b12';
         context.fillRect(0, 0, canvas.width, canvas.height);
         if (pageIndex > 0) drawPage(context, pageIndex - 1, pages[pageIndex - 1].duration || 6);
@@ -1399,7 +1453,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         setShareStatus('Video is ready. Tap “Share video file” and choose WhatsApp in your device share menu.');
         return;
       }
-      setShareStatus('Your video is ready. Click “Save Animated Video” below to download it.');
+      startVideoDownload(videoFile, 'Download started automatically. Check your browser downloads for the invitation video.');
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#D4AF37', '#FFEAA7', '#FFD700', '#C41E3A'] });
     } catch (error) {
       console.error('Video export failed', error);
@@ -1418,17 +1472,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   };
 
   const handleDownloadPreparedVideo = () => {
-    if (!preparedVideo) return;
-    const downloadUrl = URL.createObjectURL(preparedVideo);
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = preparedVideo.name;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 60_000);
-    setShareStatus('Download started. Check your browser downloads for the invitation video.');
+    if (!preparedVideo || startingVideoDownload) return;
+    startVideoDownload(preparedVideo, 'Download started. Check your browser downloads for the invitation video.');
   };
 
   const handleShareWhatsApp = () => {
@@ -1664,7 +1709,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </div>
           <button
             onClick={() => preparedVideo ? handleDownloadPreparedVideo() : void handleDownloadVideo()}
-            disabled={downloading}
+            disabled={downloading || startingVideoDownload}
             className="group w-full p-3 rounded-xl bg-gradient-to-r from-amber-400/10 to-amber-200/[0.03] hover:from-amber-400/15 hover:to-amber-200/[0.06] border border-amber-300/20 hover:border-amber-300/40 text-left transition flex items-center justify-between gap-3 disabled:opacity-60"
           >
             <div className="flex items-center gap-3 min-w-0">
@@ -1673,7 +1718,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-semibold text-neutral-100">
-                  {downloading ? 'Rendering invitation video…' : preparedVideo ? 'Save Animated Video' : 'Download Animated Video'}
+                  {downloading
+                    ? 'Rendering invitation video…'
+                    : startingVideoDownload
+                      ? 'Starting video download…'
+                      : preparedVideo ? 'Download Video' : 'Download Animated Video'}
                 </div>
                 <div className="text-[10px] text-neutral-400 flex items-center gap-1 mt-0.5">
                   <Music className="w-3 h-3 text-amber-300" />
@@ -1681,8 +1730,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 </div>
               </div>
             </div>
-            <Download className="w-4 h-4 shrink-0 text-amber-300 group-hover:translate-y-0.5 transition-transform" />
+            {downloading || startingVideoDownload
+              ? <Loader2 className="w-4 h-4 shrink-0 animate-spin text-amber-300" />
+              : <Download className="w-4 h-4 shrink-0 text-amber-300 group-hover:translate-y-0.5 transition-transform" />}
           </button>
+          {(downloading || startingVideoDownload) && (
+            <div role="status" className="mt-2 flex items-center gap-2 rounded-lg border border-amber-300/15 bg-amber-300/[0.06] px-3 py-2 text-[10px] text-amber-100/90">
+              <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-amber-300" />
+              <span>{downloading ? 'Rendering your invitation video. Please keep this window open…' : 'Preparing the video file for download…'}</span>
+            </div>
+          )}
           {exportError && (
             <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] text-red-200">{exportError}</p>
           )}
