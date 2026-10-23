@@ -29,6 +29,7 @@ import type { SidebarTab } from './components/Sidebar';
 import { AUDIO_TRACKS } from './data/audioTracks';
 import { Homepage } from './components/Homepage';
 import type { BlankDesignOptions } from './components/CreateDesignModal';
+import { mergeTemplateCatalog, EMPTY_SAVED_CATALOG, type SavedTemplateCatalog } from './utils/templateCatalog';
 
 const Navbar = lazy(() => import('./components/Navbar').then((module) => ({ default: module.Navbar })));
 const Toolbar = lazy(() => import('./components/Toolbar').then((module) => ({ default: module.Toolbar })));
@@ -55,6 +56,7 @@ const inferInvitationCategory = (label: string): CardTemplate['category'] => {
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'editor'>('home');
+  const [catalogTemplates, setCatalogTemplates] = useState<CardTemplate[]>(INITIAL_TEMPLATES);
   const [pendingSidebarTab, setPendingSidebarTab] = useState<SidebarTab>('templates');
   const [pendingElementSubTab, setPendingElementSubTab] = useState<'frames' | 'tables' | undefined>();
   const [title, setTitle] = useState<string>('Royal Heritage Shubh Vivah');
@@ -79,6 +81,18 @@ export default function App() {
   const [customAudioTracks, setCustomAudioTracks] = useState<AudioTrack[]>([]);
   const [customVideoUploads, setCustomVideoUploads] = useState<VideoElement[]>([]);
   const audioTracks = [...AUDIO_TRACKS, ...customAudioTracks];
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/api/catalog', { signal: controller.signal })
+      .then((response) => response.ok ? response.json() : null)
+      .then((catalog: Partial<SavedTemplateCatalog> | null) => {
+        if (!catalog) return;
+        setCatalogTemplates(mergeTemplateCatalog(INITIAL_TEMPLATES, catalog));
+        setCustomAudioTracks(Array.isArray(catalog.customAudioTracks) ? catalog.customAudioTracks : []);
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, []);
   const [audioClip, setAudioClip] = useState<AudioClipSettings>({
     startSec: 0,
     durationSec: null,
@@ -310,7 +324,7 @@ export default function App() {
     const firstTemplateClip = templateAudioClips[0];
     setSelectedAudioClipId(firstTemplateClip?.id ?? null);
     if (firstTemplateClip) {
-      const templateTrack = AUDIO_TRACKS.find((track) => track.id === firstTemplateClip.trackId);
+      const templateTrack = audioTracks.find((track) => track.id === firstTemplateClip.trackId);
       if (templateTrack) setActiveAudioTrack(templateTrack);
       setAudioClip(firstTemplateClip.settings);
     }
@@ -1118,6 +1132,7 @@ export default function App() {
     return (
       <>
         <Homepage
+          templates={catalogTemplates}
           onOpenEditorWithTemplate={handleOpenFromHome}
           onOpenBlankEditor={handleOpenBlankFromHome}
           onOpenPrintExport={async (template) => {
@@ -1127,7 +1142,7 @@ export default function App() {
           }}
           onOpenAnalysis={() => setIsAnalysisOpen(true)}
           onOpenVideoCard={(template) => {
-            setVideoModalTemplate(template || INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0]);
+            setVideoModalTemplate(template || catalogTemplates[1] || catalogTemplates[0]);
             setIsVideoModalOpen(true);
           }}
         />
@@ -1142,17 +1157,17 @@ export default function App() {
           pages={
             videoModalTemplate
               ? videoModalTemplate.pages
-              : (INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0]).pages
+              : (catalogTemplates[1] || catalogTemplates[0]).pages
           }
           title={
             videoModalTemplate
               ? videoModalTemplate.title
-              : (INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0]).title
+              : (catalogTemplates[1] || catalogTemplates[0]).title
           }
           aspectRatio={
             videoModalTemplate
               ? videoModalTemplate.aspectRatio
-              : (INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0]).aspectRatio
+              : (catalogTemplates[1] || catalogTemplates[0]).aspectRatio
           }
           activeAudioTrack={
             videoModalTemplate?.audioClips?.[0]
@@ -1162,14 +1177,14 @@ export default function App() {
           audioClip={videoModalTemplate?.audioClips?.[0]?.settings || audioClip}
           audioClips={videoModalTemplate?.audioClips ?? audioClips}
           onShareVideo={async () => {
-            const targetTmpl = videoModalTemplate || INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0];
+            const targetTmpl = videoModalTemplate || catalogTemplates[1] || catalogTemplates[0];
             await handleSelectTemplate(targetTmpl);
             setCurrentView('editor');
             setIsVideoModalOpen(false);
             setIsExportOpen(true);
           }}
           onCustomizeInEditor={async (targetSlideIndex = 0) => {
-            const targetTmpl = videoModalTemplate || INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0];
+            const targetTmpl = videoModalTemplate || catalogTemplates[1] || catalogTemplates[0];
             await handleSelectTemplate(targetTmpl, targetSlideIndex);
             setCurrentView('editor');
             setIsVideoModalOpen(false);
@@ -1232,6 +1247,7 @@ export default function App() {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Responsive Customization Studio (Desktop 12-Tab Left Rail + Flyout Drawer, Mobile Bottom Dock + Sheet) */}
         <Sidebar
+          templates={catalogTemplates}
           initialActiveTab={pendingSidebarTab}
           initialElementSubTab={pendingElementSubTab}
           aspectRatio={aspectRatio}

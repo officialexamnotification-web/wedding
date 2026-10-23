@@ -35,7 +35,9 @@ const layouts: Record<LayoutName, {
   classic: { left: 0.12, width: 0.76, intro: 0.18, title: 0.25, names: 0.34, message: 0.45, date: 0.57, venue: 0.65 },
   envelope: { left: 0.19, width: 0.62, intro: 0.17, title: 0.24, names: 0.33, message: 0.44, date: 0.54, venue: 0.62 },
   'scenic-left': { left: 0.06, width: 0.56, intro: 0.25, title: 0.32, names: 0.40, message: 0.49, date: 0.58, venue: 0.64 },
-  'split-suite': { left: 0.18, width: 0.64, intro: 0.11, title: 0.18, names: 0.26, message: 0.36, date: 0.43, venue: 0.48 },
+  // This artwork has a narrow upper writing panel above a crosswise ribbon.
+  // Keep the complete invitation details inside that panel, clear of the ribbon.
+  'split-suite': { left: 0.18, width: 0.64, intro: 0.10, title: 0.16, names: 0.23, message: 0.32, date: 0.39, venue: 0.435 },
   ornate: { left: 0.15, width: 0.70, intro: 0.23, title: 0.30, names: 0.39, message: 0.49, date: 0.59, venue: 0.67 },
 };
 

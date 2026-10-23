@@ -514,6 +514,10 @@ export interface VideoElement extends BaseElement {
   videoName: string;
   /** User-uploaded video source. Library motion elements leave this unset. */
   mediaSrc?: string;
+  /** Optional still frame shown until the cover clip can play. */
+  posterSrc?: string;
+  /** Hide the editor-only clip label when the video is used as invitation artwork. */
+  mediaLabelVisible?: boolean;
   visualTheme: string;
   primaryColor: string;
   secondaryColor: string;

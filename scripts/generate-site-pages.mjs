@@ -243,7 +243,7 @@ const homeUrl = `${site}/`;
 const sitemapEntries = [homeUrl, ...allPages.map((page) => `${site}${page.path}`)];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries.map((url) => `  <url><loc>${url}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod></url>`).join('\n')}\n</urlset>\n`;
 fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemap, 'utf8');
-fs.writeFileSync(path.join(publicDir, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${site}/sitemap.xml\n`, 'utf8');
+fs.writeFileSync(path.join(publicDir, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /admin\nSitemap: ${site}/sitemap.xml\n`, 'utf8');
 fs.writeFileSync(path.join(publicDir, '404.html'), `<!doctype html><html lang="en-IN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,follow"><title>Page not found | Nimantran Royale</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site-pages.css"></head><body><main class="not-found"><p class="eyebrow">404 · PAGE NOT FOUND</p><h1>This page could not be found.</h1><p>Return to Nimantran Royale to explore invitation designs and the design studio.</p><a class="button button-primary" href="/">Return home <span aria-hidden="true">→</span></a></main></body></html>`, 'utf8');
 
 fs.writeFileSync(path.join(publicDir, 'site-pages.css'), `

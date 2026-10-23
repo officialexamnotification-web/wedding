@@ -51,7 +51,7 @@ import {
   CountdownElement,
   BarcodeElement,
 } from '../types/editor';
-import { INITIAL_TEMPLATES, TEMPLATE_CATEGORIES } from '../data/templates';
+import { TEMPLATE_CATEGORIES } from '../data/templates';
 import { BlankDesignOptions, CreateDesignModal } from './CreateDesignModal';
 import {
   getImageCssFilter,
@@ -67,6 +67,7 @@ import {
 } from './Canvas';
 
 interface HomepageProps {
+  templates: CardTemplate[];
   onOpenEditorWithTemplate: (template: CardTemplate, targetSlideIndex?: number) => void;
   onOpenBlankEditor: (options: BlankDesignOptions) => void;
   onOpenPrintExport: (template: CardTemplate) => void;
@@ -376,6 +377,7 @@ const HOMEPAGE_FEATURED_COUNT = 12;
 type StudioIntent = Pick<BlankDesignOptions, 'initialSidebarTab' | 'initialElementSubTab'>;
 
 export const Homepage: React.FC<HomepageProps> = ({
+  templates,
   onOpenEditorWithTemplate,
   onOpenBlankEditor,
   onOpenPrintExport,
@@ -418,7 +420,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'शुभ विवाह निमंत्रण',
       icon: Crown, 
       image: '/images/photo-library/wedding-palace-stairs-02.webp',
-      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'wedding').length} Royal Designs`,
+      count: `${templates.filter((template) => template.category === 'wedding').length} Royal Designs`,
     },
     { 
       id: 'housewarming', 
@@ -426,7 +428,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'गृह प्रवेश एवं वास्तु पूजा',
       icon: RoyalKalashIcon, 
       image: '/images/photo-library/home-courtyard-kalash-02.webp',
-      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'housewarming').length} Sacred Designs`,
+      count: `${templates.filter((template) => template.category === 'housewarming').length} Sacred Designs`,
     },
     { 
       id: 'sangeet-mehendi', 
@@ -434,7 +436,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'संगीत, हल्दी व मेहंदी',
       icon: Music, 
       image: '/images/photo-library/sangeet-genda-evening-06.webp',
-      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'sangeet-mehendi').length} Festive Designs`,
+      count: `${templates.filter((template) => template.category === 'sangeet-mehendi').length} Festive Designs`,
     },
     { 
       id: 'birthday', 
@@ -442,7 +444,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'जन्मदिन उत्सव',
       icon: Sparkles, 
       image: '/images/photo-library/birthday-little-star-08.webp',
-      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'birthday').length} Luxe Designs`,
+      count: `${templates.filter((template) => template.category === 'birthday').length} Luxe Designs`,
     },
     { 
       id: 'baby-shower', 
@@ -450,7 +452,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'गोद भराई एवं नामकरण',
       icon: Heart, 
       image: '/images/photo-library/godh-bloom-portrait-01.webp',
-      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'baby-shower').length} Pastel Designs`,
+      count: `${templates.filter((template) => template.category === 'baby-shower').length} Pastel Designs`,
     },
     { 
       id: 'anniversary', 
@@ -458,12 +460,12 @@ export const Homepage: React.FC<HomepageProps> = ({
       hindi: 'विवाह वर्षगांठ',
       icon: Gem, 
       image: '/images/photo-library/anniversary-evergreen-together-07.webp',
-      count: `${INITIAL_TEMPLATES.filter((template) => template.category === 'anniversary').length} Jubilee Designs`,
+      count: `${templates.filter((template) => template.category === 'anniversary').length} Jubilee Designs`,
     },
   ];
 
   // Filter templates
-  const filteredTemplates = INITIAL_TEMPLATES.filter((t) => {
+  const filteredTemplates = templates.filter((t) => {
     const isPhotoFrame = t.tags.some((tag) => tag.toLowerCase().includes('photo frame'));
     const matchesCat = selectedCategory === 'all'
       || (selectedCategory === 'photo-frames' ? isPhotoFrame : t.category === selectedCategory);
@@ -473,9 +475,12 @@ export const Homepage: React.FC<HomepageProps> = ({
       t.category.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
   });
+  const prioritizeNewGanesha = selectedCategory === 'wedding' || searchQuery.toLowerCase().includes('ganesha');
   const orderedTemplates = selectedCategory === 'photo-frames'
     ? [...filteredTemplates].reverse()
-    : filteredTemplates;
+    : prioritizeNewGanesha
+      ? [...filteredTemplates].sort((a, b) => Number(b.tags.includes('New Ganesha Collection')) - Number(a.tags.includes('New Ganesha Collection')))
+      : filteredTemplates;
   const isFeaturedHomeView = selectedCategory === 'all' && !searchQuery.trim() && !showAllTemplates;
   const visibleTemplates = isFeaturedHomeView
     ? orderedTemplates.slice(0, HOMEPAGE_FEATURED_COUNT)
@@ -567,7 +572,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 Sangeet & Haldi
               </button>
               <button 
-                onClick={() => onOpenVideoCard(INITIAL_TEMPLATES[0])}
+                onClick={() => onOpenVideoCard(templates[0])}
                 className="text-amber-300/90 hover:text-amber-200 transition flex items-center gap-1.5 cursor-pointer"
               >
                 <Film className="w-3.5 h-3.5 text-amber-400" />
@@ -611,7 +616,7 @@ export const Homepage: React.FC<HomepageProps> = ({
             {/* Hero CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
               <button
-                onClick={() => onOpenVideoCard(INITIAL_TEMPLATES[0])}
+                onClick={() => onOpenVideoCard(templates[0])}
                 className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-110 text-neutral-950 font-bold text-sm rounded-xl shadow-xl shadow-amber-500/25 transition-all hover:scale-[1.02] flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Play className="w-4 h-4 fill-neutral-950 text-neutral-950" />
@@ -668,9 +673,9 @@ export const Homepage: React.FC<HomepageProps> = ({
 
             {/* Interactive Customizable Card */}
             <div 
-              onClick={() => onOpenEditorWithTemplate(INITIAL_TEMPLATES[0])}
+              onClick={() => onOpenEditorWithTemplate(templates[0])}
               className="cursor-pointer group relative w-72 sm:w-80 h-[460px] rounded-3xl p-5 shadow-2xl border-2 border-amber-500/50 rotate-[2deg] hover:rotate-0 hover:scale-105 transition-all duration-300 z-10 overflow-hidden will-change-transform"
-              style={{ background: INITIAL_TEMPLATES[0].pages[0].backgroundValue }}
+              style={{ background: templates[0].pages[0].backgroundValue }}
             >
               {/* Background Cover Image (WebP) */}
               <img
@@ -1473,7 +1478,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 <span>Launch Design Studio</span>
               </button>
               <button
-                onClick={() => onOpenVideoCard(INITIAL_TEMPLATES[0])}
+                onClick={() => onOpenVideoCard(templates[0])}
                 className="w-full sm:w-auto px-5 py-3.5 bg-neutral-900/90 hover:bg-neutral-800 border border-amber-500/40 text-amber-200 font-semibold text-xs uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Play className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
@@ -1609,7 +1614,7 @@ export const Homepage: React.FC<HomepageProps> = ({
               <ul className="space-y-2.5 text-xs text-neutral-400">
                 <li>
                   <button
-                    onClick={() => onOpenEditorWithTemplate(INITIAL_TEMPLATES[0])}
+                    onClick={() => onOpenEditorWithTemplate(templates[0])}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <Film className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1618,7 +1623,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </li>
                 <li>
                   <button
-                    onClick={() => onOpenEditorWithTemplate(INITIAL_TEMPLATES[1] || INITIAL_TEMPLATES[0])}
+                    onClick={() => onOpenEditorWithTemplate(templates[1] || templates[0])}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <Film className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1627,7 +1632,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </li>
                 <li>
                   <button
-                    onClick={() => onOpenVideoCard(INITIAL_TEMPLATES[0])}
+                    onClick={() => onOpenVideoCard(templates[0])}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <Play className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
@@ -1700,7 +1705,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </li>
                 <li>
                   <button
-                    onClick={() => onOpenPrintExport(INITIAL_TEMPLATES[0])}
+                    onClick={() => onOpenPrintExport(templates[0])}
                     className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
                   >
                     <Printer className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />

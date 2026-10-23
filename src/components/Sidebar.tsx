@@ -141,6 +141,7 @@ export type SidebarTab =
   | 'slides';
 
 interface SidebarProps {
+  templates: CardTemplate[];
   initialActiveTab?: SidebarTab;
   initialElementSubTab?: 'frames' | 'tables';
   aspectRatio: AspectRatioType;
@@ -567,6 +568,7 @@ const CANVA_FONT_COMBINATIONS = [
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
+  templates,
   initialActiveTab = 'templates',
   initialElementSubTab,
   aspectRatio,
@@ -1204,7 +1206,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   // Filter templates
-  const filteredTemplates = INITIAL_TEMPLATES.filter((t) => {
+  const filteredTemplates = templates.filter((t) => {
     if (templateCategory === 'all') return true;
     if (templateCategory === 'photo-frames') {
       return t.tags?.some((tag) => tag.toLowerCase().includes('photo frame')) ?? false;
