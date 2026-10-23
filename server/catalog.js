@@ -10,7 +10,11 @@ async function readText(stream) {
 }
 
 export async function readCatalog() {
-  const result = await get(CATALOG_PATH, { access: 'private' });
+  // Admin writes use the returned ETag as an optimistic concurrency guard.
+  // Reading through the Blob CDN cache can pair old JSON/revision data with an
+  // ETag that no longer matches the origin, making every save look conflicted.
+  // Always read the catalog from origin so revision checks and ifMatch agree.
+  const result = await get(CATALOG_PATH, { access: 'private', useCache: false });
   if (!result || result.statusCode !== 200 || !result.stream) {
     return { catalog: emptyCatalog(), etag: null };
   }
