@@ -9,6 +9,8 @@ import { INITIAL_TEMPLATES } from '../data/templates';
 import { AUDIO_TRACKS } from '../data/audioTracks';
 import type { AudioTrack, CardPage, CardTemplate, CanvasItem, ImageElement, VideoElement } from '../types/editor';
 import { CANVAS_SIZES } from '../types/editor';
+import { Canvas } from './Canvas';
+import { Toolbar } from './Toolbar';
 import { buildSavedCatalog, EMPTY_SAVED_CATALOG, mergeTemplateCatalog, type SavedTemplateCatalog } from '../utils/templateCatalog';
 
 type AdminTab = 'templates' | 'media';
@@ -54,13 +56,6 @@ function makeTemplate(): CardTemplate {
   };
 }
 
-function previewImage(page: CardPage): string | null {
-  const candidates = page.elements.filter((element) => element.type === 'image' || element.type === 'video');
-  const first = candidates[0] as ImageElement | VideoElement | undefined;
-  if (!first) return null;
-  return first.type === 'image' ? first.src : first.posterSrc || first.mediaSrc || null;
-}
-
 function formatBytes(value: number) {
   if (value < 1024 * 1024) return `${Math.max(1, Math.round(value / 1024))} KB`;
   return `${(value / (1024 * 1024)).toFixed(1)} MB`;
@@ -77,6 +72,8 @@ export const AdminPanel: React.FC = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState(INITIAL_TEMPLATES[0]?.id || '');
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [canvasZoom, setCanvasZoom] = useState(0.55);
+  const [pendingDelete, setPendingDelete] = useState<'slide' | 'template' | null>(null);
   const [tab, setTab] = useState<AdminTab>('templates');
   const [query, setQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -91,7 +88,6 @@ export const AdminPanel: React.FC = () => {
 
   const selectedTemplate = templates.find((item) => item.id === selectedTemplateId) || templates[0] || null;
   const selectedPage = selectedTemplate?.pages[selectedPageIndex] || selectedTemplate?.pages[0] || null;
-  const previewSize = CANVAS_SIZES[selectedTemplate?.aspectRatio || 'portrait-story'];
   const selectedElement = selectedPage?.elements.find((item) => item.id === selectedElementId) || null;
   const allTracks = useMemo(() => [...AUDIO_TRACKS, ...savedCatalog.customAudioTracks], [savedCatalog.customAudioTracks]);
   const filteredTemplates = useMemo(() => templates.filter((template) => {
@@ -266,13 +262,38 @@ export const AdminPanel: React.FC = () => {
   };
 
   const deleteTemplate = () => {
-    if (!selectedTemplate || !window.confirm(`Remove “${selectedTemplate.title}” from the live template catalog?`)) return;
-    const next = templates.filter((item) => item.id !== selectedTemplate.id);
-    setTemplates(next);
-    setSelectedTemplateId(next[0]?.id || '');
-    setSelectedPageIndex(0);
-    setSelectedElementId(null);
-    setNotice('Template removed from the draft catalog. Save to publish this change.');
+    if (!selectedTemplate) return;
+    setPendingDelete('template');
+  };
+
+  const confirmDelete = () => {
+    if (!selectedTemplate || !pendingDelete) return;
+    if (pendingDelete === 'template') {
+      const next = templates.filter((item) => item.id !== selectedTemplate.id);
+      setTemplates(next);
+      setSelectedTemplateId(next[0]?.id || '');
+      setSelectedPageIndex(0);
+      setSelectedElementId(null);
+      setNotice('Template removed from this draft. Choose Save & publish to apply it to the website.');
+    } else {
+      if (selectedTemplate.pages.length <= 1 || !selectedPage) return;
+      const nextPages = selectedTemplate.pages.filter((_, index) => index !== selectedPageIndex);
+      const nextClips = (selectedTemplate.audioClips || []).flatMap((clip) => {
+        if (clip.pageIndex === null || clip.pageIndex < selectedPageIndex) return [clip];
+        if (clip.pageIndex === selectedPageIndex) return [];
+        return [{ ...clip, pageIndex: clip.pageIndex - 1 }];
+      });
+      updateTemplate({ pages: nextPages, audioClips: reflowAudioClips(nextPages, nextClips) });
+      setSelectedPageIndex(Math.max(0, selectedPageIndex - 1));
+      setSelectedElementId(null);
+      setNotice('Slide removed from this draft. Save & publish to apply it to the website.');
+    }
+    setPendingDelete(null);
+  };
+
+  const deletePage = () => {
+    if (!selectedTemplate || selectedTemplate.pages.length <= 1) return;
+    setPendingDelete('slide');
   };
 
   const saveCatalog = async () => {
@@ -309,19 +330,6 @@ export const AdminPanel: React.FC = () => {
     };
     updateTemplate({ pages: [...selectedTemplate.pages, page] });
     setSelectedPageIndex(selectedTemplate.pages.length);
-    setSelectedElementId(null);
-  };
-
-  const deletePage = () => {
-    if (!selectedTemplate || selectedTemplate.pages.length <= 1 || !window.confirm('Delete this slide?')) return;
-    const nextPages = selectedTemplate.pages.filter((_, index) => index !== selectedPageIndex);
-    const nextClips = (selectedTemplate.audioClips || []).flatMap((clip) => {
-      if (clip.pageIndex === null || clip.pageIndex < selectedPageIndex) return [clip];
-      if (clip.pageIndex === selectedPageIndex) return [];
-      return [{ ...clip, pageIndex: clip.pageIndex - 1 }];
-    });
-    updateTemplate({ pages: nextPages, audioClips: reflowAudioClips(nextPages, nextClips) });
-    setSelectedPageIndex(Math.max(0, selectedPageIndex - 1));
     setSelectedElementId(null);
   };
 
@@ -525,7 +533,7 @@ export const AdminPanel: React.FC = () => {
     <div className="flex h-screen min-h-[680px] flex-col overflow-hidden bg-[#0b090a] text-stone-100 selection:bg-amber-300/30">
       <header className="z-10 flex h-[72px] shrink-0 items-center justify-between border-b border-amber-200/10 bg-[#100d0e]/95 px-5 shadow-lg shadow-black/20 md:px-8">
         <div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-xl border border-amber-200/20 bg-amber-300/[0.08] text-amber-200"><Gem className="h-5 w-5" /></div><div><p className="font-serif text-lg tracking-wide text-[#fff1db]">Nimantran <span className="text-amber-300">Admin</span></p><p className="hidden text-[10px] uppercase tracking-[.18em] text-stone-500 sm:block">Private template studio</p></div></div>
-        <div className="flex items-center gap-2 sm:gap-3"><span className="hidden items-center gap-1.5 rounded-full border border-emerald-300/15 bg-emerald-300/[0.06] px-3 py-1.5 text-[11px] text-emerald-200/90 md:flex"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300" /> Live catalog</span><button onClick={exportBackup} className="hidden rounded-lg border border-white/10 px-3 py-2 text-xs text-stone-300 hover:border-amber-200/30 hover:text-amber-100 sm:block">Export backup</button><button onClick={signOut} className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-stone-300 transition hover:border-rose-200/30 hover:text-rose-200"><LogOut className="h-4 w-4" /><span className="hidden sm:inline">Sign out</span></button><button onClick={saveCatalog} disabled={busy || uploadProgress !== null} className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-200 to-yellow-500 px-3.5 py-2.5 text-xs font-bold text-[#211307] transition hover:brightness-110 disabled:opacity-50 sm:px-5"><Save className="h-4 w-4" />{busy ? 'Saving…' : 'Save changes'}</button></div>
+        <div className="flex items-center gap-2 sm:gap-3"><span className="hidden items-center gap-1.5 rounded-full border border-emerald-300/15 bg-emerald-300/[0.06] px-3 py-1.5 text-[11px] text-emerald-200/90 md:flex"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300" /> Live catalog</span><button onClick={exportBackup} className="hidden rounded-lg border border-white/10 px-3 py-2 text-xs text-stone-300 hover:border-amber-200/30 hover:text-amber-100 sm:block">Export backup</button><button onClick={signOut} className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-stone-300 transition hover:border-rose-200/30 hover:text-rose-200"><LogOut className="h-4 w-4" /><span className="hidden sm:inline">Sign out</span></button><button onClick={saveCatalog} disabled={busy || uploadProgress !== null} className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-200 to-yellow-500 px-3.5 py-2.5 text-xs font-bold text-[#211307] transition hover:brightness-110 disabled:opacity-50 sm:px-5"><Save className="h-4 w-4" />{busy ? 'Publishing…' : 'Save & publish'}</button></div>
       </header>
 
       <div className="flex min-h-0 flex-1">
@@ -543,33 +551,87 @@ export const AdminPanel: React.FC = () => {
         </aside>
 
         <main className="min-w-0 flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_40%_0%,rgba(89,47,30,.14),transparent_50%)]">
-          {!selectedTemplate ? <div className="grid h-full place-items-center p-8 text-sm text-stone-500">No templates are in the current catalog. Create one to begin.</div> : <div className="mx-auto max-w-[1080px] p-5 md:p-8">
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[.2em] text-amber-300/80">Template editor</p><h1 className="mt-1 max-w-[680px] truncate font-serif text-3xl text-[#fff1db] md:text-[38px]">{selectedTemplate.title}</h1><p className="mt-2 text-xs text-stone-500">Editing catalog item · {selectedTemplate.pages.length} slides · {selectedTemplate.aspectRatio}</p></div><div className="flex items-center gap-2"><button onClick={duplicateTemplate} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-stone-300 hover:border-amber-200/25"><FilePlus2 className="mr-1.5 inline h-4 w-4" />Duplicate</button><button onClick={deleteTemplate} className="rounded-lg border border-rose-300/10 p-2 text-rose-300/70 hover:border-rose-300/35 hover:text-rose-200" title="Remove template"><Trash2 className="h-4 w-4" /></button></div></div>
+          {!selectedTemplate ? <div className="grid h-full place-items-center p-8 text-sm text-stone-500">No templates are in the current catalog. Create one to begin.</div> : <div className="mx-auto max-w-[1600px] p-4 md:p-7">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[.2em] text-amber-300/80">Template editor</p><h1 className="mt-1 max-w-[760px] truncate font-serif text-3xl text-[#fff1db] md:text-[38px]">{selectedTemplate.title}</h1><p className="mt-2 text-xs text-stone-500">{selectedTemplate.pages.length} slides · {CANVAS_SIZES[selectedTemplate.aspectRatio].ratioLabel}</p></div><div className="flex items-center gap-2"><button onClick={duplicateTemplate} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-stone-300 hover:border-amber-200/25"><FilePlus2 className="mr-1.5 inline h-4 w-4" />Make a copy</button><button onClick={deleteTemplate} className="flex items-center gap-1.5 rounded-lg border border-rose-300/10 px-3 py-2 text-xs text-rose-200/75 hover:border-rose-300/35 hover:text-rose-100" title="Remove template"><Trash2 className="h-4 w-4" />Remove</button></div></div>
+
+            <div className="mb-5 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-amber-200/10 bg-amber-200/[0.035] px-4 py-3 text-[11px] leading-5 text-stone-300"><span className="font-semibold text-amber-100">Quick guide</span><span>1. Choose a slide below.</span><span>2. Click text or artwork on the canvas to edit or drag it.</span><span>3. Press <strong className="text-stone-100">Save & publish</strong> when ready.</span></div>
 
             {notice && <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-amber-200/10 bg-amber-200/[0.04] px-4 py-3 text-xs leading-5 text-amber-100/80"><span className="flex items-center gap-2"><Cloud className="h-4 w-4 shrink-0 text-amber-300" />{notice}</span><button onClick={() => setNotice('')} aria-label="Dismiss"><X className="h-4 w-4 text-stone-600" /></button></div>}
 
             <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
               <div className="space-y-5">
                 <div className="rounded-2xl border border-white/[0.08] bg-[#131011]/90 p-5 shadow-2xl shadow-black/10 md:p-6">
-                  <div className="mb-5 flex items-center gap-2 text-xs font-semibold text-stone-300"><Settings2 className="h-4 w-4 text-amber-300" />Template details</div>
+                  <div className="mb-5 flex items-center gap-2 text-xs font-semibold text-stone-300"><Settings2 className="h-4 w-4 text-amber-300" />Template details <span className="font-normal text-stone-600">· name, occasion and size</span></div>
                   <div className="grid gap-4 md:grid-cols-2"><label className="text-[11px] text-stone-500">Template name<input value={selectedTemplate.title} onChange={(event) => updateTemplate({ title: event.target.value })} className={`${inputClasses} mt-1.5`} /></label><label className="text-[11px] text-stone-500">Category<select value={selectedTemplate.category} onChange={(event) => updateTemplate({ category: event.target.value as CardTemplate['category'] })} className={`${selectClasses} mt-1.5`}>{categories.map((category) => <option value={category.id} key={category.id}>{category.label}</option>)}</select></label><label className="text-[11px] text-stone-500">Canvas size<select value={selectedTemplate.aspectRatio} onChange={(event) => changeAspectRatio(event.target.value as CardTemplate['aspectRatio'])} className={`${selectClasses} mt-1.5`}><option value="portrait-story">Portrait story · 9:16</option><option value="portrait-classic">Print · 5:7</option><option value="a4-print">A4 print</option><option value="square">Square · 1:1</option><option value="landscape">Landscape · 7:5</option><option value="whatsapp-banner">Wide video · 16:9</option></select></label><label className="text-[11px] text-stone-500">Search tags<input value={selectedTemplate.tags.join(', ')} onChange={(event) => updateTemplate({ tags: event.target.value.split(',').map((tag) => tag.trim()).filter(Boolean) })} className={`${inputClasses} mt-1.5`} placeholder="Wedding, photo frame, maroon" /></label></div>
                 </div>
 
                 <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#131011]/90 shadow-2xl shadow-black/10">
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.07] px-5 py-4"><div><p className="text-xs font-semibold text-stone-200">Slides & design elements</p><p className="mt-1 text-[10px] text-stone-600">Edit each slide and every element in the template.</p></div><div className="flex items-center gap-2"><button onClick={addText} className="rounded-lg border border-white/10 px-3 py-2 text-[11px] text-stone-300 hover:border-amber-200/25"><Plus className="mr-1 inline h-3.5 w-3.5" />Text</button><button onClick={() => startUpload('image')} className="rounded-lg border border-white/10 px-3 py-2 text-[11px] text-stone-300 hover:border-amber-200/25"><ImagePlus className="mr-1 inline h-3.5 w-3.5" />Image</button><button onClick={addPage} className="rounded-lg bg-amber-300/[0.08] px-3 py-2 text-[11px] text-amber-200 hover:bg-amber-300/[0.14]"><Plus className="mr-1 inline h-3.5 w-3.5" />Slide</button></div></div>
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.07] px-5 py-4"><div><p className="text-xs font-semibold text-stone-200">Design your slides</p><p className="mt-1 text-[10px] text-stone-500">Choose a slide, then select anything on the canvas.</p></div><div className="flex items-center gap-2"><button onClick={addText} className="rounded-lg border border-white/10 px-3 py-2 text-[11px] text-stone-300 hover:border-amber-200/25"><Plus className="mr-1 inline h-3.5 w-3.5" />Add text</button><button onClick={() => startUpload('image')} className="rounded-lg border border-white/10 px-3 py-2 text-[11px] text-stone-300 hover:border-amber-200/25"><ImagePlus className="mr-1 inline h-3.5 w-3.5" />Add photo</button><button onClick={addPage} className="rounded-lg bg-amber-300/[0.08] px-3 py-2 text-[11px] text-amber-200 hover:bg-amber-300/[0.14]"><Plus className="mr-1 inline h-3.5 w-3.5" />Add slide</button></div></div>
                   <div className="flex gap-2 overflow-x-auto border-b border-white/[0.07] px-4 py-3">{selectedTemplate.pages.map((page, index) => <button key={page.id} onClick={() => { setSelectedPageIndex(index); setSelectedElementId(null); }} className={`flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-left text-[11px] transition ${index === selectedPageIndex ? 'border-amber-200/25 bg-amber-300/[0.07] text-amber-100' : 'border-white/[0.07] text-stone-500 hover:text-stone-200'}`}><span className="grid h-5 w-5 place-items-center rounded bg-black/20 text-[9px]">{String(index + 1).padStart(2, '0')}</span><span className="max-w-36 truncate">{page.title}</span></button>)}</div>
                   <div className="flex flex-wrap items-center justify-end gap-2 border-b border-white/[0.07] px-4 py-2"><span className="mr-auto text-[10px] text-stone-600">Slide {selectedPageIndex + 1} of {selectedTemplate.pages.length}</span><button onClick={() => movePage(-1)} disabled={selectedPageIndex === 0} className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[10px] text-stone-400 hover:text-amber-100 disabled:opacity-30">Move left</button><button onClick={duplicatePage} className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[10px] text-stone-400 hover:text-amber-100">Duplicate slide</button><button onClick={() => movePage(1)} disabled={selectedPageIndex === selectedTemplate.pages.length - 1} className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[10px] text-stone-400 hover:text-amber-100 disabled:opacity-30">Move right</button></div>
-                  {selectedPage && <div className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_210px]">
+                  {selectedPage && <div className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,380px)]">
                     <div className="space-y-4"><div className="grid gap-3 sm:grid-cols-2"><label className="text-[11px] text-stone-500">Slide title<input value={selectedPage.title} onChange={(event) => updatePage({ title: event.target.value })} className={`${inputClasses} mt-1.5`} /></label><label className="text-[11px] text-stone-500">Transition<select value={selectedPage.transition || 'fade'} onChange={(event) => updatePage({ transition: event.target.value as CardPage['transition'] })} className={`${selectClasses} mt-1.5`}>{transitions.map((transition) => <option key={transition} value={transition}>{transition}</option>)}</select></label><label className="text-[11px] text-stone-500">Background<select value={selectedPage.backgroundType} onChange={(event) => updatePage({ backgroundType: event.target.value as CardPage['backgroundType'] })} className={`${selectClasses} mt-1.5`}><option value="color">Solid color</option><option value="gradient">Gradient</option><option value="pattern">Pattern</option><option value="image">Image URL</option></select></label><label className="text-[11px] text-stone-500">Duration · seconds<input type="number" min="1" max="60" step="0.5" value={selectedPage.duration || 5} onChange={(event) => updatePage({ duration: Number(event.target.value) || 5 })} className={`${inputClasses} mt-1.5`} /></label></div><label className="block text-[11px] text-stone-500">Background value<input value={selectedPage.backgroundValue} onChange={(event) => updatePage({ backgroundValue: event.target.value })} className={`${inputClasses} mt-1.5`} placeholder="#1b0d11, CSS gradient or image URL" /></label>
                       <div className="rounded-xl border border-white/[0.07] bg-black/15 p-3"><div className="mb-2 flex items-center justify-between"><span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">Elements on this slide · {selectedPage.elements.length}</span><button onClick={() => startUpload('video')} className="text-[10px] text-amber-200/80 hover:text-amber-100"><Clapperboard className="mr-1 inline h-3.5 w-3.5" />Add video</button></div><div className="max-h-[300px] space-y-1 overflow-y-auto">{selectedPage.elements.map((element) => <div key={element.id} className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 ${element.id === selectedElementId ? 'border-amber-200/20 bg-amber-300/[0.06]' : 'border-transparent hover:bg-white/[0.035]'}`}><button onClick={() => setSelectedElementId(element.id)} className="flex min-w-0 flex-1 items-center gap-2 text-left"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white/[0.04] text-amber-200/70">{element.type === 'text' ? <span className="font-serif text-sm">T</span> : element.type === 'video' ? <Film className="h-3.5 w-3.5" /> : element.type === 'image' ? <FileImage className="h-3.5 w-3.5" /> : <LayoutTemplate className="h-3.5 w-3.5" />}</span><span className="min-w-0"><span className="block truncate text-[11px] text-stone-300">{element.type === 'text' ? (element as Extract<CanvasItem, { type: 'text' }>).text || 'Text' : element.type === 'image' ? (element as ImageElement).alt || 'Image' : element.type === 'video' ? (element as VideoElement).videoName || 'Video' : element.type}</span><span className="mt-0.5 block text-[9px] uppercase tracking-wider text-stone-600">{element.type}</span></span></button><button onClick={() => { setSelectedElementId(element.id); updatePage({ elements: selectedPage.elements.filter((item) => item.id !== element.id) }); }} aria-label="Remove element" className="p-1 text-stone-600 hover:text-rose-300"><Trash2 className="h-3.5 w-3.5" /></button></div>)}{selectedPage.elements.length === 0 && <p className="py-5 text-center text-[11px] text-stone-600">No design elements yet. Add text, artwork or a video.</p>}</div></div>
                     </div>
-                    <div className="flex flex-col items-center justify-start gap-3"><div className={`relative w-full max-w-[190px] overflow-hidden rounded-[18px] border border-amber-200/25 shadow-xl shadow-black/30 ${selectedTemplate.aspectRatio === 'square' ? 'aspect-square' : selectedTemplate.aspectRatio === 'landscape' ? 'aspect-[7/5]' : selectedTemplate.aspectRatio === 'whatsapp-banner' ? 'aspect-video' : selectedTemplate.aspectRatio === 'portrait-classic' ? 'aspect-[5/7]' : selectedTemplate.aspectRatio === 'a4-print' ? 'aspect-[520/735]' : 'aspect-[9/16]'}`} style={{ background: selectedPage.backgroundType === 'color' || selectedPage.backgroundType === 'gradient' ? selectedPage.backgroundValue : '#25161a' }}>{selectedPage.backgroundType === 'image' && <img src={selectedPage.backgroundValue} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70" />}{previewImage(selectedPage) && <img src={previewImage(selectedPage) || undefined} alt="Selected template slide preview" className="absolute inset-0 h-full w-full object-cover opacity-70" />}{selectedPage.elements.filter((element) => element.type === 'text').slice(0, 5).map((element) => { const text = element as Extract<CanvasItem, { type: 'text' }>; return <div key={text.id} className="absolute flex items-center justify-center overflow-hidden px-2 text-center" style={{ left: `${(text.x / previewSize.width) * 100}%`, top: `${(text.y / previewSize.height) * 100}%`, width: `${(text.width / previewSize.width) * 100}%`, height: `${(text.height / previewSize.height) * 100}%`, color: text.color, fontFamily: text.fontFamily, fontSize: `${Math.max(7, (text.fontSize / previewSize.width) * 190)}px`, lineHeight: text.lineHeight, fontWeight: text.fontWeight, fontStyle: text.fontStyle, textAlign: text.textAlign, opacity: text.opacity }}>{text.text}</div>; })}<span className="absolute inset-x-2 bottom-2 rounded-full border border-white/10 bg-black/50 px-2 py-1 text-center text-[8px] text-stone-200">Slide {selectedPageIndex + 1} preview</span></div><div className="flex w-full flex-col gap-2"><button onClick={() => startUpload('image')} className="rounded-lg border border-white/[0.08] py-2 text-[10px] text-stone-400 hover:text-amber-100"><ImagePlus className="mr-1 inline h-3.5 w-3.5" />Upload image</button><button onClick={() => startUpload('audio')} className="rounded-lg border border-white/[0.08] py-2 text-[10px] text-stone-400 hover:text-amber-100"><Music2 className="mr-1 inline h-3.5 w-3.5" />Upload music</button><button onClick={deletePage} disabled={selectedTemplate.pages.length <= 1} className="rounded-lg border border-rose-300/10 py-2 text-[10px] text-rose-200/60 hover:border-rose-300/30 disabled:opacity-30"><Trash2 className="mr-1 inline h-3.5 w-3.5" />Delete slide</button></div></div>
+                    <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#100d0e] shadow-xl shadow-black/20">
+                      <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3">
+                        <div><p className="text-xs font-semibold text-stone-200">Live design canvas</p><p className="mt-1 text-[10px] text-stone-500">Select an item, then drag it to reposition.</p></div>
+                        <span className="shrink-0 rounded-full border border-amber-200/10 px-2.5 py-1 text-[10px] text-amber-100/70">Slide {selectedPageIndex + 1}</span>
+                      </div>
+                      <div className="h-[min(68vh,760px)] min-h-[500px] w-full">
+                        <Canvas
+                          aspectRatio={selectedTemplate.aspectRatio}
+                          backgroundType={selectedPage.backgroundType}
+                          backgroundValue={selectedPage.backgroundValue}
+                          elements={selectedPage.elements}
+                          selectedElementId={selectedElementId}
+                          onSelectElement={setSelectedElementId}
+                          onUpdateElement={(id, updates) => updateElement(id, updates)}
+                          onAddElement={(element) => updatePage({ elements: [...selectedPage.elements, element] })}
+                          onDeleteElement={() => {
+                            if (selectedElementId) updatePage({ elements: selectedPage.elements.filter((element) => element.id !== selectedElementId) });
+                            setSelectedElementId(null);
+                          }}
+                          onDuplicateElement={() => {
+                            const element = selectedPage.elements.find((item) => item.id === selectedElementId);
+                            if (!element) return;
+                            const copy = { ...structuredClone(element), id: `${element.id}-copy-${Date.now()}`, x: element.x + 16, y: element.y + 16 } as CanvasItem;
+                            updatePage({ elements: [...selectedPage.elements, copy] });
+                            setSelectedElementId(copy.id);
+                          }}
+                          onBringForward={() => {
+                            const element = selectedPage.elements.find((item) => item.id === selectedElementId);
+                            if (element) updateElement(element.id, { zIndex: Number(('zIndex' in element && element.zIndex) || 1) + 1 });
+                          }}
+                          onSendBackward={() => {
+                            const element = selectedPage.elements.find((item) => item.id === selectedElementId);
+                            if (element) updateElement(element.id, { zIndex: Math.max(1, Number(('zIndex' in element && element.zIndex) || 1) - 1) });
+                          }}
+                          onBringToFront={() => {
+                            const element = selectedPage.elements.find((item) => item.id === selectedElementId);
+                            if (element) updateElement(element.id, { zIndex: Math.max(...selectedPage.elements.map((item) => Number(('zIndex' in item && item.zIndex) || 1)), 0) + 1 });
+                          }}
+                          onSendToBack={() => {
+                            const element = selectedPage.elements.find((item) => item.id === selectedElementId);
+                            if (element) updateElement(element.id, { zIndex: 1 });
+                          }}
+                          zoom={canvasZoom}
+                          onZoomChange={setCanvasZoom}
+                          showRulers={false}
+                          showSafeZones={false}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 border-t border-white/[0.07] p-3">
+                        <button onClick={() => startUpload('image')} className="rounded-lg border border-white/[0.08] py-2.5 text-xs text-stone-300 transition hover:border-amber-200/25 hover:text-amber-100"><ImagePlus className="mr-1.5 inline h-4 w-4" />Add photo</button>
+                        <button onClick={() => startUpload('audio')} className="rounded-lg border border-white/[0.08] py-2.5 text-xs text-stone-300 transition hover:border-amber-200/25 hover:text-amber-100"><Music2 className="mr-1.5 inline h-4 w-4" />Add music</button>
+                      </div>
+                    </div>
                   </div>}
                 </div>
 
                 {selectedPage && <div className="rounded-2xl border border-white/[0.08] bg-[#131011]/90 p-5 shadow-2xl shadow-black/10 md:p-6"><div className="mb-4 flex items-center gap-2 text-xs font-semibold text-stone-300"><Music2 className="h-4 w-4 text-amber-300" />Music on this slide</div><div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]"><select onChange={(event) => assignTrack(event.target.value)} value="" className={selectClasses}><option value="" disabled>Choose a saved music track…</option>{allTracks.map((track) => <option value={track.id} key={track.id}>{track.name}</option>)}</select><button onClick={() => startUpload('audio')} className="rounded-lg border border-amber-200/15 px-3 py-2.5 text-xs text-amber-100 hover:bg-amber-300/[0.05]"><Upload className="mr-1.5 inline h-4 w-4" />Upload music</button></div><div className="mt-3 space-y-2">{(selectedTemplate.audioClips || []).filter((clip) => clip.pageIndex === selectedPageIndex || clip.pageIndex === null).map((clip) => { const track = allTracks.find((item) => item.id === clip.trackId); return <div key={clip.id} className="flex items-center justify-between rounded-lg border border-white/[0.06] px-3 py-2 text-xs text-stone-400"><span className="flex min-w-0 items-center gap-2"><AudioLines className="h-4 w-4 shrink-0 text-amber-200/80" /><span className="truncate">{track?.name || clip.trackId}</span></span><button onClick={() => updateTemplate({ audioClips: (selectedTemplate.audioClips || []).filter((item) => item.id !== clip.id) })} className="text-stone-600 hover:text-rose-300" aria-label="Remove music"><X className="h-4 w-4" /></button></div>; })}</div></div>}
 
-                {selectedElement && <div className="rounded-2xl border border-white/[0.08] bg-[#131011]/90 p-5 shadow-2xl shadow-black/10 md:p-6"><div className="mb-4 flex items-center justify-between"><div><div className="flex items-center gap-2 text-xs font-semibold text-stone-200"><LayoutTemplate className="h-4 w-4 text-amber-300" />Element properties</div><p className="mt-1 text-[10px] text-stone-600">{selectedElement.type} · {selectedElement.id}</p></div><button onClick={() => setSelectedElementId(null)} className="text-stone-600 hover:text-stone-300"><X className="h-4 w-4" /></button></div>{selectedElement.type === 'text' && <div className="mb-4 grid gap-3 sm:grid-cols-2"><label className="text-[10px] text-stone-500 sm:col-span-2">Text content<textarea value={selectedElement.text} onChange={(event) => updateElement(selectedElement.id, { text: event.target.value })} rows={3} className={`${inputClasses} mt-1.5 resize-y`} /></label><label className="text-[10px] text-stone-500">Font size<input type="number" min="1" max="240" value={selectedElement.fontSize} onChange={(event) => updateElement(selectedElement.id, { fontSize: Number(event.target.value) })} className={`${inputClasses} mt-1.5`} /></label><label className="text-[10px] text-stone-500">Text color<input type="color" value={/^#[0-9a-f]{6}$/i.test(selectedElement.color) ? selectedElement.color : '#f5dfb0'} onChange={(event) => updateElement(selectedElement.id, { color: event.target.value })} className={`${inputClasses} mt-1.5 h-10 p-1`} /></label></div>}{(selectedElement.type === 'image' || selectedElement.type === 'video') && <div className="mb-4 grid gap-3 sm:grid-cols-2"><label className="text-[10px] text-stone-500 sm:col-span-2">Media URL<input value={selectedElement.type === 'image' ? selectedElement.src : selectedElement.mediaSrc || ''} onChange={(event) => updateElement(selectedElement.id, selectedElement.type === 'image' ? { src: event.target.value } : { mediaSrc: event.target.value })} className={`${inputClasses} mt-1.5`} /></label>{selectedElement.type === 'image' && <label className="text-[10px] text-stone-500">Image fit<select value={selectedElement.objectFit || 'cover'} onChange={(event) => updateElement(selectedElement.id, { objectFit: event.target.value as ImageElement['objectFit'] })} className={`${selectClasses} mt-1.5`}><option value="cover">Cover</option><option value="contain">Contain</option><option value="fill">Stretch / Fill</option></select></label>}</div>}<label className="block text-[10px] text-stone-500">Full element JSON <span className="text-stone-600">(all geometry, font, frame and animation settings)</span><textarea value={jsonDraft} onChange={(event) => setJsonDraft(event.target.value)} rows={12} spellCheck={false} className="mt-1.5 w-full rounded-lg border border-white/10 bg-[#0a0809] p-3 font-mono text-[10px] leading-5 text-amber-100/80 outline-none focus:border-amber-300/45" /></label>{jsonError && <p className="mt-2 text-xs text-rose-300">{jsonError}</p>}<button onClick={applyElementJson} className="mt-3 rounded-lg border border-amber-200/15 px-3 py-2 text-[11px] text-amber-100 hover:bg-amber-300/[0.05]">Apply element settings</button></div>}
+                {selectedElement && <div className="rounded-2xl border border-white/[0.08] bg-[#131011]/90 p-5 shadow-2xl shadow-black/10 md:p-6"><div className="mb-4 flex items-center justify-between"><div><div className="flex items-center gap-2 text-xs font-semibold text-stone-200"><LayoutTemplate className="h-4 w-4 text-amber-300" />Edit selected {selectedElement.type}</div><p className="mt-1 text-[10px] text-stone-600">Same editing controls as the design studio. Changes appear on the canvas immediately.</p></div><button onClick={() => setSelectedElementId(null)} className="text-stone-600 hover:text-stone-300" aria-label="Close element settings"><X className="h-4 w-4" /></button></div><Toolbar selectedElement={selectedElement} aspectRatio={selectedTemplate.aspectRatio} onUpdateElement={(patch) => updateElement(selectedElement.id, patch)} onDeleteElement={() => { updatePage({ elements: selectedPage.elements.filter((element) => element.id !== selectedElement.id) }); setSelectedElementId(null); }} onDuplicateElement={() => { const copy = { ...structuredClone(selectedElement), id: `${selectedElement.id}-copy-${Date.now()}`, x: selectedElement.x + 16, y: selectedElement.y + 16 } as CanvasItem; updatePage({ elements: [...selectedPage.elements, copy] }); setSelectedElementId(copy.id); }} onBringForward={() => updateElement(selectedElement.id, { zIndex: Number(('zIndex' in selectedElement && selectedElement.zIndex) || 1) + 1 })} onSendBackward={() => updateElement(selectedElement.id, { zIndex: Math.max(1, Number(('zIndex' in selectedElement && selectedElement.zIndex) || 1) - 1) })} onBringToFront={() => updateElement(selectedElement.id, { zIndex: Math.max(...selectedPage.elements.map((item) => Number(('zIndex' in item && item.zIndex) || 1)), 0) + 1 })} onSendToBack={() => updateElement(selectedElement.id, { zIndex: 1 })} /></div>}
               </div>
 
               <aside className="space-y-5"><div className="rounded-2xl border border-white/[0.08] bg-[#131011]/90 p-5"><div className="mb-4 flex items-center gap-2 text-xs font-semibold text-stone-300"><BadgeCheck className="h-4 w-4 text-amber-300" />Publish status</div><div className="rounded-xl border border-emerald-200/10 bg-emerald-300/[0.04] p-3"><p className="text-xs font-medium text-emerald-100">Live website catalog</p><p className="mt-1 text-[10px] leading-5 text-stone-500">Saving publishes template edits, new slides and attached media to the shared catalog used by website visitors.</p></div><div className="mt-4 flex justify-between border-b border-white/[0.06] pb-3 text-[11px]"><span className="text-stone-600">Catalog revision</span><span className="text-stone-300">{savedCatalog.revision}</span></div><div className="mt-3 flex justify-between text-[11px]"><span className="text-stone-600">Visible templates</span><span className="text-stone-300">{templates.length}</span></div><button onClick={saveCatalog} disabled={busy || uploadProgress !== null} className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-200 to-yellow-500 px-4 py-3 text-xs font-bold text-[#211307] transition hover:brightness-110 disabled:opacity-50"><Save className="h-4 w-4" />{busy ? 'Saving…' : 'Save & publish'}</button></div>
@@ -582,6 +644,7 @@ export const AdminPanel: React.FC = () => {
       </div>
       <input ref={uploadRef} type="file" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void processUpload(file); }} />
       {uploadProgress !== null && <div className="fixed inset-x-0 bottom-0 h-1.5 bg-white/5"><div className="h-full bg-gradient-to-r from-amber-400 to-yellow-300" style={{ width: `${uploadProgress}%` }} /></div>}
+      {pendingDelete && selectedTemplate && <div className="fixed inset-0 z-[100] grid place-items-center bg-black/75 p-4 backdrop-blur-sm" role="presentation"><section role="alertdialog" aria-modal="true" aria-labelledby="admin-delete-title" className="w-full max-w-md rounded-2xl border border-rose-200/15 bg-[#171113] p-6 shadow-2xl shadow-black/60"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-rose-200/75">Confirm removal</p><h2 id="admin-delete-title" className="mt-2 font-serif text-2xl text-[#fff1db]">Remove this {pendingDelete}?</h2><p className="mt-3 text-sm leading-6 text-stone-400">{pendingDelete === 'slide' ? `“${selectedPage?.title || 'Selected slide'}” will be removed from this draft.` : `“${selectedTemplate.title}” will be removed from this draft.`} Your live website will only change after you choose Save &amp; publish.</p><div className="mt-6 flex justify-end gap-3"><button onClick={() => setPendingDelete(null)} className="rounded-lg border border-white/10 px-4 py-2.5 text-xs text-stone-300 hover:border-white/20">Keep it</button><button onClick={confirmDelete} className="rounded-lg bg-rose-300 px-4 py-2.5 text-xs font-semibold text-[#220d13] hover:bg-rose-200">Remove from draft</button></div></section></div>}
     </div>
   );
 };
