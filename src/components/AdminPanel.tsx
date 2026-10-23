@@ -645,9 +645,9 @@ export const AdminPanel: React.FC = () => {
           </div>}
         </main>
       </div>
-      {showStudioTools && selectedTemplate && selectedPage && <div className="fixed inset-y-[72px] left-[270px] z-[60] max-lg:left-[230px] max-md:left-[58px]">
+      {showStudioTools && selectedTemplate && selectedPage && <div className="fixed inset-y-[72px] right-0 z-[60]">
         <div className="absolute inset-0 bg-black/45" onClick={() => setShowStudioTools(false)} />
-        <div className="relative h-full w-[min(430px,calc(100vw-270px))] max-lg:w-[min(430px,calc(100vw-230px))] max-md:w-[min(430px,calc(100vw-58px))] shadow-2xl">
+        <div className="relative h-full w-[min(430px,100vw)] shadow-2xl">
           <Sidebar
             templates={templates}
             initialActiveTab="elements"
