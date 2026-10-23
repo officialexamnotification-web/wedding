@@ -1,4 +1,5 @@
-import { handleUpload } from '@vercel/blob/client';
+import { handleUploadPresigned } from '@vercel/blob/client';
+import { issueSignedToken } from '@vercel/blob';
 import { isAdminRequest, isSameOriginRequest, sendJson } from '../../server/admin.js';
 
 const allowedByKind = {
@@ -12,29 +13,30 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'POST');
     return sendJson(res, 405, { error: 'Method not allowed.' });
   }
-  if (!process.env.MEDIA_BLOB_READ_WRITE_TOKEN) {
-    return sendJson(res, 503, { error: 'Connect a public Vercel Blob media store and set MEDIA_BLOB_READ_WRITE_TOKEN.' });
+  if (!process.env.MEDIA_BLOB_STORE_ID) {
+    return sendJson(res, 503, { error: 'Connect the public Vercel Blob media store to this project.' });
   }
   try {
-    const result = await handleUpload({
-      token: process.env.MEDIA_BLOB_READ_WRITE_TOKEN,
+    const result = await handleUploadPresigned({
       body: req.body,
       request: req,
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
+      getSignedToken: async (pathname, clientPayload) => {
         if (!isAdminRequest(req)) throw new Error('Admin sign-in required.');
         if (!isSameOriginRequest(req)) throw new Error('Upload origin is not allowed.');
         if (!pathname.startsWith('nimantran-media/')) throw new Error('Invalid upload path.');
         let payload = {};
         try { payload = JSON.parse(clientPayload || '{}'); } catch { throw new Error('Invalid upload details.'); }
         if (!['image', 'video', 'audio'].includes(payload.kind)) throw new Error('Unsupported media type.');
-        return {
+
+        const token = await issueSignedToken({
+          storeId: process.env.MEDIA_BLOB_STORE_ID,
+          pathname,
+          operations: ['put'],
           allowedContentTypes: allowedByKind[payload.kind],
-          addRandomSuffix: true,
           maximumSizeInBytes: 250 * 1024 * 1024,
-          tokenPayload: JSON.stringify({ kind: payload.kind }),
-        };
+        });
+        return { token, urlOptions: { tokenPayload: JSON.stringify({ kind: payload.kind }) } };
       },
-      onUploadCompleted: async () => {},
     });
     return sendJson(res, 200, result);
   } catch (error) {
@@ -43,4 +45,3 @@ export default async function handler(req, res) {
     return sendJson(res, status, { error: message });
   }
 }
-

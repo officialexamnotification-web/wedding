@@ -11,12 +11,10 @@ Add these in **Vercel → Project → Settings → Environment Variables**, for 
 | `ADMIN_USERNAME` | Your private admin username |
 | `ADMIN_PASSWORD` | A long unique password |
 | `ADMIN_SESSION_SECRET` | Random secret, at least 32 characters |
-| `BLOB_READ_WRITE_TOKEN` | Token created for a **private** Vercel Blob store (template catalog) |
-| `MEDIA_BLOB_READ_WRITE_TOKEN` | Token created for a separate **public** Vercel Blob store (published media) |
 
-Create two Blob stores in the Vercel project. Keep the catalog store private. Create the media store as public and set its environment variable prefix to `MEDIA_BLOB`, which makes Vercel create `MEDIA_BLOB_READ_WRITE_TOKEN`. Vercel Blob tokens stay on the server; browser uploads receive short-lived, restricted upload tokens only after admin authentication. The media files are public because published invitations need to load them for every visitor.
+Connect two Blob stores to the `wedding` project in Vercel Storage: a private store with the default `BLOB` prefix for the template catalog, and a public store with the `MEDIA_BLOB` prefix for uploaded media. Vercel injects the store IDs into the project environment. The app uses Vercel OIDC and short-lived, path-scoped upload permissions; it does not need a Blob API key or read-write token. Browser uploads are allowed only after admin authentication. Media files are public because published invitations need to load them for every visitor.
 
-After adding or changing variables, redeploy the Vercel project so the serverless functions receive them. No username, password, session secret or Blob token belongs in source control.
+After connecting stores or changing environment variables, redeploy the Vercel project so serverless functions receive the store IDs. No username, password, session secret or Blob token belongs in source control.
 
 To generate a session secret in PowerShell:
 

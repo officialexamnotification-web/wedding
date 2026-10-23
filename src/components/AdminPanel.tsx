@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { upload } from '@vercel/blob/client';
+import { uploadPresigned } from '@vercel/blob/client';
 import {
   ArrowLeft, AudioLines, BadgeCheck, ChevronRight, Clapperboard,
   Cloud, FileImage, FilePlus2, Film, FolderOpen, Gem, ImagePlus, LayoutTemplate, LockKeyhole,
@@ -395,7 +395,7 @@ export const AdminPanel: React.FC = () => {
     setNotice(`Uploading ${file.name} securely to Vercel Blob…`);
     try {
       const pathname = `nimantran-media/${kind}/${Date.now()}-${safeFileName(file.name)}`;
-      const result = await upload(pathname, file, {
+      const result = await uploadPresigned(pathname, file, {
         access: 'public', handleUploadUrl: '/api/admin/upload',
         multipart: file.size > 5 * 1024 * 1024,
         clientPayload: JSON.stringify({ kind }),
