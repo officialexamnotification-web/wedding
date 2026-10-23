@@ -1,4 +1,4 @@
-import { BlobPreconditionFailedError, get, put } from '@vercel/blob';
+import { BlobPreconditionFailedError, get, head, put } from '@vercel/blob';
 
 const CATALOG_PATH = 'nimantran/admin/catalog-v1.json';
 const emptyCatalog = () => ({ version: 1, revision: 0, overrides: {}, added: [], hiddenIds: [], customAudioTracks: [] });
@@ -20,6 +20,9 @@ export async function readCatalog() {
   }
   try {
     const parsed = JSON.parse(await readText(result.stream));
+    // `get()` supplies the catalog body; `head()` supplies the authoritative
+    // storage metadata ETag used by `put({ ifMatch })`.
+    const metadata = await head(CATALOG_PATH, { access: 'private' });
     return {
       catalog: {
         version: 1,
@@ -29,7 +32,7 @@ export async function readCatalog() {
         hiddenIds: Array.isArray(parsed.hiddenIds) ? parsed.hiddenIds : [],
         customAudioTracks: Array.isArray(parsed.customAudioTracks) ? parsed.customAudioTracks : [],
       },
-      etag: result.blob.etag,
+      etag: metadata.etag,
     };
   } catch {
     throw new Error('The stored catalog could not be read.');
