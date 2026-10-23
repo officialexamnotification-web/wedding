@@ -553,7 +553,7 @@ export const AdminPanel: React.FC = () => {
             <div className="border-t border-white/[0.07] p-3 max-md:hidden"><button onClick={() => importRef.current?.click()} className="w-full rounded-lg px-2 py-2 text-left text-xs text-stone-500 hover:text-stone-200"><Upload className="mr-2 inline h-3.5 w-3.5" />Import catalog backup</button><input ref={importRef} type="file" accept="application/json,.json" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importBackup(file); event.currentTarget.value = ''; }} /></div>
         </aside>
 
-        <main className="min-w-0 flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_40%_0%,rgba(89,47,30,.14),transparent_50%)]">
+        <main className={`min-w-0 flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_40%_0%,rgba(89,47,30,.14),transparent_50%)] ${showStudioTools ? 'xl:pl-[416px]' : ''}`}>
           {!selectedTemplate ? <div className="grid h-full place-items-center p-8 text-sm text-stone-500">No templates are in the current catalog. Create one to begin.</div> : <div className="mx-auto max-w-[1600px] p-4 md:p-7">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[.2em] text-amber-300/80">Template editor</p><h1 className="mt-1 max-w-[760px] truncate font-serif text-3xl text-[#fff1db] md:text-[38px]">{selectedTemplate.title}</h1><p className="mt-2 text-xs text-stone-500">{selectedTemplate.pages.length} slides · {CANVAS_SIZES[selectedTemplate.aspectRatio].ratioLabel}</p></div><div className="flex items-center gap-2"><button onClick={duplicateTemplate} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-stone-300 hover:border-amber-200/25"><FilePlus2 className="mr-1.5 inline h-4 w-4" />Make a copy</button><button onClick={deleteTemplate} className="flex items-center gap-1.5 rounded-lg border border-rose-300/10 px-3 py-2 text-xs text-rose-200/75 hover:border-rose-300/35 hover:text-rose-100" title="Remove template"><Trash2 className="h-4 w-4" />Remove</button></div></div>
 
@@ -645,9 +645,9 @@ export const AdminPanel: React.FC = () => {
           </div>}
         </main>
       </div>
-      {showStudioTools && selectedTemplate && selectedPage && <div className="fixed inset-y-[72px] right-0 z-[60]">
-        <div className="absolute inset-0 bg-black/45" onClick={() => setShowStudioTools(false)} />
-        <div className="relative h-full w-[min(430px,100vw)] shadow-2xl">
+      {showStudioTools && selectedTemplate && selectedPage && <div className="fixed inset-y-[72px] left-[270px] z-[60] max-lg:left-[230px] max-md:inset-y-auto max-md:bottom-16 max-md:left-0">
+        <div className="absolute inset-0 bg-black/45 xl:hidden" onClick={() => setShowStudioTools(false)} />
+        <div className="relative h-full w-[min(416px,calc(100vw-270px))] shadow-2xl max-lg:w-[min(416px,calc(100vw-230px))] max-md:h-[min(75vh,640px)] max-md:w-screen">
           <Sidebar
             templates={templates}
             initialActiveTab="elements"
