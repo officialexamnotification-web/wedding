@@ -3058,17 +3058,19 @@ export const Canvas: React.FC<CanvasProps> = ({
     backgroundValue.startsWith('/') ||
     backgroundValue.startsWith('data:image');
 
-  const artboardBackgroundStyle: React.CSSProperties = isBgImage
-    ? {
-        backgroundImage: backgroundValue.startsWith('url(')
-          ? backgroundValue
-          : `url("${backgroundValue}")`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }
-    : {
-        background: backgroundValue,
-      };
+  const isBgGradient = backgroundValue.includes('gradient(');
+  const artboardBackgroundStyle: React.CSSProperties = {
+    backgroundColor: !isBgImage && !isBgGradient ? backgroundValue : undefined,
+    backgroundImage: isBgImage
+      ? backgroundValue.startsWith('url(')
+        ? backgroundValue
+        : `url("${backgroundValue}")`
+      : isBgGradient
+        ? backgroundValue
+        : 'none',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  };
 
   return (
     <div

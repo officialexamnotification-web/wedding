@@ -87,7 +87,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="h-14 sm:h-15 bg-neutral-950 border-b border-neutral-800/90 px-3 sm:px-4 flex items-center justify-between text-neutral-200 select-none z-30 relative shadow-md">
+    <header className="h-14 sm:h-15 bg-neutral-950 border-b border-neutral-800/90 px-3 sm:px-4 flex items-center justify-between text-neutral-200 select-none z-50 relative shadow-md">
       {/* Left: Brand, File Menu, Magic Switch & Editable Title */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         {/* Back to Home Button */}

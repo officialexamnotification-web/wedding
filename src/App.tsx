@@ -218,6 +218,7 @@ export default function App() {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
       setPages(history[newIndex]);
+      latestPagesRef.current = history[newIndex];
       setSelectedElementId(null);
     }
   }, [historyIndex, history]);
@@ -228,6 +229,7 @@ export default function App() {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
       setPages(history[newIndex]);
+      latestPagesRef.current = history[newIndex];
       setSelectedElementId(null);
     }
   }, [historyIndex, history]);
@@ -261,6 +263,7 @@ export default function App() {
 
       if (changed) {
         setPages(updatedPages);
+        latestPagesRef.current = updatedPages;
       }
     };
 
@@ -387,6 +390,7 @@ export default function App() {
       };
     });
     setPages(cleared);
+    latestPagesRef.current = cleared;
 
     setTimeout(() => {
       const updated = latestPagesRef.current.map((page, idx) => {
@@ -599,39 +603,58 @@ export default function App() {
   // Canva Space Evenly / Smart Tidy Up Elements on Current Page
   const handleDistributeElements = (axis: 'horizontal' | 'vertical' | 'tidy') => {
     const dim = CANVAS_SIZES[aspectRatio];
+    let changed = false;
     const updated = pages.map((p, idx) => {
       if (idx !== currentPageIndex) return p;
       const unlocked = p.elements.filter((e) => !e.locked && e.type !== 'shape');
       if (unlocked.length < 2) return p;
-      const sorted = [...unlocked].sort((a, b) => (axis === 'horizontal' ? a.x - b.x : a.y - b.y));
-      const minY = 60;
-      const maxY = dim.height - 120;
-      const stepY = (maxY - minY) / Math.max(1, sorted.length - 1);
-
       const posMap = new Map<string, { x: number; y: number }>();
-      sorted.forEach((el, i) => {
-        if (axis === 'tidy' || axis === 'vertical') {
-          posMap.set(el.id, {
-            x: axis === 'tidy' ? Math.round((dim.width - el.width) / 2) : el.x,
-            y: Math.round(minY + i * stepY),
-          });
-        } else {
+      if (axis === 'tidy') {
+        const sorted = [...unlocked].sort((a, b) => a.y - b.y);
+        const totalHeight = sorted.reduce((sum, el) => sum + el.height, 0);
+        const preferredGap = 16;
+        const availableHeight = Math.max(0, dim.height - 120);
+        const gap = totalHeight + preferredGap * (sorted.length - 1) <= availableHeight
+          ? preferredGap
+          : 0;
+        const startY = Math.max(20, Math.round((dim.height - (totalHeight + gap * (sorted.length - 1))) / 2));
+        let cursorY = startY;
+        sorted.forEach((el) => {
           posMap.set(el.id, {
             x: Math.round((dim.width - el.width) / 2),
-            y: el.y,
+            y: Math.round(cursorY),
           });
-        }
-      });
+          cursorY += el.height + gap;
+        });
+      } else {
+        const horizontal = axis === 'horizontal';
+        const sorted = [...unlocked].sort((a, b) => horizontal ? a.x - b.x : a.y - b.y);
+        const sizeOf = (el: CanvasItem) => horizontal ? el.width : el.height;
+        const start = horizontal ? sorted[0].x : sorted[0].y;
+        const last = sorted[sorted.length - 1];
+        const end = horizontal ? last.x + last.width : last.y + last.height;
+        const totalSize = sorted.reduce((sum, el) => sum + sizeOf(el), 0);
+        const gap = Math.max(0, (end - start - totalSize) / (sorted.length - 1));
+        let cursor = start;
+        sorted.forEach((el) => {
+          posMap.set(el.id, horizontal
+            ? { x: Math.round(cursor), y: el.y }
+            : { x: el.x, y: Math.round(cursor) });
+          cursor += sizeOf(el) + gap;
+        });
+      }
 
       return {
         ...p,
         elements: p.elements.map((el) => {
           const nextPos = posMap.get(el.id);
-          return nextPos ? { ...el, ...nextPos } : el;
+          if (!nextPos || (nextPos.x === el.x && nextPos.y === el.y)) return el;
+          changed = true;
+          return { ...el, ...nextPos };
         }),
       };
     });
-    commitPages(updated);
+    if (changed) commitPages(updated);
   };
 
   // Canva Smart Page Layouts
