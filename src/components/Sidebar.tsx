@@ -80,6 +80,7 @@ import {
   BrandKit,
   AudioTrack,
   AudioClipSettings,
+  AudioTimelineClip,
   DrawBrushSettings,
   SavedProject,
   ChartVariant,
@@ -170,6 +171,11 @@ interface SidebarProps {
   onApplyBrandKit?: (kit: BrandKit) => void;
   activeAudioTrackId?: string;
   availableAudioTracks?: AudioTrack[];
+  audioClips?: AudioTimelineClip[];
+  onSelectAudioClip?: (clip: AudioTimelineClip) => void;
+  onUpdateAudioClipById?: (clipId: string, updates: Partial<AudioClipSettings>) => void;
+  onApplyAudioToAll?: (clip: AudioTimelineClip) => void;
+  onRemoveAudioClip?: (clipId: string) => void;
   onSelectAudioTrack?: (track: AudioTrack) => void;
   onRegisterCustomAudioTrack?: (track: AudioTrack) => void;
   availableVideoUploads?: VideoElement[];
@@ -596,6 +602,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onApplyBrandKit,
   activeAudioTrackId = 'at-the-palace-gates',
   availableAudioTracks = AUDIO_TRACKS,
+  audioClips = [],
+  onSelectAudioClip,
+  onUpdateAudioClipById,
+  onApplyAudioToAll,
+  onRemoveAudioClip,
   onSelectAudioTrack,
   onRegisterCustomAudioTrack,
   availableVideoUploads = [],
@@ -724,6 +735,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const totalDuration = pages.reduce((sum, p) => sum + (p.duration || 4.5), 0);
   const selectedAudioTrack = availableAudioTracks.find((track) => track.id === activeAudioTrackId) || availableAudioTracks[0] || AUDIO_TRACKS[0];
+  const currentSlideAudioClip = audioClips.find((clip) => clip.pageIndex === currentPageIndex)
+    || audioClips.find((clip) => clip.pageIndex === null)
+    || null;
+  const mobileAudioClip = currentSlideAudioClip;
+  const mobileAudioTrack = mobileAudioClip
+    ? availableAudioTracks.find((track) => track.id === mobileAudioClip.trackId) || selectedAudioTrack
+    : selectedAudioTrack;
   const activeAudioScopeDuration = Math.max(0.25, audioScopeDuration ?? totalDuration);
   const effectiveAudioDuration = Math.max(0.25, Math.min(audioClip.durationSec ?? activeAudioScopeDuration, activeAudioScopeDuration));
   const maxAudioStart = audioSourceDuration > 0 ? Math.max(0, audioSourceDuration - 0.1) : 999;
@@ -771,7 +789,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     stopPreviewAudio();
     setPlayingTrackId(track.id);
     if (onSelectAudioTrack) onSelectAudioTrack(track);
-
     try {
       if (track.audioUrl) {
         const audio = new Audio(track.audioUrl);
@@ -1241,6 +1258,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'apps' as SidebarTab, label: 'Apps', icon: QrCode },
     { id: 'slides' as SidebarTab, label: 'Pages', icon: Film },
   ];
+  const MOBILE_TABS_CONFIG = [
+    ...TABS_CONFIG.filter((tab) => ['templates', 'elements', 'text', 'audio'].includes(tab.id)),
+    ...TABS_CONFIG.filter((tab) => !['templates', 'elements', 'text', 'audio'].includes(tab.id)),
+  ];
 
   // Get readable element summary for Layers panel
   const getElementLabel = (el: CanvasItem): string => {
@@ -1328,7 +1349,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* ================= MOBILE BOTTOM NAVIGATION DOCK (< md) ================= */}
       <nav aria-label="Customization tools" className="md:hidden fixed bottom-0 inset-x-0 h-[calc(4rem+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] bg-neutral-950 border-t border-neutral-800/90 flex items-center justify-start px-1.5 gap-1 z-40 select-none shadow-2xl overflow-x-auto overscroll-x-contain no-scrollbar snap-x snap-mandatory">
-        {TABS_CONFIG.map((tab) => {
+        {MOBILE_TABS_CONFIG.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id && isDrawerOpen;
           return (
@@ -3116,7 +3137,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </p>
             </div>
 
-            <div className="space-y-2.5">
+            <button
+              type="button"
+              onClick={() => document.getElementById(currentSlideAudioClip ? 'mobile-slide-music-controls' : 'mobile-audio-library')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              className="md:hidden flex w-full items-center justify-between rounded-lg border border-violet-400/30 bg-violet-500/10 px-3 py-2.5 text-left text-[11px] font-semibold text-violet-100"
+            >
+              <span>{currentSlideAudioClip ? `Edit music on Slide ${currentPageIndex + 1}` : `Choose music for Slide ${currentPageIndex + 1}`}</span>
+              <ChevronDown className="h-4 w-4 shrink-0" />
+            </button>
+
+            <div id="mobile-audio-library" className="space-y-2.5 max-h-[32vh] overflow-y-auto pr-1 md:max-h-none md:overflow-visible md:pr-0">
               {availableAudioTracks.map((track) => {
                 const isSelected = activeAudioTrackId === track.id;
                 const isPlayingThis = playingTrackId === track.id;
@@ -3164,10 +3194,110 @@ export const Sidebar: React.FC<SidebarProps> = ({
               })}
             </div>
 
-            <div className="rounded-xl border border-neutral-700 bg-neutral-950/70 p-3 text-[11px] leading-relaxed text-neutral-300">
+            <div className="hidden md:block rounded-xl border border-neutral-700 bg-neutral-950/70 p-3 text-[11px] leading-relaxed text-neutral-300">
               <p className="font-semibold text-neutral-100">Add music to this slide</p>
               <p className="mt-1 text-neutral-400">Choose a song above. It appears as a clip beneath the slides. Select that clip to preview it, choose a part of the song, and adjust its volume.</p>
               <p className="mt-2 text-[10px] text-violet-200">Want the same song throughout? Select its clip and choose <span className="font-semibold">Use on all slides</span>.</p>
+            </div>
+
+            <div id="mobile-slide-music-controls" className="md:hidden space-y-3 rounded-xl border border-violet-400/25 bg-neutral-950/70 p-3">
+              <div>
+                <h4 className="text-xs font-semibold text-neutral-100">Music on your slides</h4>
+                <p className="mt-1 text-[10px] text-neutral-400">Choose a slide below to view or edit its music.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {pages.map((page, index) => {
+                  const pageClip = audioClips.find((clip) => clip.pageIndex === index)
+                    || audioClips.find((clip) => clip.pageIndex === null)
+                    || null;
+                  const pageTrack = pageClip
+                    ? availableAudioTracks.find((track) => track.id === pageClip.trackId)
+                    : undefined;
+                  const isCurrent = currentPageIndex === index;
+                  return (
+                    <button
+                      key={page.id || index}
+                      type="button"
+                      onClick={() => {
+                        onSelectPage(index);
+                        if (pageClip) onSelectAudioClip?.(pageClip);
+                      }}
+                      className={`min-w-0 rounded-lg border p-2 text-left transition ${isCurrent ? 'border-violet-300 bg-violet-500/15' : 'border-neutral-700 bg-neutral-900 hover:border-violet-400/50'}`}
+                    >
+                      <span className="block text-[10px] font-semibold text-neutral-100">Slide {index + 1}{isCurrent ? ' · Editing' : ''}</span>
+                      <span className={`mt-1 block truncate text-[9px] ${pageClip ? 'text-violet-200' : 'text-neutral-500'}`}>
+                        {pageTrack?.name || (pageClip ? pageClip.trackId : 'No music')}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {currentSlideAudioClip ? (() => {
+                const clip = currentSlideAudioClip;
+                const sourceDuration = audioSourceDuration > 0
+                  ? audioSourceDuration
+                  : Math.max(30, clip.settings.sourceEndSec ?? 0, clip.settings.startSec + 30);
+                const startSec = Math.min(clip.settings.startSec, Math.max(0, sourceDuration - 0.1));
+                const endSec = Math.min(clip.settings.sourceEndSec ?? sourceDuration, sourceDuration);
+                const editingAllSlides = clip.pageIndex === null;
+                return (
+                  <div className="space-y-3 rounded-lg border border-violet-400/25 bg-violet-500/[0.06] p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-violet-200">
+                          {editingAllSlides ? 'All slides' : `Slide ${currentPageIndex + 1}`} music
+                        </p>
+                        <p className="mt-0.5 truncate text-xs text-neutral-100">{mobileAudioTrack.name}</p>
+                      </div>
+                      <button type="button" onClick={() => previewTrackAudio(mobileAudioTrack, true)} className="shrink-0 rounded-lg border border-violet-300/30 px-2.5 py-1.5 text-[10px] font-semibold text-violet-100 hover:bg-violet-400/15">
+                        {playingTrackId === mobileAudioTrack.id ? 'Stop' : 'Preview'}
+                      </button>
+                    </div>
+
+                    <label className="block space-y-1.5 text-[10px] text-neutral-300">
+                      <span className="flex justify-between"><span>Volume</span><span>{Math.round(clip.settings.volume * 100)}%</span></span>
+                      <input aria-label="Music volume" type="range" min={0} max={1} step={0.01} value={clip.settings.volume} onChange={(event) => onUpdateAudioClipById?.(clip.id, { volume: Number(event.target.value) })} className="w-full accent-violet-400" />
+                    </label>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <label className="space-y-1 text-[10px] text-neutral-400">Song start (sec)
+                        <input type="number" min={0} max={Math.max(0, endSec - 0.1)} step={0.1} value={Number(startSec.toFixed(1))} onChange={(event) => {
+                          const nextStart = Math.max(0, Math.min(Number(event.target.value) || 0, endSec - 0.1));
+                          onUpdateAudioClipById?.(clip.id, { startSec: nextStart });
+                        }} className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-xs text-neutral-100" />
+                      </label>
+                      <label className="space-y-1 text-[10px] text-neutral-400">Song end (sec)
+                        <input type="number" min={startSec + 0.1} max={sourceDuration} step={0.1} value={Number(endSec.toFixed(1))} onChange={(event) => {
+                          const nextEnd = Math.max(startSec + 0.1, Math.min(Number(event.target.value) || sourceDuration, sourceDuration));
+                          onUpdateAudioClipById?.(clip.id, { sourceEndSec: nextEnd });
+                        }} className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-xs text-neutral-100" />
+                      </label>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" onClick={() => onUpdateAudioClipById?.(clip.id, { loop: !clip.settings.loop })} className={`rounded-lg border px-2.5 py-1.5 text-[10px] ${clip.settings.loop ? 'border-violet-300/50 bg-violet-400/15 text-violet-100' : 'border-neutral-700 text-neutral-300'}`}>
+                        Loop {clip.settings.loop ? 'On' : 'Off'}
+                      </button>
+                      <button type="button" onClick={() => onUpdateAudioClipById?.(clip.id, { fadeInSec: clip.settings.fadeInSec > 0 ? 0 : 0.8 })} className={`rounded-lg border px-2.5 py-1.5 text-[10px] ${clip.settings.fadeInSec > 0 ? 'border-violet-300/50 bg-violet-400/15 text-violet-100' : 'border-neutral-700 text-neutral-300'}`}>
+                        Fade in {clip.settings.fadeInSec > 0 ? 'On' : 'Off'}
+                      </button>
+                      <button type="button" onClick={() => onUpdateAudioClipById?.(clip.id, { fadeOutSec: clip.settings.fadeOutSec > 0 ? 0 : 0.8 })} className={`rounded-lg border px-2.5 py-1.5 text-[10px] ${clip.settings.fadeOutSec > 0 ? 'border-violet-300/50 bg-violet-400/15 text-violet-100' : 'border-neutral-700 text-neutral-300'}`}>
+                        Fade out {clip.settings.fadeOutSec > 0 ? 'On' : 'Off'}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 border-t border-neutral-800 pt-2">
+                      {!editingAllSlides && <button type="button" onClick={() => onApplyAudioToAll?.(clip)} className="rounded-lg border border-violet-300/30 px-2 py-2 text-[10px] font-semibold text-violet-100 hover:bg-violet-400/10">Use on all slides</button>}
+                      <button type="button" onClick={() => onRemoveAudioClip?.(clip.id)} className="rounded-lg border border-rose-400/25 px-2 py-2 text-[10px] font-semibold text-rose-200 hover:bg-rose-500/10">Remove music</button>
+                    </div>
+                  </div>
+                );
+              })() : (
+                <div className="rounded-lg border border-dashed border-neutral-700 p-3 text-[10px] leading-relaxed text-neutral-400">
+                  No music is assigned to Slide {currentPageIndex + 1}. Choose a song above to add it to this slide; other templates keep their own music.
+                </div>
+              )}
             </div>
           </div>
         )}

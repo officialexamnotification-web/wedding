@@ -320,44 +320,46 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-lg flex items-center justify-center p-3 sm:p-6 z-50 animate-fade-in select-none">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-lg flex items-center justify-center p-3 sm:p-6 max-md:items-start max-md:px-2 max-md:pt-[max(0.5rem,env(safe-area-inset-top))] max-md:pb-[max(0.5rem,env(safe-area-inset-bottom))] z-50 animate-fade-in select-none">
       {track.audioUrl && <audio ref={trackAudioRef} src={track.audioUrl} preload="metadata" />}
-      <div className="bg-neutral-900 border border-neutral-700 rounded-3xl w-full max-w-4xl max-h-[96vh] flex flex-col overflow-hidden shadow-2xl relative">
+      <div className="bg-neutral-900 border border-neutral-700 rounded-3xl max-md:rounded-2xl w-full max-w-4xl max-h-[96vh] max-md:max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1rem)] flex flex-col overflow-hidden shadow-2xl relative">
         {/* Top Header Bar */}
-        <div className="p-3.5 sm:p-4 border-b border-neutral-800 flex items-center justify-between z-20 bg-neutral-900/90 backdrop-blur-md">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg gold-shimmer flex items-center justify-center text-neutral-950 font-bold">
+        <div className="p-3.5 sm:p-4 max-md:px-3 max-md:py-2.5 border-b border-neutral-800 flex items-center justify-between gap-2 z-20 bg-neutral-900/90 backdrop-blur-md">
+          <div className="flex items-center gap-2.5 max-md:min-w-0 max-md:flex-1 max-md:gap-2">
+            <div className="w-8 h-8 max-md:w-7 max-md:h-7 shrink-0 rounded-lg gold-shimmer flex items-center justify-center text-neutral-950 font-bold">
               <Play className="w-4 h-4 fill-neutral-950" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-neutral-100">
+            <div className="max-md:min-w-0 max-md:flex-1">
+              <div className="flex items-center gap-2 max-md:min-w-0 max-md:gap-1.5">
+                <h3 className="text-sm font-bold text-neutral-100 max-md:min-w-0 max-md:truncate max-md:text-xs">
                   {title || 'Digital Video Invitation'}
                 </h3>
-                <span className="text-[10px] text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1">
-                  <Music className="w-3 h-3" /> {track.name}
+                <span title={track.name} className="max-w-[38%] shrink-0 truncate text-[10px] text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1 max-md:max-w-[34%] max-md:px-1.5">
+                  <Music className="w-3 h-3 shrink-0" /> <span className="truncate">{track.name}</span>
                 </span>
               </div>
-              <p className="text-[11px] text-neutral-400">
+              <p className="text-[11px] text-neutral-400 max-md:hidden">
                 {pages.map((page) => page.title.replace(/^Page\s+\d+\s*[—-]\s*/i, '')).join('  →  ')}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 max-md:shrink-0 max-md:gap-1.5">
             <button
               onClick={() => {
                 onClose();
                 onCustomizeInEditor(currentIndex);
               }}
-              className="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-neutral-950 font-bold text-xs rounded-lg transition flex items-center gap-1.5 shadow"
+              className="px-3 py-1.5 max-md:p-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-neutral-950 font-bold text-xs rounded-lg transition flex items-center gap-1.5 shadow"
+              aria-label={`Edit slide ${currentIndex + 1} in Studio`}
             >
               <Palette className="w-3.5 h-3.5" />
-              <span>Edit Slide #{currentIndex + 1} in Studio</span>
+              <span className="max-md:hidden">Edit Slide #{currentIndex + 1} in Studio</span>
             </button>
 
             <button
               onClick={onClose}
+              aria-label="Close video preview"
               className="p-1.5 text-neutral-400 hover:text-neutral-100 rounded-lg hover:bg-neutral-800 transition"
             >
               <X className="w-5 h-5" />
@@ -366,7 +368,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
         </div>
 
         {/* Video Player Stage */}
-        <div className="flex-1 overflow-hidden bg-neutral-950 flex flex-col items-center justify-center p-4 relative">
+        <div className="flex-1 overflow-hidden bg-neutral-950 flex flex-col items-center justify-center p-4 max-md:min-h-0 max-md:p-2 relative">
           {/* Top Stories Progress Bar Segments */}
           <div className="w-full max-w-sm flex items-center gap-1.5 mb-3 px-2 z-20">
             {pages.map((_, i) => (
@@ -589,8 +591,8 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
             );
           })()}
 
-          <div className="text-center mt-3 z-20">
-            <span className="text-xs font-semibold text-amber-200">
+          <div className="text-center mt-3 max-md:mt-2 z-20 max-w-full px-2">
+            <span className="text-xs font-semibold text-amber-200 max-md:block max-md:truncate max-md:text-[11px]">
               Slide {currentIndex + 1} of {pages.length}: {currentSlide.title} (
               {currentSlide.duration || 4.5}s)
             </span>
@@ -598,8 +600,8 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
         </div>
 
         {/* Bottom Playback & Thumbnail Controls */}
-        <div className="p-4 border-t border-neutral-800 bg-neutral-900 flex flex-col sm:flex-row items-center justify-between gap-4 z-20">
-          <div className="flex items-center gap-2">
+        <div className="p-4 max-md:p-3 border-t border-neutral-800 bg-neutral-900 flex flex-col sm:flex-row items-center justify-between gap-4 max-md:gap-2.5 z-20">
+          <div className="flex items-center justify-center gap-2 max-md:w-full">
             <button
               onClick={handlePrev}
               className="p-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
@@ -642,7 +644,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
             </button>
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full">
+          <div className="flex items-center justify-start gap-1.5 overflow-x-auto max-w-full max-md:w-full max-md:pb-0.5">
             {pages.map((p, idx) => (
               <button
                 key={p.id}
@@ -651,7 +653,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                   setProgress(0);
                   startTimeRef.current = Date.now();
                 }}
-                className={`text-[11px] px-2.5 py-1 rounded-lg whitespace-nowrap transition ${
+                className={`text-[11px] px-2.5 py-1 rounded-lg whitespace-nowrap transition max-md:shrink-0 max-md:px-2 max-md:py-1.5 ${
                   currentIndex === idx
                     ? 'bg-amber-500 text-neutral-950 font-bold shadow'
                     : 'bg-neutral-800 text-neutral-400 hover:text-neutral-200'
@@ -665,10 +667,11 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
           <button
             onClick={onShareVideo}
             disabled={!onShareVideo}
-            className="px-3.5 py-2 bg-[#25D366] hover:bg-[#20ba59] text-neutral-950 font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
+            className="px-3.5 py-2 max-md:w-full max-md:py-2.5 bg-[#25D366] hover:bg-[#20ba59] text-neutral-950 font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
           >
             <Share2 className="w-3.5 h-3.5" />
-            <span>Export & Share Video</span>
+            <span className="sm:hidden">Share video</span>
+            <span className="hidden sm:inline">Export & Share Video</span>
           </button>
         </div>
       </div>

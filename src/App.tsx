@@ -113,6 +113,14 @@ export default function App() {
     setAudioClip(next);
     setAudioClips((clips) => clips.map((clip) => clip.id === selectedAudioClipId ? { ...clip, settings: next } : clip));
   };
+  const handleUpdateAudioClipById = (clipId: string, updates: Partial<AudioClipSettings>) => {
+    const clip = audioClips.find((item) => item.id === clipId);
+    if (!clip) return;
+    const next = { ...clip.settings, ...updates };
+    setAudioClips((clips) => clips.map((item) => item.id === clipId ? { ...item, settings: next } : item));
+    setSelectedAudioClipId(clipId);
+    setAudioClip(next);
+  };
   const [drawBrush, setDrawBrush] = useState<DrawBrushSettings>({
     isEnabled: false,
     brushType: 'glow-gold',
@@ -324,15 +332,23 @@ export default function App() {
     setInvitationCategory(template.category);
     setAspectRatio(template.aspectRatio);
 
-    const templateAudioClips = template.audioClips ?? [];
+    const templateAudioClips = (template.audioClips ?? []).filter((clip) => audioTracks.some((track) => track.id === clip.trackId));
     setAudioClips(templateAudioClips);
     const firstTemplateClip = templateAudioClips[0];
     setSelectedAudioClipId(firstTemplateClip?.id ?? null);
-    if (firstTemplateClip) {
-      const templateTrack = audioTracks.find((track) => track.id === firstTemplateClip.trackId);
-      if (templateTrack) setActiveAudioTrack(templateTrack);
-      setAudioClip(firstTemplateClip.settings);
-    }
+    const templateTrack = firstTemplateClip
+      ? audioTracks.find((track) => track.id === firstTemplateClip.trackId)
+      : undefined;
+    setActiveAudioTrack(templateTrack || AUDIO_TRACKS[0]);
+    setAudioClip(firstTemplateClip?.settings || {
+      startSec: 0,
+      durationSec: null,
+      sourceEndSec: null,
+      volume: 0.45,
+      fadeInSec: 0,
+      fadeOutSec: 0,
+      loop: true,
+    });
 
     const updatedPages = await Promise.all(
       template.pages.map(async (page) => {
@@ -1281,6 +1297,26 @@ export default function App() {
           onApplyBrandKit={handleApplyBrandKit}
           activeAudioTrackId={activeAudioTrack.id}
           availableAudioTracks={audioTracks}
+          audioClips={audioClips}
+          onSelectAudioClip={(clip) => {
+            setSelectedAudioClipId(clip.id);
+            setAudioClip(clip.settings);
+            const track = audioTracks.find((item) => item.id === clip.trackId);
+            if (track) setActiveAudioTrack(track);
+            if (clip.pageIndex !== null) setCurrentPageIndex(clip.pageIndex);
+          }}
+          onUpdateAudioClipById={handleUpdateAudioClipById}
+          onApplyAudioToAll={(selectedClip) => {
+            const settings = { ...selectedClip.settings, startSec: 0, sourceEndSec: null, durationSec: null };
+            const id = `audio-all-${Date.now()}`;
+            setAudioClips([{ id, trackId: selectedClip.trackId, pageIndex: null, timelineStartSec: 0, settings }]);
+            setSelectedAudioClipId(id);
+            setAudioClip(settings);
+          }}
+          onRemoveAudioClip={(clipId) => {
+            setAudioClips((clips) => clips.filter((clip) => clip.id !== clipId));
+            setSelectedAudioClipId((selected) => selected === clipId ? null : selected);
+          }}
           audioScopeDuration={(() => {
             const selectedClip = audioClips.find((clip) => clip.id === selectedAudioClipId);
             if (selectedClip?.pageIndex === null) return pages.reduce((sum, page) => sum + (page.duration || 4.5), 0);
