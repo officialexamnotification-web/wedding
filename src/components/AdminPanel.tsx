@@ -73,6 +73,8 @@ export const AdminPanel: React.FC = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState(INITIAL_TEMPLATES[0]?.id || '');
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [selectedElementIds, setSelectedElementIds] = useState<string[]>([]);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [showStudioTools, setShowStudioTools] = useState(false);
   const [canvasZoom, setCanvasZoom] = useState(0.55);
   const [pendingDelete, setPendingDelete] = useState<'slide' | 'template' | null>(null);
@@ -91,6 +93,13 @@ export const AdminPanel: React.FC = () => {
   const selectedTemplate = templates.find((item) => item.id === selectedTemplateId) || templates[0] || null;
   const selectedPage = selectedTemplate?.pages[selectedPageIndex] || selectedTemplate?.pages[0] || null;
   const selectedElement = selectedPage?.elements.find((item) => item.id === selectedElementId) || null;
+  const selectedElements = selectedPage?.elements.filter((item) => selectedElementIds.includes(item.id)) || [];
+  const selectedGroupId = selectedElement?.groupId;
+  const isGroupedSelection = Boolean(selectedGroupId)
+    && selectedElements.length > 0
+    && selectedElements.every((item) => item.groupId === selectedGroupId);
+  const canGroupSelection = selectedElements.length > 1
+    && selectedElements.every((item) => item.type === 'text' && !item.locked && !item.groupId);
   const allTracks = useMemo(() => [...AUDIO_TRACKS, ...savedCatalog.customAudioTracks], [savedCatalog.customAudioTracks]);
   const filteredTemplates = useMemo(() => templates.filter((template) => {
     const matchesText = `${template.title} ${template.category} ${template.tags.join(' ')}`.toLowerCase().includes(query.trim().toLowerCase());
@@ -233,6 +242,96 @@ export const AdminPanel: React.FC = () => {
     updateTemplate({ pages: selectedTemplate.pages.map((page, index) => index === selectedPageIndex
       ? { ...page, elements: page.elements.map((element) => element.id === elementId ? { ...element, ...patch } as CanvasItem : element) }
       : page) });
+  };
+
+  useEffect(() => {
+    if (!selectedElementId) {
+      setSelectedElementIds([]);
+      setIsMultiSelectMode(false);
+    }
+  }, [selectedElementId]);
+
+  useEffect(() => {
+    setSelectedElementId(null);
+    setSelectedElementIds([]);
+    setIsMultiSelectMode(false);
+  }, [selectedTemplateId, selectedPageIndex]);
+
+  const handleSelectElement = (id: string | null, additive = false) => {
+    if (!id) {
+      setSelectedElementId(null);
+      setSelectedElementIds([]);
+      return;
+    }
+
+    const clicked = selectedPage?.elements.find((element) => element.id === id);
+    if (additive || isMultiSelectMode) {
+      const nextIds = selectedElementIds.includes(id)
+        ? selectedElementIds.filter((selectedId) => selectedId !== id)
+        : [...selectedElementIds, id];
+      setSelectedElementIds(nextIds);
+      setSelectedElementId(nextIds.includes(id) ? id : nextIds[nextIds.length - 1] || null);
+      return;
+    }
+
+    if (clicked?.groupId) {
+      const groupIds = selectedPage?.elements
+        .filter((element) => element.groupId === clicked.groupId)
+        .map((element) => element.id) || [id];
+      setSelectedElementId(id);
+      setSelectedElementIds(groupIds);
+      return;
+    }
+
+    if (selectedElementIds.length > 1 && selectedElementIds.includes(id)) {
+      setSelectedElementId(id);
+      return;
+    }
+
+    setSelectedElementId(id);
+    setSelectedElementIds([id]);
+  };
+
+  const handleGroupSelection = () => {
+    if (!canGroupSelection || !selectedPage) return;
+    const groupId = `text-group-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+    updatePage({ elements: selectedPage.elements.map((element) => selectedElementIds.includes(element.id)
+      ? { ...element, groupId } as CanvasItem
+      : element) });
+    setIsMultiSelectMode(false);
+  };
+
+  const handleUngroupSelection = () => {
+    if (!selectedGroupId || !selectedElementId || !selectedPage) return;
+    updatePage({ elements: selectedPage.elements.map((element) => element.groupId === selectedGroupId
+      ? { ...element, groupId: undefined } as CanvasItem
+      : element) });
+    setSelectedElementIds([selectedElementId]);
+    setIsMultiSelectMode(false);
+  };
+
+  const handleDeleteSelection = () => {
+    if (!selectedPage) return;
+    const idsToDelete = selectedElementIds.length > 1 ? selectedElementIds : selectedElementId ? [selectedElementId] : [];
+    if (!idsToDelete.length) return;
+    updatePage({ elements: selectedPage.elements.filter((element) => !idsToDelete.includes(element.id)) });
+    setSelectedElementId(null);
+  };
+
+  const handleRemoveElement = (id: string) => {
+    if (!selectedPage) return;
+    updatePage({ elements: selectedPage.elements.filter((element) => element.id !== id) });
+    if (selectedElementIds.includes(id)) {
+      const remainingIds = selectedElementIds.filter((selectedId) => selectedId !== id);
+      setSelectedElementIds(remainingIds);
+      setSelectedElementId(remainingIds[remainingIds.length - 1] || null);
+    }
+  };
+
+  const selectOnlyElement = (id: string) => {
+    setSelectedElementId(id);
+    setSelectedElementIds([id]);
+    setIsMultiSelectMode(false);
   };
 
   const addTemplate = () => {
@@ -383,7 +482,7 @@ export const AdminPanel: React.FC = () => {
       lineHeight: 1.2, x: canvasSize.width * 0.1, y: canvasSize.height * 0.45, width: canvasSize.width * 0.8, height: canvasSize.height * 0.1, rotation: 0, opacity: 1, zIndex: 4,
     };
     updatePage({ elements: [...selectedPage.elements, text] });
-    setSelectedElementId(id);
+    selectOnlyElement(id);
   };
 
   const startUpload = (kind: UploadKind) => {
@@ -420,7 +519,7 @@ export const AdminPanel: React.FC = () => {
           objectFit: 'cover', scale: 1, offsetX: 0, offsetY: 0,
         };
         updatePage({ elements: [...selectedPage.elements, image] });
-        setSelectedElementId(id);
+        selectOnlyElement(id);
       } else if (kind === 'video') {
         const id = `${selectedTemplate.id}-video-${Date.now()}`;
         const canvasSize = CANVAS_SIZES[selectedTemplate.aspectRatio];
@@ -433,7 +532,7 @@ export const AdminPanel: React.FC = () => {
           rotation: 0, opacity: 1, zIndex: 2,
         };
         updatePage({ elements: [...selectedPage.elements, video] });
-        setSelectedElementId(id);
+        selectOnlyElement(id);
       } else {
         const track: AudioTrack = {
           id: `custom-audio-${crypto.randomUUID()}`, name: file.name.replace(/\.[^.]+$/, ''),
@@ -570,11 +669,11 @@ export const AdminPanel: React.FC = () => {
                   <div className="order-1 flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3"><div><p className="text-xs font-semibold text-stone-200">Design your slides</p><p className="mt-1 text-[10px] text-stone-500">Select an item on the preview to edit it.</p></div><div className="flex flex-wrap items-center gap-2"><button onClick={() => setShowStudioTools((open) => !open)} aria-pressed={showStudioTools} className={`rounded-lg border px-3 py-2 text-[11px] transition ${showStudioTools ? 'border-amber-200/35 bg-amber-300/[0.12] text-amber-100' : 'border-amber-200/20 bg-amber-300/[0.06] text-amber-100 hover:bg-amber-300/[0.12]'}`}>{showStudioTools ? <X className="mr-1 inline h-3.5 w-3.5" /> : <Settings2 className="mr-1 inline h-3.5 w-3.5" />}{showStudioTools ? 'Close tools' : 'Design tools'}</button><button onClick={addText} className="rounded-lg border border-white/10 px-3 py-2 text-[11px] text-stone-300 hover:border-amber-200/25"><Plus className="mr-1 inline h-3.5 w-3.5" />Add text</button><button onClick={() => startUpload('image')} className="rounded-lg border border-white/10 px-3 py-2 text-[11px] text-stone-300 hover:border-amber-200/25"><ImagePlus className="mr-1 inline h-3.5 w-3.5" />Add photo</button><button onClick={addPage} className="rounded-lg bg-amber-300/[0.08] px-3 py-2 text-[11px] text-amber-200 hover:bg-amber-300/[0.14]"><Plus className="mr-1 inline h-3.5 w-3.5" />Add slide</button></div></div>
                   {selectedPage && <div className="order-2 grid gap-5 p-3 sm:p-5 2xl:grid-cols-[minmax(0,1fr)_minmax(280px,380px)]">
                     <div className="min-w-0 space-y-4 max-2xl:order-2 2xl:col-start-1 2xl:row-start-1"><div className="grid gap-3 sm:grid-cols-2"><label className="text-[11px] text-stone-500">Slide title<input value={selectedPage.title} onChange={(event) => updatePage({ title: event.target.value })} className={`${inputClasses} mt-1.5`} /></label><label className="text-[11px] text-stone-500">Transition<select value={selectedPage.transition || 'fade'} onChange={(event) => updatePage({ transition: event.target.value as CardPage['transition'] })} className={`${selectClasses} mt-1.5`}>{transitions.map((transition) => <option key={transition} value={transition}>{transition}</option>)}</select></label><label className="text-[11px] text-stone-500">Background<select value={selectedPage.backgroundType} onChange={(event) => updatePage({ backgroundType: event.target.value as CardPage['backgroundType'] })} className={`${selectClasses} mt-1.5`}><option value="color">Solid color</option><option value="gradient">Gradient</option><option value="pattern">Pattern</option><option value="image">Image URL</option></select></label><label className="text-[11px] text-stone-500">Duration · seconds<input type="number" min="1" max="60" step="0.5" value={selectedPage.duration || 5} onChange={(event) => updatePage({ duration: Number(event.target.value) || 5 })} className={`${inputClasses} mt-1.5`} /></label></div><label className="block text-[11px] text-stone-500">Background value<input value={selectedPage.backgroundValue} onChange={(event) => updatePage({ backgroundValue: event.target.value })} className={`${inputClasses} mt-1.5`} placeholder="#1b0d11, CSS gradient or image URL" /></label>
-                      <div className="rounded-xl border border-white/[0.07] bg-black/15 p-3"><div className="mb-2 flex items-center justify-between"><span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">Elements on this slide · {selectedPage.elements.length}</span><button onClick={() => startUpload('video')} className="text-[10px] text-amber-200/80 hover:text-amber-100"><Clapperboard className="mr-1 inline h-3.5 w-3.5" />Add video</button></div><div className="max-h-[300px] space-y-1 overflow-y-auto">{selectedPage.elements.map((element) => <div key={element.id} className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 ${element.id === selectedElementId ? 'border-amber-200/20 bg-amber-300/[0.06]' : 'border-transparent hover:bg-white/[0.035]'}`}><button onClick={() => setSelectedElementId(element.id)} className="flex min-w-0 flex-1 items-center gap-2 text-left"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white/[0.04] text-amber-200/70">{element.type === 'text' ? <span className="font-serif text-sm">T</span> : element.type === 'video' ? <Film className="h-3.5 w-3.5" /> : element.type === 'image' ? <FileImage className="h-3.5 w-3.5" /> : <LayoutTemplate className="h-3.5 w-3.5" />}</span><span className="min-w-0"><span className="block truncate text-[11px] text-stone-300">{element.type === 'text' ? (element as Extract<CanvasItem, { type: 'text' }>).text || 'Text' : element.type === 'image' ? (element as ImageElement).alt || 'Image' : element.type === 'video' ? (element as VideoElement).videoName || 'Video' : element.type}</span><span className="mt-0.5 block text-[9px] uppercase tracking-wider text-stone-600">{element.type}</span></span></button><button onClick={() => { setSelectedElementId(element.id); updatePage({ elements: selectedPage.elements.filter((item) => item.id !== element.id) }); }} aria-label="Remove element" className="p-1 text-stone-600 hover:text-rose-300"><Trash2 className="h-3.5 w-3.5" /></button></div>)}{selectedPage.elements.length === 0 && <p className="py-5 text-center text-[11px] text-stone-600">No design elements yet. Add text, artwork or a video.</p>}</div></div>
+                      <div className="rounded-xl border border-white/[0.07] bg-black/15 p-3"><div className="mb-2 flex items-center justify-between"><span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">Elements on this slide · {selectedPage.elements.length}</span><button onClick={() => startUpload('video')} className="text-[10px] text-amber-200/80 hover:text-amber-100"><Clapperboard className="mr-1 inline h-3.5 w-3.5" />Add video</button></div><div className="max-h-[300px] space-y-1 overflow-y-auto">{selectedPage.elements.map((element) => <div key={element.id} className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 ${selectedElementIds.includes(element.id) ? 'border-amber-200/20 bg-amber-300/[0.06]' : 'border-transparent hover:bg-white/[0.035]'}`}><button onClick={() => handleSelectElement(element.id)} className="flex min-w-0 flex-1 items-center gap-2 text-left"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white/[0.04] text-amber-200/70">{element.type === 'text' ? <span className="font-serif text-sm">T</span> : element.type === 'video' ? <Film className="h-3.5 w-3.5" /> : element.type === 'image' ? <FileImage className="h-3.5 w-3.5" /> : <LayoutTemplate className="h-3.5 w-3.5" />}</span><span className="min-w-0"><span className="block truncate text-[11px] text-stone-300">{element.type === 'text' ? (element as Extract<CanvasItem, { type: 'text' }>).text || 'Text' : element.type === 'image' ? (element as ImageElement).alt || 'Image' : element.type === 'video' ? (element as VideoElement).videoName || 'Video' : element.type}</span><span className="mt-0.5 block text-[9px] uppercase tracking-wider text-stone-600">{element.type}</span></span></button><button onClick={() => handleRemoveElement(element.id)} aria-label="Remove element" className="p-1 text-stone-600 hover:text-rose-300"><Trash2 className="h-3.5 w-3.5" /></button></div>)}{selectedPage.elements.length === 0 && <p className="py-5 text-center text-[11px] text-stone-600">No design elements yet. Add text, artwork or a video.</p>}</div></div>
                     </div>
                     <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#100d0e] shadow-xl shadow-black/20 max-2xl:order-1 2xl:col-start-2 2xl:row-start-1">
                       <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3">
-                        <div><p className="text-xs font-semibold text-stone-200">Live design canvas</p><p className="mt-1 text-[10px] text-stone-500">Select an item, then drag it to reposition.</p></div>
+                        <div><p className="text-xs font-semibold text-stone-200">Live design canvas</p><p className="mt-1 text-[10px] text-stone-500">Select text, then use its toolbar to select and group multiple boxes.</p></div>
                         <span className="shrink-0 rounded-full border border-amber-200/10 px-2.5 py-1 text-[10px] text-amber-100/70">Slide {selectedPageIndex + 1}</span>
                       </div>
                       <div className="flex h-[min(52vh,620px)] min-h-[300px] min-w-0 w-full">
@@ -584,19 +683,20 @@ export const AdminPanel: React.FC = () => {
                           backgroundValue={selectedPage.backgroundValue}
                           elements={selectedPage.elements}
                           selectedElementId={selectedElementId}
-                          onSelectElement={setSelectedElementId}
+                          selectedElementIds={selectedElementIds}
+                          multiSelectMode={isMultiSelectMode}
+                          onSelectElement={handleSelectElement}
                           onUpdateElement={(id, updates) => updateElement(id, updates)}
-                          onAddElement={(element) => updatePage({ elements: [...selectedPage.elements, element] })}
+                          onAddElement={(element) => { updatePage({ elements: [...selectedPage.elements, element] }); selectOnlyElement(element.id); }}
                           onDeleteElement={() => {
-                            if (selectedElementId) updatePage({ elements: selectedPage.elements.filter((element) => element.id !== selectedElementId) });
-                            setSelectedElementId(null);
+                            handleDeleteSelection();
                           }}
                           onDuplicateElement={() => {
                             const element = selectedPage.elements.find((item) => item.id === selectedElementId);
                             if (!element) return;
                             const copy = { ...structuredClone(element), id: `${element.id}-copy-${Date.now()}`, x: element.x + 16, y: element.y + 16 } as CanvasItem;
                             updatePage({ elements: [...selectedPage.elements, copy] });
-                            setSelectedElementId(copy.id);
+                            selectOnlyElement(copy.id);
                           }}
                           onBringForward={() => {
                             const element = selectedPage.elements.find((item) => item.id === selectedElementId);
@@ -632,7 +732,34 @@ export const AdminPanel: React.FC = () => {
 
                 {selectedPage && <div className="rounded-2xl border border-white/[0.08] bg-[#131011]/90 p-5 shadow-2xl shadow-black/10 md:p-6"><div className="mb-4 flex items-center gap-2 text-xs font-semibold text-stone-300"><Music2 className="h-4 w-4 text-amber-300" />Music on this slide</div><div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]"><select onChange={(event) => assignTrack(event.target.value)} value="" className={selectClasses}><option value="" disabled>Choose a saved music track…</option>{allTracks.map((track) => <option value={track.id} key={track.id}>{track.name}</option>)}</select><button onClick={() => startUpload('audio')} className="rounded-lg border border-amber-200/15 px-3 py-2.5 text-xs text-amber-100 hover:bg-amber-300/[0.05]"><Upload className="mr-1.5 inline h-4 w-4" />Upload music</button></div><div className="mt-3 space-y-2">{(selectedTemplate.audioClips || []).filter((clip) => clip.pageIndex === selectedPageIndex || clip.pageIndex === null).map((clip) => { const track = allTracks.find((item) => item.id === clip.trackId); return <div key={clip.id} className="flex items-center justify-between rounded-lg border border-white/[0.06] px-3 py-2 text-xs text-stone-400"><span className="flex min-w-0 items-center gap-2"><AudioLines className="h-4 w-4 shrink-0 text-amber-200/80" /><span className="truncate">{track?.name || clip.trackId}</span></span><button onClick={() => updateTemplate({ audioClips: (selectedTemplate.audioClips || []).filter((item) => item.id !== clip.id) })} className="text-stone-600 hover:text-rose-300" aria-label="Remove music"><X className="h-4 w-4" /></button></div>; })}</div></div>}
 
-                {selectedElement && <div className="rounded-2xl border border-white/[0.08] bg-[#131011]/90 p-5 shadow-2xl shadow-black/10 md:p-6"><div className="mb-4 flex items-center justify-between"><div><div className="flex items-center gap-2 text-xs font-semibold text-stone-200"><LayoutTemplate className="h-4 w-4 text-amber-300" />Edit selected {selectedElement.type}</div><p className="mt-1 text-[10px] text-stone-600">Same editing controls as the design studio. Changes appear on the canvas immediately.</p></div><button onClick={() => setSelectedElementId(null)} className="text-stone-600 hover:text-stone-300" aria-label="Close element settings"><X className="h-4 w-4" /></button></div><Toolbar selectedElement={selectedElement} aspectRatio={selectedTemplate.aspectRatio} onUpdateElement={(patch) => updateElement(selectedElement.id, patch)} onDeleteElement={() => { updatePage({ elements: selectedPage.elements.filter((element) => element.id !== selectedElement.id) }); setSelectedElementId(null); }} onDuplicateElement={() => { const copy = { ...structuredClone(selectedElement), id: `${selectedElement.id}-copy-${Date.now()}`, x: selectedElement.x + 16, y: selectedElement.y + 16 } as CanvasItem; updatePage({ elements: [...selectedPage.elements, copy] }); setSelectedElementId(copy.id); }} onBringForward={() => updateElement(selectedElement.id, { zIndex: Number(('zIndex' in selectedElement && selectedElement.zIndex) || 1) + 1 })} onSendBackward={() => updateElement(selectedElement.id, { zIndex: Math.max(1, Number(('zIndex' in selectedElement && selectedElement.zIndex) || 1) - 1) })} onBringToFront={() => updateElement(selectedElement.id, { zIndex: Math.max(...selectedPage.elements.map((item) => Number(('zIndex' in item && item.zIndex) || 1)), 0) + 1 })} onSendToBack={() => updateElement(selectedElement.id, { zIndex: 1 })} /></div>}
+                {selectedElement && <div className="rounded-2xl border border-white/[0.08] bg-[#131011]/90 p-5 shadow-2xl shadow-black/10 md:p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div><div className="flex items-center gap-2 text-xs font-semibold text-stone-200"><LayoutTemplate className="h-4 w-4 text-amber-300" />Edit selected {selectedElement.type}</div><p className="mt-1 text-[10px] text-stone-600">Same editing controls as the design studio. Changes appear on the canvas immediately.</p></div>
+                    <button onClick={() => setSelectedElementId(null)} className="text-stone-600 hover:text-stone-300" aria-label="Close element settings"><X className="h-4 w-4" /></button>
+                  </div>
+                  <Toolbar
+                    selectedElement={selectedElement}
+                    selectionCount={selectedElementIds.length}
+                    canGroupSelection={canGroupSelection}
+                    isGroupedSelection={isGroupedSelection}
+                    isMultiSelectMode={isMultiSelectMode}
+                    onToggleMultiSelect={() => setIsMultiSelectMode((active) => !active)}
+                    onGroupSelection={handleGroupSelection}
+                    onUngroupSelection={handleUngroupSelection}
+                    aspectRatio={selectedTemplate.aspectRatio}
+                    onUpdateElement={(patch) => updateElement(selectedElement.id, patch)}
+                    onDeleteElement={handleDeleteSelection}
+                    onDuplicateElement={() => {
+                      const copy = { ...structuredClone(selectedElement), id: `${selectedElement.id}-copy-${Date.now()}`, x: selectedElement.x + 16, y: selectedElement.y + 16 } as CanvasItem;
+                      updatePage({ elements: [...selectedPage.elements, copy] });
+                      selectOnlyElement(copy.id);
+                    }}
+                    onBringForward={() => updateElement(selectedElement.id, { zIndex: Number(('zIndex' in selectedElement && selectedElement.zIndex) || 1) + 1 })}
+                    onSendBackward={() => updateElement(selectedElement.id, { zIndex: Math.max(1, Number(('zIndex' in selectedElement && selectedElement.zIndex) || 1) - 1) })}
+                    onBringToFront={() => updateElement(selectedElement.id, { zIndex: Math.max(...selectedPage.elements.map((item) => Number(('zIndex' in item && item.zIndex) || 1)), 0) + 1 })}
+                    onSendToBack={() => updateElement(selectedElement.id, { zIndex: 1 })}
+                  />
+                </div>}
               </div>
 
               <aside className="mt-3"><div className="rounded-xl border border-white/[0.08] bg-[#131011]/70 p-3"><div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-stone-300"><span className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-amber-300" />Live catalog</span><span className="text-[10px] font-normal text-stone-500">Revision {savedCatalog.revision} · {templates.length} templates</span></div><p className="mt-1.5 text-[10px] leading-4 text-stone-500">Save & publish updates the catalog visitors see on the website.</p></div>
@@ -654,7 +781,7 @@ export const AdminPanel: React.FC = () => {
               setSelectedElementId(null);
               setNotice(`Editing “${source.title}”. Changes stay in draft until you publish.`);
             }}
-            onAddElement={(element) => { updatePage({ elements: [...selectedPage.elements, element] }); setSelectedElementId(element.id); }}
+            onAddElement={(element) => { updatePage({ elements: [...selectedPage.elements, element] }); selectOnlyElement(element.id); }}
             onSetBackground={(backgroundType, backgroundValue) => updatePage({ backgroundType, backgroundValue })}
             activeBackground={selectedPage.backgroundValue}
             pages={selectedTemplate.pages}
@@ -665,15 +792,15 @@ export const AdminPanel: React.FC = () => {
             onOpenVideoPreview={() => setNotice('Select the video element on the canvas to edit or preview it.')}
             onCloseSidebar={() => setShowStudioTools(false)}
             selectedElementId={selectedElementId}
-            onSelectElement={setSelectedElementId}
+            onSelectElement={handleSelectElement}
             onUpdateElement={(id, patch) => updateElement(id, patch)}
-            onDeleteElementById={(id) => { updatePage({ elements: selectedPage.elements.filter((element) => element.id !== id) }); if (selectedElementId === id) setSelectedElementId(null); }}
+            onDeleteElementById={handleRemoveElement}
             onDuplicateElementById={(id) => {
               const source = selectedPage.elements.find((element) => element.id === id);
               if (!source) return;
               const copy = { ...structuredClone(source), id: `${source.id}-copy-${Date.now()}`, x: source.x + 16, y: source.y + 16 } as CanvasItem;
               updatePage({ elements: [...selectedPage.elements, copy] });
-              setSelectedElementId(copy.id);
+              selectOnlyElement(copy.id);
             }}
             availableAudioTracks={allTracks}
             activeAudioTrackId={activeAudioClip?.trackId}
