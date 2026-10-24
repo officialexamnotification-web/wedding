@@ -142,10 +142,11 @@ export const AdminPanel: React.FC = () => {
   const allTracks = useMemo(() => [...AUDIO_TRACKS, ...savedCatalog.customAudioTracks], [savedCatalog.customAudioTracks]);
   const queryTerms = useMemo(() => query.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().match(/[\p{L}\p{N}]+/gu) || [], [query]);
   const filteredTemplates = useMemo(() => templates.filter((template) => {
+    const matchesCategory = categoryFilter === 'all' || template.category === categoryFilter;
+    if (!matchesCategory) return false;
     if (queryTerms.length === 0) return true;
     const searchText = getTemplateSearchText(template);
-    const matchesText = queryTerms.every((term) => searchText.includes(term));
-    return matchesText && (categoryFilter === 'all' || template.category === categoryFilter);
+    return queryTerms.every((term) => searchText.includes(term));
   }), [templates, queryTerms, categoryFilter]);
   const deferredFilteredTemplates = useDeferredValue(filteredTemplates);
   const handleSelectTemplate = useCallback((id: string) => {
