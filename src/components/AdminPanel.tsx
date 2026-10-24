@@ -238,10 +238,15 @@ export const AdminPanel: React.FC = () => {
   };
 
   const updateElement = (elementId: string, patch: Partial<CanvasItem>) => {
-    if (!selectedTemplate || !selectedPage) return;
-    updateTemplate({ pages: selectedTemplate.pages.map((page, index) => index === selectedPageIndex
-      ? { ...page, elements: page.elements.map((element) => element.id === elementId ? { ...element, ...patch } as CanvasItem : element) }
-      : page) });
+    if (!selectedTemplate) return;
+    const templateId = selectedTemplate.id;
+    const pageIndex = selectedPageIndex;
+    setTemplates((items) => items.map((template) => template.id !== templateId ? template : {
+      ...template,
+      pages: template.pages.map((page, index) => index === pageIndex
+        ? { ...page, elements: page.elements.map((element) => element.id === elementId ? { ...element, ...patch } as CanvasItem : element) }
+        : page),
+    }));
   };
 
   useEffect(() => {
