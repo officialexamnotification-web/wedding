@@ -1376,6 +1376,35 @@ export default function App() {
             showSafeZones={showSafeZones}
           />
 
+          {pages.length > 1 && !isFitScreenMode && (
+            <div
+              className="md:hidden absolute bottom-[calc(4rem+env(safe-area-inset-bottom)+0.65rem)] left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-full border border-amber-300/25 bg-neutral-950/95 px-2 py-1.5 text-amber-100 shadow-xl shadow-black/40 backdrop-blur"
+              aria-label="Invitation slide navigation"
+            >
+              <button
+                type="button"
+                onClick={() => setCurrentPageIndex((index) => Math.max(0, index - 1))}
+                disabled={currentPageIndex === 0}
+                aria-label="Previous slide"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-lg transition hover:bg-amber-300/15 disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                ‹
+              </button>
+              <span className="min-w-[5.5rem] text-center text-xs font-semibold tabular-nums" aria-live="polite">
+                Slide {currentPageIndex + 1} of {pages.length}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCurrentPageIndex((index) => Math.min(pages.length - 1, index + 1))}
+                disabled={currentPageIndex === pages.length - 1}
+                aria-label="Next slide"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-lg transition hover:bg-amber-300/15 disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                ›
+              </button>
+            </div>
+          )}
+
           {/* Bottom Canva-style Multi-Page / Video Slide Filmstrip */}
           {!isFitScreenMode && <div className="hidden md:block shrink-0 max-h-[72vh] overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-neutral-700">
             <SlideFilmstrip

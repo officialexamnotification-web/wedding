@@ -580,9 +580,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     : FONT_OPTIONS[0];
 
   return (
-    <div className="h-12 bg-neutral-900 border-b border-neutral-800 px-2.5 sm:px-3 flex items-center justify-between text-neutral-200 text-xs gap-2 select-none z-30 relative shadow-md">
+    <div className={`${isText ? 'h-auto min-h-12 flex-col items-stretch py-1 md:h-12 md:flex-row md:items-center md:py-0' : 'h-12 flex-row items-center'} bg-neutral-900 border-b border-neutral-800 px-2.5 sm:px-3 flex justify-between text-neutral-200 text-xs gap-1 md:gap-2 select-none z-30 relative shadow-md`}>
       {/* Left properties specific to element type */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+      <div className={`${isText ? 'w-full min-w-0 md:w-auto' : ''} flex items-center gap-1.5 overflow-x-auto scrollbar-thin scrollbar-thumb-neutral-600 md:no-scrollbar py-1 touch-pan-x`}>
+        {isText && <span className="md:hidden sticky left-0 z-10 shrink-0 bg-neutral-900 pr-1 text-[9px] font-bold uppercase tracking-wide text-amber-300">Text</span>}
         {/* ================= TEXT CONTROLS ================= */}
         {isText && (
           <>
@@ -1441,7 +1442,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       </div>
 
       {/* Right Universal Canva Actions (Animate, Position, Transparency, Link, Copy Style, Lock, Duplicate, Delete) */}
-      <div className="flex items-center gap-1 shrink-0">
+      <div className={`${isText ? 'w-full justify-between border-t border-neutral-800 pt-1 md:w-auto md:justify-start md:border-t-0 md:pt-0' : ''} flex items-center gap-1 shrink-0`}>
         {/* Canva ANIMATE Button */}
         <button
           disabled={isLocked}
