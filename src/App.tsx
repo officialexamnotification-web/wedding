@@ -65,6 +65,7 @@ export default function App() {
   const [pages, setPages] = useState<CardPage[]>(INITIAL_TEMPLATES[0].pages);
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
   const [canvasFitRequest, setCanvasFitRequest] = useState(0);
+  const [isFitScreenMode, setIsFitScreenMode] = useState(false);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [zoom, setZoom] = useState<number>(() => {
     if (window.innerWidth < 640) return 0.5;
@@ -72,6 +73,10 @@ export default function App() {
     return 0.75;
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => window.innerWidth >= 1024);
+  const toggleFitScreenMode = () => {
+    setIsFitScreenMode((current) => !current);
+    setCanvasFitRequest((request) => request + 1);
+  };
 
   // Canva Pro Studio States
   const [showRulers, setShowRulers] = useState<boolean>(false);
@@ -1344,6 +1349,8 @@ export default function App() {
           <Canvas
             aspectRatio={aspectRatio}
             fitRequest={canvasFitRequest}
+            fitScreenMode={isFitScreenMode}
+            onToggleFitScreenMode={toggleFitScreenMode}
             backgroundType={currentPage?.backgroundType || 'gradient'}
             backgroundValue={currentPage?.backgroundValue || '#171717'}
             elements={currentPage?.elements || []}
@@ -1370,7 +1377,7 @@ export default function App() {
           />
 
           {/* Bottom Canva-style Multi-Page / Video Slide Filmstrip */}
-          <div className="hidden md:block shrink-0 max-h-[72vh] overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-neutral-700">
+          {!isFitScreenMode && <div className="hidden md:block shrink-0 max-h-[72vh] overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-neutral-700">
             <SlideFilmstrip
               pages={pages}
               currentPageIndex={currentPageIndex}
@@ -1426,7 +1433,7 @@ export default function App() {
                 if (clipId === selectedAudioClipId && next.settings) setAudioClip(next.settings);
               }}
             />
-          </div>
+          </div>}
         </div>
       </div>
 

@@ -49,6 +49,8 @@ const RealisticModel3D = React.lazy(() => import('./RealisticModel3D'));
 interface CanvasProps {
   aspectRatio: AspectRatioType;
   fitRequest?: number;
+  fitScreenMode?: boolean;
+  onToggleFitScreenMode?: () => void;
   backgroundType: 'color' | 'gradient' | 'pattern' | 'image';
   backgroundValue: string;
   elements: CanvasItem[];
@@ -1648,6 +1650,8 @@ export function renderAudioVisual(au: AudioElement) {
 export const Canvas: React.FC<CanvasProps> = ({
   aspectRatio,
   fitRequest = 0,
+  fitScreenMode = false,
+  onToggleFitScreenMode,
   backgroundType,
   backgroundValue,
   elements,
@@ -3404,12 +3408,20 @@ export const Canvas: React.FC<CanvasProps> = ({
           </button>
           <div className="h-3 w-px bg-neutral-700 mx-0.5" />
           <button
-            onClick={calculateAutoFit}
+            onClick={() => {
+              if (onToggleFitScreenMode) {
+                onToggleFitScreenMode();
+                window.setTimeout(calculateAutoFit, 120);
+              } else {
+                calculateAutoFit();
+              }
+            }}
+            aria-pressed={fitScreenMode}
             className="flex items-center gap-1 text-[11px] bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 px-2 py-0.5 rounded-full transition font-semibold"
-            title="Fit invitation card to screen without clipping"
+            title={fitScreenMode ? 'Restore slide timeline and editing controls' : 'Hide the slide timeline and fit invitation to screen'}
           >
             <Maximize2 className="w-3 h-3" />
-            <span>Fit Screen</span>
+            <span>{fitScreenMode ? 'Exit Fit' : 'Fit Screen'}</span>
           </button>
         </div>
       )}
