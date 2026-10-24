@@ -119,23 +119,54 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
     const end = start + Math.min(clip.settings.durationSec ?? currentPageDurationSec, currentPageDurationSec);
     return timelineCursorSec >= start && timelineCursorSec < end;
   });
-  // A mobile “Use on all slides” choice must stay continuous even if old
-  // page-scoped copies are still present in a saved project.
+  // Older projects can contain a separate copy of the same song on every
+  // slide. Treat matching, full-slide clips as one continuous sequence so the
+  // audio element does not pause and seek at each page boundary.
+  const pageAudioClips = pages.map((page, index) => {
+    const pageClip = audioClips.find((clip) => clip.pageIndex === index);
+    const sharedClip = audioClips.find((clip) => clip.pageIndex === null);
+    return isMobileViewport ? sharedClip || pageClip : pageClip || sharedClip;
+  });
+  const firstSequenceClip = pageAudioClips[0];
+  const continuousPageSequenceClip = firstSequenceClip && pages.length > 1 && pageAudioClips.every((clip, index) => {
+    if (!clip || clip.trackId !== firstSequenceClip.trackId) return false;
+    const settings = clip.settings;
+    const first = firstSequenceClip.settings;
+    const pageDuration = pages[index]?.duration || 4.5;
+    const clipCoversPage = settings.durationSec === null || settings.durationSec === undefined || settings.durationSec >= pageDuration - 0.05;
+    return clipCoversPage
+      && settings.startSec === first.startSec
+      && settings.sourceEndSec === first.sourceEndSec
+      && settings.volume === first.volume
+      && settings.fadeInSec === first.fadeInSec
+      && settings.fadeOutSec === first.fadeOutSec
+      && settings.loop === first.loop;
+  })
+    ? {
+        ...firstSequenceClip,
+        id: `audio-sequence-${firstSequenceClip.trackId}`,
+        pageIndex: null,
+        timelineStartSec: 0,
+        settings: { ...firstSequenceClip.settings, durationSec: null },
+      }
+    : undefined;
+
+  // Shared clips and identical full-slide copies must not restart when the
+  // visual sequence changes pages in either viewport.
   const timelineClip = isMobileViewport
-    ? mobileAllSlidesClip || allSlidesTimelineClip || pageTimelineClip
-    : pageTimelineClip || allSlidesTimelineClip;
+    ? mobileAllSlidesClip || continuousPageSequenceClip || allSlidesTimelineClip || pageTimelineClip
+    : continuousPageSequenceClip || pageTimelineClip || allSlidesTimelineClip;
   const track = (timelineClip && AUDIO_TRACKS.find((item) => item.id === timelineClip.trackId)) || activeAudioTrack || AUDIO_TRACKS[0];
   const currentAudioClip = timelineClip?.settings || audioClip;
   const clipTimelineStartSec = timelineClip?.timelineStartSec ?? (timelineClip?.pageIndex === null ? 0 : pageStartSec);
   const audioScopeEndSec = timelineClip?.pageIndex === null ? invitationDurationSec : pageStartSec + currentPageDurationSec;
   const musicDurationSec = Math.max(0.25, Math.min(currentAudioClip.durationSec ?? (audioScopeEndSec - clipTimelineStartSec), audioScopeEndSec - clipTimelineStartSec));
-  const isMobileContinuousAudio = isMobileViewport && timelineClip?.pageIndex === null;
-  const mobilePlaybackConfigRef = useRef({ clip: currentAudioClip, durationSec: musicDurationSec });
-  mobilePlaybackConfigRef.current = { clip: currentAudioClip, durationSec: musicDurationSec };
-  // On mobile, keep the same all-slides audio element alive as the video advances
-  // between pages. Page-scoped clips still restart/switch at their page boundary.
+  const isContinuousAllSlidesAudio = timelineClip?.pageIndex === null;
+  const continuousPlaybackConfigRef = useRef({ clip: currentAudioClip, durationSec: musicDurationSec });
+  continuousPlaybackConfigRef.current = { clip: currentAudioClip, durationSec: musicDurationSec };
+  // Keep one audio element alive as the video advances. Page-scoped clips with
+  // different tracks/settings still switch at their own page boundaries.
   const audioPlaybackPageKey = timelineClip?.pageIndex === null
-    && isMobileViewport
     ? 'all-slides'
     : currentIndex;
   const pageTransition = currentSlide?.transition || 'fade';
@@ -169,9 +200,8 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    // The mobile all-slides path has its own stable audio clock below. Keeping
-    // it out of this page-aware effect prevents slide progress from seeking it.
-    if (isMobileContinuousAudio) return;
+    // Shared sequences use the stable audio clock below in both viewports.
+    if (isContinuousAllSlidesAudio) return;
     const audio = trackAudioRef.current;
     if (!audio || !track.audioUrl || !timelineClip) {
       audio?.pause();
@@ -235,10 +265,10 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
       if (clipTimerRef.current !== null) window.clearInterval(clipTimerRef.current);
       clipTimerRef.current = null;
     };
-  }, [isOpen, track.audioUrl, isPlaying, isMuted, audioCycle, currentAudioClip.startSec, currentAudioClip.sourceEndSec, currentAudioClip.durationSec, currentAudioClip.volume, currentAudioClip.fadeInSec, currentAudioClip.fadeOutSec, currentAudioClip.loop, musicDurationSec, timelineClip?.id, audioPlaybackPageKey, isMobileContinuousAudio]);
+  }, [isOpen, track.audioUrl, isPlaying, isMuted, audioCycle, currentAudioClip.startSec, currentAudioClip.sourceEndSec, currentAudioClip.durationSec, currentAudioClip.volume, currentAudioClip.fadeInSec, currentAudioClip.fadeOutSec, currentAudioClip.loop, musicDurationSec, timelineClip?.id, audioPlaybackPageKey, isContinuousAllSlidesAudio]);
 
   useEffect(() => {
-    if (!isOpen || !isMobileContinuousAudio) return;
+    if (!isOpen || !isContinuousAllSlidesAudio) return;
     const audio = trackAudioRef.current;
     if (!audio || !track.audioUrl || !timelineClip) return;
 
@@ -251,7 +281,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
     let lastTick = performance.now();
     let disposed = false;
     const getBounds = () => {
-      const { clip } = mobilePlaybackConfigRef.current;
+      const { clip } = continuousPlaybackConfigRef.current;
       const sourceStartSec = Math.max(0, clip.startSec);
       const sourceEndSec = Number.isFinite(audio.duration)
         ? Math.max(sourceStartSec + 0.05, Math.min(clip.sourceEndSec ?? audio.duration, audio.duration))
@@ -291,7 +321,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
       clipElapsedRef.current = elapsedSec;
 
       const { clip, sourceStartSec, sourceEndSec } = getBounds();
-      const { durationSec } = mobilePlaybackConfigRef.current;
+      const { durationSec } = continuousPlaybackConfigRef.current;
       if (elapsedSec >= durationSec) {
         audio.pause();
         audio.volume = clip.volume;
@@ -320,11 +350,11 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
       disposed = true;
       audio.removeEventListener('loadedmetadata', startPlayback);
       audio.pause();
-      audio.volume = mobilePlaybackConfigRef.current.clip.volume;
+      audio.volume = continuousPlaybackConfigRef.current.clip.volume;
       if (clipTimerRef.current !== null) window.clearInterval(clipTimerRef.current);
       clipTimerRef.current = null;
     };
-  }, [isOpen, isMobileContinuousAudio, track.audioUrl, isPlaying, isMuted, audioCycle, timelineClip?.id]);
+  }, [isOpen, isContinuousAllSlidesAudio, track.audioUrl, isPlaying, isMuted, audioCycle, timelineClip?.id]);
 
   const playShehnaiNote = () => {
     if (isMuted || track.audioUrl || !timelineClip) return;
@@ -361,7 +391,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   };
 
   const handleNext = () => {
-    if (currentIndex === pages.length - 1 && (audioClip.durationSec === null || audioClip.durationSec >= invitationDurationSec - 0.05)) {
+    if (currentIndex === pages.length - 1 && (isContinuousAllSlidesAudio || audioClip.durationSec === null || audioClip.durationSec >= invitationDurationSec - 0.05)) {
       clipElapsedRef.current = 0;
       setAudioCycle((cycle) => cycle + 1);
     }
@@ -389,7 +419,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
       setProgress(currentProg);
 
       if (elapsed >= slideDurationMs) {
-        if (currentIndex === pages.length - 1 && (audioClip.durationSec === null || audioClip.durationSec >= invitationDurationSec - 0.05)) {
+        if (currentIndex === pages.length - 1 && (isContinuousAllSlidesAudio || audioClip.durationSec === null || audioClip.durationSec >= invitationDurationSec - 0.05)) {
           clipElapsedRef.current = 0;
           setAudioCycle((cycle) => cycle + 1);
         }
@@ -407,7 +437,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isOpen, isPlaying, currentIndex, slideDurationMs, pages.length, audioClip.durationSec, invitationDurationSec]);
+  }, [isOpen, isPlaying, currentIndex, slideDurationMs, pages.length, audioClip.durationSec, invitationDurationSec, isContinuousAllSlidesAudio]);
 
   useEffect(() => {
     if (!isOpen) return;
