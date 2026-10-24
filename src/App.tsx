@@ -1378,7 +1378,7 @@ export default function App() {
 
           {pages.length > 1 && !isFitScreenMode && (
             <div
-              className="md:hidden absolute bottom-[calc(4rem+env(safe-area-inset-bottom)+0.65rem)] left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-full border border-amber-300/25 bg-neutral-950/95 px-2 py-1.5 text-amber-100 shadow-xl shadow-black/40 backdrop-blur"
+              className="md:hidden absolute bottom-[calc(4rem+env(safe-area-inset-bottom)+0.65rem)] left-[calc(50%-1.5rem)] z-30 flex -translate-x-1/2 items-center gap-1 rounded-full border border-amber-300/25 bg-neutral-950/95 px-1 py-1 text-amber-100 shadow-xl shadow-black/40 backdrop-blur"
               aria-label="Invitation slide navigation"
             >
               <button
@@ -1386,19 +1386,19 @@ export default function App() {
                 onClick={() => setCurrentPageIndex((index) => Math.max(0, index - 1))}
                 disabled={currentPageIndex === 0}
                 aria-label="Previous slide"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-lg transition hover:bg-amber-300/15 disabled:cursor-not-allowed disabled:opacity-35"
+                className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 text-base transition hover:bg-amber-300/15 disabled:cursor-not-allowed disabled:opacity-35"
               >
                 ‹
               </button>
-              <span className="min-w-[5.5rem] text-center text-xs font-semibold tabular-nums" aria-live="polite">
-                Slide {currentPageIndex + 1} of {pages.length}
+              <span className="min-w-[4rem] whitespace-nowrap text-center text-[11px] font-semibold tabular-nums" aria-live="polite">
+                Slide {currentPageIndex + 1}/{pages.length}
               </span>
               <button
                 type="button"
                 onClick={() => setCurrentPageIndex((index) => Math.min(pages.length - 1, index + 1))}
                 disabled={currentPageIndex === pages.length - 1}
                 aria-label="Next slide"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-lg transition hover:bg-amber-300/15 disabled:cursor-not-allowed disabled:opacity-35"
+                className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 text-base transition hover:bg-amber-300/15 disabled:cursor-not-allowed disabled:opacity-35"
               >
                 ›
               </button>
