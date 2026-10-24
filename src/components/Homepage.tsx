@@ -967,7 +967,10 @@ export const Homepage: React.FC<HomepageProps> = ({
                   {/* Authentic Miniature Invitation Frame */}
                   <div
                     onClick={() => {
-                      if (coverVideo && activeSlideIdx === 0) {
+                      // On phones, tapping a template should enter the editor directly.
+                      // The explicit “Play cover preview” control remains available for video.
+                      const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
+                      if (!isMobileViewport && coverVideo && activeSlideIdx === 0) {
                         setActiveVideoPreviewId((activeId) => activeId === template.id ? null : template.id);
                         return;
                       }
