@@ -119,6 +119,12 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   const clipTimelineStartSec = timelineClip?.timelineStartSec ?? (timelineClip?.pageIndex === null ? 0 : pageStartSec);
   const audioScopeEndSec = timelineClip?.pageIndex === null ? invitationDurationSec : pageStartSec + currentPageDurationSec;
   const musicDurationSec = Math.max(0.25, Math.min(currentAudioClip.durationSec ?? (audioScopeEndSec - clipTimelineStartSec), audioScopeEndSec - clipTimelineStartSec));
+  // On mobile, keep the same all-slides audio element alive as the video advances
+  // between pages. Page-scoped clips still restart/switch at their page boundary.
+  const audioPlaybackPageKey = timelineClip?.pageIndex === null
+    && window.matchMedia('(max-width: 767px)').matches
+    ? 'all-slides'
+    : currentIndex;
   const pageTransition = currentSlide?.transition || 'fade';
   const transitionAnimations: Record<string, string | undefined> = {
     none: undefined,
@@ -213,7 +219,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
       if (clipTimerRef.current !== null) window.clearInterval(clipTimerRef.current);
       clipTimerRef.current = null;
     };
-  }, [isOpen, track.audioUrl, isPlaying, isMuted, audioCycle, currentAudioClip.startSec, currentAudioClip.sourceEndSec, currentAudioClip.durationSec, currentAudioClip.volume, currentAudioClip.fadeInSec, currentAudioClip.fadeOutSec, currentAudioClip.loop, musicDurationSec, timelineClip?.id, currentIndex]);
+  }, [isOpen, track.audioUrl, isPlaying, isMuted, audioCycle, currentAudioClip.startSec, currentAudioClip.sourceEndSec, currentAudioClip.durationSec, currentAudioClip.volume, currentAudioClip.fadeInSec, currentAudioClip.fadeOutSec, currentAudioClip.loop, musicDurationSec, timelineClip?.id, audioPlaybackPageKey]);
 
   const playShehnaiNote = () => {
     if (isMuted || track.audioUrl || !timelineClip) return;
