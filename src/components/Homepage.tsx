@@ -50,6 +50,7 @@ import {
   GridElement,
   CountdownElement,
   BarcodeElement,
+  VideoElement,
 } from '../types/editor';
 import { TEMPLATE_CATEGORIES } from '../data/templates';
 import { BlankDesignOptions, CreateDesignModal } from './CreateDesignModal';
@@ -210,7 +211,8 @@ const MiniCardArtwork: React.FC<{
   aspectRatio: CardTemplate['aspectRatio'];
   targetWidth?: number;
   maxHeight?: number;
-}> = ({ page, aspectRatio, targetWidth = 240, maxHeight = 280 }) => {
+  playVideoPreview?: boolean;
+}> = ({ page, aspectRatio, targetWidth = 240, maxHeight = 280, playVideoPreview = false }) => {
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
   const scale = Math.min(targetWidth / dimensions.width, maxHeight / dimensions.height);
   const renderedWidth = Math.round(dimensions.width * scale);
@@ -239,7 +241,7 @@ const MiniCardArtwork: React.FC<{
         }}
       >
         {[...page.elements]
-          .filter((el) => !el.hidden)
+          .filter((el) => !el.hidden && !(playVideoPreview && el.type === 'text'))
           .sort((a, b) => (a.zIndex || 1) - (b.zIndex || 1))
           .map((elem) => {
             const flipTransform = `${elem.flipX ? ' scaleX(-1)' : ''}${
@@ -264,6 +266,19 @@ const MiniCardArtwork: React.FC<{
                   <div className="w-full h-full flex flex-col justify-center">
                     {renderTextVisual(elem as TextElement)}
                   </div>
+                )}
+                {elem.type === 'video' && playVideoPreview && (elem as VideoElement).mediaSrc && (
+                  <video
+                    src={(elem as VideoElement).mediaSrc}
+                    poster={(elem as VideoElement).posterSrc}
+                    className="h-full w-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    aria-label="Muted invitation cover video preview"
+                  />
                 )}
                 {elem.type === 'sticker' && (
                   <div
@@ -392,6 +407,7 @@ export const Homepage: React.FC<HomepageProps> = ({
   const [studioIntent, setStudioIntent] = useState<StudioIntent>({});
   // Per-card active slide index in the Signature Collection grid
   const [activeCardSlides, setActiveCardSlides] = useState<Record<string, number>>({});
+  const [activeVideoPreviewId, setActiveVideoPreviewId] = useState<string | null>(null);
 
   const openCreateDesign = (intent: StudioIntent = {}) => {
     setStudioIntent(intent);
@@ -476,11 +492,22 @@ export const Homepage: React.FC<HomepageProps> = ({
     return matchesCat && matchesSearch;
   });
   const prioritizeNewGanesha = selectedCategory === 'wedding' || searchQuery.toLowerCase().includes('ganesha');
+  const hasVideoCover = (template: CardTemplate) =>
+    template.pages[0]?.elements.some((element) => element.type === 'video' && Boolean(element.mediaSrc)) ?? false;
+  const isVideoInvitationTemplate = (template: CardTemplate) =>
+    template.tags.some((tag) => tag.toLowerCase().includes('video invitation'))
+    || template.pages.length > 1;
   const orderedTemplates = selectedCategory === 'photo-frames'
     ? [...filteredTemplates].reverse()
-    : prioritizeNewGanesha
-      ? [...filteredTemplates].sort((a, b) => Number(b.tags.includes('New Ganesha Collection')) - Number(a.tags.includes('New Ganesha Collection')))
-      : filteredTemplates;
+    : selectedCategory === 'all'
+      ? [
+          ...filteredTemplates.filter(hasVideoCover),
+          ...filteredTemplates.filter((template) => !hasVideoCover(template) && isVideoInvitationTemplate(template)),
+          ...filteredTemplates.filter((template) => !isVideoInvitationTemplate(template))
+        ]
+      : prioritizeNewGanesha
+        ? [...filteredTemplates].sort((a, b) => Number(b.tags.includes('New Ganesha Collection')) - Number(a.tags.includes('New Ganesha Collection')))
+        : filteredTemplates;
   const isFeaturedHomeView = selectedCategory === 'all' && !searchQuery.trim() && !showAllTemplates;
   const visibleTemplates = isFeaturedHomeView
     ? orderedTemplates.slice(0, HOMEPAGE_FEATURED_COUNT)
@@ -885,12 +912,24 @@ export const Homepage: React.FC<HomepageProps> = ({
             const activeSlideIdx = activeCardSlides[template.id] || 0;
             const currentPage = template.pages[activeSlideIdx] || template.pages[0];
             const isMultiSlide = template.pages.length > 1;
+            const coverVideo = template.pages[0]?.elements.find(
+              (element): element is VideoElement => element.type === 'video' && Boolean(element.mediaSrc),
+            );
+            const isCoverVideoPreviewing = Boolean(coverVideo)
+              && activeVideoPreviewId === template.id
+              && activeSlideIdx === 0;
             const hasQr = template.pages.some((p) => p.elements.some((e) => e.type === 'qr'));
             const audioClipCount = template.audioClips?.length ?? 0;
 
             return (
               <div
                 key={template.id}
+                onMouseEnter={() => {
+                  if (coverVideo) setActiveVideoPreviewId(template.id);
+                }}
+                onMouseLeave={() => {
+                  setActiveVideoPreviewId((activeId) => activeId === template.id ? null : activeId);
+                }}
                 className="group relative rounded-3xl bg-gradient-to-b from-[#150a0f] via-[#0e080b] to-[#0a0608] border border-amber-500/25 hover:border-amber-400/75 shadow-[0_15px_45px_rgba(0,0,0,0.75)] hover:shadow-[0_20px_60px_rgba(212,175,55,0.14)] transition-all duration-300 flex flex-col justify-between overflow-hidden"
               >
                 {/* Top Ornamental Gold Shimmer Hairline */}
@@ -927,19 +966,42 @@ export const Homepage: React.FC<HomepageProps> = ({
 
                   {/* Authentic Miniature Invitation Frame */}
                   <div
-                    onClick={() => onOpenEditorWithTemplate(template, activeSlideIdx)}
+                    onClick={() => {
+                      if (coverVideo && activeSlideIdx === 0) {
+                        setActiveVideoPreviewId((activeId) => activeId === template.id ? null : template.id);
+                        return;
+                      }
+                      onOpenEditorWithTemplate(template, activeSlideIdx);
+                    }}
                     className="relative cursor-pointer group/card transition-transform duration-500 group-hover:scale-[1.03]"
-                    title="Click to personalize this slide in Studio"
+                    title={coverVideo && activeSlideIdx === 0 ? 'Tap to play or pause the cover video preview' : 'Click to personalize this slide in Studio'}
                   >
                     <MiniCardArtwork
                       page={currentPage}
                       aspectRatio={template.aspectRatio}
                       targetWidth={190}
                       maxHeight={208}
+                      playVideoPreview={isCoverVideoPreviewing}
                     />
 
+                    {coverVideo && activeSlideIdx === 0 && !isCoverVideoPreviewing && (
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setActiveVideoPreviewId(template.id);
+                        }}
+                        aria-label="Play cover video preview"
+                        aria-pressed={false}
+                        className="absolute bottom-2.5 left-1/2 z-50 inline-flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-amber-200/50 bg-black/80 px-3 py-1.5 text-[10px] font-semibold text-amber-100 shadow-lg backdrop-blur-md transition-colors hover:bg-black"
+                      >
+                        <Play className="h-3 w-3 fill-amber-300 text-amber-300" aria-hidden="true" />
+                        <span>Play cover preview</span>
+                      </button>
+                    )}
+
                     {/* Subtle Hover Action Pill Over Artwork */}
-                    <div className="opacity-0 group-hover/card:opacity-100 transition-all duration-200 absolute inset-0 rounded-[18px] bg-black/55 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2 p-4 z-40 pointer-events-auto">
+                    <div className={`${isCoverVideoPreviewing ? 'pointer-events-none opacity-0' : 'pointer-events-auto opacity-0 group-hover/card:opacity-100'} transition-all duration-200 absolute inset-0 rounded-[18px] bg-black/55 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2 p-4 z-40`}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -995,6 +1057,9 @@ export const Homepage: React.FC<HomepageProps> = ({
                                 ...prev,
                                 [template.id]: sIdx,
                               }));
+                              if (sIdx !== 0) {
+                                setActiveVideoPreviewId((activeId) => activeId === template.id ? null : activeId);
+                              }
                             }}
                             className={`w-6 h-6 rounded-full text-[10px] font-bold transition-all cursor-pointer flex items-center justify-center ${
                               isSlideActive
