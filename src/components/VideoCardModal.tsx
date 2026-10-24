@@ -103,17 +103,24 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   const currentPageDurationSec = currentSlide?.duration || 4.5;
   const pageStartSec = pages.slice(0, currentIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0);
   const timelineCursorSec = pageStartSec + (progress / 100) * currentPageDurationSec;
-  const timelineClip = audioClips.find((clip) => {
-    if (clip.pageIndex !== currentIndex) return false;
-    const start = clip.timelineStartSec ?? pageStartSec;
-    const end = start + Math.min(clip.settings.durationSec ?? currentPageDurationSec, currentPageDurationSec);
-    return timelineCursorSec >= start && timelineCursorSec < end;
-  }) || audioClips.find((clip) => {
+  const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
+  const allSlidesTimelineClip = audioClips.find((clip) => {
     if (clip.pageIndex !== null) return false;
     const start = clip.timelineStartSec ?? 0;
     const end = start + Math.min(clip.settings.durationSec ?? invitationDurationSec, invitationDurationSec);
     return timelineCursorSec >= start && timelineCursorSec < end;
   });
+  const pageTimelineClip = audioClips.find((clip) => {
+    if (clip.pageIndex !== currentIndex) return false;
+    const start = clip.timelineStartSec ?? pageStartSec;
+    const end = start + Math.min(clip.settings.durationSec ?? currentPageDurationSec, currentPageDurationSec);
+    return timelineCursorSec >= start && timelineCursorSec < end;
+  });
+  // A mobile “Use on all slides” choice must stay continuous even if old
+  // page-scoped copies are still present in a saved project.
+  const timelineClip = isMobileViewport
+    ? allSlidesTimelineClip || pageTimelineClip
+    : pageTimelineClip || allSlidesTimelineClip;
   const track = (timelineClip && AUDIO_TRACKS.find((item) => item.id === timelineClip.trackId)) || activeAudioTrack || AUDIO_TRACKS[0];
   const currentAudioClip = timelineClip?.settings || audioClip;
   const clipTimelineStartSec = timelineClip?.timelineStartSec ?? (timelineClip?.pageIndex === null ? 0 : pageStartSec);
@@ -122,7 +129,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   // On mobile, keep the same all-slides audio element alive as the video advances
   // between pages. Page-scoped clips still restart/switch at their page boundary.
   const audioPlaybackPageKey = timelineClip?.pageIndex === null
-    && window.matchMedia('(max-width: 767px)').matches
+    && isMobileViewport
     ? 'all-slides'
     : currentIndex;
   const pageTransition = currentSlide?.transition || 'fade';
