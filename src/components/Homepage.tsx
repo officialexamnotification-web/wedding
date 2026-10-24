@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Search, 
   Sparkles, 
@@ -408,6 +408,32 @@ export const Homepage: React.FC<HomepageProps> = ({
   // Per-card active slide index in the Signature Collection grid
   const [activeCardSlides, setActiveCardSlides] = useState<Record<string, number>>({});
   const [activeVideoPreviewId, setActiveVideoPreviewId] = useState<string | null>(null);
+  const [videoPreviewSequenceIndex, setVideoPreviewSequenceIndex] = useState(0);
+
+  // A cover preview is a short story: play its cover clip, then show the next two slides.
+  useEffect(() => {
+    if (!activeVideoPreviewId) return;
+    const template = templates.find((item) => item.id === activeVideoPreviewId);
+    if (!template || template.pages.length < 2) return;
+
+    const sequenceLength = Math.min(3, template.pages.length);
+    const delay = videoPreviewSequenceIndex === 0 ? 5000 : 2300;
+    const timeout = window.setTimeout(() => {
+      setVideoPreviewSequenceIndex((current) => (current + 1) % sequenceLength);
+    }, delay);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeVideoPreviewId, templates, videoPreviewSequenceIndex]);
+
+  const startCoverStoryPreview = (templateId: string) => {
+    setVideoPreviewSequenceIndex(0);
+    setActiveVideoPreviewId(templateId);
+  };
+
+  const stopCoverStoryPreview = (templateId?: string) => {
+    setActiveVideoPreviewId((activeId) => !templateId || activeId === templateId ? null : activeId);
+    setVideoPreviewSequenceIndex(0);
+  };
 
   const openCreateDesign = (intent: StudioIntent = {}) => {
     setStudioIntent(intent);
@@ -910,14 +936,16 @@ export const Homepage: React.FC<HomepageProps> = ({
             };
 
             const activeSlideIdx = activeCardSlides[template.id] || 0;
-            const currentPage = template.pages[activeSlideIdx] || template.pages[0];
             const isMultiSlide = template.pages.length > 1;
             const coverVideo = template.pages[0]?.elements.find(
               (element): element is VideoElement => element.type === 'video' && Boolean(element.mediaSrc),
             );
-            const isCoverVideoPreviewing = Boolean(coverVideo)
-              && activeVideoPreviewId === template.id
-              && activeSlideIdx === 0;
+            const isVideoStoryPreviewing = Boolean(coverVideo) && activeVideoPreviewId === template.id;
+            const isCoverVideoPreviewing = isVideoStoryPreviewing && videoPreviewSequenceIndex === 0;
+            const displayedSlideIdx = isVideoStoryPreviewing
+              ? Math.min(videoPreviewSequenceIndex, template.pages.length - 1)
+              : activeSlideIdx;
+            const currentPage = template.pages[displayedSlideIdx] || template.pages[0];
             const hasQr = template.pages.some((p) => p.elements.some((e) => e.type === 'qr'));
             const audioClipCount = template.audioClips?.length ?? 0;
 
@@ -925,10 +953,10 @@ export const Homepage: React.FC<HomepageProps> = ({
               <div
                 key={template.id}
                 onMouseEnter={() => {
-                  if (coverVideo) setActiveVideoPreviewId(template.id);
+                  if (coverVideo) startCoverStoryPreview(template.id);
                 }}
                 onMouseLeave={() => {
-                  setActiveVideoPreviewId((activeId) => activeId === template.id ? null : activeId);
+                  stopCoverStoryPreview(template.id);
                 }}
                 className="group relative rounded-3xl bg-gradient-to-b from-[#150a0f] via-[#0e080b] to-[#0a0608] border border-amber-500/25 hover:border-amber-400/75 shadow-[0_15px_45px_rgba(0,0,0,0.75)] hover:shadow-[0_20px_60px_rgba(212,175,55,0.14)] transition-all duration-300 flex flex-col justify-between overflow-hidden"
               >
@@ -936,7 +964,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                 <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-400/70 to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
 
                 {/* 1. CARD STAGE: Velvet Pedestal + Real Scaled Miniature Invitation */}
-                <div className="relative h-[300px] px-4 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_35%,rgba(212,175,55,0.12)_0%,rgba(20,7,11,0.6)_60%,rgba(8,6,8,0.95)_100%)] border-b border-amber-500/15">
+                <div className="relative h-[320px] sm:h-[330px] px-4 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_35%,rgba(212,175,55,0.12)_0%,rgba(20,7,11,0.6)_60%,rgba(8,6,8,0.95)_100%)] border-b border-amber-500/15">
                   {/* Decorative Corner Filigree Accents */}
                   <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-amber-400/35 rounded-tl pointer-events-none" />
                   <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-amber-400/35 rounded-tr pointer-events-none" />
@@ -970,41 +998,42 @@ export const Homepage: React.FC<HomepageProps> = ({
                       // On phones, tapping a template should enter the editor directly.
                       // The explicit “Play cover preview” control remains available for video.
                       const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
-                      if (!isMobileViewport && coverVideo && activeSlideIdx === 0) {
-                        setActiveVideoPreviewId((activeId) => activeId === template.id ? null : template.id);
+                      if (!isMobileViewport && coverVideo && (activeSlideIdx === 0 || isVideoStoryPreviewing)) {
+                        if (isVideoStoryPreviewing) stopCoverStoryPreview(template.id);
+                        else startCoverStoryPreview(template.id);
                         return;
                       }
-                      onOpenEditorWithTemplate(template, activeSlideIdx);
+                      onOpenEditorWithTemplate(template, displayedSlideIdx);
                     }}
-                    className="relative cursor-pointer group/card transition-transform duration-500 group-hover:scale-[1.03]"
-                    title={coverVideo && activeSlideIdx === 0 ? 'Tap to play or pause the cover video preview' : 'Click to personalize this slide in Studio'}
+                    className="relative -translate-y-3 cursor-pointer group/card transition-transform duration-500 group-hover:scale-[1.03]"
+                    title={coverVideo && (activeSlideIdx === 0 || isVideoStoryPreviewing) ? 'Tap to play or pause the cover and slide preview' : 'Click to personalize this slide in Studio'}
                   >
                     <MiniCardArtwork
                       page={currentPage}
                       aspectRatio={template.aspectRatio}
-                      targetWidth={190}
-                      maxHeight={208}
+                      targetWidth={230}
+                      maxHeight={238}
                       playVideoPreview={isCoverVideoPreviewing}
                     />
 
-                    {coverVideo && activeSlideIdx === 0 && !isCoverVideoPreviewing && (
+                    {coverVideo && activeSlideIdx === 0 && !isVideoStoryPreviewing && (
                       <button
                         type="button"
                         onClick={(event) => {
                           event.stopPropagation();
-                          setActiveVideoPreviewId(template.id);
+                          startCoverStoryPreview(template.id);
                         }}
-                        aria-label="Play cover video preview"
+                        aria-label="Play cover video and next two slides"
                         aria-pressed={false}
                         className="absolute bottom-2.5 left-1/2 z-50 inline-flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-amber-200/50 bg-black/80 px-3 py-1.5 text-[10px] font-semibold text-amber-100 shadow-lg backdrop-blur-md transition-colors hover:bg-black"
                       >
                         <Play className="h-3 w-3 fill-amber-300 text-amber-300" aria-hidden="true" />
-                        <span>Play cover preview</span>
+                        <span>Play story preview</span>
                       </button>
                     )}
 
                     {/* Subtle Hover Action Pill Over Artwork */}
-                    <div className={`${isCoverVideoPreviewing ? 'pointer-events-none opacity-0' : 'pointer-events-auto opacity-0 group-hover/card:opacity-100'} transition-all duration-200 absolute inset-0 rounded-[18px] bg-black/55 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2 p-4 z-40`}>
+                    <div className={`${isVideoStoryPreviewing ? 'pointer-events-none opacity-0' : 'pointer-events-auto opacity-0 group-hover/card:opacity-100'} transition-all duration-200 absolute inset-0 rounded-[18px] bg-black/55 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2 p-4 z-40`}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1060,9 +1089,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                                 ...prev,
                                 [template.id]: sIdx,
                               }));
-                              if (sIdx !== 0) {
-                                setActiveVideoPreviewId((activeId) => activeId === template.id ? null : activeId);
-                              }
+                              stopCoverStoryPreview(template.id);
                             }}
                             className={`w-6 h-6 rounded-full text-[10px] font-bold transition-all cursor-pointer flex items-center justify-center ${
                               isSlideActive
@@ -1085,11 +1112,11 @@ export const Homepage: React.FC<HomepageProps> = ({
                 </div>
 
                 {/* 2. EDITORIAL METADATA & DIRECT ACTION BAR */}
-                <div className="p-4 flex-1 flex flex-col justify-between space-y-3 bg-gradient-to-b from-[#12090d] to-[#0b0609]">
-                  <div className="space-y-2">
+                <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between space-y-2 bg-gradient-to-b from-[#12090d] to-[#0b0609]">
+                  <div className="space-y-1.5">
                     {/* Hindi Subtitle + Palette Swatches */}
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-tiro text-amber-400/95 tracking-wide">
+                      <span className="text-[10px] sm:text-[11px] font-tiro text-amber-400/95 tracking-wide">
                         {meta.hindiSubtitle}
                       </span>
                       <div className="flex items-center -space-x-1" title="Suite Color Palette">
@@ -1106,13 +1133,13 @@ export const Homepage: React.FC<HomepageProps> = ({
                     {/* Clean Royal Suite Title */}
                     <h3
                       onClick={() => onOpenEditorWithTemplate(template, activeSlideIdx)}
-                      className="font-cinzel text-base sm:text-lg font-bold text-amber-100 group-hover:text-amber-300 transition-colors cursor-pointer leading-snug"
+                      className="font-cinzel text-[15px] sm:text-base font-bold text-amber-100 group-hover:text-amber-300 transition-colors cursor-pointer leading-tight"
                     >
                       {meta.cleanTitle}
                     </h3>
 
                     {/* Featured Couple / Venue Info */}
-                    <div className="flex items-center justify-between text-[11px] text-neutral-400 pt-0.5">
+                    <div className="flex items-center justify-between text-[10px] text-neutral-400">
                       <span className="font-medium text-neutral-300 truncate">
                         {meta.coupleOrHighlight}
                       </span>
@@ -1124,22 +1151,22 @@ export const Homepage: React.FC<HomepageProps> = ({
                   </div>
 
                   {/* Direct Action Buttons Row (Always Visible & Effortless) */}
-                  <div className="pt-3 border-t border-neutral-800/80 flex items-center gap-2">
+                  <div className="pt-2 border-t border-neutral-800/80 flex items-center justify-center gap-1.5">
                     <button
                       onClick={() => onOpenEditorWithTemplate(template, activeSlideIdx)}
-                      className="flex-1 py-2.5 px-3.5 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-110 text-neutral-950 font-bold text-xs rounded-xl shadow-md shadow-amber-500/15 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="flex-1 min-w-0 max-w-[210px] py-2 px-2.5 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-110 text-neutral-950 font-bold text-[11px] rounded-lg shadow-md shadow-amber-500/15 transition-all flex items-center justify-center gap-1 cursor-pointer"
                     >
-                      <Palette className="w-3.5 h-3.5" />
+                        <Palette className="w-3 h-3 shrink-0" />
                       <span>Customize Suite</span>
                     </button>
 
                     {isMultiSlide && (
                       <button
                         onClick={() => onOpenVideoCard(template)}
-                        className="py-2.5 px-3 bg-neutral-900 hover:bg-neutral-800 text-amber-200 border border-amber-500/35 hover:border-amber-400 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="py-2 px-2.5 bg-neutral-900 hover:bg-neutral-800 text-amber-200 border border-amber-500/35 hover:border-amber-400 rounded-lg text-[11px] font-semibold transition flex items-center justify-center gap-1 cursor-pointer"
                         title="Play Animated Video Invitation with Shehnai Music"
                       >
-                        <Play className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                        <Play className="w-3 h-3 fill-amber-300 text-amber-300 shrink-0" />
                         <span>Video</span>
                       </button>
                     )}
@@ -1149,10 +1176,10 @@ export const Homepage: React.FC<HomepageProps> = ({
                         setPreviewTemplate(template);
                         setPreviewSlideIdx(activeSlideIdx);
                       }}
-                      className="p-2.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-amber-200 border border-neutral-800 hover:border-amber-500/30 rounded-xl transition cursor-pointer"
+                      className="p-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-amber-200 border border-neutral-800 hover:border-amber-500/30 rounded-lg transition cursor-pointer"
                       title="Full-Size Suite Preview"
                     >
-                      <Maximize2 className="w-3.5 h-3.5" />
+                      <Maximize2 className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
