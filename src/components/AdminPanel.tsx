@@ -26,6 +26,31 @@ const categories: Array<{ id: CardTemplate['category']; label: string }> = [
   { id: 'anniversary', label: 'Anniversary' },
   { id: 'gold-velvet', label: '24K Gold Foil & Velvet' },
 ];
+const templateSearchAliases: Record<string, string[]> = {
+  'royal-marigold-hour-wedding-story': ['The Marigold Hour'],
+  'royal-lakeside-wedding': ['Royal Lakeside Palace Suite'],
+  'golden-mandap-wedding': ['Swarna Mandap Heritage Suite'],
+  'royal-indian-video-wedding': ['Umaid Marwar Palace Vivah'],
+  'grand-mandap-royal-video-wedding': ['Rajvilas Vedic Mandap Suite'],
+  'royal-rajasthani-wedding': ['Rambagh Crimson Foil Card'],
+  'emerald-luxury-wedding': ['Emerald Velvet Botanical Card'],
+  'shubh-griha-pravesh': ['Manglik Kalash Griha Pravesh'],
+  'sangeet-mehendi-festive': ['Mehfil-e-Sangeet & Mehendi'],
+  'first-birthday-celebration': ['Celestial Star 1st Birthday'],
+};
+const templateSearchIndex = new WeakMap<CardTemplate, string>();
+const normalizeSearchText = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ');
+const getTemplateSearchText = (template: CardTemplate) => {
+  const cached = templateSearchIndex.get(template);
+  if (cached) return cached;
+  const slideContent = template.pages.flatMap((page) => [
+    page.title,
+    ...page.elements.flatMap((element) => element.type === 'text' ? [element.text] : []),
+  ]).join(' ');
+  const searchText = normalizeSearchText(`${template.title} ${template.id} ${template.category} ${template.tags.join(' ')} ${(templateSearchAliases[template.id] || []).join(' ')} ${slideContent}`);
+  templateSearchIndex.set(template, searchText);
+  return searchText;
+};
 
 const transitions = ['none', 'fade', 'slide', 'zoom', 'royal-curtain', 'sparkle', 'push', 'wipe', 'flip', 'blur', 'rotate', 'stack', 'chop', 'match-move', 'iris', 'vertical-wipe', 'cross-zoom', 'page-turn', 'light-sweep', 'panorama'];
 const safeFileName = (name: string) => name.normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(-100) || 'media';
@@ -115,10 +140,13 @@ export const AdminPanel: React.FC = () => {
   const canGroupSelection = selectedElements.length > 1
     && selectedElements.every((item) => item.type === 'text' && !item.locked && !item.groupId);
   const allTracks = useMemo(() => [...AUDIO_TRACKS, ...savedCatalog.customAudioTracks], [savedCatalog.customAudioTracks]);
+  const queryTerms = useMemo(() => query.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().match(/[\p{L}\p{N}]+/gu) || [], [query]);
   const filteredTemplates = useMemo(() => templates.filter((template) => {
-    const matchesText = `${template.title} ${template.category} ${template.tags.join(' ')}`.toLowerCase().includes(query.trim().toLowerCase());
+    if (queryTerms.length === 0) return true;
+    const searchText = getTemplateSearchText(template);
+    const matchesText = queryTerms.every((term) => searchText.includes(term));
     return matchesText && (categoryFilter === 'all' || template.category === categoryFilter);
-  }), [templates, query, categoryFilter]);
+  }), [templates, queryTerms, categoryFilter]);
   const deferredFilteredTemplates = useDeferredValue(filteredTemplates);
   const handleSelectTemplate = useCallback((id: string) => {
     setSelectedTemplateId(id);
