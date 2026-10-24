@@ -419,7 +419,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Shubh Vivah', 
       hindi: 'शुभ विवाह निमंत्रण',
       icon: Crown, 
-      image: '/images/photo-library/wedding-palace-stairs-02.webp',
+      image: '/images/home-category/wedding-palace-stairs-02.webp',
       count: `${templates.filter((template) => template.category === 'wedding').length} Royal Designs`,
     },
     { 
@@ -427,7 +427,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Griha Pravesh', 
       hindi: 'गृह प्रवेश एवं वास्तु पूजा',
       icon: RoyalKalashIcon, 
-      image: '/images/photo-library/home-courtyard-kalash-02.webp',
+      image: '/images/home-category/home-courtyard-kalash-02.webp',
       count: `${templates.filter((template) => template.category === 'housewarming').length} Sacred Designs`,
     },
     { 
@@ -435,7 +435,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Sangeet & Haldi', 
       hindi: 'संगीत, हल्दी व मेहंदी',
       icon: Music, 
-      image: '/images/photo-library/sangeet-genda-evening-06.webp',
+      image: '/images/home-category/sangeet-genda-evening-06.webp',
       count: `${templates.filter((template) => template.category === 'sangeet-mehendi').length} Festive Designs`,
     },
     { 
@@ -443,7 +443,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Birthday Celebration', 
       hindi: 'जन्मदिन उत्सव',
       icon: Sparkles, 
-      image: '/images/photo-library/birthday-little-star-08.webp',
+      image: '/images/home-category/birthday-little-star-08.webp',
       count: `${templates.filter((template) => template.category === 'birthday').length} Luxe Designs`,
     },
     { 
@@ -451,7 +451,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Godh Bharai', 
       hindi: 'गोद भराई एवं नामकरण',
       icon: Heart, 
-      image: '/images/photo-library/godh-bloom-portrait-01.webp',
+      image: '/images/home-category/godh-bloom-portrait-01.webp',
       count: `${templates.filter((template) => template.category === 'baby-shower').length} Pastel Designs`,
     },
     { 
@@ -459,7 +459,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Royal Anniversary', 
       hindi: 'विवाह वर्षगांठ',
       icon: Gem, 
-      image: '/images/photo-library/anniversary-evergreen-together-07.webp',
+      image: '/images/home-category/anniversary-evergreen-together-07.webp',
       count: `${templates.filter((template) => template.category === 'anniversary').length} Jubilee Designs`,
     },
   ];
@@ -591,6 +591,7 @@ export const Homepage: React.FC<HomepageProps> = ({
         </div>
       </header>
 
+      <main id="main-content">
       {/* 3. HERO SECTION */}
       <section className="relative overflow-hidden pt-12 pb-16 px-4 sm:px-6 bg-gradient-to-b from-[#13090e] via-[#090709] to-[#080608] border-b border-amber-500/15">
         {/* Ambient background glow */}
@@ -656,11 +657,16 @@ export const Homepage: React.FC<HomepageProps> = ({
             {/* Real Photograph Flatlay Card */}
             <div className="hidden sm:block w-64 h-[420px] rounded-3xl overflow-hidden border border-amber-500/25 shadow-2xl relative group rotate-[-3deg] hover:rotate-0 transition-transform duration-300 will-change-transform">
               <img
-                src="/images/invitation_hero_1791965343981.jpg"
                 alt="Luxury Royal Indian Invitation Cards Flatlay"
                 referrerPolicy="no-referrer"
-                loading="eager"
+                loading="lazy"
                 decoding="async"
+                width={768}
+                height={429}
+                fetchPriority="low"
+                srcSet="/images/invitation_hero_card.webp 768w"
+                sizes="256px"
+                src="/images/invitation_hero_card.webp"
                 className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent flex items-end p-4">
@@ -679,7 +685,9 @@ export const Homepage: React.FC<HomepageProps> = ({
             >
               {/* Background Cover Image (WebP) */}
               <img
-                src="/wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1.webp"
+                src="/wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1-card-640.webp"
+                srcSet="/wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1-card-640.webp 640w, /wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1-card.webp 768w, /wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1.webp 1024w"
+                sizes="(max-width: 640px) 288px, 320px"
                 alt="Royal Lakeside Wedding Invitation Cover"
                 referrerPolicy="no-referrer"
                 loading="eager"
@@ -784,7 +792,9 @@ export const Homepage: React.FC<HomepageProps> = ({
                       referrerPolicy="no-referrer"
                       loading="lazy"
                       decoding="async"
-                      className="w-full h-full"
+                      width={192}
+                      height={192}
+                      className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
                   </div>
@@ -1441,6 +1451,7 @@ export const Homepage: React.FC<HomepageProps> = ({
           ))}
         </div>
       </section>
+      </main>
 
       {/* 10. BESPOKE IMPERIAL HERITAGE FOOTER */}
       <footer className="mt-auto bg-gradient-to-b from-[#0a0608] via-[#070406] to-[#040203] border-t border-amber-500/30 text-neutral-400 text-xs relative overflow-hidden">

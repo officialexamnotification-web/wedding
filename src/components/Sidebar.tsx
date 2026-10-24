@@ -1327,7 +1327,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* ================= MOBILE BOTTOM NAVIGATION DOCK (< md) ================= */}
-      <div className="md:hidden fixed bottom-0 inset-x-0 h-16 bg-neutral-950 border-t border-neutral-800/90 flex items-center justify-start px-2 gap-1 z-40 select-none shadow-2xl overflow-x-auto no-scrollbar">
+      <nav aria-label="Customization tools" className="md:hidden fixed bottom-0 inset-x-0 h-[calc(4rem+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] bg-neutral-950 border-t border-neutral-800/90 flex items-center justify-start px-1.5 gap-1 z-40 select-none shadow-2xl overflow-x-auto overscroll-x-contain no-scrollbar snap-x snap-mandatory">
         {TABS_CONFIG.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id && isDrawerOpen;
@@ -1342,7 +1342,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onUpdateDrawBrush({ isEnabled: false });
                 }
               }}
-              className={`min-w-[58px] py-1.5 flex flex-col items-center justify-center gap-0.5 rounded-lg transition-colors shrink-0 ${
+              className={`min-w-[58px] snap-center py-1.5 px-0.5 flex flex-col items-center justify-center gap-0.5 rounded-lg transition-colors shrink-0 ${
                 isActive
                   ? 'text-amber-300 font-bold bg-amber-500/10'
                   : 'text-neutral-400 hover:text-neutral-200'
@@ -1353,7 +1353,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           );
         })}
-      </div>
+      </nav>
 
       {/* ================= MOBILE BOTTOM SHEET DRAWER (< md) ================= */}
       {isDrawerOpen && (

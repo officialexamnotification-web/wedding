@@ -1213,8 +1213,8 @@ export default function App() {
   };
 
   return (
-    <Suspense fallback={<div className="flex h-screen w-screen items-center justify-center bg-neutral-950 text-neutral-300">Loading invitation studio…</div>}>
-    <div className="flex flex-col h-screen w-screen bg-neutral-950 text-neutral-100 overflow-hidden font-sans">
+    <Suspense fallback={<div className="flex h-dvh w-full items-center justify-center bg-neutral-950 text-neutral-300">Loading invitation studio…</div>}>
+    <div className="flex h-dvh min-h-0 w-full flex-col overflow-hidden bg-neutral-950 font-sans text-neutral-100">
       {/* Top Studio Navbar */}
       <Navbar
         title={title}
@@ -1249,7 +1249,7 @@ export default function App() {
       />
 
       {/* Main Workspace Body */}
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
         {/* Responsive Customization Studio (Desktop 12-Tab Left Rail + Flyout Drawer, Mobile Bottom Dock + Sheet) */}
         <Sidebar
           templates={catalogTemplates}
@@ -1322,7 +1322,7 @@ export default function App() {
         />
 
         {/* Center Canvas Area + Contextual Properties Toolbar + Bottom Filmstrip */}
-        <div className="flex-1 flex flex-col h-full overflow-hidden pb-16 md:pb-0 relative min-w-0">
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
           <Toolbar
             selectedElement={selectedElement}
             aspectRatio={aspectRatio}

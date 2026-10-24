@@ -312,7 +312,7 @@ export const INITIAL_TEMPLATES: CardTemplate[] = [
           {
             id: 'rl-bg-1',
             type: 'image',
-            src: '/wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1-editable-bg.png',
+            src: '/wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1-editable-bg.webp',
             alt: 'Royal Lakeside Wedding Invitation Cover',
             mask: 'none',
             x: 0,
@@ -1057,7 +1057,7 @@ export const INITIAL_TEMPLATES: CardTemplate[] = [
           {
             id: 'gm-bg-1',
             type: 'image',
-            src: '/wedding/Golden Mandap Wedding Invitation/Golden Mandap Wedding Invitation-1-editable-bg.png',
+            src: '/wedding/Golden Mandap Wedding Invitation/Golden Mandap Wedding Invitation-1-editable-bg.webp',
             alt: 'Golden Mandap Wedding Invitation Cover',
             mask: 'none',
             x: 0,

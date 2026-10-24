@@ -87,13 +87,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="h-14 sm:h-15 bg-neutral-950 border-b border-neutral-800/90 px-3 sm:px-4 flex items-center justify-between text-neutral-200 select-none z-50 relative shadow-md">
+    <header className="min-h-14 h-auto sm:h-15 bg-neutral-950 border-b border-neutral-800/90 px-2.5 py-1.5 sm:px-4 sm:py-0 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-1.5 sm:gap-y-0 text-neutral-200 select-none z-50 relative shadow-md">
       {/* Left: Brand, File Menu, Magic Switch & Editable Title */}
-      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+      <div className="flex min-w-0 basis-full items-center gap-1 sm:basis-auto sm:gap-2.5 sm:shrink-0">
         {/* Back to Home Button */}
         <button
           onClick={onBackToHome}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs text-neutral-300 hover:text-amber-300 transition cursor-pointer"
+          className="flex shrink-0 items-center gap-1 px-2 py-1.5 sm:px-2.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs text-neutral-300 hover:text-amber-300 transition cursor-pointer"
           title="Return to Nimantran Royale Homepage"
         >
           <span>←</span>
@@ -116,10 +116,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               setShowFileMenu(!showFileMenu);
               setShowMagicSwitch(false);
             }}
-            className="px-2.5 py-1.5 rounded-lg hover:bg-neutral-900 text-xs font-medium text-neutral-200 hover:text-amber-300 flex items-center gap-1 transition"
+            className="px-2 py-1.5 sm:px-2.5 rounded-lg hover:bg-neutral-900 text-xs font-medium text-neutral-200 hover:text-amber-300 flex items-center gap-1 transition"
           >
             <FileText className="w-3.5 h-3.5 text-amber-400" />
-            <span>File</span>
+            <span className="hidden min-[400px]:inline">File</span>
             <ChevronDown className="w-3 h-3 text-neutral-400" />
           </button>
 
@@ -290,13 +290,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder="Invitation Title..."
-          className="bg-neutral-900/80 hover:bg-neutral-900 focus:bg-neutral-950 text-xs font-medium text-neutral-100 px-2.5 py-1.5 rounded-lg border border-neutral-800 focus:border-amber-500/60 outline-none w-28 sm:w-44 md:w-52 truncate transition-colors"
+          className="min-w-0 bg-neutral-900/80 hover:bg-neutral-900 focus:bg-neutral-950 text-xs font-medium text-neutral-100 px-2 py-1.5 sm:px-2.5 rounded-lg border border-neutral-800 focus:border-amber-500/60 outline-none w-20 min-[400px]:w-28 sm:w-44 md:w-52 truncate transition-colors"
           title="Click to rename invitation"
         />
       </div>
 
       {/* Center: Undo/Redo & Quick Save Status */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="ml-0 flex shrink-0 items-center gap-1.5 sm:ml-auto sm:gap-2">
         <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-800">
           <button
             onClick={onUndo}
