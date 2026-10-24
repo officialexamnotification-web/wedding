@@ -1355,14 +1355,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           return (
             <button
               key={tab.id}
-              onClick={() => {
-                if (activeTab === 'audio' && tab.id !== 'audio') stopPreviewAudio();
-                setActiveTab(tab.id);
-                setIsDrawerOpen(true);
-                if (tab.id !== 'tools' && drawBrush?.isEnabled && onUpdateDrawBrush) {
-                  onUpdateDrawBrush({ isEnabled: false });
-                }
-              }}
+              onClick={() => handleTabClick(tab.id)}
               className={`min-w-[58px] snap-center py-1.5 px-0.5 flex flex-col items-center justify-center gap-0.5 rounded-lg transition-colors shrink-0 ${
                 isActive
                   ? 'text-amber-300 font-bold bg-amber-500/10'
@@ -1503,7 +1496,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     return (
                       <div
                         key={template.id}
-                        onClick={() => onSelectTemplate(template)}
+                        onClick={() => {
+                          onSelectTemplate(template);
+                          if (window.matchMedia('(max-width: 767px)').matches) {
+                            setIsDrawerOpen(false);
+                          }
+                        }}
                         className="group cursor-pointer rounded-xl overflow-hidden border border-neutral-700/80 hover:border-amber-400 bg-neutral-800/80 hover:bg-neutral-800 transition duration-200 shadow-md flex flex-col"
                       >
                         <div

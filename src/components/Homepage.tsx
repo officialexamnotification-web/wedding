@@ -794,7 +794,8 @@ export const Homepage: React.FC<HomepageProps> = ({
                       decoding="async"
                       width={192}
                       height={192}
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full object-cover transition duration-500 ${cat.id === 'wedding' || cat.id === 'baby-shower' ? '' : 'group-hover:scale-105'}`}
+                      style={cat.id === 'wedding' || cat.id === 'baby-shower' ? { transform: 'scale(1.32) translateY(7%)' } : undefined}
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
                   </div>
