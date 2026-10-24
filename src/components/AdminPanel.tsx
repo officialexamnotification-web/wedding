@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { startTransition, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { uploadPresigned } from '@vercel/blob/client';
 import {
   ArrowLeft, AudioLines, BadgeCheck, ChevronRight, Clapperboard,
@@ -30,6 +30,20 @@ const categories: Array<{ id: CardTemplate['category']; label: string }> = [
 const transitions = ['none', 'fade', 'slide', 'zoom', 'royal-curtain', 'sparkle', 'push', 'wipe', 'flip', 'blur', 'rotate', 'stack', 'chop', 'match-move', 'iris', 'vertical-wipe', 'cross-zoom', 'page-turn', 'light-sweep', 'panorama'];
 const safeFileName = (name: string) => name.normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(-100) || 'media';
 const makeId = () => `custom-${crypto.randomUUID()}`;
+const AdminTemplateList = React.memo(function AdminTemplateList({ templates, selectedTemplateId, onSelect }: {
+  templates: CardTemplate[];
+  selectedTemplateId: string;
+  onSelect: (id: string) => void;
+}) {
+  return <>
+    {templates.map((template) => <button key={template.id} title={template.title} onClick={() => onSelect(template.id)} className={`w-full rounded-lg px-3 py-2.5 text-left transition ${template.id === selectedTemplateId ? 'border border-amber-200/15 bg-amber-300/[0.08]' : 'border border-transparent hover:bg-white/[0.035]'}`}><span className="line-clamp-2 text-xs font-medium leading-4 max-md:hidden">{template.title}</span><span className={`block truncate text-[10px] capitalize max-md:hidden ${template.id === selectedTemplateId ? 'mt-1 text-amber-200/60' : 'mt-1 text-stone-600'}`}>{template.category.replace('-', ' ')}</span><span className="hidden text-[10px] text-amber-200 md:hidden">{template.title.slice(0, 2).toUpperCase()}</span></button>)}
+  </>;
+}, (previous, next) => previous.selectedTemplateId === next.selectedTemplateId
+  && previous.onSelect === next.onSelect
+  && previous.templates.length === next.templates.length
+  && previous.templates.every((template, index) => template.id === next.templates[index].id
+    && template.title === next.templates[index].title
+    && template.category === next.templates[index].category));
 const reflowAudioClips = (pages: CardPage[], clips: NonNullable<CardTemplate['audioClips']>) => clips.map((clip) => {
   if (clip.pageIndex === null) return clip;
   const index = Math.max(0, Math.min(clip.pageIndex, pages.length - 1));
@@ -105,7 +119,14 @@ export const AdminPanel: React.FC = () => {
     const matchesText = `${template.title} ${template.category} ${template.tags.join(' ')}`.toLowerCase().includes(query.trim().toLowerCase());
     return matchesText && (categoryFilter === 'all' || template.category === categoryFilter);
   }), [templates, query, categoryFilter]);
+  const deferredFilteredTemplates = useDeferredValue(filteredTemplates);
+  const handleSelectTemplate = useCallback((id: string) => {
+    setSelectedTemplateId(id);
+    setSelectedPageIndex(0);
+    setSelectedElementId(null);
+  }, []);
   const mediaAssets = useMemo(() => {
+    if (tab !== 'media') return [];
     const rows: Array<{ id: string; kind: UploadKind; label: string; url: string; templateId: string; pageIndex: number; elementId?: string }> = [];
     for (const template of templates) {
       template.pages.forEach((page, pageIndex) => page.elements.forEach((element) => {
@@ -118,7 +139,7 @@ export const AdminPanel: React.FC = () => {
       }
     }
     return [...new Map(rows.map((row) => [row.url, row])).values()];
-  }, [templates, savedCatalog.customAudioTracks]);
+  }, [tab, templates, savedCatalog.customAudioTracks]);
 
   const reloadCatalog = async () => {
     const response = await fetch('/api/admin/catalog', { credentials: 'same-origin', cache: 'no-store' });
@@ -651,7 +672,7 @@ export const AdminPanel: React.FC = () => {
             <div className="flex items-center justify-between px-4 pb-2 pt-1 max-md:hidden"><span className="text-[10px] font-semibold uppercase tracking-[.18em] text-stone-600">Catalog</span><span className="text-[10px] text-stone-600">{filteredTemplates.length}</span></div>
             <div className="min-h-0 flex-1 space-y-1 overflow-y-auto px-2 pb-3">
               <button onClick={addTemplate} title="New template" className="mb-2 flex w-full items-center gap-2 rounded-lg border border-dashed border-amber-300/20 px-3 py-2.5 text-left text-xs text-amber-200 transition hover:bg-amber-300/[0.06]"><Plus className="h-4 w-4 shrink-0" /><span className="max-md:hidden">Create new template</span></button>
-              {filteredTemplates.map((template) => <button key={template.id} title={template.title} onClick={() => { setSelectedTemplateId(template.id); setSelectedPageIndex(0); setSelectedElementId(null); }} className={`w-full rounded-lg px-3 py-2.5 text-left transition ${template.id === selectedTemplateId ? 'border border-amber-200/15 bg-amber-300/[0.08]' : 'border border-transparent hover:bg-white/[0.035]'}`}><span className="line-clamp-2 text-xs font-medium leading-4 max-md:hidden">{template.title}</span><span className={`block truncate text-[10px] capitalize max-md:hidden ${template.id === selectedTemplateId ? 'mt-1 text-amber-200/60' : 'mt-1 text-stone-600'}`}>{template.category.replace('-', ' ')}</span><span className="hidden text-[10px] text-amber-200 md:hidden">{template.title.slice(0, 2).toUpperCase()}</span></button>)}
+              <AdminTemplateList templates={deferredFilteredTemplates} selectedTemplateId={selectedTemplateId} onSelect={handleSelectTemplate} />
             </div>
           </> : <div className="space-y-3 overflow-y-auto p-3 max-md:hidden"><p className="px-1 text-[10px] font-semibold uppercase tracking-[.16em] text-stone-600">Upload to selected slide</p><button onClick={() => startUpload('image')} className="flex w-full items-center gap-2 rounded-lg border border-white/[0.08] px-3 py-2.5 text-left text-xs text-stone-300 hover:border-amber-200/20 hover:text-amber-100"><ImagePlus className="h-4 w-4 text-amber-200" /> Image / artwork</button><button onClick={() => startUpload('video')} className="flex w-full items-center gap-2 rounded-lg border border-white/[0.08] px-3 py-2.5 text-left text-xs text-stone-300 hover:border-amber-200/20 hover:text-amber-100"><Film className="h-4 w-4 text-amber-200" /> Video clip</button><button onClick={() => startUpload('audio')} className="flex w-full items-center gap-2 rounded-lg border border-white/[0.08] px-3 py-2.5 text-left text-xs text-stone-300 hover:border-amber-200/20 hover:text-amber-100"><Music2 className="h-4 w-4 text-amber-200" /> Music track</button><div className="rounded-xl border border-amber-200/10 bg-amber-200/[0.035] p-3 text-[11px] leading-5 text-stone-500">Uploaded assets are placed in Vercel Blob and linked to the selected template after saving.</div><div className="border-t border-white/[0.07] pt-3"><p className="mb-2 text-[10px] font-semibold uppercase tracking-[.16em] text-stone-600">Catalog media · {mediaAssets.length}</p>{mediaAssets.map((asset) => <button key={asset.id} onClick={() => { setSelectedTemplateId(asset.templateId); setSelectedPageIndex(asset.pageIndex); setSelectedElementId(asset.elementId || null); setTab('templates'); }} className="flex w-full items-center gap-2 rounded-md border-b border-white/[0.04] py-2 text-left text-xs text-stone-400 hover:text-amber-100"><span className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded bg-white/[0.04] text-amber-200/80">{asset.kind === 'image' ? <img src={asset.url} alt="" className="h-full w-full object-cover" /> : asset.kind === 'video' ? <Film className="h-3.5 w-3.5" /> : <AudioLines className="h-3.5 w-3.5" />}</span><span className="min-w-0"><span className="block truncate">{asset.label}</span><span className="mt-0.5 block text-[9px] capitalize text-stone-600">{asset.kind} · {templates.find((item) => item.id === asset.templateId)?.title}</span></span></button>)}</div><div className="border-t border-white/[0.07] pt-3"><p className="mb-2 text-[10px] font-semibold uppercase tracking-[.16em] text-stone-600">Available music tracks · {allTracks.length}</p>{allTracks.slice(-12).map((track) => <div key={track.id} className="flex items-center gap-2 border-b border-white/[0.04] py-2 text-xs text-stone-400"><AudioLines className="h-3.5 w-3.5 text-amber-200/70" /><span className="truncate">{track.name}</span></div>)}</div></div>}
             <div className="border-t border-white/[0.07] p-3 max-md:hidden"><button onClick={() => importRef.current?.click()} className="w-full rounded-lg px-2 py-2 text-left text-xs text-stone-500 hover:text-stone-200"><Upload className="mr-2 inline h-3.5 w-3.5" />Import catalog backup</button><input ref={importRef} type="file" accept="application/json,.json" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importBackup(file); event.currentTarget.value = ''; }} /></div>
@@ -752,7 +773,11 @@ export const AdminPanel: React.FC = () => {
                     onGroupSelection={handleGroupSelection}
                     onUngroupSelection={handleUngroupSelection}
                     aspectRatio={selectedTemplate.aspectRatio}
-                    onUpdateElement={(patch) => updateElement(selectedElement.id, patch)}
+                    onUpdateElement={(patch) => {
+                      const colorOnly = Object.keys(patch).every((key) => ['color', 'gradientText'].includes(key));
+                      if (colorOnly) startTransition(() => updateElement(selectedElement.id, patch));
+                      else updateElement(selectedElement.id, patch);
+                    }}
                     onDeleteElement={handleDeleteSelection}
                     onDuplicateElement={() => {
                       const copy = { ...structuredClone(selectedElement), id: `${selectedElement.id}-copy-${Date.now()}`, x: selectedElement.x + 16, y: selectedElement.y + 16 } as CanvasItem;
