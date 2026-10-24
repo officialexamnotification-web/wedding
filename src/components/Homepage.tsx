@@ -953,10 +953,16 @@ export const Homepage: React.FC<HomepageProps> = ({
               <div
                 key={template.id}
                 onMouseEnter={() => {
-                  if (coverVideo) startCoverStoryPreview(template.id);
+                  // Touch browsers may synthesize mouseenter/mouseleave around a tap.
+                  // Keep tap-controlled previews alive on phones; hover previews are desktop-only.
+                  if (coverVideo && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                    startCoverStoryPreview(template.id);
+                  }
                 }}
                 onMouseLeave={() => {
-                  stopCoverStoryPreview(template.id);
+                  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                    stopCoverStoryPreview(template.id);
+                  }
                 }}
                 className="group relative rounded-3xl bg-gradient-to-b from-[#150a0f] via-[#0e080b] to-[#0a0608] border border-amber-500/25 hover:border-amber-400/75 shadow-[0_15px_45px_rgba(0,0,0,0.75)] hover:shadow-[0_20px_60px_rgba(212,175,55,0.14)] transition-all duration-300 flex flex-col justify-between overflow-hidden"
               >
