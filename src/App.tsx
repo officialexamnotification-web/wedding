@@ -1378,7 +1378,7 @@ export default function App() {
 
           {pages.length > 1 && !isFitScreenMode && (
             <div
-              className="md:hidden absolute bottom-[calc(4rem+env(safe-area-inset-bottom)+0.65rem)] left-[calc(50%-1.5rem)] z-30 flex -translate-x-1/2 items-center gap-1 rounded-full border border-amber-300/25 bg-neutral-950/95 px-1 py-1 text-amber-100 shadow-xl shadow-black/40 backdrop-blur"
+              className="md:hidden absolute bottom-[calc(4rem+env(safe-area-inset-bottom)+0.65rem)] left-3 z-30 flex items-center gap-1 rounded-full border border-amber-300/25 bg-neutral-950/95 px-1 py-1 text-amber-100 shadow-xl shadow-black/40 backdrop-blur"
               aria-label="Invitation slide navigation"
             >
               <button
