@@ -37,6 +37,7 @@ import {
   Table2,
   BarChart3,
   LayoutGrid,
+  Layers,
   Clock,
   Barcode,
   Plus,
@@ -80,6 +81,13 @@ import { generateQrDataUrl } from '../utils/qrHelper';
 
 interface ToolbarProps {
   selectedElement: CanvasItem | null;
+  selectionCount?: number;
+  canGroupSelection?: boolean;
+  isGroupedSelection?: boolean;
+  isMultiSelectMode?: boolean;
+  onGroupSelection?: () => void;
+  onUngroupSelection?: () => void;
+  onToggleMultiSelect?: () => void;
   aspectRatio: AspectRatioType;
   onUpdateElement: (updated: Partial<CanvasItem>, commitToHistory?: boolean) => void;
   onDeleteElement: () => void;
@@ -271,6 +279,13 @@ export const ANIMATION_PRESETS: {
 
 export const Toolbar: React.FC<ToolbarProps> = ({
   selectedElement,
+  selectionCount = 0,
+  canGroupSelection = false,
+  isGroupedSelection = false,
+  isMultiSelectMode = false,
+  onGroupSelection,
+  onUngroupSelection,
+  onToggleMultiSelect,
   aspectRatio,
   onUpdateElement,
   onDeleteElement,
@@ -357,8 +372,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
   if (!selectedElement) {
     return (
-      <div className="h-12 shrink-0 bg-neutral-900/80 border-b border-neutral-800 px-4 flex items-center text-xs text-neutral-500 select-none">
-        Select an item on the card to customize it · Double-click text to edit inline
+      <div className="min-h-12 shrink-0 bg-neutral-900/80 border-b border-neutral-800 px-4 flex items-center justify-between gap-3 text-xs text-neutral-500 select-none">
+        <span>{isMultiSelectMode ? 'Multi-select is on · Tap or Shift-click text boxes to select them' : 'Select an item on the card to customize it · Double-click text to edit inline'}</span>
+        {onToggleMultiSelect && (
+          <button
+            type="button"
+            onClick={onToggleMultiSelect}
+            aria-pressed={isMultiSelectMode}
+            className={`shrink-0 rounded-lg border px-2.5 py-1.5 font-semibold transition ${isMultiSelectMode ? 'border-amber-400 bg-amber-500/20 text-amber-200' : 'border-neutral-700 bg-neutral-800 text-neutral-300 hover:border-amber-500/50 hover:text-amber-200'}`}
+          >
+            {isMultiSelectMode ? 'Done selecting' : 'Select multiple'}
+          </button>
+        )}
       </div>
     );
   }
@@ -1443,6 +1468,37 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       {/* Right Universal Canva Actions (Animate, Position, Transparency, Link, Copy Style, Lock, Duplicate, Delete) */}
       <div className={`${isText ? 'w-full justify-between border-t border-neutral-800 pt-1 md:w-auto md:justify-start md:border-t-0 md:pt-0' : ''} flex items-center gap-1 shrink-0`}>
+        {isText && onToggleMultiSelect && (
+          <button
+            type="button"
+            onClick={onToggleMultiSelect}
+            aria-pressed={isMultiSelectMode}
+            className={`rounded-lg border px-2 py-1.5 text-[11px] font-semibold transition ${isMultiSelectMode ? 'border-amber-400 bg-amber-500/20 text-amber-200' : 'border-neutral-700 bg-neutral-800 text-neutral-300 hover:text-amber-200'}`}
+            title="Select several text boxes to move them together"
+          >
+            {isMultiSelectMode ? 'Done selecting' : 'Select multiple'}
+          </button>
+        )}
+        {selectionCount > 1 && canGroupSelection && !isGroupedSelection && onGroupSelection && (
+          <button
+            type="button"
+            onClick={onGroupSelection}
+            className="inline-flex items-center gap-1 rounded-lg border border-amber-500/50 bg-amber-500/15 px-2 py-1.5 text-[11px] font-semibold text-amber-200 transition hover:bg-amber-500/25"
+            title={`Group ${selectionCount} selected text boxes`}
+          >
+            <Layers className="h-3.5 w-3.5" /> Group ({selectionCount})
+          </button>
+        )}
+        {isGroupedSelection && onUngroupSelection && (
+          <button
+            type="button"
+            onClick={onUngroupSelection}
+            className="inline-flex items-center gap-1 rounded-lg border border-amber-500/50 bg-amber-500/15 px-2 py-1.5 text-[11px] font-semibold text-amber-200 transition hover:bg-amber-500/25"
+            title="Ungroup these text boxes so they can be moved separately"
+          >
+            <Layers className="h-3.5 w-3.5" /> Ungroup
+          </button>
+        )}
         {/* Canva ANIMATE Button */}
         <button
           disabled={isLocked}

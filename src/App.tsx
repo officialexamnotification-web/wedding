@@ -67,6 +67,8 @@ export default function App() {
   const [canvasFitRequest, setCanvasFitRequest] = useState(0);
   const [isFitScreenMode, setIsFitScreenMode] = useState(false);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [selectedElementIds, setSelectedElementIds] = useState<string[]>([]);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [zoom, setZoom] = useState<number>(() => {
     if (window.innerWidth < 640) return 0.5;
     if (window.innerWidth < 1024) return 0.65;
@@ -894,6 +896,15 @@ export default function App() {
   // Delete selected element
   const handleDeleteElement = () => {
     if (!selectedElementId) return;
+    if (selectedElementIds.length > 1) {
+      const nextPages = latestPagesRef.current.map((page, pageIndex) => pageIndex !== currentPageIndex
+        ? page
+        : { ...page, elements: page.elements.filter((element) => !selectedElementIds.includes(element.id)) });
+      commitPages(nextPages);
+      setSelectedElementId(null);
+      setSelectedElementIds([]);
+      return;
+    }
     handleDeleteElementById(selectedElementId);
   };
 
@@ -1147,6 +1158,83 @@ export default function App() {
   };
 
   const selectedElement = currentPage?.elements.find((e) => e.id === selectedElementId) || null;
+  useEffect(() => {
+    if (!selectedElementId) {
+      setSelectedElementIds([]);
+      setIsMultiSelectMode(false);
+    }
+  }, [selectedElementId]);
+  useEffect(() => {
+    setSelectedElementId(null);
+    setSelectedElementIds([]);
+    setIsMultiSelectMode(false);
+  }, [currentPageIndex]);
+
+  const handleSelectElement = (id: string | null, additive = false) => {
+    if (!id) {
+      setSelectedElementId(null);
+      setSelectedElementIds([]);
+      return;
+    }
+
+    const clicked = currentPage?.elements.find((element) => element.id === id);
+    if (additive || isMultiSelectMode) {
+      const nextIds = selectedElementIds.includes(id)
+        ? selectedElementIds.filter((selectedId) => selectedId !== id)
+        : [...selectedElementIds, id];
+      setSelectedElementIds(nextIds);
+      setSelectedElementId(nextIds.includes(id) ? id : nextIds[nextIds.length - 1] || null);
+      return;
+    }
+
+    if (clicked?.groupId) {
+      const groupIds = currentPage?.elements
+        .filter((element) => element.groupId === clicked.groupId)
+        .map((element) => element.id) || [id];
+      setSelectedElementId(id);
+      setSelectedElementIds(groupIds);
+      return;
+    }
+
+    if (selectedElementIds.length > 1 && selectedElementIds.includes(id)) {
+      setSelectedElementId(id);
+      return;
+    }
+
+    setSelectedElementId(id);
+    setSelectedElementIds([id]);
+  };
+
+  const selectedElements = currentPage?.elements.filter((element) => selectedElementIds.includes(element.id)) || [];
+  const selectedGroupId = selectedElement?.groupId;
+  const isSingleGroupSelected = Boolean(selectedGroupId)
+    && selectedElements.every((element) => element.groupId === selectedGroupId);
+  const canGroupSelected = selectedElements.length > 1
+    && selectedElements.every((element) => element.type === 'text' && !element.locked && !element.groupId);
+
+  const handleGroupSelectedElements = () => {
+    if (!canGroupSelected) return;
+    const groupId = `text-group-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const nextPages = latestPagesRef.current.map((page, pageIndex) => pageIndex !== currentPageIndex
+      ? page
+      : { ...page, elements: page.elements.map((element) => selectedElementIds.includes(element.id)
+        ? { ...element, groupId } as CanvasItem
+        : element) });
+    commitPages(nextPages);
+    setIsMultiSelectMode(false);
+  };
+
+  const handleUngroupSelectedElements = () => {
+    if (!selectedGroupId || !selectedElementId) return;
+    const nextPages = latestPagesRef.current.map((page, pageIndex) => pageIndex !== currentPageIndex
+      ? page
+      : { ...page, elements: page.elements.map((element) => element.groupId === selectedGroupId
+        ? { ...element, groupId: undefined } as CanvasItem
+        : element) });
+    commitPages(nextPages);
+    setSelectedElementIds([selectedElementId]);
+    setIsMultiSelectMode(false);
+  };
 
   // 1. IF CURRENT VIEW IS HOMEPAGE:
   if (currentView === 'home') {
@@ -1287,7 +1375,7 @@ export default function App() {
           onOpenVideoPreview={() => setIsVideoModalOpen(true)}
           onOpenAiCopy={() => setIsAiCopyOpen(true)}
           selectedElementId={selectedElementId}
-          onSelectElement={setSelectedElementId}
+          onSelectElement={(id) => handleSelectElement(id)}
           onUpdateElement={handleUpdateElement}
           onDeleteElementById={handleDeleteElementById}
           onDuplicateElementById={handleDuplicateElementById}
@@ -1361,6 +1449,13 @@ export default function App() {
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
           <Toolbar
             selectedElement={selectedElement}
+            selectionCount={selectedElementIds.length}
+            canGroupSelection={canGroupSelected}
+            isGroupedSelection={isSingleGroupSelected}
+            isMultiSelectMode={isMultiSelectMode}
+            onGroupSelection={handleGroupSelectedElements}
+            onUngroupSelection={handleUngroupSelectedElements}
+            onToggleMultiSelect={() => setIsMultiSelectMode((active) => !active)}
             aspectRatio={aspectRatio}
             onUpdateElement={(updates, commitToHistory) => {
               if (selectedElementId) {
@@ -1391,7 +1486,9 @@ export default function App() {
             backgroundValue={currentPage?.backgroundValue || '#171717'}
             elements={currentPage?.elements || []}
             selectedElementId={selectedElementId}
-            onSelectElement={setSelectedElementId}
+            selectedElementIds={selectedElementIds}
+            multiSelectMode={isMultiSelectMode}
+            onSelectElement={handleSelectElement}
             onUpdateElement={handleUpdateElement}
             onAddElement={handleAddElement}
             onCommitCurrentState={handleCommitCurrentState}

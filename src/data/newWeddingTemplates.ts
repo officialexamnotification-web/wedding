@@ -253,7 +253,6 @@ function createSuite(definition: SuiteDefinition): CardTemplate {
       coverElements.push(backgroundImage(coverId + '-poster', definition.coverPosterSrc, definition.title + ' animated cover poster'));
     }
     coverElements.push(coverVideo(definition.id + '-cover-video', definition.slug, basePath + definition.coverVideo, definition.coverPosterSrc));
-    coverElements.push(...suiteText('cover', coverId, definition.ink, definition.accent, true));
     const videoPage: CardPage = {
       id: coverId,
       title: '01 · Animated Cover',

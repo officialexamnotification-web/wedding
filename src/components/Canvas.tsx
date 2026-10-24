@@ -55,7 +55,9 @@ interface CanvasProps {
   backgroundValue: string;
   elements: CanvasItem[];
   selectedElementId: string | null;
-  onSelectElement: (id: string | null) => void;
+  selectedElementIds?: string[];
+  multiSelectMode?: boolean;
+  onSelectElement: (id: string | null, additive?: boolean) => void;
   onUpdateElement: (id: string, updates: Partial<CanvasItem>, commitToHistory?: boolean) => void;
   onAddElement?: (elem: CanvasItem) => void;
   onCommitCurrentState?: () => void;
@@ -1656,6 +1658,8 @@ export const Canvas: React.FC<CanvasProps> = ({
   backgroundValue,
   elements,
   selectedElementId,
+  selectedElementIds = [],
+  multiSelectMode = false,
   onSelectElement,
   onUpdateElement,
   onAddElement,
@@ -1725,6 +1729,7 @@ export const Canvas: React.FC<CanvasProps> = ({
   const [editingShapeTextId, setEditingShapeTextId] = useState<string | null>(null);
   const [dropTargetFrameId, setDropTargetFrameId] = useState<string | null>(null);
   const didModifyRef = useRef<boolean>(false);
+  const dragMemberInitialPositionsRef = useRef<Array<{ id: string; x: number; y: number }>>([]);
 
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
 
@@ -1956,14 +1961,25 @@ export const Canvas: React.FC<CanvasProps> = ({
     e.stopPropagation();
     setContextMenu(null);
 
+    const additiveSelection = e.shiftKey || e.ctrlKey || e.metaKey || multiSelectMode;
+    if (additiveSelection) return;
+    onSelectElement(elem.id);
+
     // If Copy Style Paint Roller is active, paste style onto clicked element!
     if (copiedStyle && onApplyCopiedStyle) {
       onApplyCopiedStyle(elem.id);
-      onSelectElement(elem.id);
       return;
     }
 
-    onSelectElement(elem.id);
+    const dragIds = elem.groupId
+      ? elements.filter((item) => item.groupId === elem.groupId).map((item) => item.id)
+      : selectedElementIds.length > 1 && selectedElementIds.includes(elem.id)
+        ? selectedElementIds
+        : [elem.id];
+    dragMemberInitialPositionsRef.current = dragIds
+      .map((id) => elements.find((item) => item.id === id))
+      .filter((item): item is CanvasItem => Boolean(item))
+      .map((item) => ({ id: item.id, x: item.x, y: item.y }));
 
     if (editingTextId === elem.id || editingShapeTextId === elem.id || elem.locked) return;
 
@@ -1984,7 +2000,18 @@ export const Canvas: React.FC<CanvasProps> = ({
   const handleTouchStart = (e: React.TouchEvent, elem: CanvasItem) => {
     if (drawBrush?.isEnabled) return;
     e.stopPropagation();
+    if (multiSelectMode) return;
     onSelectElement(elem.id);
+
+    const dragIds = elem.groupId
+      ? elements.filter((item) => item.groupId === elem.groupId).map((item) => item.id)
+      : selectedElementIds.length > 1 && selectedElementIds.includes(elem.id)
+        ? selectedElementIds
+        : [elem.id];
+    dragMemberInitialPositionsRef.current = dragIds
+      .map((id) => elements.find((item) => item.id === id))
+      .filter((item): item is CanvasItem => Boolean(item))
+      .map((item) => ({ id: item.id, x: item.x, y: item.y }));
 
     if (editingTextId === elem.id || editingShapeTextId === elem.id || elem.locked) return;
 
@@ -2232,8 +2259,9 @@ export const Canvas: React.FC<CanvasProps> = ({
         }
 
         // 3. Snap to other elements' centers/edges
+        const movingIds = new Set(dragMemberInitialPositionsRef.current.map((item) => item.id));
         elements.forEach((other) => {
-          if (other.id === currentElem.id || other.hidden) return;
+          if (movingIds.has(other.id) || other.hidden) return;
           const otherCenterX = other.x + other.width / 2;
           const otherCenterY = other.y + other.height / 2;
 
@@ -2259,9 +2287,18 @@ export const Canvas: React.FC<CanvasProps> = ({
           horizontal: Array.from(new Set(activeHorizontalGuides)),
         });
 
-        onUpdateElement(selectedElementId, {
-          x: rawX,
-          y: rawY,
+        const appliedDeltaX = rawX - elemInitialPos.x;
+        const appliedDeltaY = rawY - elemInitialPos.y;
+        const movingItems = dragMemberInitialPositionsRef.current.length > 0
+          ? dragMemberInitialPositionsRef.current
+          : [{ id: selectedElementId, x: elemInitialPos.x, y: elemInitialPos.y }];
+        movingItems.forEach((item) => {
+          const movingElement = elements.find((element) => element.id === item.id);
+          if (!movingElement || movingElement.locked) return;
+          onUpdateElement(item.id, {
+            x: item.x + appliedDeltaX,
+            y: item.y + appliedDeltaY,
+          });
         });
       } else if (isResizing && resizeHandle) {
         const deltaX = (clientX - dragStart.x) / zoom;
@@ -2481,7 +2518,7 @@ export const Canvas: React.FC<CanvasProps> = ({
   const renderElement = (elem: CanvasItem) => {
     if (elem.hidden) return null;
 
-    const isSelected = selectedElementId === elem.id;
+    const isSelected = selectedElementId === elem.id || selectedElementIds.includes(elem.id);
     const isEditing = editingTextId === elem.id || editingShapeTextId === elem.id;
     const isLocked = !!elem.locked;
 
@@ -2537,7 +2574,6 @@ export const Canvas: React.FC<CanvasProps> = ({
         onMouseDown={(e) => handleMouseDown(e, elem)}
         onClick={(e) => {
           e.stopPropagation();
-          if (!drawBrush?.isEnabled) onSelectElement(elem.id);
         }}
         onTouchStart={(e) => handleTouchStart(e, elem)}
         onContextMenu={(e) => {
@@ -3145,7 +3181,10 @@ export const Canvas: React.FC<CanvasProps> = ({
           onClickCapture={(e) => {
             if (drawBrush?.isEnabled) return;
             const element = getCanvasElementAtPoint(e.clientX, e.clientY);
-            if (element) onSelectElement(element.id);
+            if (element) {
+              const additiveSelection = multiSelectMode || e.shiftKey || e.ctrlKey || e.metaKey;
+              onSelectElement(element.id, additiveSelection);
+            }
           }}
           onDoubleClickCapture={(e) => {
             if (drawBrush?.isEnabled) return;
