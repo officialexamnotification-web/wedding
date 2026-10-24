@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { QrCodeImage } from './QrCodeImage';
 import { X, Smartphone, Monitor, ChevronLeft, ChevronRight, Share2 } from 'lucide-react';
 import {
   CardPage,
@@ -265,14 +266,12 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
                                     (elem as QrElement).backgroundColor || '#FFF4D6',
                                 }}
                               >
-                                {(elem as QrElement).dataUrl ? (
-                                  <img
-                                    src={(elem as QrElement).dataUrl}
-                                    alt="QR Code"
-                                    referrerPolicy="no-referrer"
-                                    className="w-full h-full object-contain"
-                                  />
-                                ) : null}
+                                <QrCodeImage
+                                  targetValue={(elem as QrElement).targetValue}
+                                  color={(elem as QrElement).color}
+                                  backgroundColor={(elem as QrElement).backgroundColor}
+                                  label={(elem as QrElement).label}
+                                />
                               </div>
                             )}
                             </div>

@@ -43,6 +43,7 @@ import {
   AlignCenter,
   Link2,
 } from 'lucide-react';
+import { QrCodeImage } from './QrCodeImage';
 
 const RealisticModel3D = React.lazy(() => import('./RealisticModel3D'));
 
@@ -2827,9 +2828,11 @@ export const Canvas: React.FC<CanvasProps> = ({
               className="w-full h-full flex flex-col items-center justify-center p-1.5 rounded-lg shadow-md border border-amber-500/40"
               style={{ backgroundColor: (elem as QrElement).backgroundColor || '#FFF4D6' }}
             >
-              <img
-                src={(elem as QrElement).dataUrl}
-                alt={(elem as QrElement).label}
+              <QrCodeImage
+                targetValue={(elem as QrElement).targetValue}
+                color={(elem as QrElement).color}
+                backgroundColor={(elem as QrElement).backgroundColor}
+                label={(elem as QrElement).label}
                 className="w-full h-full object-contain pointer-events-none"
               />
             </div>

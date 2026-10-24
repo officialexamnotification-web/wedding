@@ -43,6 +43,7 @@ import {
   CardTemplate,
 } from '../types/editor';
 import { evaluateSheetCell } from './Canvas';
+import { generateQrDataUrl } from '../utils/qrHelper';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -472,19 +473,25 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       }
 
       // QR ELEMENT
-      else if (elem.type === 'qr' && (elem as QrElement).dataUrl) {
+      else if (elem.type === 'qr') {
         const qr = elem as QrElement;
         try {
           ctx.fillStyle = qr.backgroundColor || '#FFF4D6';
           ctx.fillRect(qr.x, qr.y, qr.width, qr.height);
           const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.src = qr.dataUrl;
-          await new Promise((res) => {
-            img.onload = res;
-            img.onerror = res;
+          const dataUrl = await generateQrDataUrl(
+            qr.targetValue,
+            qr.color,
+            qr.backgroundColor
+          );
+          if (!dataUrl) throw new Error('QR code destination is empty or invalid');
+          img.src = dataUrl;
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = () => reject(new Error('QR image could not be loaded'));
           });
-          ctx.drawImage(img, qr.x + 4, qr.y + 4, qr.width - 8, qr.height - 8);
+          const inset = Math.max(2, Math.round(Math.min(qr.width, qr.height) * 0.04));
+          ctx.drawImage(img, qr.x + inset, qr.y + inset, qr.width - inset * 2, qr.height - inset * 2);
         } catch (e) {
           console.warn('QR draw err', e);
         }

@@ -57,6 +57,7 @@ import {
   renderAudioVisual,
 } from './Canvas';
 import { AUDIO_TRACKS } from '../data/audioTracks';
+import { QrCodeImage } from './QrCodeImage';
 
 interface VideoCardModalProps {
   isOpen: boolean;
@@ -700,14 +701,12 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                                       (elem as QrElement).backgroundColor || '#FFF4D6',
                                   }}
                                 >
-                                  {(elem as QrElement).dataUrl ? (
-                                    <img
-                                      src={(elem as QrElement).dataUrl}
-                                      alt="QR Code"
-                                      className="w-full h-full object-contain"
-                                      referrerPolicy="no-referrer"
-                                    />
-                                  ) : null}
+                                  <QrCodeImage
+                                    targetValue={(elem as QrElement).targetValue}
+                                    color={(elem as QrElement).color}
+                                    backgroundColor={(elem as QrElement).backgroundColor}
+                                    label={(elem as QrElement).label}
+                                  />
                                 </div>
                               )}
                               </div>

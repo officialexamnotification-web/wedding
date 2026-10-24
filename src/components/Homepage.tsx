@@ -54,6 +54,7 @@ import {
 } from '../types/editor';
 import { TEMPLATE_CATEGORIES } from '../data/templates';
 import { BlankDesignOptions, CreateDesignModal } from './CreateDesignModal';
+import { QrCodeImage } from './QrCodeImage';
 import {
   getImageCssFilter,
   getImageMaskStyle,
@@ -363,19 +364,12 @@ const MiniCardArtwork: React.FC<{
                       backgroundColor: (elem as QrElement).backgroundColor || '#FFF4D6',
                     }}
                   >
-                    {(elem as QrElement).dataUrl ? (
-                      <img
-                        src={(elem as QrElement).dataUrl}
-                        alt="QR Code"
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <QrCode
-                        className="w-full h-full"
-                        style={{ color: (elem as QrElement).color || '#1c0308' }}
-                      />
-                    )}
+                    <QrCodeImage
+                      targetValue={(elem as QrElement).targetValue}
+                      color={(elem as QrElement).color}
+                      backgroundColor={(elem as QrElement).backgroundColor}
+                      label={(elem as QrElement).label}
+                    />
                   </div>
                 )}
               </div>
