@@ -104,6 +104,9 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   const pageStartSec = pages.slice(0, currentIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0);
   const timelineCursorSec = pageStartSec + (progress / 100) * currentPageDurationSec;
   const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
+  const mobileAllSlidesClip = isMobileViewport
+    ? audioClips.find((clip) => clip.pageIndex === null)
+    : undefined;
   const allSlidesTimelineClip = audioClips.find((clip) => {
     if (clip.pageIndex !== null) return false;
     const start = clip.timelineStartSec ?? 0;
@@ -119,13 +122,16 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   // A mobile “Use on all slides” choice must stay continuous even if old
   // page-scoped copies are still present in a saved project.
   const timelineClip = isMobileViewport
-    ? allSlidesTimelineClip || pageTimelineClip
+    ? mobileAllSlidesClip || allSlidesTimelineClip || pageTimelineClip
     : pageTimelineClip || allSlidesTimelineClip;
   const track = (timelineClip && AUDIO_TRACKS.find((item) => item.id === timelineClip.trackId)) || activeAudioTrack || AUDIO_TRACKS[0];
   const currentAudioClip = timelineClip?.settings || audioClip;
   const clipTimelineStartSec = timelineClip?.timelineStartSec ?? (timelineClip?.pageIndex === null ? 0 : pageStartSec);
   const audioScopeEndSec = timelineClip?.pageIndex === null ? invitationDurationSec : pageStartSec + currentPageDurationSec;
   const musicDurationSec = Math.max(0.25, Math.min(currentAudioClip.durationSec ?? (audioScopeEndSec - clipTimelineStartSec), audioScopeEndSec - clipTimelineStartSec));
+  const isMobileContinuousAudio = isMobileViewport && timelineClip?.pageIndex === null;
+  const mobilePlaybackConfigRef = useRef({ clip: currentAudioClip, durationSec: musicDurationSec });
+  mobilePlaybackConfigRef.current = { clip: currentAudioClip, durationSec: musicDurationSec };
   // On mobile, keep the same all-slides audio element alive as the video advances
   // between pages. Page-scoped clips still restart/switch at their page boundary.
   const audioPlaybackPageKey = timelineClip?.pageIndex === null
@@ -163,6 +169,9 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
+    // The mobile all-slides path has its own stable audio clock below. Keeping
+    // it out of this page-aware effect prevents slide progress from seeking it.
+    if (isMobileContinuousAudio) return;
     const audio = trackAudioRef.current;
     if (!audio || !track.audioUrl || !timelineClip) {
       audio?.pause();
@@ -226,7 +235,96 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
       if (clipTimerRef.current !== null) window.clearInterval(clipTimerRef.current);
       clipTimerRef.current = null;
     };
-  }, [isOpen, track.audioUrl, isPlaying, isMuted, audioCycle, currentAudioClip.startSec, currentAudioClip.sourceEndSec, currentAudioClip.durationSec, currentAudioClip.volume, currentAudioClip.fadeInSec, currentAudioClip.fadeOutSec, currentAudioClip.loop, musicDurationSec, timelineClip?.id, audioPlaybackPageKey]);
+  }, [isOpen, track.audioUrl, isPlaying, isMuted, audioCycle, currentAudioClip.startSec, currentAudioClip.sourceEndSec, currentAudioClip.durationSec, currentAudioClip.volume, currentAudioClip.fadeInSec, currentAudioClip.fadeOutSec, currentAudioClip.loop, musicDurationSec, timelineClip?.id, audioPlaybackPageKey, isMobileContinuousAudio]);
+
+  useEffect(() => {
+    if (!isOpen || !isMobileContinuousAudio) return;
+    const audio = trackAudioRef.current;
+    if (!audio || !track.audioUrl || !timelineClip) return;
+
+    if (!isPlaying || isMuted) {
+      audio.pause();
+      return;
+    }
+
+    let elapsedSec = clipElapsedRef.current;
+    let lastTick = performance.now();
+    let disposed = false;
+    const getBounds = () => {
+      const { clip } = mobilePlaybackConfigRef.current;
+      const sourceStartSec = Math.max(0, clip.startSec);
+      const sourceEndSec = Number.isFinite(audio.duration)
+        ? Math.max(sourceStartSec + 0.05, Math.min(clip.sourceEndSec ?? audio.duration, audio.duration))
+        : Number.POSITIVE_INFINITY;
+      return { clip, sourceStartSec, sourceEndSec };
+    };
+
+    const startPlayback = () => {
+      if (disposed) return;
+      const { clip, sourceStartSec, sourceEndSec } = getBounds();
+      const sourceLength = Number.isFinite(sourceEndSec) ? Math.max(0.05, sourceEndSec - sourceStartSec) : 0;
+      const sourceOffset = clip.loop && sourceLength > 0
+        ? elapsedSec % sourceLength
+        : Math.min(elapsedSec, sourceLength || elapsedSec);
+      if (Number.isFinite(audio.duration)) {
+        audio.currentTime = Math.min(sourceStartSec + sourceOffset, Math.max(0, audio.duration - 0.05));
+      }
+      audio.volume = clip.volume;
+      audio.muted = false;
+      void audio.play().catch(() => undefined);
+    };
+
+    audio.loop = false;
+    if (Number.isFinite(audio.duration)) {
+      startPlayback();
+    } else {
+      audio.addEventListener('loadedmetadata', startPlayback, { once: true });
+      // Start fetching/playing immediately; loadedmetadata restores the saved
+      // source offset once the browser knows the track duration.
+      void audio.play().catch(() => undefined);
+    }
+
+    clipTimerRef.current = window.setInterval(() => {
+      const now = performance.now();
+      elapsedSec += (now - lastTick) / 1000;
+      lastTick = now;
+      clipElapsedRef.current = elapsedSec;
+
+      const { clip, sourceStartSec, sourceEndSec } = getBounds();
+      const { durationSec } = mobilePlaybackConfigRef.current;
+      if (elapsedSec >= durationSec) {
+        audio.pause();
+        audio.volume = clip.volume;
+        if (clipTimerRef.current !== null) window.clearInterval(clipTimerRef.current);
+        clipTimerRef.current = null;
+        return;
+      }
+
+      if (Number.isFinite(audio.duration) && audio.currentTime >= sourceEndSec - 0.03) {
+        if (clip.loop) audio.currentTime = Math.min(sourceStartSec, Math.max(0, audio.duration - 0.05));
+        else {
+          audio.pause();
+          return;
+        }
+      }
+
+      let fade = 1;
+      if (clip.fadeInSec > 0 && elapsedSec < clip.fadeInSec) fade = elapsedSec / clip.fadeInSec;
+      if (clip.fadeOutSec > 0 && elapsedSec > durationSec - clip.fadeOutSec) {
+        fade = Math.min(fade, Math.max(0, (durationSec - elapsedSec) / clip.fadeOutSec));
+      }
+      audio.volume = Math.max(0, Math.min(1, clip.volume * fade));
+    }, 40);
+
+    return () => {
+      disposed = true;
+      audio.removeEventListener('loadedmetadata', startPlayback);
+      audio.pause();
+      audio.volume = mobilePlaybackConfigRef.current.clip.volume;
+      if (clipTimerRef.current !== null) window.clearInterval(clipTimerRef.current);
+      clipTimerRef.current = null;
+    };
+  }, [isOpen, isMobileContinuousAudio, track.audioUrl, isPlaying, isMuted, audioCycle, timelineClip?.id]);
 
   const playShehnaiNote = () => {
     if (isMuted || track.audioUrl || !timelineClip) return;
