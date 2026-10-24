@@ -789,7 +789,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
     stopPreviewAudio();
     setPlayingTrackId(track.id);
-    if (onSelectAudioTrack) onSelectAudioTrack(track);
+    // On mobile, auditioning a track must not silently replace the current
+    // slide's assignment (especially a shared all-slides clip). The track row
+    // itself remains the explicit selection action. Preserve desktop behavior.
+    if (onSelectAudioTrack && !window.matchMedia('(max-width: 767px)').matches) {
+      onSelectAudioTrack(track);
+    }
     try {
       if (track.audioUrl) {
         const audio = new Audio(track.audioUrl);
@@ -3249,8 +3254,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         </p>
                         <p className="mt-0.5 truncate text-xs text-neutral-100">{mobileAudioTrack.name}</p>
                       </div>
-                      <button type="button" onClick={() => previewTrackAudio(mobileAudioTrack, true)} className="shrink-0 rounded-lg border border-violet-300/30 px-2.5 py-1.5 text-[10px] font-semibold text-violet-100 hover:bg-violet-400/15">
-                        {playingTrackId === mobileAudioTrack.id ? 'Stop' : 'Preview'}
+                      <button
+                        type="button"
+                        aria-label="Preview invitation video"
+                        onClick={() => {
+                          stopPreviewAudio();
+                          setIsDrawerOpen(false);
+                          onOpenVideoPreview();
+                        }}
+                        className="shrink-0 rounded-lg border border-violet-300/30 px-2.5 py-1.5 text-[10px] font-semibold text-violet-100 hover:bg-violet-400/15"
+                      >
+                        <span className="flex items-center gap-1"><Play className="h-3 w-3 fill-current" /> Preview video</span>
                       </button>
                     </div>
 
