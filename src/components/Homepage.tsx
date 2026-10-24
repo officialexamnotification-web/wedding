@@ -419,7 +419,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Shubh Vivah', 
       hindi: 'शुभ विवाह निमंत्रण',
       icon: Crown, 
-      image: '/images/home-category/wedding-palace-stairs-02.webp',
+      image: '/images/photo-library/wedding-palace-couple-editorial-01.webp',
       count: `${templates.filter((template) => template.category === 'wedding').length} Royal Designs`,
     },
     { 
@@ -451,7 +451,7 @@ export const Homepage: React.FC<HomepageProps> = ({
       name: 'Godh Bharai', 
       hindi: 'गोद भराई एवं नामकरण',
       icon: Heart, 
-      image: '/images/home-category/godh-bloom-portrait-01.webp',
+      image: '/images/photo-library/godh-blush-home-portrait-14.webp',
       count: `${templates.filter((template) => template.category === 'baby-shower').length} Pastel Designs`,
     },
     { 
@@ -795,7 +795,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                       width={192}
                       height={192}
                       className={`w-full h-full object-cover transition duration-500 ${cat.id === 'wedding' || cat.id === 'baby-shower' ? '' : 'group-hover:scale-105'}`}
-                      style={cat.id === 'wedding' || cat.id === 'baby-shower' ? { transform: 'scale(1.32) translateY(7%)' } : undefined}
+                      style={cat.id === 'wedding' ? { objectPosition: 'center 18%' } : cat.id === 'baby-shower' ? { objectPosition: 'center 6%' } : undefined}
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
                   </div>
