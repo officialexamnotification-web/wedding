@@ -1060,7 +1060,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           const video = document.createElement('video');
           video.src = element.mediaSrc!;
           video.muted = element.isMuted ?? true;
-          video.loop = element.loop ?? true;
+          // Generated cover clips are intended to play once. Older saved catalog
+          // copies may still carry loop=true, so enforce the cover behavior here too.
+          const isGeneratedCoverClip = element.videoId.endsWith('-cover-video');
+          video.loop = isGeneratedCoverClip ? false : (element.loop ?? true);
           video.playsInline = true;
           video.preload = 'auto';
           await new Promise<void>((resolve) => {

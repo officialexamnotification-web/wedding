@@ -634,8 +634,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [elementSubTab, setElementSubTab] = useState<
     'all' | 'shapes' | 'frames' | 'grids' | 'tables' | 'charts' | 'stickers'
   >(initialElementSubTab || 'all');
-  // Open the customization panel with the editor so available tools are visible immediately.
-  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  // Keep the mobile editor canvas unobstructed when a selected template opens.
+  // Users can open the tools sheet from the bottom dock when they need it.
+  const [isDrawerOpen, setIsDrawerOpen] = useState(() => window.matchMedia('(min-width: 768px)').matches);
   const [templateCategory, setTemplateCategory] = useState<string>('all');
   const [stickerCategory, setStickerCategory] = useState<string>('all');
   const [stickerSearch, setStickerSearch] = useState<string>('');

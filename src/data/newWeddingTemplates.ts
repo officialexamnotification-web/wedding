@@ -162,7 +162,9 @@ function coverVideo(id: string, slug: string, src: string, posterSrc?: string): 
     bgGradient: 'linear-gradient(145deg, #20101e 0%, #563041 55%, #160d15 100%)',
     isPlaying: true,
     isMuted: true,
-    loop: true,
+    // Cover clips are a one-time opening sequence; repeating them makes the
+    // exported invitation appear to show its cover twice.
+    loop: false,
     playbackSpeed: 1,
     borderRadius: 0,
     borderWidth: 0,
