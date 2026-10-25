@@ -128,6 +128,7 @@ export const AdminPanel: React.FC = () => {
   const importRef = useRef<HTMLInputElement>(null);
   const uploadRef = useRef<HTMLInputElement>(null);
   const uploadKindRef = useRef<UploadKind>('image');
+  const selectedElementEditorRef = useRef<HTMLDivElement>(null);
 
   const selectedTemplate = templates.find((item) => item.id === selectedTemplateId) || templates[0] || null;
   const selectedPage = selectedTemplate?.pages[selectedPageIndex] || selectedTemplate?.pages[0] || null;
@@ -303,7 +304,12 @@ export const AdminPanel: React.FC = () => {
     if (!selectedElementId) {
       setSelectedElementIds([]);
       setIsMultiSelectMode(false);
+      return;
     }
+    const frame = requestAnimationFrame(() => {
+      selectedElementEditorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return () => cancelAnimationFrame(frame);
   }, [selectedElementId]);
 
   useEffect(() => {
@@ -787,7 +793,7 @@ export const AdminPanel: React.FC = () => {
 
                 {selectedPage && <div className="rounded-2xl border border-white/[0.08] bg-[#131011]/90 p-5 shadow-2xl shadow-black/10 md:p-6"><div className="mb-4 flex items-center gap-2 text-xs font-semibold text-stone-300"><Music2 className="h-4 w-4 text-amber-300" />Music on this slide</div><div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]"><select onChange={(event) => assignTrack(event.target.value)} value="" className={selectClasses}><option value="" disabled>Choose a saved music track…</option>{allTracks.map((track) => <option value={track.id} key={track.id}>{track.name}</option>)}</select><button onClick={() => startUpload('audio')} className="rounded-lg border border-amber-200/15 px-3 py-2.5 text-xs text-amber-100 hover:bg-amber-300/[0.05]"><Upload className="mr-1.5 inline h-4 w-4" />Upload music</button></div><div className="mt-3 space-y-2">{(selectedTemplate.audioClips || []).filter((clip) => clip.pageIndex === selectedPageIndex || clip.pageIndex === null).map((clip) => { const track = allTracks.find((item) => item.id === clip.trackId); return <div key={clip.id} className="flex items-center justify-between rounded-lg border border-white/[0.06] px-3 py-2 text-xs text-stone-400"><span className="flex min-w-0 items-center gap-2"><AudioLines className="h-4 w-4 shrink-0 text-amber-200/80" /><span className="truncate">{track?.name || clip.trackId}</span></span><button onClick={() => updateTemplate({ audioClips: (selectedTemplate.audioClips || []).filter((item) => item.id !== clip.id) })} className="text-stone-600 hover:text-rose-300" aria-label="Remove music"><X className="h-4 w-4" /></button></div>; })}</div></div>}
 
-                {selectedElement && <div className="rounded-2xl border border-white/[0.08] bg-[#131011]/90 p-5 shadow-2xl shadow-black/10 md:p-6">
+                {selectedElement && <div ref={selectedElementEditorRef} className="scroll-mt-4 rounded-2xl border border-white/[0.08] bg-[#131011]/90 p-5 shadow-2xl shadow-black/10 md:p-6">
                   <div className="mb-4 flex items-center justify-between">
                     <div><div className="flex items-center gap-2 text-xs font-semibold text-stone-200"><LayoutTemplate className="h-4 w-4 text-amber-300" />Edit selected {selectedElement.type}</div><p className="mt-1 text-[10px] text-stone-600">Same editing controls as the design studio. Changes appear on the canvas immediately.</p></div>
                     <button onClick={() => setSelectedElementId(null)} className="text-stone-600 hover:text-stone-300" aria-label="Close element settings"><X className="h-4 w-4" /></button>
