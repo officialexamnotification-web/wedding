@@ -42,6 +42,7 @@ const WordingModal = lazy(() => import('./components/WordingModal').then((module
 const PhotoAdjustModal = lazy(() => import('./components/PhotoAdjustModal').then((module) => ({ default: module.PhotoAdjustModal })));
 const VideoCardModal = lazy(() => import('./components/VideoCardModal').then((module) => ({ default: module.VideoCardModal })));
 const SlideFilmstrip = lazy(() => import('./components/SlideFilmstrip').then((module) => ({ default: module.SlideFilmstrip })));
+const VedicAstrologyStudio = lazy(() => import('./components/VedicAstrologyStudio').then((module) => ({ default: module.VedicAstrologyStudio })));
 
 const inferInvitationCategory = (label: string): CardTemplate['category'] => {
   const value = label.toLowerCase();
@@ -55,7 +56,7 @@ const inferInvitationCategory = (label: string): CardTemplate['category'] => {
 };
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'editor'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'editor' | 'astrology'>(() => window.location.hash === '#jyotish' ? 'astrology' : 'home');
   const [catalogTemplates, setCatalogTemplates] = useState<CardTemplate[]>(INITIAL_TEMPLATES);
   const [pendingSidebarTab, setPendingSidebarTab] = useState<SidebarTab>('templates');
   const [pendingElementSubTab, setPendingElementSubTab] = useState<'frames' | 'tables' | undefined>();
@@ -75,6 +76,28 @@ export default function App() {
     return 0.75;
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => window.innerWidth >= 1024);
+  useEffect(() => {
+    const syncAstrologyHash = () => {
+      if (window.location.hash === '#jyotish') setCurrentView('astrology');
+      else setCurrentView((view) => view === 'astrology' ? 'home' : view);
+    };
+    window.addEventListener('popstate', syncAstrologyHash);
+    window.addEventListener('hashchange', syncAstrologyHash);
+    return () => {
+      window.removeEventListener('popstate', syncAstrologyHash);
+      window.removeEventListener('hashchange', syncAstrologyHash);
+    };
+  }, []);
+  const openAstrology = () => {
+    if (window.location.hash !== '#jyotish') window.history.pushState({ view: 'astrology' }, '', `${window.location.pathname}${window.location.search}#jyotish`);
+    setCurrentView('astrology');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+  const closeAstrology = () => {
+    if (window.location.hash === '#jyotish') window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+    setCurrentView('home');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
   const toggleFitScreenMode = () => {
     setIsFitScreenMode((current) => !current);
     setCanvasFitRequest((request) => request + 1);
@@ -1236,6 +1259,12 @@ export default function App() {
     setIsMultiSelectMode(false);
   };
 
+  if (currentView === 'astrology') {
+    return <Suspense fallback={<div className="flex min-h-dvh items-center justify-center bg-neutral-950 text-neutral-300">Opening Jyotish Studio…</div>}>
+      <VedicAstrologyStudio onBack={closeAstrology} />
+    </Suspense>;
+  }
+
   // 1. IF CURRENT VIEW IS HOMEPAGE:
   if (currentView === 'home') {
     return (
@@ -1254,6 +1283,7 @@ export default function App() {
             setVideoModalTemplate(template || catalogTemplates[1] || catalogTemplates[0]);
             setIsVideoModalOpen(true);
           }}
+          onOpenAstrology={openAstrology}
         />
         <Suspense fallback={null}>
         {isAnalysisOpen && <AnalysisModal isOpen={isAnalysisOpen} onClose={() => setIsAnalysisOpen(false)} />}

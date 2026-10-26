@@ -32,7 +32,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Eye
+  Eye,
+  MoonStar
 } from 'lucide-react';
 import {
   CardTemplate,
@@ -75,6 +76,7 @@ interface HomepageProps {
   onOpenPrintExport: (template: CardTemplate) => void;
   onOpenAnalysis?: () => void;
   onOpenVideoCard: (template?: CardTemplate) => void;
+  onOpenAstrology: () => void;
 }
 
 /* Bespoke Royal Gold SVG Icons for Luxury Aesthetic */
@@ -391,6 +393,7 @@ export const Homepage: React.FC<HomepageProps> = ({
   onOpenBlankEditor,
   onOpenPrintExport,
   onOpenVideoCard,
+  onOpenAstrology,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -625,6 +628,13 @@ export const Homepage: React.FC<HomepageProps> = ({
                 <Film className="w-3.5 h-3.5 text-amber-400" />
                 <span>Video Suites</span>
               </button>
+              <button
+                onClick={onOpenAstrology}
+                className="text-neutral-300 hover:text-amber-200 transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <MoonStar className="w-3.5 h-3.5 text-amber-400" />
+                <span>Jyotish</span>
+              </button>
             </nav>
 
             <button
@@ -685,6 +695,13 @@ export const Homepage: React.FC<HomepageProps> = ({
               >
                 <Palette className="w-4 h-4 text-amber-400" />
                 <span>Custom Canvas</span>
+              </button>
+              <button
+                onClick={onOpenAstrology}
+                className="w-full sm:w-auto px-5 py-3.5 bg-neutral-900/70 hover:bg-neutral-800 border border-amber-500/20 text-amber-100/90 font-medium text-sm rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <MoonStar className="w-4 h-4 text-amber-300" />
+                <span>Vedic Astrology</span>
               </button>
             </div>
 
@@ -1744,6 +1761,15 @@ export const Homepage: React.FC<HomepageProps> = ({
                   >
                     <Play className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
                     <span>Interactive Video Story Player</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={onOpenAstrology}
+                    className="hover:text-amber-300 transition flex items-center gap-2.5 cursor-pointer group text-left"
+                  >
+                    <MoonStar className="w-3.5 h-3.5 text-amber-400/70 group-hover:text-amber-300 shrink-0" />
+                    <span>Vedic Astrology Studio</span>
                   </button>
                 </li>
                 <li>
