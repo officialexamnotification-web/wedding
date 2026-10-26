@@ -183,6 +183,7 @@ function PrintRashiChart({chart,language}:{chart:BirthChart;language:ResultLangu
 function PrintableReport({document:printDocument}:{document:PrintDocument|null}) {
   if(!printDocument)return null;
   const hi=printDocument.language==='hi';
+  const hasRetrograde = printDocument.charts?.some((chart)=>chart.planets.some((planet)=>planet.retrograde)) ?? false;
   return <article className="jyotish-print-root" lang={hi?'hi':'en'}>
     <style>{`@page{size:A4;margin:16mm} .jyotish-print-root{display:none} @media print{html,body{background:#fff!important;color:#201912!important}body *{display:none!important;visibility:hidden!important}.jyotish-print-root,.jyotish-print-root *{display:revert!important;visibility:visible!important}.jyotish-print-root{display:block!important;position:static!important;width:100%!important;padding:0!important;color:#201912!important;background:#fff!important;font:11pt/1.55 Arial,"Nirmala UI","Noto Sans Devanagari","Mangal",sans-serif!important}.jyotish-print-root h1{font:24pt Georgia,serif!important;color:#5c3b12!important;margin:0 0 5mm!important}.jyotish-print-root h2{font:15pt Georgia,serif!important;color:#6b4b1b!important;border-bottom:1px solid #d8c7a4;padding-bottom:2mm;margin:7mm 0 3mm!important;break-after:avoid}.jyotish-print-root p{margin:1.5mm 0!important}.jyotish-print-root table{width:100%;border-collapse:collapse;margin-top:3mm}.jyotish-print-root th,.jyotish-print-root td{border:1px solid #ded6c8;padding:2.2mm;text-align:left}.jyotish-print-root th{background:#f5f0e7}.jyotish-print-root svg{display:block!important;width:100%!important;max-width:390px!important;height:auto!important;max-height:155mm;margin:14px auto!important;break-inside:avoid}.jyotish-print-brand{font:9pt Georgia,serif!important;letter-spacing:2px;color:#986d27!important;margin-bottom:7mm}.jyotish-print-section{break-inside:avoid}.jyotish-print-footer{margin-top:10mm;padding-top:3mm;border-top:1px solid #ded6c8;color:#766d60;font-size:9pt}}`}</style>
     <div className="jyotish-print-brand">NIMANTRAN JYOTISH</div>
@@ -192,6 +193,7 @@ function PrintableReport({document:printDocument}:{document:PrintDocument|null})
       {section.rows.length>0&&<table><tbody>{section.rows.map((row)=><tr key={`${row.label}-${row.value}`}><th>{row.label}</th><td>{row.value}</td></tr>)}</tbody></table>}
     </section>)}
     {printDocument.charts?.map((chart,index)=><section className="jyotish-print-section" key={`chart-${index}`}><h2>{hi?`${chart.birth.name||'जन्म'} की राशि कुंडली`:`${chart.birth.name||'Birth'} Rashi chart`}</h2><PrintRashiChart chart={chart} language={printDocument.language}/></section>)}
+    {hasRetrograde&&<p className="jyotish-print-symbol-note">{hi?'℞ का अर्थ वक्री है। यह चिह्न बताता है कि पृथ्वी से देखने पर ग्रह पीछे की ओर चलता हुआ प्रतीत होता है।':'℞ means retrograde. It marks a planet that appears to move backward as seen from Earth.'}</p>}
     <div className="jyotish-print-footer">{hi?'यह रिपोर्ट आपके दिए गए जन्म विवरण के आधार पर तैयार की गई है।':'Prepared from the birth details provided.'}</div>
   </article>;
 }
