@@ -11,6 +11,7 @@ const staticSitePages = new Set([
   'contact',
   'privacy',
   'terms',
+  'jyotish',
   'wedding-invitations',
   'griha-pravesh-invitations',
   'sangeet-haldi-invitations',
