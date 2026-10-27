@@ -17,10 +17,32 @@ interface SuiteDefinition {
   coverVideo?: string;
   videoIsCoverOnly?: boolean;
   coverPosterSrc?: string;
+  assetPath?: string;
   tags: string[];
 }
 
 const suiteDefinitions: SuiteDefinition[] = [
+  {
+    id: 'burgundy-gold-ganesha-story',
+    title: 'Burgundy Gold Ganesha · Wedding Story',
+    slug: 'burgundy-gold',
+    pageFiles: ['01', '02', '03', '04'],
+    ink: '#F7E6C4', accent: '#E2B968', paper: '#542B31', deep: '#32151B',
+    coverVideo: 'burgundy-gold-cover.mp4',
+    videoIsCoverOnly: true,
+    coverPosterSrc: '/templates/user-added-ganesha/burgundy-gold-01.webp',
+    assetPath: '/templates/user-added-ganesha/',
+    tags: ['Burgundy & Gold', 'Ganesha Blessings', 'Cover Video'],
+  },
+  {
+    id: 'golden-ganesha-maroon-wedding-story',
+    title: 'Golden Ganesha on a Maroon Invitation · Wedding Story',
+    slug: 'golden-ganesha-maroon',
+    pageFiles: ['01', '02', '03', '04'],
+    ink: '#F8E6BF', accent: '#E4BD70', paper: '#681B20', deep: '#3E0D13',
+    assetPath: '/templates/user-added-ganesha/',
+    tags: ['Maroon & Gold', 'Ganesha Blessings'],
+  },
   {
     id: 'elegant-navy-ganesha-story',
     title: 'Elegant Navy Ganesha · Wedding Story',
@@ -244,7 +266,7 @@ function suiteText(role: SuitePageRole, id: string, ink: string, accent: string,
 }
 
 function createSuite(definition: SuiteDefinition): CardTemplate {
-  const basePath = '/templates/new-wedding/ganesha-suites/';
+  const basePath = definition.assetPath ?? '/templates/new-wedding/ganesha-suites/';
   const sourcePageNumbers = definition.pageFiles;
   let pages: CardPage[];
 
@@ -322,9 +344,21 @@ interface SingleCardDefinition {
   ink: string;
   accent: string;
   paper: string;
+  assetPath?: string;
 }
 
 const singleCardDefinitions: SingleCardDefinition[] = [
+  { id: 'ganesha-burgundy-frame-single', title: 'Elegant Burgundy Ganesha Invitation Frame', asset: 'ganesha-single-01.webp', type: 'wedding', ink: '#F5DFB0', accent: '#D8AF5F', paper: '#4A2027', assetPath: '/templates/user-added-ganesha/' },
+  { id: 'ganesha-gold-burgundy-frame-single', title: 'Elegant Gold Ganesha on Burgundy Frame', asset: 'ganesha-single-02.webp', type: 'wedding', ink: '#F7E8C8', accent: '#E1BF76', paper: '#542127', assetPath: '/templates/user-added-ganesha/' },
+  { id: 'ganesha-ornate-border-single', title: 'Golden Ganesha Ornate Border Invitation', asset: 'ganesha-single-03.webp', type: 'wedding', ink: '#F7E5BF', accent: '#E3BD70', paper: '#5B171B', assetPath: '/templates/user-added-ganesha/' },
+  { id: 'ganesha-terracotta-frame-single', title: 'Luxury Terracotta Ganesha Invitation Frame', asset: 'ganesha-single-04.webp', type: 'wedding', ink: '#FFF0D5', accent: '#E3BA68', paper: '#753027', assetPath: '/templates/user-added-ganesha/' },
+  { id: 'ganesha-ornate-burgundy-single', title: 'Ornate Burgundy Ganesha Wedding Invitation', asset: 'ganesha-single-05.webp', type: 'wedding', ink: '#F5DEAE', accent: '#D8AD58', paper: '#4A1119', assetPath: '/templates/user-added-ganesha/' },
+  { id: 'ganesha-ornate-gold-frame-single', title: 'Ornate Gold Ganesha Wedding Invitation', asset: 'ganesha-single-06.webp', type: 'wedding', ink: '#F5E3BD', accent: '#E2B969', paper: '#50161C', assetPath: '/templates/user-added-ganesha/' },
+  { id: 'ganesha-gold-frame-2-single', title: 'Royal Gold Ganesha Invitation Frame', asset: 'ganesha-single-07.webp', type: 'wedding', ink: '#F7E7C4', accent: '#E5C276', paper: '#52161D', assetPath: '/templates/user-added-ganesha/' },
+  { id: 'ganesha-gold-maroon-frame-single', title: 'Ornate Gold Maroon Wedding Invitation Frame', asset: 'ganesha-single-08.webp', type: 'wedding', ink: '#F8E6C0', accent: '#E6C071', paper: '#4C1018', assetPath: '/templates/user-added-ganesha/' },
+  { id: 'ganesha-ornate-card-single', title: 'Ornate Golden Ganesha Invitation Card', asset: 'ganesha-single-09.webp', type: 'wedding', ink: '#F6E1B7', accent: '#E1B762', paper: '#52161B', assetPath: '/templates/user-added-ganesha/' },
+  { id: 'ganesha-terracotta-gold-single', title: 'Terracotta Gold Ganesh Wedding Invitation', asset: 'ganesha-single-10.webp', type: 'wedding', ink: '#FFF0D5', accent: '#E5BF72', paper: '#7A392C', assetPath: '/templates/user-added-ganesha/' },
+  { id: 'ganesha-terracotta-card-single', title: 'Terracotta Gold Ganesha Invitation Card', asset: 'ganesha-single-11.webp', type: 'wedding', ink: '#FFF0D5', accent: '#E5BF72', paper: '#78362B', assetPath: '/templates/user-added-ganesha/' },
   { id: 'elegant-navy-ganesha-wedding-single', title: 'Elegant Navy Ganesha · Wedding Events', asset: 'elegant-navy-ganesha-wedding.webp', type: 'schedule', ink: '#263E5A', accent: '#956F35', paper: '#F5F0E8' },
   { id: 'luxury-purple-gold-ganesha-wedding-single', title: 'Luxury Purple & Gold Ganesha · Wedding Events', asset: 'luxury-purple-gold-ganesha-wedding.webp', type: 'schedule', ink: '#4C2B56', accent: '#A17433', paper: '#F3EADF' },
   { id: 'navy-silver-reception-single', title: 'Navy & Silver · Reception Invitation', asset: 'navy-silver-reception-invitation.webp', type: 'reception', ink: '#263E5A', accent: '#8D744F', paper: '#F2EFE8' },
@@ -390,7 +424,7 @@ function createSingleCard(definition: SingleCardDefinition): CardTemplate {
   const id = definition.id;
   const image = backgroundImage(
     id + '-artwork',
-    '/templates/new-wedding/single-cards/' + definition.asset,
+    (definition.assetPath ?? '/templates/new-wedding/single-cards/') + definition.asset,
     definition.title + ' editable invitation artwork',
   );
   const page: CardPage = {
