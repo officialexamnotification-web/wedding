@@ -3,7 +3,7 @@ import { uploadPresigned } from '@vercel/blob/client';
 import {
   ArrowLeft, AudioLines, BadgeCheck, ChevronRight, Clapperboard, ClipboardPaste, Copy,
   Cloud, FileImage, FilePlus2, Film, FolderOpen, Gem, ImagePlus, LayoutTemplate, LockKeyhole,
-  LogOut, Music2, Plus, Save, Search, Settings2, ShieldCheck, Trash2, Upload, X,
+  LogOut, Music2, Plus, Redo2, Save, Scissors, Search, Settings2, ShieldCheck, Trash2, Undo2, Upload, X,
 } from 'lucide-react';
 import { INITIAL_TEMPLATES } from '../data/templates';
 import { AUDIO_TRACKS } from '../data/audioTracks';
@@ -109,6 +109,20 @@ export const AdminPanel: React.FC = () => {
   const [authError, setAuthError] = useState('');
   const [savedCatalog, setSavedCatalog] = useState<SavedTemplateCatalog>(EMPTY_SAVED_CATALOG);
   const [templates, setTemplates] = useState<CardTemplate[]>(INITIAL_TEMPLATES);
+  const [historyStatus, setHistoryStatus] = useState({ canUndo: false, canRedo: false });
+  const historyRef = useRef<{
+    past: CardTemplate[][];
+    future: CardTemplate[][];
+    current: CardTemplate[];
+    pending: CardTemplate[] | null;
+    timer: ReturnType<typeof setTimeout> | null;
+    restoring: boolean;
+  }>({ past: [], future: [], current: INITIAL_TEMPLATES, pending: null, timer: null, restoring: false });
+  const resetTemplateHistory = (snapshot: CardTemplate[]) => {
+    if (historyRef.current.timer) clearTimeout(historyRef.current.timer);
+    historyRef.current = { past: [], future: [], current: snapshot, pending: null, timer: null, restoring: false };
+    setHistoryStatus({ canUndo: false, canRedo: false });
+  };
   const [selectedTemplateId, setSelectedTemplateId] = useState(INITIAL_TEMPLATES[0]?.id || '');
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
@@ -151,6 +165,37 @@ export const AdminPanel: React.FC = () => {
     return queryTerms.every((term) => searchText.includes(term));
   }), [templates, queryTerms, categoryFilter]);
   const deferredFilteredTemplates = useDeferredValue(filteredTemplates);
+  useEffect(() => {
+    const history = historyRef.current;
+    if (history.restoring) {
+      history.restoring = false;
+      history.current = templates;
+      history.pending = null;
+      setHistoryStatus({ canUndo: history.past.length > 0, canRedo: history.future.length > 0 });
+      return;
+    }
+    if (history.current === templates) return;
+    history.pending ??= history.current;
+    history.current = templates;
+    history.future = [];
+    setHistoryStatus({ canUndo: true, canRedo: false });
+    if (history.timer) clearTimeout(history.timer);
+    history.timer = setTimeout(() => {
+      if (history.pending) {
+        history.past.push(history.pending);
+        if (history.past.length > 50) history.past.shift();
+        history.future = [];
+        history.pending = null;
+        setHistoryStatus({ canUndo: history.past.length > 0, canRedo: false });
+      }
+      history.timer = null;
+    }, 300);
+  }, [templates]);
+
+  useEffect(() => () => {
+    if (historyRef.current.timer) clearTimeout(historyRef.current.timer);
+  }, []);
+
   const handleSelectTemplate = useCallback((id: string) => {
     setSelectedTemplateId(id);
     setSelectedPageIndex(0);
@@ -183,8 +228,10 @@ export const AdminPanel: React.FC = () => {
     }
     const data = await response.json() as SavedTemplateCatalog;
     const normalized = { ...EMPTY_SAVED_CATALOG, ...data };
+    const loadedTemplates = mergeTemplateCatalog(INITIAL_TEMPLATES, normalized);
     setSavedCatalog(normalized);
-    setTemplates(mergeTemplateCatalog(INITIAL_TEMPLATES, normalized));
+    resetTemplateHistory(loadedTemplates);
+    setTemplates(loadedTemplates);
   };
 
   useEffect(() => {
@@ -414,23 +461,22 @@ export const AdminPanel: React.FC = () => {
     setNotice(`${ids.length} ${ids.length === 1 ? 'element' : 'elements'} pasted onto this slide.`);
   }, [selectedPage, selectedTemplate, updatePage]);
 
-  useEffect(() => {
-    const handleClipboardShortcuts = (event: KeyboardEvent) => {
-      if (!authenticated || event.isComposing || !(event.ctrlKey || event.metaKey) || event.altKey) return;
-      const target = event.target;
-      if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable="true"], [role="textbox"]')) return;
-      const key = event.key.toLowerCase();
-      if (key === 'c' && (selectedElementId || selectedElementIds.length)) {
-        event.preventDefault();
-        copySelection();
-      } else if (key === 'v' && adminClipboardRef.current) {
-        event.preventDefault();
-        pasteSelection();
-      }
-    };
-    window.addEventListener('keydown', handleClipboardShortcuts);
-    return () => window.removeEventListener('keydown', handleClipboardShortcuts);
-  }, [authenticated, copySelection, pasteSelection, selectedElementId, selectedElementIds.length]);
+  const cutSelection = useCallback(() => {
+    if (!selectedPage) return;
+    const ids = selectedElementIds.length ? selectedElementIds : selectedElementId ? [selectedElementId] : [];
+    const targets = selectedPage.elements.filter((element) => ids.includes(element.id));
+    if (!targets.length) return;
+    if (targets.some((element) => element.locked)) {
+      setNotice('Unlock selected elements before cutting them.');
+      return;
+    }
+    copySelection();
+    updatePage({ elements: selectedPage.elements.filter((element) => !ids.includes(element.id)) });
+    setSelectedElementId(null);
+    setSelectedElementIds([]);
+    setIsMultiSelectMode(false);
+    setNotice(`${targets.length} ${targets.length === 1 ? 'element' : 'elements'} cut. Select a slide or template and press Ctrl+V.`);
+  }, [copySelection, selectedElementId, selectedElementIds, selectedPage, updatePage]);
 
   const handleGroupSelection = () => {
     if (!canGroupSelection || !selectedPage) return;
@@ -554,8 +600,11 @@ export const AdminPanel: React.FC = () => {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Could not save changes.');
-      setSavedCatalog({ ...EMPTY_SAVED_CATALOG, ...data });
-      setTemplates(mergeTemplateCatalog(INITIAL_TEMPLATES, data));
+      const normalized = { ...EMPTY_SAVED_CATALOG, ...data };
+      const savedTemplates = mergeTemplateCatalog(INITIAL_TEMPLATES, normalized);
+      setSavedCatalog(normalized);
+      resetTemplateHistory(savedTemplates);
+      setTemplates(savedTemplates);
       setNotice('Saved. The public template catalog will show these changes after its next refresh.');
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Could not save changes.');
@@ -563,6 +612,82 @@ export const AdminPanel: React.FC = () => {
       setBusy(false);
     }
   };
+
+  const undoTemplateEdit = useCallback(() => {
+    const history = historyRef.current;
+    if (history.timer) clearTimeout(history.timer);
+    history.timer = null;
+    if (history.pending) {
+      history.past.push(history.pending);
+      history.pending = null;
+    }
+    const previous = history.past.pop();
+    if (!previous) {
+      setHistoryStatus({ canUndo: false, canRedo: history.future.length > 0 });
+      setNotice('Nothing to undo.');
+      return;
+    }
+    history.future.push(history.current);
+    history.current = previous;
+    history.restoring = true;
+    setTemplates(previous);
+    setHistoryStatus({ canUndo: history.past.length > 0, canRedo: true });
+    setNotice('Last admin edit undone.');
+  }, []);
+
+  const redoTemplateEdit = useCallback(() => {
+    const history = historyRef.current;
+    if (history.timer) clearTimeout(history.timer);
+    history.timer = null;
+    const next = history.future.pop();
+    if (!next) {
+      setHistoryStatus({ canUndo: history.past.length > 0, canRedo: false });
+      setNotice('Nothing to redo.');
+      return;
+    }
+    history.past.push(history.current);
+    history.current = next;
+    history.pending = null;
+    history.restoring = true;
+    setTemplates(next);
+    setHistoryStatus({ canUndo: true, canRedo: history.future.length > 0 });
+    setNotice('Last admin edit restored.');
+  }, []);
+
+  useEffect(() => {
+    const handleAdminShortcuts = (event: KeyboardEvent) => {
+      if (!authenticated || pendingDelete || event.isComposing || !(event.ctrlKey || event.metaKey) || event.altKey) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable="true"], [role="textbox"]')) return;
+      const key = event.key.toLowerCase();
+      if (key === 'z') {
+        event.preventDefault();
+        if (event.shiftKey) redoTemplateEdit();
+        else undoTemplateEdit();
+      } else if (key === 'y') {
+        event.preventDefault();
+        redoTemplateEdit();
+      } else if (key === 'c' && (selectedElementId || selectedElementIds.length)) {
+        event.preventDefault();
+        copySelection();
+      } else if (key === 'x' && (selectedElementId || selectedElementIds.length)) {
+        event.preventDefault();
+        cutSelection();
+      } else if (key === 'v' && adminClipboardRef.current) {
+        event.preventDefault();
+        pasteSelection();
+      } else if (key === 'g') {
+        event.preventDefault();
+        if (event.shiftKey) handleUngroupSelection();
+        else handleGroupSelection();
+      } else if (key === 's' && !busy && uploadProgress === null) {
+        event.preventDefault();
+        void saveCatalog();
+      }
+    };
+    window.addEventListener('keydown', handleAdminShortcuts);
+    return () => window.removeEventListener('keydown', handleAdminShortcuts);
+  }, [authenticated, busy, copySelection, cutSelection, handleGroupSelection, handleUngroupSelection, pasteSelection, pendingDelete, redoTemplateEdit, saveCatalog, selectedElementId, selectedElementIds.length, undoTemplateEdit, uploadProgress]);
 
   const addPage = () => {
     if (!selectedTemplate) return;
@@ -777,7 +902,7 @@ export const AdminPanel: React.FC = () => {
     <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-[#0b090a] text-stone-100 selection:bg-amber-300/30">
       <header className="z-10 flex h-[72px] shrink-0 items-center justify-between border-b border-amber-200/10 bg-[#100d0e]/95 px-5 shadow-lg shadow-black/20 md:px-8">
         <div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-xl border border-amber-200/20 bg-amber-300/[0.08] text-amber-200"><Gem className="h-5 w-5" /></div><div><p className="font-serif text-lg tracking-wide text-[#fff1db]">Nimantran <span className="text-amber-300">Admin</span></p><p className="hidden text-[10px] uppercase tracking-[.18em] text-stone-500 sm:block">Private template studio</p></div></div>
-        <div className="flex items-center gap-2 sm:gap-3"><span className="hidden items-center gap-1.5 rounded-full border border-emerald-300/15 bg-emerald-300/[0.06] px-3 py-1.5 text-[11px] text-emerald-200/90 md:flex"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300" /> Live catalog</span><button onClick={exportBackup} className="hidden rounded-lg border border-white/10 px-3 py-2 text-xs text-stone-300 hover:border-amber-200/30 hover:text-amber-100 sm:block">Export backup</button><button onClick={signOut} className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-stone-300 transition hover:border-rose-200/30 hover:text-rose-200"><LogOut className="h-4 w-4" /><span className="hidden sm:inline">Sign out</span></button><button onClick={saveCatalog} disabled={busy || uploadProgress !== null} className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-200 to-yellow-500 px-3.5 py-2.5 text-xs font-bold text-[#211307] transition hover:brightness-110 disabled:opacity-50 sm:px-5"><Save className="h-4 w-4" />{busy ? 'Publishing…' : 'Save & publish'}</button></div>
+        <div className="flex items-center gap-2 sm:gap-3"><span className="hidden items-center gap-1.5 rounded-full border border-emerald-300/15 bg-emerald-300/[0.06] px-3 py-1.5 text-[11px] text-emerald-200/90 md:flex"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300" /> Live catalog</span><button onClick={exportBackup} className="hidden rounded-lg border border-white/10 px-3 py-2 text-xs text-stone-300 hover:border-amber-200/30 hover:text-amber-100 sm:block">Export backup</button><button onClick={signOut} className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-stone-300 transition hover:border-rose-200/30 hover:text-rose-200"><LogOut className="h-4 w-4" /><span className="hidden sm:inline">Sign out</span></button><button onClick={saveCatalog} disabled={busy || uploadProgress !== null} title="Save & publish changes (Ctrl+S)" className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-200 to-yellow-500 px-3.5 py-2.5 text-xs font-bold text-[#211307] transition hover:brightness-110 disabled:opacity-50 sm:px-5"><Save className="h-4 w-4" />{busy ? 'Publishing…' : 'Save & publish'}</button></div>
       </header>
 
       <div className="flex min-h-0 flex-1">
@@ -815,8 +940,11 @@ export const AdminPanel: React.FC = () => {
                     </div>
                     <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#100d0e] shadow-xl shadow-black/20 max-2xl:order-1 2xl:col-start-2 2xl:row-start-1">
                       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3">
-                        <div><p className="text-xs font-semibold text-stone-200">Live design canvas</p><p className="mt-1 text-[10px] text-stone-500">Select text or artwork to copy it between slides and templates.</p></div>
+                        <div><p className="text-xs font-semibold text-stone-200">Live design canvas</p><p className="mt-1 text-[10px] text-stone-500">Ctrl+Z undo · Ctrl+Shift+Z redo · Ctrl+X cut · Ctrl+C copy · Ctrl+V paste · Ctrl+D duplicate · Delete remove · Ctrl+G group.</p></div>
                         <div className="flex items-center gap-2">
+                          <button type="button" onClick={undoTemplateEdit} disabled={!historyStatus.canUndo} title="Undo last admin edit (Ctrl+Z)" aria-label="Undo last admin edit" className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-[10px] text-stone-300 transition hover:border-amber-200/30 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-40"><Undo2 className="h-3.5 w-3.5" />Undo</button>
+                          <button type="button" onClick={redoTemplateEdit} disabled={!historyStatus.canRedo} title="Redo last admin edit (Ctrl+Shift+Z or Ctrl+Y)" aria-label="Redo last admin edit" className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-[10px] text-stone-300 transition hover:border-amber-200/30 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-40"><Redo2 className="h-3.5 w-3.5" />Redo</button>
+                          <button type="button" onClick={cutSelection} disabled={!selectedElementIds.length && !selectedElementId} title="Cut selected elements (Ctrl+X)" className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200/10 px-2.5 py-1.5 text-[10px] text-rose-200/80 transition hover:border-rose-200/30 hover:text-rose-100 disabled:cursor-not-allowed disabled:opacity-40"><Scissors className="h-3.5 w-3.5" />Cut</button>
                           <button type="button" onClick={copySelection} disabled={!selectedElementIds.length && !selectedElementId} title="Copy selected elements (Ctrl+C)" className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-[10px] text-stone-300 transition hover:border-amber-200/30 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-40"><Copy className="h-3.5 w-3.5" />Copy</button>
                           <button type="button" onClick={pasteSelection} disabled={!clipboardCount} title="Paste copied elements (Ctrl+V)" className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200/20 bg-amber-300/[0.06] px-2.5 py-1.5 text-[10px] text-amber-100 transition hover:bg-amber-300/[0.12] disabled:cursor-not-allowed disabled:opacity-40"><ClipboardPaste className="h-3.5 w-3.5" />Paste{clipboardCount ? ` · ${clipboardCount}` : ''}</button>
                           <span className="shrink-0 rounded-full border border-amber-200/10 px-2.5 py-1 text-[10px] text-amber-100/70">Slide {selectedPageIndex + 1}</span>

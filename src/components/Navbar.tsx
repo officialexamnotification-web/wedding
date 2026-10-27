@@ -314,7 +314,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className={`p-1.5 rounded hover:bg-neutral-800 transition ${
               canRedo ? 'text-neutral-200' : 'text-neutral-600 cursor-not-allowed'
             }`}
-            title="Redo (Ctrl+Y)"
+            title="Redo (Ctrl+Shift+Z or Ctrl+Y)"
           >
             <Redo2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
@@ -323,7 +323,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           onClick={handleQuickSave}
           className="hidden lg:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-[11px] text-neutral-300 hover:text-amber-300 transition"
-          title="Save Snapshot to My Projects"
+          title="Save Snapshot to My Projects (Ctrl+S)"
         >
           {savedNotice ? (
             <>

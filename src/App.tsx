@@ -69,6 +69,7 @@ export default function App() {
   const [isFitScreenMode, setIsFitScreenMode] = useState(false);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [selectedElementIds, setSelectedElementIds] = useState<string[]>([]);
+  const editorClipboardRef = useRef<{ elements: CanvasItem[]; width: number; height: number } | null>(null);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [zoom, setZoom] = useState<number>(() => {
     if (window.innerWidth < 640) return 0.5;
@@ -325,13 +326,13 @@ export default function App() {
   // Keyboard shortcut listener for Undo/Redo
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const isInput =
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement ||
-        e.target instanceof HTMLSelectElement;
+      if (currentView !== 'editor') return;
+      const target = e.target;
+      const isEditingField = target instanceof HTMLElement
+        && target.closest('input, textarea, select, [contenteditable="true"], [role="textbox"], [role="dialog"], [role="alertdialog"]');
 
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-        if (!isInput) {
+        if (!isEditingField) {
           e.preventDefault();
           if (e.shiftKey) {
             handleRedo();
@@ -340,7 +341,7 @@ export default function App() {
           }
         }
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
-        if (!isInput) {
+        if (!isEditingField) {
           e.preventDefault();
           handleRedo();
         }
@@ -349,7 +350,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleUndo, handleRedo]);
+  }, [currentView, handleUndo, handleRedo]);
 
   // Handle template selection
   const handleSelectTemplate = async (template: CardTemplate, targetSlideIndex: number = 0) => {
@@ -1258,6 +1259,108 @@ export default function App() {
     setSelectedElementIds([selectedElementId]);
     setIsMultiSelectMode(false);
   };
+
+  const copySelectionToClipboard = () => {
+    const page = latestPagesRef.current[currentPageIndex];
+    if (!page) return false;
+    const ids = selectedElementIds.length ? selectedElementIds : selectedElementId ? [selectedElementId] : [];
+    const elements = page.elements.filter((element) => ids.includes(element.id));
+    if (!elements.length) return false;
+    const size = CANVAS_SIZES[aspectRatio];
+    editorClipboardRef.current = { elements: structuredClone(elements), width: size.width, height: size.height };
+    return true;
+  };
+
+  const pasteClipboardElements = () => {
+    const clipboard = editorClipboardRef.current;
+    const pagesNow = latestPagesRef.current;
+    const page = pagesNow[currentPageIndex];
+    if (!clipboard || !page) return false;
+    const targetSize = CANVAS_SIZES[aspectRatio];
+    const scale = Math.min(targetSize.width / clipboard.width, targetSize.height / clipboard.height);
+    const offsetX = (targetSize.width - clipboard.width * scale) / 2;
+    const offsetY = (targetSize.height - clipboard.height * scale) / 2;
+    const groupIds = new Map<string, string>();
+    const transformed = clipboard.elements.map((source) => {
+      const element = structuredClone(source);
+      const id = `paste-${crypto.randomUUID()}`;
+      const oldGroupId = element.groupId;
+      element.id = id;
+      if ('videoId' in element) element.videoId = id;
+      element.width *= scale;
+      element.height *= scale;
+      element.x = element.x * scale + offsetX;
+      element.y = element.y * scale + offsetY;
+      if (element.type === 'text') {
+        element.fontSize = Math.max(1, Math.round(element.fontSize * scale * 100) / 100);
+        element.letterSpacing = (element.letterSpacing || 0) * scale;
+      }
+      if (oldGroupId) {
+        if (!groupIds.has(oldGroupId)) groupIds.set(oldGroupId, `paste-group-${crypto.randomUUID()}`);
+        element.groupId = groupIds.get(oldGroupId);
+      }
+      return element;
+    });
+    const bounds = transformed.reduce((box, element) => ({
+      left: Math.min(box.left, element.x),
+      top: Math.min(box.top, element.y),
+      right: Math.max(box.right, element.x + element.width),
+      bottom: Math.max(box.bottom, element.y + element.height),
+    }), { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
+    const shiftX = Math.max(-bounds.left, Math.min(14, targetSize.width - bounds.right));
+    const shiftY = Math.max(-bounds.top, Math.min(14, targetSize.height - bounds.bottom));
+    const pasted = transformed.map((element) => ({ ...element, x: element.x + shiftX, y: element.y + shiftY }));
+    commitPages(pagesNow.map((item, index) => index === currentPageIndex
+      ? { ...item, elements: [...item.elements, ...pasted] }
+      : item));
+    const pastedIds = pasted.map((element) => element.id);
+    setSelectedElementId(pastedIds[0] || null);
+    setSelectedElementIds(pastedIds);
+    setIsMultiSelectMode(false);
+    return true;
+  };
+
+  const cutSelection = () => {
+    const ids = selectedElementIds.length ? selectedElementIds : selectedElementId ? [selectedElementId] : [];
+    const page = latestPagesRef.current[currentPageIndex];
+    if (!page || page.elements.some((element) => ids.includes(element.id) && element.locked)) return false;
+    if (!copySelectionToClipboard()) return false;
+    commitPages(latestPagesRef.current.map((item, index) => index === currentPageIndex
+      ? { ...item, elements: item.elements.filter((element) => !ids.includes(element.id)) }
+      : item));
+    setSelectedElementId(null);
+    setSelectedElementIds([]);
+    setIsMultiSelectMode(false);
+    return true;
+  };
+
+  useEffect(() => {
+    const handleEditorShortcuts = (event: KeyboardEvent) => {
+      if (currentView !== 'editor' || !(event.ctrlKey || event.metaKey) || event.altKey || event.isComposing) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable="true"], [role="textbox"], [role="dialog"], [role="alertdialog"]')) return;
+      const key = event.key.toLowerCase();
+      if (key === 'c' && (selectedElementId || selectedElementIds.length)) {
+        event.preventDefault();
+        copySelectionToClipboard();
+      } else if (key === 'x' && (selectedElementId || selectedElementIds.length)) {
+        event.preventDefault();
+        cutSelection();
+      } else if (key === 'v' && editorClipboardRef.current) {
+        event.preventDefault();
+        pasteClipboardElements();
+      } else if (key === 'g') {
+        event.preventDefault();
+        if (event.shiftKey) handleUngroupSelectedElements();
+        else handleGroupSelectedElements();
+      } else if (key === 's') {
+        event.preventDefault();
+        handleSaveProject();
+      }
+    };
+    window.addEventListener('keydown', handleEditorShortcuts);
+    return () => window.removeEventListener('keydown', handleEditorShortcuts);
+  }, [currentView, aspectRatio, selectedElementId, selectedElementIds, currentPageIndex, copySelectionToClipboard, cutSelection, pasteClipboardElements, handleSaveProject, handleGroupSelectedElements, handleUngroupSelectedElements]);
 
   if (currentView === 'astrology') {
     return <Suspense fallback={<div className="flex min-h-dvh items-center justify-center bg-neutral-950 text-neutral-300">Opening Jyotish Studio…</div>}>

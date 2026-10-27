@@ -1484,7 +1484,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             type="button"
             onClick={onGroupSelection}
             className="inline-flex items-center gap-1 rounded-lg border border-amber-500/50 bg-amber-500/15 px-2 py-1.5 text-[11px] font-semibold text-amber-200 transition hover:bg-amber-500/25"
-            title={`Group ${selectionCount} selected text boxes`}
+            title={`Group ${selectionCount} selected text boxes (Ctrl+G)`}
           >
             <Layers className="h-3.5 w-3.5" /> Group ({selectionCount})
           </button>
@@ -1494,7 +1494,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             type="button"
             onClick={onUngroupSelection}
             className="inline-flex items-center gap-1 rounded-lg border border-amber-500/50 bg-amber-500/15 px-2 py-1.5 text-[11px] font-semibold text-amber-200 transition hover:bg-amber-500/25"
-            title="Ungroup these text boxes so they can be moved separately"
+            title="Ungroup these text boxes so they can be moved separately (Ctrl+Shift+G)"
           >
             <Layers className="h-3.5 w-3.5" /> Ungroup
           </button>
