@@ -56,7 +56,9 @@ const inferInvitationCategory = (label: string): CardTemplate['category'] => {
 };
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'editor' | 'astrology'>(() => window.location.hash === '#jyotish' ? 'astrology' : 'home');
+  const isAstrologyRoute = () => window.location.pathname.replace(/\/+$/, '') === '/jyotish-studio';
+  const isLegacyAstrologyUrl = () => window.location.hash === '#jyotish';
+  const [currentView, setCurrentView] = useState<'home' | 'editor' | 'astrology'>(() => isAstrologyRoute() || isLegacyAstrologyUrl() ? 'astrology' : 'home');
   const [catalogTemplates, setCatalogTemplates] = useState<CardTemplate[]>(INITIAL_TEMPLATES);
   const [pendingSidebarTab, setPendingSidebarTab] = useState<SidebarTab>('templates');
   const [pendingElementSubTab, setPendingElementSubTab] = useState<'frames' | 'tables' | undefined>();
@@ -78,24 +80,28 @@ export default function App() {
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => window.innerWidth >= 1024);
   useEffect(() => {
-    const syncAstrologyHash = () => {
-      if (window.location.hash === '#jyotish') setCurrentView('astrology');
+    // Keep old shared #jyotish links working, but immediately give them a clean path URL.
+    if (isLegacyAstrologyUrl()) {
+      window.history.replaceState({ view: 'astrology' }, '', `/jyotish-studio/${window.location.search}`);
+    }
+    const syncAstrologyRoute = () => {
+      if (isAstrologyRoute() || isLegacyAstrologyUrl()) setCurrentView('astrology');
       else setCurrentView((view) => view === 'astrology' ? 'home' : view);
     };
-    window.addEventListener('popstate', syncAstrologyHash);
-    window.addEventListener('hashchange', syncAstrologyHash);
+    window.addEventListener('popstate', syncAstrologyRoute);
+    window.addEventListener('hashchange', syncAstrologyRoute);
     return () => {
-      window.removeEventListener('popstate', syncAstrologyHash);
-      window.removeEventListener('hashchange', syncAstrologyHash);
+      window.removeEventListener('popstate', syncAstrologyRoute);
+      window.removeEventListener('hashchange', syncAstrologyRoute);
     };
   }, []);
   const openAstrology = () => {
-    if (window.location.hash !== '#jyotish') window.history.pushState({ view: 'astrology' }, '', `${window.location.pathname}${window.location.search}#jyotish`);
+    if (!isAstrologyRoute()) window.history.pushState({ view: 'astrology' }, '', `/jyotish-studio/${window.location.search}`);
     setCurrentView('astrology');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
   const closeAstrology = () => {
-    if (window.location.hash === '#jyotish') window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+    if (isAstrologyRoute() || isLegacyAstrologyUrl()) window.history.replaceState(null, '', `/${window.location.search}`);
     setCurrentView('home');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
