@@ -1,7 +1,7 @@
 import React, { startTransition, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { uploadPresigned } from '@vercel/blob/client';
 import {
-  ArrowLeft, AudioLines, BadgeCheck, ChevronRight, Clapperboard,
+  ArrowLeft, AudioLines, BadgeCheck, ChevronRight, Clapperboard, ClipboardPaste, Copy,
   Cloud, FileImage, FilePlus2, Film, FolderOpen, Gem, ImagePlus, LayoutTemplate, LockKeyhole,
   LogOut, Music2, Plus, Save, Search, Settings2, ShieldCheck, Trash2, Upload, X,
 } from 'lucide-react';
@@ -125,9 +125,11 @@ export const AdminPanel: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [jsonDraft, setJsonDraft] = useState('');
   const [jsonError, setJsonError] = useState('');
+  const [clipboardCount, setClipboardCount] = useState(0);
   const importRef = useRef<HTMLInputElement>(null);
   const uploadRef = useRef<HTMLInputElement>(null);
   const uploadKindRef = useRef<UploadKind>('image');
+  const adminClipboardRef = useRef<{ elements: CanvasItem[]; width: number; height: number } | null>(null);
 
   const selectedTemplate = templates.find((item) => item.id === selectedTemplateId) || templates[0] || null;
   const selectedPage = selectedTemplate?.pages[selectedPageIndex] || selectedTemplate?.pages[0] || null;
@@ -153,6 +155,8 @@ export const AdminPanel: React.FC = () => {
     setSelectedTemplateId(id);
     setSelectedPageIndex(0);
     setSelectedElementId(null);
+    setSelectedElementIds([]);
+    setIsMultiSelectMode(false);
   }, []);
   const mediaAssets = useMemo(() => {
     if (tab !== 'media') return [];
@@ -346,6 +350,88 @@ export const AdminPanel: React.FC = () => {
     setSelectedElementIds([id]);
   };
 
+  const copySelection = useCallback(() => {
+    if (!selectedPage || !selectedTemplate) return;
+    const ids = selectedElementIds.length ? selectedElementIds : selectedElementId ? [selectedElementId] : [];
+    const elements = selectedPage.elements.filter((element) => ids.includes(element.id));
+    if (!elements.length) {
+      setNotice('Select a canvas element first, then press Ctrl+C.');
+      return;
+    }
+    const canvasSize = CANVAS_SIZES[selectedTemplate.aspectRatio];
+    adminClipboardRef.current = {
+      elements: structuredClone(elements),
+      width: canvasSize.width,
+      height: canvasSize.height,
+    };
+    setClipboardCount(elements.length);
+    setNotice(`${elements.length} ${elements.length === 1 ? 'element' : 'elements'} copied. Select a slide or template and press Ctrl+V.`);
+  }, [selectedElementId, selectedElementIds, selectedPage, selectedTemplate]);
+
+  const pasteSelection = useCallback(() => {
+    const clipboard = adminClipboardRef.current;
+    if (!clipboard || !selectedPage || !selectedTemplate) return;
+    const targetSize = CANVAS_SIZES[selectedTemplate.aspectRatio];
+    // Preserve artwork proportions when copying between differently sized canvases.
+    const scale = Math.min(targetSize.width / clipboard.width, targetSize.height / clipboard.height);
+    const offsetX = (targetSize.width - clipboard.width * scale) / 2;
+    const offsetY = (targetSize.height - clipboard.height * scale) / 2;
+    const groupIds = new Map<string, string>();
+    const transformed = clipboard.elements.map((source) => {
+      const element = structuredClone(source);
+      const newId = `admin-paste-${crypto.randomUUID()}`;
+      const groupId = element.groupId;
+      element.id = newId;
+      if ('videoId' in element) element.videoId = newId;
+      element.width *= scale;
+      element.height *= scale;
+      element.x = element.x * scale + offsetX;
+      element.y = element.y * scale + offsetY;
+      if (element.type === 'text') {
+        element.fontSize = Math.max(1, Math.round(element.fontSize * scale * 100) / 100);
+        element.letterSpacing = (element.letterSpacing || 0) * scale;
+      }
+      if (groupId) {
+        if (!groupIds.has(groupId)) groupIds.set(groupId, `admin-group-${crypto.randomUUID()}`);
+        element.groupId = groupIds.get(groupId);
+      }
+      return element;
+    });
+    const bounds = transformed.reduce((box, element) => ({
+      left: Math.min(box.left, element.x),
+      top: Math.min(box.top, element.y),
+      right: Math.max(box.right, element.x + element.width),
+      bottom: Math.max(box.bottom, element.y + element.height),
+    }), { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
+    const shiftX = Math.max(-bounds.left, Math.min(14, targetSize.width - bounds.right));
+    const shiftY = Math.max(-bounds.top, Math.min(14, targetSize.height - bounds.bottom));
+    const pastedElements = transformed.map((element) => ({ ...element, x: element.x + shiftX, y: element.y + shiftY }));
+    updatePage({ elements: [...selectedPage.elements, ...pastedElements] });
+    const ids = pastedElements.map((element) => element.id);
+    setSelectedElementId(ids[0] || null);
+    setSelectedElementIds(ids);
+    setIsMultiSelectMode(false);
+    setNotice(`${ids.length} ${ids.length === 1 ? 'element' : 'elements'} pasted onto this slide.`);
+  }, [selectedPage, selectedTemplate, updatePage]);
+
+  useEffect(() => {
+    const handleClipboardShortcuts = (event: KeyboardEvent) => {
+      if (!authenticated || event.isComposing || !(event.ctrlKey || event.metaKey) || event.altKey) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable="true"], [role="textbox"]')) return;
+      const key = event.key.toLowerCase();
+      if (key === 'c' && (selectedElementId || selectedElementIds.length)) {
+        event.preventDefault();
+        copySelection();
+      } else if (key === 'v' && adminClipboardRef.current) {
+        event.preventDefault();
+        pasteSelection();
+      }
+    };
+    window.addEventListener('keydown', handleClipboardShortcuts);
+    return () => window.removeEventListener('keydown', handleClipboardShortcuts);
+  }, [authenticated, copySelection, pasteSelection, selectedElementId, selectedElementIds.length]);
+
   const handleGroupSelection = () => {
     if (!canGroupSelection || !selectedPage) return;
     const groupId = `text-group-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
@@ -413,6 +499,8 @@ export const AdminPanel: React.FC = () => {
     setSelectedTemplateId(id);
     setSelectedPageIndex(0);
     setSelectedElementId(null);
+    setSelectedElementIds([]);
+    setIsMultiSelectMode(false);
     setNotice('Template duplicated. Edit and save to publish.');
   };
 
@@ -726,9 +814,13 @@ export const AdminPanel: React.FC = () => {
                       <div className="rounded-xl border border-white/[0.07] bg-black/15 p-3"><div className="mb-2 flex items-center justify-between"><span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">Elements on this slide · {selectedPage.elements.length}</span><button onClick={() => startUpload('video')} className="text-[10px] text-amber-200/80 hover:text-amber-100"><Clapperboard className="mr-1 inline h-3.5 w-3.5" />Add video</button></div><div className="max-h-[300px] space-y-1 overflow-y-auto">{selectedPage.elements.map((element) => <div key={element.id} className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 ${selectedElementIds.includes(element.id) ? 'border-amber-200/20 bg-amber-300/[0.06]' : 'border-transparent hover:bg-white/[0.035]'}`}><button onClick={() => handleSelectElement(element.id)} className="flex min-w-0 flex-1 items-center gap-2 text-left"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white/[0.04] text-amber-200/70">{element.type === 'text' ? <span className="font-serif text-sm">T</span> : element.type === 'video' ? <Film className="h-3.5 w-3.5" /> : element.type === 'image' ? <FileImage className="h-3.5 w-3.5" /> : <LayoutTemplate className="h-3.5 w-3.5" />}</span><span className="min-w-0"><span className="block truncate text-[11px] text-stone-300">{element.type === 'text' ? (element as Extract<CanvasItem, { type: 'text' }>).text || 'Text' : element.type === 'image' ? (element as ImageElement).alt || 'Image' : element.type === 'video' ? (element as VideoElement).videoName || 'Video' : element.type}</span><span className="mt-0.5 block text-[9px] uppercase tracking-wider text-stone-600">{element.type}</span></span></button><button onClick={() => handleRemoveElement(element.id)} aria-label="Remove element" className="p-1 text-stone-600 hover:text-rose-300"><Trash2 className="h-3.5 w-3.5" /></button></div>)}{selectedPage.elements.length === 0 && <p className="py-5 text-center text-[11px] text-stone-600">No design elements yet. Add text, artwork or a video.</p>}</div></div>
                     </div>
                     <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#100d0e] shadow-xl shadow-black/20 max-2xl:order-1 2xl:col-start-2 2xl:row-start-1">
-                      <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3">
-                        <div><p className="text-xs font-semibold text-stone-200">Live design canvas</p><p className="mt-1 text-[10px] text-stone-500">Select text, then use its toolbar to select and group multiple boxes.</p></div>
-                        <span className="shrink-0 rounded-full border border-amber-200/10 px-2.5 py-1 text-[10px] text-amber-100/70">Slide {selectedPageIndex + 1}</span>
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3">
+                        <div><p className="text-xs font-semibold text-stone-200">Live design canvas</p><p className="mt-1 text-[10px] text-stone-500">Select text or artwork to copy it between slides and templates.</p></div>
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={copySelection} disabled={!selectedElementIds.length && !selectedElementId} title="Copy selected elements (Ctrl+C)" className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-[10px] text-stone-300 transition hover:border-amber-200/30 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-40"><Copy className="h-3.5 w-3.5" />Copy</button>
+                          <button type="button" onClick={pasteSelection} disabled={!clipboardCount} title="Paste copied elements (Ctrl+V)" className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200/20 bg-amber-300/[0.06] px-2.5 py-1.5 text-[10px] text-amber-100 transition hover:bg-amber-300/[0.12] disabled:cursor-not-allowed disabled:opacity-40"><ClipboardPaste className="h-3.5 w-3.5" />Paste{clipboardCount ? ` · ${clipboardCount}` : ''}</button>
+                          <span className="shrink-0 rounded-full border border-amber-200/10 px-2.5 py-1 text-[10px] text-amber-100/70">Slide {selectedPageIndex + 1}</span>
+                        </div>
                       </div>
                       <div className="flex h-[min(52vh,620px)] min-h-[300px] min-w-0 w-full">
                         <Canvas
@@ -780,7 +872,7 @@ export const AdminPanel: React.FC = () => {
                       </div>
                     </div>
                   </div>}
-                  <div className="order-3 flex gap-2 overflow-x-auto border-y border-white/[0.07] px-4 py-3">{selectedTemplate.pages.map((page, index) => <button key={page.id} onClick={() => { setSelectedPageIndex(index); setSelectedElementId(null); }} className={`flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-left text-[11px] transition ${index === selectedPageIndex ? 'border-amber-200/25 bg-amber-300/[0.07] text-amber-100' : 'border-white/[0.07] text-stone-500 hover:text-stone-200'}`}><span className="grid h-5 w-5 place-items-center rounded bg-black/20 text-[9px]">{String(index + 1).padStart(2, '0')}</span><span className="max-w-36 truncate">{page.title}</span></button>)}</div>
+                  <div className="order-3 flex gap-2 overflow-x-auto border-y border-white/[0.07] px-4 py-3">{selectedTemplate.pages.map((page, index) => <button key={page.id} onClick={() => { setSelectedPageIndex(index); setSelectedElementId(null); setSelectedElementIds([]); setIsMultiSelectMode(false); }} className={`flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-left text-[11px] transition ${index === selectedPageIndex ? 'border-amber-200/25 bg-amber-300/[0.07] text-amber-100' : 'border-white/[0.07] text-stone-500 hover:text-stone-200'}`}><span className="grid h-5 w-5 place-items-center rounded bg-black/20 text-[9px]">{String(index + 1).padStart(2, '0')}</span><span className="max-w-36 truncate">{page.title}</span></button>)}</div>
                   <div className="order-4 flex flex-wrap items-center justify-end gap-2 px-4 py-2"><span className="mr-auto text-[10px] text-stone-600">Slide {selectedPageIndex + 1} of {selectedTemplate.pages.length}</span><button onClick={() => movePage(-1)} disabled={selectedPageIndex === 0} className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[10px] text-stone-400 hover:text-amber-100 disabled:opacity-30">Move left</button><button onClick={duplicatePage} className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[10px] text-stone-400 hover:text-amber-100">Duplicate slide</button><button onClick={() => movePage(1)} disabled={selectedPageIndex === selectedTemplate.pages.length - 1} className="rounded-md border border-white/[0.08] px-2.5 py-1.5 text-[10px] text-stone-400 hover:text-amber-100 disabled:opacity-30">Move right</button></div>
                 </div>
 
