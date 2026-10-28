@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { Suspense, useState, useRef, useEffect } from 'react';
 import {
   LayoutTemplate,
   Type,
@@ -97,7 +97,7 @@ import {
   getImageMaskStyle,
   renderShapeVisual,
 } from './Canvas';
-import { ElementsLibraryPanel } from './ElementsLibraryPanel';
+const ElementsLibraryPanel = React.lazy(() => import('./ElementsLibraryPanel').then((module) => ({ default: module.ElementsLibraryPanel })));
 import { PHOTOS_LIBRARY_ITEMS } from '../data/elements/mediaInteractiveManifest';
 
 const TEMPLATE_FRAME_PHOTOS = INITIAL_TEMPLATES.flatMap((template) =>
@@ -1637,14 +1637,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* ================= 2. ELEMENTS (14-CATEGORY LIBRARY + CLASSIC PRESETS) TAB ================= */}
         {activeTab === 'elements' && (
           <div className="space-y-4">
-            <ElementsLibraryPanel
-              dimensions={dimensions}
-              onAddElement={onAddElement}
-              selectedElement={
-                currentPage?.elements.find((e) => e.id === selectedElementId) || null
-              }
-              onUpdateElement={(id, updates) => onUpdateElement(id, updates, true)}
-            />
+            <Suspense fallback={<div className="rounded-xl border border-neutral-800 p-4 text-xs text-neutral-400">Loading element library…</div>}>
+              <ElementsLibraryPanel
+                dimensions={dimensions}
+                onAddElement={onAddElement}
+                selectedElement={
+                  currentPage?.elements.find((e) => e.id === selectedElementId) || null
+                }
+                onUpdateElement={(id, updates) => onUpdateElement(id, updates, true)}
+              />
+            </Suspense>
 
             <details className="group pt-2 border-t border-neutral-800">
               <summary className="cursor-pointer list-none flex items-center justify-between text-xs font-bold text-amber-300/90 py-1.5 px-2.5 rounded-lg bg-neutral-900/80 border border-neutral-800 hover:border-amber-500/40">

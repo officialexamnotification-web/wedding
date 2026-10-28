@@ -43,6 +43,25 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    // The largest remaining chunks are lazy-loaded SVG/3D libraries whose gzip sizes
+    // are small; keep the warning focused on chunks above 800 kB after minification.
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('/src/data/stickers.ts')) return 'sticker-library';
+          if (id.includes('/src/data/elements/mediaInteractiveManifest.ts')) return 'media-library';
+          if (id.includes('/src/data/templates.ts')) return 'invitation-templates';
+          if (id.includes('/src/data/shlokaLibrary.ts')) return 'shloka-library';
+          if (id.includes('/src/components/ElementsLibraryPanel.tsx')) return 'elements-library';
+          if (id.includes('/src/data/elements/graphicsManifest.ts')) return 'element-graphics';
+          if (id.includes('/src/data/elements/canvaDecorativeManifest.ts')) return 'element-decorative';
+          if (id.includes('/src/data/elements/shapesManifest.ts')) return 'element-shapes';
+          if (id.includes('/src/data/elements/framesGridsManifest.ts')) return 'element-frames';
+          if (id.includes('/src/data/elements/premiumWedding.ts')) return 'element-wedding-art';
+        },
+      },
+    },
   },
   server: {
     port: 3000,
