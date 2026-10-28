@@ -209,6 +209,41 @@ const SUITE_SHOWCASE_META: Record<
 };
 
 /* True Scaled Miniature Artwork Renderer — Renders the actual invitation slide with real fonts, shlokas, frames, and QR */
+const HOME_PREVIEW_IMAGES: Record<string, string> = {
+  '/images/wedding_couple_1791965341379.jpg': '/images/home-preview/wedding-couple.webp',
+  '/templates/new-wedding/ganesha-suites/ornate-gold-ganesha-01.webp': '/images/home-preview/ornate-gold-ganesha.webp',
+  '/images/photo-library/wedding-palace-couple-editorial-01.webp': '/images/home-preview/wedding-palace-couple.webp',
+  '/images/photo-library/wedding-jharokha-sunrise-01.webp': '/images/home-preview/wedding-jharokha.webp',
+  '/templates/new-wedding/ganesha-suites/ornate-maroon-ganesha-01.webp': '/images/home-preview/ornate-maroon-ganesha.webp',
+  '/templates/new-wedding/single-cards/ornate-maroon-ganesha-wedding-cover.webp': '/images/home-preview/ornate-maroon-cover.webp',
+  '/templates/new-wedding/ganesha-suites/luxury-purple-gold-ganesha-01.webp': '/images/home-preview/purple-gold-ganesha.webp',
+  '/templates/new-wedding/ganesha-suites/elegant-navy-ganesha-01.webp': '/images/home-preview/navy-ganesha.webp',
+  '/templates/user-added-ganesha/golden-ganesha-maroon-01.webp': '/images/home-preview/user-ganesha.webp',
+  '/wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1-card-640.webp': '/images/home-preview/royal-lakeside-cover.webp',
+};
+
+function getHomePreviewPage(page: CardPage): CardPage {
+  return {
+    ...page,
+    elements: page.elements.map((element) => {
+      if (element.type === 'image') {
+        const preview = HOME_PREVIEW_IMAGES[(element as ImageElement).src];
+        return preview ? { ...element, src: preview } : element;
+      }
+      if (element.type === 'frame') {
+        const preview = HOME_PREVIEW_IMAGES[(element as FrameElement).imageSrc];
+        return preview ? { ...element, imageSrc: preview } : element;
+      }
+      if (element.type === 'video') {
+        const video = element as VideoElement;
+        const preview = video.posterSrc ? HOME_PREVIEW_IMAGES[video.posterSrc] : undefined;
+        return preview ? { ...element, posterSrc: preview } : element;
+      }
+      return element;
+    }),
+  };
+}
+
 const MiniCardArtwork: React.FC<{
   page: CardPage;
   aspectRatio: CardTemplate['aspectRatio'];
@@ -749,9 +784,7 @@ export const Homepage: React.FC<HomepageProps> = ({
             >
               {/* Background Cover Image (WebP) */}
               <img
-                src="/wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1-card-640.webp"
-                srcSet="/wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1-card-640.webp 640w, /wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1-card.webp 768w, /wedding/Royal Lakeside Wedding Invitation/Royal Lakeside Wedding Invitation-1.webp 1024w"
-                sizes="(max-width: 640px) 288px, 320px"
+                src="/images/home-preview/royal-lakeside-hero.webp"
                 alt="Royal Lakeside Wedding Invitation Cover"
                 referrerPolicy="no-referrer"
                 loading="eager"
@@ -1026,7 +1059,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                     title={coverVideo && (activeSlideIdx === 0 || isVideoStoryPreviewing) ? 'Tap to play or pause the cover and slide preview' : 'Click to personalize this slide in Studio'}
                   >
                     <MiniCardArtwork
-                      page={currentPage}
+                      page={getHomePreviewPage(currentPage)}
                       aspectRatio={template.aspectRatio}
                       targetWidth={230}
                       maxHeight={238}

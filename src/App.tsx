@@ -120,15 +120,21 @@ export default function App() {
   const audioTracks = [...AUDIO_TRACKS, ...customAudioTracks];
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/catalog', { signal: controller.signal })
-      .then((response) => response.ok ? response.json() : null)
-      .then((catalog: Partial<SavedTemplateCatalog> | null) => {
-        if (!catalog) return;
-        setCatalogTemplates(mergeTemplateCatalog(INITIAL_TEMPLATES, catalog));
-        setCustomAudioTracks(Array.isArray(catalog.customAudioTracks) ? catalog.customAudioTracks : []);
-      })
-      .catch(() => undefined);
-    return () => controller.abort();
+    // Keep the homepage's first render independent from the optional remote catalog.
+    const timer = window.setTimeout(() => {
+      fetch('/api/catalog', { signal: controller.signal })
+        .then((response) => response.ok ? response.json() : null)
+        .then((catalog: Partial<SavedTemplateCatalog> | null) => {
+          if (!catalog) return;
+          setCatalogTemplates(mergeTemplateCatalog(INITIAL_TEMPLATES, catalog));
+          setCustomAudioTracks(Array.isArray(catalog.customAudioTracks) ? catalog.customAudioTracks : []);
+        })
+        .catch(() => undefined);
+    }, 900);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
   }, []);
   const [audioClip, setAudioClip] = useState<AudioClipSettings>({
     startSec: 0,
