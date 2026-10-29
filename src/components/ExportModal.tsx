@@ -163,11 +163,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [exportError, setExportError] = useState<string | null>(null);
   const [preparedVideo, setPreparedVideo] = useState<File | null>(null);
   const [startingVideoDownload, setStartingVideoDownload] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [greetingMessage, setGreetingMessage] = useState('');
   const [greetingLanguage, setGreetingLanguage] = useState<GreetingLanguage>('en');
   const [videoQuality, setVideoQuality] = useState<VideoQuality>('1080p');
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
+  const videoFrameRate = videoQuality === '4k' ? 30 : 60;
   const videoShortEdge = videoQuality === '4k' ? 2160 : 1080;
   const videoOutputScale = videoShortEdge / Math.min(dimensions.width, dimensions.height);
   const videoOutputWidth = Math.round(dimensions.width * videoOutputScale / 2) * 2;
@@ -983,7 +985,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const startVideoDownload = (videoFile: File, completionMessage: string) => {
     if (startingVideoDownload) return;
     setStartingVideoDownload(true);
-    setShareStatus('Starting video download…');
+    setShareStatus('Downloading video…');
     const downloadUrl = URL.createObjectURL(videoFile);
     const link = document.createElement('a');
     link.href = downloadUrl;
@@ -1002,6 +1004,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const handleDownloadVideo = async (prepareForShare = false) => {
     if (!pages.length) return;
     setDownloading(true);
+    setVideoProgress(0);
     setExportError(null);
     setShareStatus(null);
     let audioContext: AudioContext | null = null;
@@ -1078,7 +1081,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             video.onerror = () => resolve();
             window.setTimeout(resolve, 5000);
           });
-          if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) void video.play().catch(() => undefined);
+          // Keep clips paused while the rest of the export is prepared. Starting
+          // them here can let a short cover clip finish before recording begins.
           return { element, video };
         }));
       }));
@@ -1092,7 +1096,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       const context = canvas.getContext('2d');
       if (!context) throw new Error('Could not initialize the video renderer. Try 1080p / 60 FPS on this device.');
 
-      const videoStream = canvas.captureStream(60);
+      const videoStream = canvas.captureStream(videoFrameRate);
       stream = videoStream;
       const audioDurationSec = pages.reduce((sum, page) => sum + (page.duration || 4.5), 0);
       let audioDestination: MediaStreamAudioDestinationNode | null = null;
@@ -1158,7 +1162,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       // in Chromium, which some mobile players scale or handle inconsistently.
       const h264Mp4Candidates = videoQuality === '4k'
         ? [
-            'video/mp4;codecs="avc1.640034,mp4a.40.2"', // H.264 High, Level 5.2 (4K60)
+            'video/mp4;codecs="avc1.640032,mp4a.40.2"', // H.264 High, Level 5.0 (4K30)
             'video/mp4;codecs="avc1.640033,mp4a.40.2"', // H.264 High, Level 5.1
           ]
         : [
@@ -1180,7 +1184,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       const chunks: BlobPart[] = [];
       recorder = new MediaRecorder(videoStream, {
         mimeType,
-        videoBitsPerSecond: videoQuality === '4k' ? 35_000_000 : 12_000_000,
+        videoBitsPerSecond: videoQuality === '4k' ? 24_000_000 : 12_000_000,
         audioBitsPerSecond: 192_000,
       });
       const recording = new Promise<Blob>((resolve, reject) => {
@@ -1193,6 +1197,23 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
       const pageDurations = pages.map((page) => page.duration || 4.5);
       const totalDurationSec = pageDurations.reduce((sum, duration) => sum + duration, 0);
+      let activeVideoPage = -1;
+      const syncVideoPlayback = (pageIndex: number) => {
+        if (activeVideoPage === pageIndex) return;
+        videoLayers.forEach((pageLayers, index) => {
+          pageLayers.forEach(({ video }) => {
+            if (index === pageIndex) {
+              if (video.ended) {
+                try { video.currentTime = 0; } catch { /* metadata may not be ready */ }
+              }
+              void video.play().catch(() => undefined);
+            } else {
+              video.pause();
+            }
+          });
+        });
+        activeVideoPage = pageIndex;
+      };
       const frameCanvas = document.createElement('canvas');
       frameCanvas.width = canvas.width;
       frameCanvas.height = canvas.height;
@@ -1228,6 +1249,20 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           const translateY = kind === 'rise' ? (1 - progress) * element.height * 0.45 : 0;
           const translateX = kind === 'pan' ? (1 - progress) * -element.width * 0.45 : 0;
           const scale = kind === 'pop' ? 0.86 + progress * 0.14 : 1;
+          // Text layers are full-canvas transparent images. Blitting each whole
+          // 4K image per frame caused large avoidable 4K memory copies; draw only
+          // the text bounds (with room for its stroke and shadow) instead.
+          const shadow = element.shadow;
+          const textPadding = Math.max(
+            12,
+            (shadow?.blur || 0) + Math.max(Math.abs(shadow?.offsetX || 0), Math.abs(shadow?.offsetY || 0)) + (element.strokeWidth || 0) + 4,
+          );
+          const sourceLeft = Math.max(0, element.x - textPadding) * renderScale;
+          const sourceTop = Math.max(0, element.y - textPadding) * renderScale;
+          const sourceRight = Math.min(dimensions.width, element.x + element.width + textPadding) * renderScale;
+          const sourceBottom = Math.min(dimensions.height, element.y + element.height + textPadding) * renderScale;
+          const sourceWidth = sourceRight - sourceLeft;
+          const sourceHeight = sourceBottom - sourceTop;
           target.save();
           target.globalAlpha = alpha;
           if (kind === 'wipe') {
@@ -1239,7 +1274,17 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           const cy = (element.y + element.height / 2) * outputScale;
           target.translate(cx + translateX * outputScale, cy + translateY * outputScale);
           target.scale(scale, scale);
-          target.drawImage(image, -cx, -cy, canvas.width, canvas.height);
+          target.drawImage(
+            image,
+            sourceLeft,
+            sourceTop,
+            sourceWidth,
+            sourceHeight,
+            (sourceLeft / renderScale - element.x - element.width / 2) * outputScale,
+            (sourceTop / renderScale - element.y - element.height / 2) * outputScale,
+            (sourceWidth / renderScale) * outputScale,
+            (sourceHeight / renderScale) * outputScale,
+          );
           target.restore();
         }
       };
@@ -1434,19 +1479,32 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         const pageDuration = pageDurations[pageIndex];
         const progress = Math.max(0, Math.min(1, (elapsedSec - pageStart) / pageDuration));
         const page = pages[pageIndex];
+        syncVideoPlayback(pageIndex);
         const transitionDuration = Math.min(0.55, pageDuration * 0.2);
         const transitionProgress = page.transition === 'none' ? 1 : Math.min(1, progress * pageDuration / transitionDuration);
         drawPageTransition(pageIndex, transitionProgress, elapsedSec - pageStart);
       };
 
-      drawFrame(0);
       recorder.start(250);
+      // Start page video clips only after recording has begun, and advance them
+      // with the active invitation page instead of letting every clip run early.
+      drawFrame(0);
       const startedAt = performance.now();
+      const frameIntervalMs = 1000 / videoFrameRate;
+      let lastFrameAt = startedAt;
       await new Promise<void>((resolve) => {
         const render = () => {
-          const elapsed = (performance.now() - startedAt) / 1000;
+          const now = performance.now();
+          if (now - lastFrameAt < frameIntervalMs) {
+            requestAnimationFrame(render);
+            return;
+          }
+          lastFrameAt = now;
+          const elapsed = (now - startedAt) / 1000;
+          setVideoProgress(Math.min(99, Math.floor((elapsed / totalDurationSec) * 100)));
           drawFrame(Math.min(elapsed, totalDurationSec - 0.001));
           if (elapsed >= totalDurationSec) {
+            setVideoProgress(100);
             recorder?.stop();
             resolve();
           } else requestAnimationFrame(render);
@@ -1458,6 +1516,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       const extension = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
       const fileName = `${safeTitle}-invitation.${extension}`;
       const videoFile = new File([blob], fileName, { type: mimeType.split(';')[0] });
+      setVideoProgress(100);
       setPreparedVideo(videoFile);
       if (prepareForShare) {
         setShareStatus('Video is ready. Tap “Share video file” and choose WhatsApp in your device share menu.');
@@ -1478,6 +1537,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       stream?.getTracks().forEach((track) => track.stop());
       if (audioContext && audioContext.state !== 'closed') await audioContext.close();
       setDownloading(false);
+      setVideoProgress(0);
     }
   };
 
@@ -1689,13 +1749,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </div>
           <div className="mb-2.5 rounded-xl border border-white/10 bg-[#141312] p-3">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <span className="text-[10px] font-medium text-neutral-300">Video resolution · 60 FPS</span>
+              <span className="text-[10px] font-medium text-neutral-300">Video resolution · {videoFrameRate} FPS</span>
               <span className="text-[9px] text-neutral-500">{videoOutputWidth} × {videoOutputHeight}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {([
                 { value: '1080p', title: '1080p · 60 FPS', detail: 'Recommended for sharing' },
-                { value: '4k', title: '4K · 60 FPS', detail: 'High resolution · large file' },
+                { value: '4k', title: '4K · 30 FPS', detail: 'High resolution · large file' },
               ] as const).map((option) => (
                 <button
                   key={option.value}
@@ -1729,14 +1789,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <div className="min-w-0">
                 <div className="text-xs font-semibold text-neutral-100">
                   {downloading
-                    ? 'Rendering invitation video…'
+                    ? `Rendering video… ${videoProgress}%`
                     : startingVideoDownload
-                      ? 'Starting video download…'
+                      ? 'Downloading video…'
                       : preparedVideo ? 'Download Video' : 'Download Animated Video'}
                 </div>
                 <div className="text-[10px] text-neutral-400 flex items-center gap-1 mt-0.5">
                   <Music className="w-3 h-3 text-amber-300" />
-                  <span className="truncate">{activeAudioTrack?.name || 'No music'} · {videoQuality === '4k' ? '4K' : '1080p'} · 60 FPS · MP4/WebM</span>
+                  <span className="truncate">{activeAudioTrack?.name || 'No music'} · {videoQuality === '4k' ? '4K' : '1080p'} · {videoFrameRate} FPS · MP4/WebM</span>
                 </div>
               </div>
             </div>
@@ -1747,7 +1807,22 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           {(downloading || startingVideoDownload) && (
             <div role="status" className="mt-2 flex items-center gap-2 rounded-lg border border-amber-300/15 bg-amber-300/[0.06] px-3 py-2 text-[10px] text-amber-100/90">
               <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-amber-300" />
-              <span>{downloading ? 'Rendering your invitation video. Please keep this window open…' : 'Preparing the video file for download…'}</span>
+              <span>{downloading ? `Rendering your invitation video… ${videoProgress}%` : 'Downloading your video…'}</span>
+            </div>
+          )}
+          {(downloading || startingVideoDownload) && (
+            <div
+              className="mt-2 h-2 overflow-hidden rounded-full bg-neutral-700/80"
+              role="progressbar"
+              aria-label={downloading ? 'Video rendering progress' : 'Video download starting'}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={downloading ? videoProgress : undefined}
+            >
+              <div
+                className={`h-full rounded-full bg-gradient-to-r from-sky-400 via-violet-500 to-fuchsia-500 transition-[width] duration-200 ${startingVideoDownload ? 'w-1/3 animate-pulse' : ''}`}
+                style={downloading ? { width: `${videoProgress}%` } : undefined}
+              />
             </div>
           )}
           {exportError && (
