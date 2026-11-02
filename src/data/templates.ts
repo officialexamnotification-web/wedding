@@ -7,6 +7,7 @@ import { SQUARE_TEMPLATES } from './squareTemplates';
 import { FLORAL_WEDDING_TEMPLATES } from './floralWeddingTemplates';
 import { IMPORTED_WEDDING_TEMPLATES } from './importedWeddingTemplates';
 import { NEW_GANESHA_WEDDING_TEMPLATES } from './newWeddingTemplates';
+import { BIRTHDAY_TEMPLATES } from './birthdayTemplates';
 
 const soundscapeText = (
   id: string,
@@ -4179,6 +4180,7 @@ export const INITIAL_TEMPLATES: CardTemplate[] = [
   },
   ...PREMIUM_WEDDING_TEMPLATES,
   ...CELEBRATION_TEMPLATES,
+  ...BIRTHDAY_TEMPLATES,
   ...FRAMED_CELEBRATION_TEMPLATES,
   ...GOLD_VELVET_TEMPLATES,
   ...SQUARE_TEMPLATES,

@@ -557,7 +557,7 @@ export const Homepage: React.FC<HomepageProps> = ({
     || template.pages.length > 1;
   const orderedTemplates = selectedCategory === 'photo-frames'
     ? [...filteredTemplates].reverse()
-    : selectedCategory === 'all'
+    : selectedCategory === 'all' || selectedCategory === 'birthday'
       ? [
           ...filteredTemplates.filter(hasVideoCover),
           ...filteredTemplates.filter((template) => !hasVideoCover(template) && isVideoInvitationTemplate(template)),
