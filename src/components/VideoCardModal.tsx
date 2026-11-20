@@ -59,6 +59,8 @@ import {
 import { AUDIO_TRACKS } from '../data/audioTracks';
 import { QrCodeImage } from './QrCodeImage';
 
+const VIDEO_SLIDE_DURATION_SECONDS = 4;
+
 interface VideoCardModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -97,24 +99,28 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   const animFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
 
-  const currentSlide = pages[currentIndex] || pages[0];
-  const slideDurationMs = (currentSlide?.duration || 4.5) * 1000;
+  const videoPages = pages.map((page) => ({ ...page, duration: VIDEO_SLIDE_DURATION_SECONDS }));
+  const videoAudioClips = audioClips.map((clip) => clip.pageIndex === null
+    ? clip
+    : { ...clip, timelineStartSec: clip.pageIndex * VIDEO_SLIDE_DURATION_SECONDS });
+  const currentSlide = videoPages[currentIndex] || videoPages[0];
+  const slideDurationMs = VIDEO_SLIDE_DURATION_SECONDS * 1000;
   const dimensions = CANVAS_SIZES[aspectRatio] || CANVAS_SIZES['portrait-story'];
-  const invitationDurationSec = pages.reduce((sum, page) => sum + (page.duration || 4.5), 0);
-  const currentPageDurationSec = currentSlide?.duration || 4.5;
-  const pageStartSec = pages.slice(0, currentIndex).reduce((sum, page) => sum + (page.duration || 4.5), 0);
+  const invitationDurationSec = videoPages.length * VIDEO_SLIDE_DURATION_SECONDS;
+  const currentPageDurationSec = VIDEO_SLIDE_DURATION_SECONDS;
+  const pageStartSec = currentIndex * VIDEO_SLIDE_DURATION_SECONDS;
   const timelineCursorSec = pageStartSec + (progress / 100) * currentPageDurationSec;
   const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
   const mobileAllSlidesClip = isMobileViewport
-    ? audioClips.find((clip) => clip.pageIndex === null)
+    ? videoAudioClips.find((clip) => clip.pageIndex === null)
     : undefined;
-  const allSlidesTimelineClip = audioClips.find((clip) => {
+  const allSlidesTimelineClip = videoAudioClips.find((clip) => {
     if (clip.pageIndex !== null) return false;
     const start = clip.timelineStartSec ?? 0;
     const end = start + Math.min(clip.settings.durationSec ?? invitationDurationSec, invitationDurationSec);
     return timelineCursorSec >= start && timelineCursorSec < end;
   });
-  const pageTimelineClip = audioClips.find((clip) => {
+  const pageTimelineClip = videoAudioClips.find((clip) => {
     if (clip.pageIndex !== currentIndex) return false;
     const start = clip.timelineStartSec ?? pageStartSec;
     const end = start + Math.min(clip.settings.durationSec ?? currentPageDurationSec, currentPageDurationSec);
@@ -123,17 +129,17 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   // Older projects can contain a separate copy of the same song on every
   // slide. Treat matching, full-slide clips as one continuous sequence so the
   // audio element does not pause and seek at each page boundary.
-  const pageAudioClips = pages.map((page, index) => {
-    const pageClip = audioClips.find((clip) => clip.pageIndex === index);
-    const sharedClip = audioClips.find((clip) => clip.pageIndex === null);
+  const pageAudioClips = videoPages.map((page, index) => {
+    const pageClip = videoAudioClips.find((clip) => clip.pageIndex === index);
+    const sharedClip = videoAudioClips.find((clip) => clip.pageIndex === null);
     return isMobileViewport ? sharedClip || pageClip : pageClip || sharedClip;
   });
   const firstSequenceClip = pageAudioClips[0];
-  const continuousPageSequenceClip = firstSequenceClip && pages.length > 1 && pageAudioClips.every((clip, index) => {
+  const continuousPageSequenceClip = firstSequenceClip && videoPages.length > 1 && pageAudioClips.every((clip, index) => {
     if (!clip || clip.trackId !== firstSequenceClip.trackId) return false;
     const settings = clip.settings;
     const first = firstSequenceClip.settings;
-    const pageDuration = pages[index]?.duration || 4.5;
+    const pageDuration = VIDEO_SLIDE_DURATION_SECONDS;
     const clipCoversPage = settings.durationSec === null || settings.durationSec === undefined || settings.durationSec >= pageDuration - 0.05;
     return clipCoversPage
       && settings.startSec === first.startSec
@@ -159,7 +165,9 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
     : continuousPageSequenceClip || pageTimelineClip || allSlidesTimelineClip;
   const track = (timelineClip && AUDIO_TRACKS.find((item) => item.id === timelineClip.trackId)) || activeAudioTrack || AUDIO_TRACKS[0];
   const currentAudioClip = timelineClip?.settings || audioClip;
-  const clipTimelineStartSec = timelineClip?.timelineStartSec ?? (timelineClip?.pageIndex === null ? 0 : pageStartSec);
+  const clipTimelineStartSec = timelineClip?.pageIndex === null
+    ? (timelineClip.timelineStartSec ?? 0)
+    : pageStartSec;
   const audioScopeEndSec = timelineClip?.pageIndex === null ? invitationDurationSec : pageStartSec + currentPageDurationSec;
   const musicDurationSec = Math.max(0.25, Math.min(currentAudioClip.durationSec ?? (audioScopeEndSec - clipTimelineStartSec), audioScopeEndSec - clipTimelineStartSec));
   const isContinuousAllSlidesAudio = timelineClip?.pageIndex === null;
@@ -392,18 +400,18 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
   };
 
   const handleNext = () => {
-    if (currentIndex === pages.length - 1 && (isContinuousAllSlidesAudio || audioClip.durationSec === null || audioClip.durationSec >= invitationDurationSec - 0.05)) {
+    if (currentIndex === videoPages.length - 1 && (isContinuousAllSlidesAudio || audioClip.durationSec === null || audioClip.durationSec >= invitationDurationSec - 0.05)) {
       clipElapsedRef.current = 0;
       setAudioCycle((cycle) => cycle + 1);
     }
-    setCurrentIndex((prev) => (prev + 1) % pages.length);
+    setCurrentIndex((prev) => (prev + 1) % videoPages.length);
     setProgress(0);
     startTimeRef.current = Date.now();
     playShehnaiNote();
   };
 
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + pages.length) % pages.length);
+    setCurrentIndex((prev) => (prev - 1 + videoPages.length) % videoPages.length);
     setProgress(0);
     startTimeRef.current = Date.now();
     playShehnaiNote();
@@ -420,11 +428,11 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
       setProgress(currentProg);
 
       if (elapsed >= slideDurationMs) {
-        if (currentIndex === pages.length - 1 && (isContinuousAllSlidesAudio || audioClip.durationSec === null || audioClip.durationSec >= invitationDurationSec - 0.05)) {
+        if (currentIndex === videoPages.length - 1 && (isContinuousAllSlidesAudio || audioClip.durationSec === null || audioClip.durationSec >= invitationDurationSec - 0.05)) {
           clipElapsedRef.current = 0;
           setAudioCycle((cycle) => cycle + 1);
         }
-        setCurrentIndex((prev) => (prev + 1) % pages.length);
+        setCurrentIndex((prev) => (prev + 1) % videoPages.length);
         setProgress(0);
         startTimeRef.current = Date.now();
         playShehnaiNote();
@@ -438,7 +446,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isOpen, isPlaying, currentIndex, slideDurationMs, pages.length, audioClip.durationSec, invitationDurationSec, isContinuousAllSlidesAudio]);
+  }, [isOpen, isPlaying, currentIndex, slideDurationMs, videoPages.length, audioClip.durationSec, invitationDurationSec, isContinuousAllSlidesAudio]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -481,7 +489,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
                 </span>
               </div>
               <p className="text-[11px] text-neutral-400 max-md:hidden">
-                {pages.map((page) => page.title.replace(/^Page\s+\d+\s*[—-]\s*/i, '')).join('  →  ')}
+                {videoPages.map((page) => page.title.replace(/^Page\s+\d+\s*[—-]\s*/i, '')).join('  →  ')}
               </p>
             </div>
           </div>
@@ -513,7 +521,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
         <div className="flex-1 overflow-hidden bg-neutral-950 flex flex-col items-center justify-center p-4 max-md:min-h-0 max-md:p-2 relative">
           {/* Top Stories Progress Bar Segments */}
           <div className="w-full max-w-sm flex items-center gap-1.5 mb-3 px-2 z-20">
-            {pages.map((_, i) => (
+            {videoPages.map((_, i) => (
               <div
                 key={i}
                 onClick={() => {
@@ -733,8 +741,8 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
 
           <div className="text-center mt-3 max-md:mt-2 z-20 max-w-full px-2">
             <span className="text-xs font-semibold text-amber-200 max-md:block max-md:truncate max-md:text-[11px]">
-              Slide {currentIndex + 1} of {pages.length}: {currentSlide.title} (
-              {currentSlide.duration || 4.5}s)
+              Slide {currentIndex + 1} of {videoPages.length}: {currentSlide.title} (
+              {VIDEO_SLIDE_DURATION_SECONDS}s)
             </span>
           </div>
         </div>
@@ -785,7 +793,7 @@ export const VideoCardModal: React.FC<VideoCardModalProps> = ({
           </div>
 
           <div className="flex items-center justify-start gap-1.5 overflow-x-auto max-w-full max-md:w-full max-md:pb-0.5">
-            {pages.map((p, idx) => (
+            {videoPages.map((p, idx) => (
               <button
                 key={p.id}
                 onClick={() => {

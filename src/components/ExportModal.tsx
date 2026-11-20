@@ -61,6 +61,7 @@ interface ExportModalProps {
 
 type GreetingLanguage = 'en' | 'hi';
 type VideoQuality = '1080p' | '4k';
+const VIDEO_SLIDE_DURATION_SECONDS = 4;
 
 const tracePhotoMask = (
   context: CanvasRenderingContext2D,
@@ -1003,6 +1004,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
   const handleDownloadVideo = async (prepareForShare = false) => {
     if (!pages.length) return;
+    const videoPages = pages.map((page) => ({ ...page, duration: VIDEO_SLIDE_DURATION_SECONDS }));
+    const videoAudioClips = audioClips.map((clip) => clip.pageIndex === null
+      ? clip
+      : { ...clip, timelineStartSec: clip.pageIndex * VIDEO_SLIDE_DURATION_SECONDS });
     setDownloading(true);
     setVideoProgress(0);
     setExportError(null);
@@ -1042,7 +1047,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       }> = [];
       // Render one page at a time to avoid holding every full-size transparent
       // text layer in memory while exporting a multi-page invitation.
-      for (const page of pages) {
+      for (const page of videoPages) {
         const textElements = page.elements
           .filter((element): element is TextElement => element.type === 'text' && !element.hidden);
         const hasVideo = page.elements.some((element) => element.type === 'video' && !!element.mediaSrc && !element.hidden);
@@ -1064,7 +1069,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           })));
         renderedPages.push({ base, text });
       }
-      const videoLayers = await Promise.all(pages.map(async (page) => {
+      const videoLayers = await Promise.all(videoPages.map(async (page) => {
         const layers = page.elements.filter((element): element is VideoElement => element.type === 'video' && !!element.mediaSrc && !element.hidden);
         return Promise.all(layers.map(async (element) => {
           const video = document.createElement('video');
@@ -1098,15 +1103,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
       const videoStream = canvas.captureStream(videoFrameRate);
       stream = videoStream;
-      const audioDurationSec = pages.reduce((sum, page) => sum + (page.duration || 4.5), 0);
+      const audioDurationSec = videoPages.length * VIDEO_SLIDE_DURATION_SECONDS;
       let audioDestination: MediaStreamAudioDestinationNode | null = null;
 
       if (audioClips.length > 0 || videoLayers.some((pageLayers) => pageLayers.some(({ element }) => !element.isMuted))) {
         audioContext = new AudioContext();
         await audioContext.resume();
         audioDestination = audioContext.createMediaStreamDestination();
-        const clipsToRender = audioClips;
-        const pageStarts = pages.map((_, index) => pages.slice(0, index).reduce((sum, page) => sum + (page.duration || 4.5), 0));
+        const clipsToRender = videoAudioClips;
+        const pageStarts = videoPages.map((_, index) => index * VIDEO_SLIDE_DURATION_SECONDS);
         for (const clip of clipsToRender) {
           const track = audioTracks.find((item) => item.id === clip.trackId) || (clip.trackId === activeAudioTrack?.id ? activeAudioTrack : undefined);
           if (!track?.audioUrl) continue;
@@ -1116,7 +1121,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           const settings = clip.settings;
           const defaultStart = clip.pageIndex === null ? 0 : pageStarts[clip.pageIndex] ?? 0;
           const timelineStart = clip.timelineStartSec ?? defaultStart;
-          const scopeEnd = clip.pageIndex === null ? audioDurationSec : defaultStart + (pages[clip.pageIndex]?.duration || 4.5);
+          const scopeEnd = clip.pageIndex === null ? audioDurationSec : defaultStart + VIDEO_SLIDE_DURATION_SECONDS;
           const scopeDuration = Math.max(0.25, scopeEnd - timelineStart);
           const musicDuration = Math.max(0.25, Math.min(settings.durationSec ?? scopeDuration, scopeDuration));
           const startAt = audioContext.currentTime + timelineStart;
@@ -1195,7 +1200,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         recorder!.onstop = () => resolve(new Blob(chunks, { type: mimeType }));
       });
 
-      const pageDurations = pages.map((page) => page.duration || 4.5);
+      const pageDurations = videoPages.map(() => VIDEO_SLIDE_DURATION_SECONDS);
       const totalDurationSec = pageDurations.reduce((sum, duration) => sum + duration, 0);
       let activeVideoPage = -1;
       const syncVideoPlayback = (pageIndex: number) => {
@@ -1290,7 +1295,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       };
 
       const drawPageTransition = (pageIndex: number, pageProgress: number, pageElapsed: number) => {
-        const transition = pages[pageIndex].transition || 'fade';
+        const transition = videoPages[pageIndex].transition || 'fade';
         const t = Math.max(0, Math.min(1, pageProgress));
         if (t >= 1 || transition === 'none') {
           drawPage(context, pageIndex, pageElapsed);
@@ -1300,7 +1305,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = '#100b12';
         context.fillRect(0, 0, canvas.width, canvas.height);
-        if (pageIndex > 0) drawPage(context, pageIndex - 1, pages[pageIndex - 1].duration || 6);
+        if (pageIndex > 0) drawPage(context, pageIndex - 1, VIDEO_SLIDE_DURATION_SECONDS);
         if (transition === 'slide' || transition === 'push') {
           if (transition === 'push' && pageIndex > 0) {
             context.drawImage(renderedPages[pageIndex - 1].base, -canvas.width * t, 0, canvas.width, canvas.height);
@@ -1478,7 +1483,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         }
         const pageDuration = pageDurations[pageIndex];
         const progress = Math.max(0, Math.min(1, (elapsedSec - pageStart) / pageDuration));
-        const page = pages[pageIndex];
+        const page = videoPages[pageIndex];
         syncVideoPlayback(pageIndex);
         const transitionDuration = Math.min(0.55, pageDuration * 0.2);
         const transitionProgress = page.transition === 'none' ? 1 : Math.min(1, progress * pageDuration / transitionDuration);
