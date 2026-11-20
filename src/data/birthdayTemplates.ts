@@ -1,4 +1,4 @@
-import type { AudioTimelineClip, CardTemplate, FrameElement, ImageElement, TextElement, VideoElement } from '../types/editor';
+import type { AudioTimelineClip, CardTemplate, FrameElement, ImageElement, TextElement } from '../types/editor';
 
 const WIDTH = 500;
 const HEIGHT = 700;
@@ -80,36 +80,6 @@ function textLayer(
   };
 }
 
-function coverVideo(): VideoElement {
-  const src = ASSET_PATH + 'Sage%20Green%20Birthday%20cover%20video.mp4';
-  return {
-    id: 'sage-green-birthday-cover-video',
-    type: 'video',
-    videoId: 'sage-green-birthday-cover-video',
-    videoName: 'Sage Green Birthday cover',
-    mediaSrc: src,
-    posterSrc: ASSET_PATH + 'Sage%20Green%20Birthday%20Invitation%20Template-1.png',
-    mediaLabelVisible: false,
-    visualTheme: 'uploaded-video',
-    primaryColor: '#8D963E',
-    secondaryColor: '#D8AE52',
-    bgGradient: 'linear-gradient(145deg, #48552C 0%, #A6A06C 55%, #F9F0D6 100%)',
-    isPlaying: true,
-    isMuted: true,
-    loop: false,
-    playbackSpeed: 1,
-    borderRadius: 0,
-    borderWidth: 0,
-    x: 0,
-    y: 0,
-    width: WIDTH,
-    height: HEIGHT,
-    rotation: 0,
-    opacity: 1,
-    zIndex: 2,
-  };
-}
-
 const birthdayPhoto: FrameElement = {
   id: 'sage-green-birthday-photo',
   type: 'frame',
@@ -138,25 +108,13 @@ const sageGreenBirthday: CardTemplate = {
   title: 'Sage Green Birthday Invitation',
   category: 'birthday',
   aspectRatio: 'portrait-classic',
-  tags: ['Birthday', 'Sage Green', 'Video Invitation', '4-Page Sequence', 'Editable Text', 'Photo Frame'],
+  tags: ['Birthday', 'Sage Green', 'Video Invitation', '3-Page Sequence', 'Editable Text', 'Photo Frame'],
   thumbnailGradient: 'from-emerald-100 via-amber-100 to-lime-800',
   audioClips: birthdayAudio,
   pages: [
     {
-      id: 'sage-birthday-animated-cover',
-      title: '01 · Animated Cover',
-      backgroundType: 'color',
-      backgroundValue: PAPER,
-      duration: 6,
-      transition: 'light-sweep',
-      elements: [
-        artwork('sage-birthday-cover-poster', 'Sage%20Green%20Birthday%20Invitation%20Template-1.png', 'Sage green birthday invitation cover'),
-        coverVideo(),
-      ],
-    },
-    {
       id: 'sage-birthday-invitation',
-      title: '02 · Birthday Invitation',
+      title: '01 · Birthday Invitation',
       backgroundType: 'color',
       backgroundValue: PAPER,
       duration: 6,
@@ -186,7 +144,7 @@ const sageGreenBirthday: CardTemplate = {
     },
     {
       id: 'sage-birthday-party-details',
-      title: '03 · Party Details',
+      title: '02 · Party Details',
       backgroundType: 'color',
       backgroundValue: PAPER,
       duration: 6,
@@ -214,7 +172,7 @@ const sageGreenBirthday: CardTemplate = {
     },
     {
       id: 'sage-birthday-thank-you',
-      title: '04 · Thank You',
+      title: '03 · Thank You',
       backgroundType: 'color',
       backgroundValue: PAPER,
       duration: 6,

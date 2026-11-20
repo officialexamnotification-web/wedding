@@ -18,6 +18,32 @@ export const EMPTY_SAVED_CATALOG: SavedTemplateCatalog = {
   customAudioTracks: [],
 };
 
+const SLIDES_ONLY_TEMPLATE_IDS = new Set([
+  'sage-green-birthday-invitation',
+  'burgundy-gold-ganesha-story',
+  'elegant-navy-ganesha-story',
+  'opulent-maroon-ganesha-story',
+  'ornate-gold-ganesha-story',
+]);
+
+export function removeOpeningCoverVideos(templates: CardTemplate[]): CardTemplate[] {
+  return templates.map((template) => {
+    if (!SLIDES_ONLY_TEMPLATE_IDS.has(template.id)) return template;
+
+    const firstPage = template.pages[0];
+    const hasOpeningVideo = firstPage?.elements.some(
+      (element) => element.type === 'video' && Boolean(element.mediaSrc),
+    );
+    if (!hasOpeningVideo) return template;
+
+    const pages = template.pages.filter((_, index) => index !== 0).map((page, index) => ({
+      ...page,
+      title: page.title.replace(/^\s*\d+/, String(index + 1).padStart(2, '0')),
+    }));
+    return { ...template, pages };
+  });
+}
+
 export function mergeTemplateCatalog(base: CardTemplate[], saved: Partial<SavedTemplateCatalog> | null | undefined): CardTemplate[] {
   if (!saved) return base;
   const hidden = new Set(saved.hiddenIds || []);

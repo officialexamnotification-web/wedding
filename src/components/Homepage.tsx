@@ -79,6 +79,14 @@ interface HomepageProps {
   onOpenAstrology: () => void;
 }
 
+const SLIDES_ONLY_TEMPLATE_IDS = new Set([
+  'sage-green-birthday-invitation',
+  'burgundy-gold-ganesha-story',
+  'elegant-navy-ganesha-story',
+  'opulent-maroon-ganesha-story',
+  'ornate-gold-ganesha-story',
+]);
+
 /* Bespoke Royal Gold SVG Icons for Luxury Aesthetic */
 const RoyalDiyaIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -967,13 +975,16 @@ export const Homepage: React.FC<HomepageProps> = ({
         {/* Luxury Showcase Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {visibleTemplates.map((template) => {
+            const isSlidesOnlyTemplate = SLIDES_ONLY_TEMPLATE_IDS.has(template.id);
             const frameTitle = template.tags.some((tag) => tag.toLowerCase().includes('photo frame'))
               ? template.title.replace(/\s+(Wedding|Griha Pravesh|Sangeet & Haldi|Birthday|Godh Bharai|Anniversary) Photo Frame Invitation$/i, '')
               : null;
             const meta = SUITE_SHOWCASE_META[template.id] || {
               cleanTitle: frameTitle || template.title.replace(/\s*\(.*?\)\s*/g, ''),
               hindiSubtitle: frameTitle ? 'फोटो फ्रेम निमंत्रण' : 'शाही डिजिटल निमंत्रण पत्र',
-              editionTag: template.pages.length > 1 ? `${template.pages.length}-Slide Video Suite` : 'Royal Card Suite',
+              editionTag: template.pages.length > 1
+                ? `${template.pages.length}-Slide ${isSlidesOnlyTemplate ? 'Suite' : 'Video Suite'}`
+                : 'Royal Card Suite',
               coupleOrHighlight: template.title,
               venueOrDetail: 'Custom Venue & Google Maps QR',
               palette: ['#5A0E1A', '#D4AF37', '#FDFBF7'],
@@ -1095,7 +1106,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                         <span>Edit Slide #{activeSlideIdx + 1}</span>
                       </button>
 
-                      {isMultiSlide && (
+                      {isMultiSlide && !isSlidesOnlyTemplate && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1210,7 +1221,7 @@ export const Homepage: React.FC<HomepageProps> = ({
                       <span>Customize Suite</span>
                     </button>
 
-                    {isMultiSlide && (
+                    {isMultiSlide && !isSlidesOnlyTemplate && (
                       <button
                         onClick={() => onOpenVideoCard(template)}
                         className="py-2 px-2.5 bg-neutral-900 hover:bg-neutral-800 text-amber-200 border border-amber-500/35 hover:border-amber-400 rounded-lg text-[11px] font-semibold transition flex items-center justify-center gap-1 cursor-pointer"

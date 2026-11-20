@@ -29,7 +29,7 @@ import type { SidebarTab } from './components/Sidebar';
 import { AUDIO_TRACKS } from './data/audioTracks';
 import { Homepage } from './components/Homepage';
 import type { BlankDesignOptions } from './components/CreateDesignModal';
-import { mergeTemplateCatalog, EMPTY_SAVED_CATALOG, type SavedTemplateCatalog } from './utils/templateCatalog';
+import { mergeTemplateCatalog, removeOpeningCoverVideos, EMPTY_SAVED_CATALOG, type SavedTemplateCatalog } from './utils/templateCatalog';
 
 const Navbar = lazy(() => import('./components/Navbar').then((module) => ({ default: module.Navbar })));
 const Toolbar = lazy(() => import('./components/Toolbar').then((module) => ({ default: module.Toolbar })));
@@ -126,7 +126,7 @@ export default function App() {
         .then((response) => response.ok ? response.json() : null)
         .then((catalog: Partial<SavedTemplateCatalog> | null) => {
           if (!catalog) return;
-          setCatalogTemplates(mergeTemplateCatalog(INITIAL_TEMPLATES, catalog));
+          setCatalogTemplates(removeOpeningCoverVideos(mergeTemplateCatalog(INITIAL_TEMPLATES, catalog)));
           setCustomAudioTracks(Array.isArray(catalog.customAudioTracks) ? catalog.customAudioTracks : []);
         })
         .catch(() => undefined);

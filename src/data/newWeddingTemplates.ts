@@ -1,4 +1,4 @@
-import type { CardTemplate, CardPage, ImageElement, TextElement, VideoElement } from '../types/editor';
+import type { CardTemplate, CardPage, ImageElement, TextElement } from '../types/editor';
 
 const WIDTH = 450;
 const HEIGHT = 800;
@@ -14,9 +14,7 @@ interface SuiteDefinition {
   accent: string;
   paper: string;
   deep: string;
-  coverVideo?: string;
-  videoIsCoverOnly?: boolean;
-  coverPosterSrc?: string;
+  slidesOnlySequence?: boolean;
   assetPath?: string;
   tags: string[];
 }
@@ -28,11 +26,9 @@ const suiteDefinitions: SuiteDefinition[] = [
     slug: 'burgundy-gold',
     pageFiles: ['01', '02', '03', '04'],
     ink: '#F7E6C4', accent: '#E2B968', paper: '#542B31', deep: '#32151B',
-    coverVideo: 'burgundy-gold-cover.mp4',
-    videoIsCoverOnly: true,
-    coverPosterSrc: '/templates/user-added-ganesha/burgundy-gold-01.webp',
+    slidesOnlySequence: true,
     assetPath: '/templates/user-added-ganesha/',
-    tags: ['Burgundy & Gold', 'Ganesha Blessings', 'Cover Video'],
+    tags: ['Burgundy & Gold', 'Ganesha Blessings'],
   },
   {
     id: 'golden-ganesha-maroon-wedding-story',
@@ -49,9 +45,7 @@ const suiteDefinitions: SuiteDefinition[] = [
     slug: 'elegant-navy-ganesha',
     pageFiles: ['01', '02', '03', '04', '05'],
     ink: '#233C5B', accent: '#9A753A', paper: '#F5F0E6', deep: '#0E1A30',
-    coverVideo: 'elegant-navy-ganesha-cover.mp4',
-    videoIsCoverOnly: true,
-    coverPosterSrc: '/templates/new-wedding/ganesha-suites/elegant-navy-ganesha-01.webp',
+    slidesOnlySequence: true,
     tags: ['Navy & Ivory', 'Ganesha Blessings'],
   },
   {
@@ -68,9 +62,7 @@ const suiteDefinitions: SuiteDefinition[] = [
     slug: 'opulent-maroon-ganesha',
     pageFiles: ['01', '02', '03', '04'],
     ink: '#FFF0D7', accent: '#E7C77C', paper: '#5A2027', deep: '#45151D',
-    coverVideo: 'opulent-maroon-ganesha-cover.mp4',
-    videoIsCoverOnly: true,
-    coverPosterSrc: '/templates/new-wedding/single-cards/ornate-maroon-ganesha-wedding-cover.webp',
+    slidesOnlySequence: true,
     tags: ['Maroon & Gold', 'Ganesha Blessings'],
   },
   {
@@ -79,9 +71,7 @@ const suiteDefinitions: SuiteDefinition[] = [
     slug: 'ornate-gold-ganesha',
     pageFiles: ['01', '02', '03', '04'],
     ink: '#4B2C22', accent: '#A1732E', paper: '#F4EBDD', deep: '#281326',
-    coverVideo: 'ornate-gold-ganesha-cover.mp4',
-    videoIsCoverOnly: true,
-    coverPosterSrc: '/templates/new-wedding/ganesha-suites/ornate-gold-ganesha-01.webp',
+    slidesOnlySequence: true,
     tags: ['Purple & Antique Gold', 'Ganesha Blessings'],
   },
   {
@@ -169,37 +159,6 @@ function backgroundImage(id: string, src: string, description: string): ImageEle
   };
 }
 
-function coverVideo(id: string, slug: string, src: string, posterSrc?: string): VideoElement {
-  return {
-    id,
-    type: 'video',
-    videoId: id,
-    videoName: slug.replaceAll('-', ' ') + ' cover',
-    mediaSrc: src,
-    posterSrc,
-    mediaLabelVisible: false,
-    visualTheme: 'uploaded-video',
-    primaryColor: '#D6B45D',
-    secondaryColor: '#F7ECD1',
-    bgGradient: 'linear-gradient(145deg, #20101e 0%, #563041 55%, #160d15 100%)',
-    isPlaying: true,
-    isMuted: true,
-    // Cover clips are a one-time opening sequence; repeating them makes the
-    // exported invitation appear to show its cover twice.
-    loop: false,
-    playbackSpeed: 1,
-    borderRadius: 0,
-    borderWidth: 0,
-    x: 0,
-    y: 0,
-    width: WIDTH,
-    height: HEIGHT,
-    rotation: 0,
-    opacity: 1,
-    zIndex: 2,
-  };
-}
-
 function suiteText(role: SuitePageRole, id: string, ink: string, accent: string, animated: boolean): TextElement[] {
   const motion = (animation: TextElement['animation'] = 'rise') => animated
     ? { animation, animationSpeed: 0.85, animationTiming: 'enter' as const }
@@ -270,47 +229,28 @@ function createSuite(definition: SuiteDefinition): CardTemplate {
   const sourcePageNumbers = definition.pageFiles;
   let pages: CardPage[];
 
-  if (definition.coverVideo && definition.videoIsCoverOnly) {
-    const coverId = definition.id + '-page-1';
-    const coverElements: CardPage['elements'] = [];
-    if (definition.coverPosterSrc) {
-      coverElements.push(backgroundImage(coverId + '-poster', definition.coverPosterSrc, definition.title + ' animated cover poster'));
-    }
-    coverElements.push(coverVideo(definition.id + '-cover-video', definition.slug, basePath + definition.coverVideo, definition.coverPosterSrc));
-    const videoPage: CardPage = {
-      id: coverId,
-      title: '01 · Animated Cover',
-      backgroundType: 'color',
-      backgroundValue: definition.paper,
-      duration: 7,
-      transition: 'light-sweep',
-      elements: coverElements,
-    };
-    const imagePages = sourcePageNumbers.map((fileNumber, index) => {
+  if (definition.slidesOnlySequence) {
+    pages = sourcePageNumbers.map((fileNumber, index) => {
       const role = coverFirstSlideRoles[Math.min(index, coverFirstSlideRoles.length - 1)];
-      const id = definition.id + '-page-' + (index + 2);
+      const id = definition.id + '-page-' + (index + 1);
       return {
         id,
-        title: String(index + 2).padStart(2, '0') + ' · ' + pageNames[role].split(' · ')[1],
+        title: String(index + 1).padStart(2, '0') + ' · ' + pageNames[role].split(' · ')[1],
         backgroundType: 'color' as const,
         backgroundValue: definition.paper,
         duration: 6,
         transition: index % 2 === 0 ? 'royal-curtain' as const : 'sparkle' as const,
         elements: [
-          backgroundImage(id + '-artwork', basePath + definition.slug + '-' + fileNumber + '.webp', definition.title + ' slide ' + (index + 2)),
+          backgroundImage(id + '-artwork', basePath + definition.slug + '-' + fileNumber + '.webp', definition.title + ' slide ' + (index + 1)),
           ...suiteText(role, id, definition.ink, definition.accent, true),
         ],
       };
     });
-    pages = [videoPage, ...imagePages];
   } else {
     pages = sourcePageNumbers.map((fileNumber, index) => {
       const role = roleTitles[Math.min(index, roleTitles.length - 1)];
       const id = definition.id + '-page-' + (index + 1);
       const elements: CardPage['elements'] = [backgroundImage(id + '-artwork', basePath + definition.slug + '-' + fileNumber + '.webp', definition.title + ' slide ' + (index + 1))];
-      if (index === 0 && definition.coverVideo) {
-        elements.push(coverVideo(definition.id + '-cover-video', definition.slug, basePath + definition.coverVideo, definition.coverPosterSrc));
-      }
       elements.push(...suiteText(role, id, definition.ink, definition.accent, true));
       return {
         id,
