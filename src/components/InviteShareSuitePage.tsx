@@ -141,9 +141,7 @@ export const InviteShareSuitePage: React.FC<InviteShareSuitePageProps> = ({
     setPreviewSide(customization.familySide === 'bride-first' ? 'bride' : 'groom');
   }, [theme.id, customization.events, customization.familySide]);
 
-  // Build clean URLs (Zero-login personalized invite URLs)
-  const cleanTemplateUrl = useMemo(() => getTemplateCanonicalUrl(theme, false), [theme]);
-
+  // Build a zero-login, personalized card-only URL for guests.
   const personalizedMainUrl = useMemo(
     () =>
       encodeShareUrl(theme, customization, {
@@ -635,24 +633,24 @@ export const InviteShareSuitePage: React.FC<InviteShareSuitePageProps> = ({
                 </button>
               </div>
 
-              {/* Clean Template Canonical URL + Copy Personalized */}
+              {/* Personalized card-only guest URL */}
               <div className="space-y-2.5">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 rounded-xl border border-[#EADFD8] bg-[#FAF6EE] px-3.5 py-2.5">
                   <div className="min-w-0 flex-1">
                     <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-[#896B6F]">
-                      Dedicated Template URL ({theme.name})
+                      Your personalized card link ({theme.name})
                     </span>
                     <p className="font-mono text-[13px] text-[#2A1316] truncate">
-                      {cleanTemplateUrl}
+                      {personalizedMainUrl}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
-                      onClick={() => handleCopy(cleanTemplateUrl, 'canonical-url')}
+                      onClick={() => handleCopy(personalizedMainUrl, 'main-link')}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-[#D8C8AA] bg-white px-3 py-1.5 text-xs font-medium text-[#2A1316] hover:border-[#A3122F] cursor-pointer"
                     >
-                      {copiedTarget === 'canonical-url' ? (
+                      {copiedTarget === 'main-link' ? (
                         <>
                           <Check className="h-3.5 w-3.5 text-[#15803D]" />
                           <span className="text-[#15803D]">Copied URL</span>
@@ -666,10 +664,10 @@ export const InviteShareSuitePage: React.FC<InviteShareSuitePageProps> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => onBackToThemePage(theme)}
+                      onClick={() => onOpenFullPreview(theme, phoneLang)}
                       className="inline-flex items-center gap-1 rounded-lg bg-[#2A1316] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#3f1e22] cursor-pointer"
                     >
-                      <span>Open Page</span>
+                      <span>Preview Card</span>
                       <ExternalLink className="h-3 w-3" />
                     </button>
                   </div>
@@ -795,7 +793,9 @@ export const InviteShareSuitePage: React.FC<InviteShareSuitePageProps> = ({
                     Your WhatsApp Number for Guest Replies
                   </label>
                   <span className="text-[11px] text-[#6D5A49] block mb-1.5">
-                    Guest replies open directly in your WhatsApp (+91 auto-formatted).
+                    {normalizeIndianWhatsappDigits(customization.rsvpWhatsapp)
+                      ? 'Guest replies open in this WhatsApp chat with details filled in; the guest taps Send.'
+                      : 'Add your WhatsApp number so guest replies open your chat directly.'}
                   </span>
                   <input
                     type="tel"
@@ -1524,7 +1524,7 @@ export const InviteShareSuitePage: React.FC<InviteShareSuitePageProps> = ({
                     {qrDataUrl ? (
                       <img
                         src={qrDataUrl}
-                        alt={`QR Code for ${cleanTemplateUrl}`}
+                        alt={`QR Code for ${personalizedMainUrl}`}
                         className="size-20 rounded-lg bg-white p-1 shrink-0"
                       />
                     ) : (

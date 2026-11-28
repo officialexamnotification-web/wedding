@@ -136,6 +136,7 @@ interface InteractiveInvitePhoneStageProps {
   weddingDateLabel?: string;
   cityLabel?: string;
   compact?: boolean;
+  fullPreview?: boolean;
   onOpenFullPreview?: () => void;
   onCloseInline?: () => void;
   externalOpenSignal?: number;
@@ -858,6 +859,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
   weddingDateLabel,
   cityLabel,
   compact = false,
+  fullPreview = false,
   onOpenFullPreview,
   onCloseInline,
   externalOpenSignal = 0,
@@ -1692,6 +1694,9 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
     }
     setRsvpErrors({});
     setRsvpSubmitting(true);
+    // Open WhatsApp directly from the guest's tap so the prefilled RSVP is
+    // addressed to the host without requiring a WhatsApp Business API.
+    window.open(whatsappReplyUrl, '_blank', 'noopener,noreferrer');
 
     const payload: RsvpSubmissionInput = {
       guestName: rsvpName.trim(),
@@ -5723,8 +5728,8 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                       ? 'Blessings Received'
                       : 'शुभकामनाएँ प्राप्त हुईं'
                     : stageLang === 'en'
-                      ? 'Dhanyavaad! RSVP Saved'
-                      : 'धन्यवाद! आपकी स्वीकृति दर्ज हुई'}
+                      ? 'Dhanyavaad! RSVP Ready'
+                      : 'धन्यवाद! RSVP भेजने के लिए तैयार'}
                 </p>
                 <p className="text-[11px] text-emerald-900 leading-snug">
                   <strong>{rsvpName.trim()}</strong>{' '}
@@ -5739,9 +5744,13 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                   <p className="text-[10px] text-[#3E5C48]">{selectedEventTitles}</p>
                 )}
                 <p className="text-[10px] font-medium text-emerald-700">
-                  {stageLang === 'en'
-                    ? 'Tap below to send your reply directly on WhatsApp'
-                    : 'नीचे दबाकर अपना उत्तर सीधे व्हाट्सएप पर भेजें'}
+                  {whatsappDigits
+                    ? stageLang === 'en'
+                      ? 'Your reply is ready in the host’s WhatsApp chat. Tap Send there to deliver it.'
+                      : 'आपका उत्तर मेज़बान के WhatsApp चैट में तैयार है। भेजने के लिए वहाँ Send दबाएँ।'
+                    : stageLang === 'en'
+                      ? 'No host number is set. Choose the host’s WhatsApp chat to send this reply.'
+                      : 'मेज़बान का नंबर नहीं जोड़ा गया है। उत्तर भेजने के लिए WhatsApp में उनका चैट चुनें।'}
                 </p>
 
                 <div className="pt-2 flex flex-col gap-2">
@@ -5753,7 +5762,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                   >
                     <MessageCircle className="h-3.5 w-3.5" />
                     <span>
-                      {stageLang === 'en' ? 'Send Reply on WhatsApp' : 'व्हाट्सएप पर भी भेजें'}
+                      {stageLang === 'en' ? 'Open WhatsApp to Send' : 'WhatsApp में भेजें'}
                     </span>
                   </a>
                   <button
@@ -6795,7 +6804,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
               {stageLang === 'en' ? (
                 <h3
                   className={`mt-1.5 font-corinthia foil-gold-text drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] leading-none ${
-                    compact ? 'text-[44px]' : 'text-[52px]'
+                    fullPreview ? 'text-[38px]' : compact ? 'text-[44px]' : 'text-[52px]'
                   }`}
                 >
                   {cleanGroom} &amp; {cleanBride}
@@ -6803,7 +6812,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
               ) : (
                 <h3
                   className={`mt-2 font-tiro font-semibold foil-gold-text drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] ${
-                    compact ? 'text-[28px]' : 'text-[34px]'
+                    fullPreview ? 'text-[25px]' : compact ? 'text-[28px]' : 'text-[34px]'
                   }`}
                 >
                   {groomHi} एवं {brideHi}
@@ -6841,7 +6850,9 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                   className={`h-24 w-24 overflow-visible transition-all duration-700 ${
                     isOpened
                       ? 'drop-shadow-[0_8px_28px_rgba(243,184,96,0.75)]'
-                      : 'drop-shadow-[0_6px_12px_rgba(0,0,0,0.7)]'
+                      : fullPreview
+                        ? 'drop-shadow-[0_2px_16px_rgba(243,184,96,0.42)]'
+                        : 'drop-shadow-[0_6px_12px_rgba(0,0,0,0.7)]'
                   }`}
                 >
                   <defs>
@@ -6887,9 +6898,9 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                   <circle
                     cx="60"
                     cy="42"
-                    r={isOpened ? 56 : 16}
+                    r={isOpened ? 56 : fullPreview ? 32 : 16}
                     fill="url(#sheeshDiyaHalo)"
-                    style={{ opacity: isOpened ? 1 : 0 }}
+                    style={{ opacity: isOpened ? 1 : fullPreview ? 0.34 : 0 }}
                     className="transition-all duration-700"
                   />
 
@@ -6955,7 +6966,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                     rx="14"
                     ry="4"
                     fill={isOpened ? '#ffd98e' : '#8c6947'}
-                    opacity={isOpened ? 0.48 : 0.14}
+                    opacity={isOpened ? 0.48 : fullPreview ? 0.3 : 0.14}
                     className="transition-opacity duration-500"
                   />
 
@@ -6999,11 +7010,17 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                 }`}
               />
 
-              <div className="absolute left-1/2 top-[66%] flex -translate-x-1/2 flex-col items-center text-center">
-                <p className="font-bodoni italic text-[19px] text-[#f6f2f7] drop-shadow-[0_0_12px_rgba(23,12,29,0.95)]">
+              <div
+                className={`absolute left-1/2 ${fullPreview ? 'top-[59%]' : 'top-[66%]'} flex -translate-x-1/2 flex-col items-center text-center`}
+              >
+                <p
+                  className={`font-bodoni italic ${fullPreview ? 'text-[14px]' : 'text-[19px]'} text-[#f6f2f7] drop-shadow-[0_0_12px_rgba(23,12,29,0.95)]`}
+                >
                   {stageLang === 'en' ? 'Tap the diya to light the palace' : 'महल रोशन करने के लिए दीपक छुएँ'}
                 </p>
-                <span className="mt-0.5 text-[10px] uppercase tracking-[0.24em] text-[#e2b8a4]">
+                <span
+                  className={`mt-0.5 ${fullPreview ? 'text-[8px]' : 'text-[10px]'} uppercase tracking-[0.24em] text-[#e2b8a4]`}
+                >
                   {stageLang === 'en'
                     ? 'Watch the mirrors awaken'
                     : 'दर्पणों को जगमगाते देखें'}

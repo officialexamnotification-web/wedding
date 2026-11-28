@@ -78,6 +78,9 @@ export default function App() {
   const [pageTheme, setPageTheme] = useState<InviteTheme>(
     () => initialLocation.current?.theme || STUDIO_THEMES[0]
   );
+  const [cardOnlyInvite, setCardOnlyInvite] = useState(
+    () => initialLocation.current?.cardOnlyView || false
+  );
   const [modalCardTheme, setModalCardTheme] = useState<InviteTheme | null>(null);
   const [customizerTheme, setCustomizerTheme] = useState<InviteTheme | null>(null);
   const [selectedCatalogCategory, setSelectedCatalogCategory] = useState<string>('All');
@@ -133,12 +136,14 @@ export default function App() {
       const resolved = resolveLocationState();
       if (!resolved) {
         setActiveRoute('studio-home');
+        setCardOnlyInvite(false);
         setGuestFamilyGreeting(undefined);
         setAllowedEventIds(undefined);
         return;
       }
       setPageTheme(resolved.theme);
       setActiveRoute(resolved.route);
+      setCardOnlyInvite(resolved.cardOnlyView);
       setGuestFamilyGreeting(resolved.guestFamily);
       setAllowedEventIds(resolved.allowedEventIds);
       if (resolved.custom) {
@@ -219,6 +224,7 @@ export default function App() {
   };
 
   const handleSelectThemePage = (theme: InviteTheme) => {
+    setCardOnlyInvite(false);
     setGuestFamilyGreeting(undefined);
     setAllowedEventIds(undefined);
     setPageTheme(theme);
@@ -228,6 +234,7 @@ export default function App() {
   };
 
   const handleOpenShareSuite = (theme: InviteTheme) => {
+    setCardOnlyInvite(false);
     setModalCardTheme(null);
     setCustomizerTheme(null);
     setPageTheme(theme);
@@ -268,6 +275,27 @@ export default function App() {
     },
     [pageTheme.id]
   );
+
+  if (cardOnlyInvite) {
+    return (
+      <div className="min-h-dvh bg-[#110A0A]">
+        <Suspense fallback={<div className="min-h-dvh bg-[#110A0A]" />}>
+          <CardOpenPreviewModal
+            theme={pageTheme}
+            onClose={() => window.location.replace('/')}
+            groomName={groomName}
+            brideName={brideName}
+            initialLang="en"
+            customization={pageCustom.data}
+            guestFamilyGreeting={guestFamilyGreeting}
+            allowedEventIds={allowedEventIds}
+            matchMainSiteCard
+            onSubmitRsvp={(input) => handleSubmitRsvp(pageTheme.id, input)}
+          />
+        </Suspense>
+      </div>
+    );
+  }
 
   return (
     <div id="top" className="min-h-dvh bg-[#fbfbfb] text-[#111315]">

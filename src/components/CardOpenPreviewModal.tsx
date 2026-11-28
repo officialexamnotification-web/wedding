@@ -21,6 +21,7 @@ interface CardOpenPreviewModalProps {
   guestFamilyGreeting?: string;
   allowedEventIds?: string[];
   onSubmitRsvp?: (input: RsvpSubmissionInput) => Promise<RsvpRecord>;
+  matchMainSiteCard?: boolean;
 }
 
 export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
@@ -35,6 +36,7 @@ export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
   guestFamilyGreeting,
   allowedEventIds,
   onSubmitRsvp,
+  matchMainSiteCard = true,
 }) => {
   const [lang, setLang] = useState<Language>(initialLang);
 
@@ -89,7 +91,11 @@ export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
           className="relative w-full h-dvh sm:h-auto sm:w-[min(390px,calc(90dvh*0.445),90vw)]"
         >
           {/* Mobile Full-Viewport Screen */}
-          <div className="relative h-full w-full overflow-hidden bg-[#120D0A] sm:hidden">
+          <div
+            className={`relative h-full w-full overflow-hidden ${
+              matchMainSiteCard ? 'bg-[#F3EAE3]' : 'bg-[#120D0A]'
+            } sm:hidden`}
+          >
             <InteractiveInvitePhoneStage
               theme={theme}
               lang={lang}
@@ -97,7 +103,8 @@ export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
               brideName={customization?.partnerName || brideName}
               weddingDateLabel={customization?.dateLabel || weddingDateLabel}
               cityLabel={customization?.cityLabel || cityLabel}
-              compact={false}
+              compact={matchMainSiteCard}
+              fullPreview={theme.id === 'sheesh-mahal'}
               customization={customization}
               guestFamilyGreeting={guestFamilyGreeting}
               allowedEventIds={allowedEventIds}
@@ -173,7 +180,9 @@ export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
                 <div className="relative overflow-hidden rounded-[13.2cqw] bg-black">
                   {/* Exact 390:844 Live Interactive Phone Screen */}
                   <div
-                    className="relative overflow-hidden bg-[#120D0A]"
+                    className={`relative overflow-hidden ${
+                      matchMainSiteCard ? 'bg-[#F3EAE3]' : 'bg-[#120D0A]'
+                    }`}
                     style={{ aspectRatio: '390 / 844' }}
                   >
                     <InteractiveInvitePhoneStage
@@ -183,7 +192,8 @@ export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
                       brideName={customization?.partnerName || brideName}
                       weddingDateLabel={customization?.dateLabel || weddingDateLabel}
                       cityLabel={customization?.cityLabel || cityLabel}
-                      compact={false}
+                      compact={matchMainSiteCard}
+                      fullPreview={theme.id === 'sheesh-mahal'}
                       customization={customization}
                       guestFamilyGreeting={guestFamilyGreeting}
                       allowedEventIds={allowedEventIds}

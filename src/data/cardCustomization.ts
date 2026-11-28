@@ -780,6 +780,9 @@ export function encodeShareUrl(
     if (allowedEventIds && allowedEventIds.length > 0 && allowedEventIds.length < custom.events.length) {
       url.searchParams.set('events', allowedEventIds.join(','));
     }
+    // Guest-facing share links land on the invitation only, without the site
+    // header, footer, or Card Studio catalog.
+    url.searchParams.set('view', 'card');
     return url.toString();
   } catch {
     return getTemplateCanonicalUrl(theme, isSharePage);
@@ -791,6 +794,7 @@ export interface DecodedLocationState {
   theme: InviteTheme;
   custom: Partial<CardCustomization> | null;
   hasExplicitCustomPayload: boolean;
+  cardOnlyView: boolean;
   side?: 'groom' | 'bride';
   guestFamily?: string;
   allowedEventIds?: string[];
@@ -941,6 +945,7 @@ export function resolveLocationState(): DecodedLocationState | null {
       theme: resolvedTheme,
       custom,
       hasExplicitCustomPayload: Boolean(encoded),
+      cardOnlyView: params.get('view') === 'card',
       side,
       guestFamily,
       allowedEventIds,
