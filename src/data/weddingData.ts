@@ -77,14 +77,14 @@ export const COUPLE_DEFAULTS = {
   targetIsoDate: '2027-02-12T16:30:00+05:30',
 };
 
-export const ROYAL_COUPLE_PORTRAIT_IMAGE = '/src/assets/images/royal_couple_portrait_1794923210425.jpg';
-export const BIRTHDAY_STAR_PORTRAIT_IMAGE = '/src/assets/images/birthday_star_portrait_1794943972434.jpg';
-export const HERO_COURTYARD_IMAGE = '/src/assets/images/jharokha_courtyard_dusk_1794564897495.jpg';
-export const HAVELI_DOORS_IMAGE = '/src/assets/images/haveli_carved_doors_1794564897457.jpg';
+export const ROYAL_COUPLE_PORTRAIT_IMAGE = '/assets/images/royal_couple_portrait_1794923210425.jpg';
+export const BIRTHDAY_STAR_PORTRAIT_IMAGE = '/assets/images/birthday_star_portrait_1794943972434.jpg';
+export const HERO_COURTYARD_IMAGE = '/assets/images/jharokha_courtyard_dusk_1794564897495.jpg';
+export const HAVELI_DOORS_IMAGE = '/assets/images/haveli_carved_doors_1794564897457.jpg';
 export const RAJWADA_AAGMAN_CLOSED_IMAGE = '/assets/covers/rajwada-aagman-cover-poster.jpg';
 export const RAJWADA_AAGMAN_OPEN_IMAGE = '/assets/covers/rajwada-aagman-card-open.jpg';
-export const GENDA_CURTAIN_CLOSED_IMAGE = '/src/assets/images/genda_curtain_closed_1794743950096.jpg';
-export const GENDA_COURTYARD_OPEN_IMAGE = '/src/assets/images/genda_courtyard_open_1794743950926.jpg';
+export const GENDA_CURTAIN_CLOSED_IMAGE = '/assets/images/genda_curtain_closed_1794743950096.jpg';
+export const GENDA_COURTYARD_OPEN_IMAGE = '/assets/images/genda_courtyard_open_1794743950926.jpg';
 export const IVORY_STATIONERY_HERO_IMAGE = '/assets/covers/shahi-mohar-card-open.jpg';
 export const DEEPOTSAV_CLOSED_IMAGE = '/assets/covers/ghat-deepmala-cover-poster.jpg';
 export const DEEPOTSAV_OPEN_IMAGE = '/assets/covers/ghat-deepmala-card-open.jpg';
@@ -98,22 +98,22 @@ export const BIRTHDAY_CAKE_LIT_IMAGE = '/assets/covers/shama-mahotsav-cover-post
 export const BIRTHDAY_SOIREE_OPEN_IMAGE = '/assets/covers/shama-mahotsav-card-open.jpg';
 export const BIRTHDAY_GIFT_CLOSED_IMAGE = '/assets/covers/khushiyan-potli-cover-poster.jpg';
 export const BIRTHDAY_GARDEN_OPEN_IMAGE = '/assets/covers/khushiyan-potli-card-open.jpg';
-export const BIRTHDAY_COCKTAILS_JAZZ_IMAGE = '/src/assets/images/birthday_cocktails_jazz_1794746308342.jpg';
-export const BIRTHDAY_DINNER_TOAST_IMAGE = '/src/assets/images/birthday_dinner_toast_1794746308453.jpg';
-export const INDIAN_BABY_PALNA_CLOSED_IMAGE = '/src/assets/images/indian_baby_palna_closed_1794747023027.jpg';
-export const INDIAN_BABY_COURTYARD_OPEN_IMAGE = '/src/assets/images/indian_baby_courtyard_open_1794747023396.jpg';
-export const CHANDA_MAMA_NIGHT_CLOSED_IMAGE = '/src/assets/images/chanda_mama_night_closed_1794747024642.jpg';
-export const CHANDA_MAMA_COURTYARD_OPEN_IMAGE = '/src/assets/images/chanda_mama_courtyard_open_1794747025614.jpg';
-export const INDIAN_BABY_KATHPUTLI_IMAGE = '/src/assets/images/indian_baby_kathputli_party_1794747025762.jpg';
-export const INDIAN_BABY_CAKE_MAKHAN_IMAGE = '/src/assets/images/indian_baby_cake_makhan_1794747025476.jpg';
+export const BIRTHDAY_COCKTAILS_JAZZ_IMAGE = '/assets/images/birthday_cocktails_jazz_1794746308342.jpg';
+export const BIRTHDAY_DINNER_TOAST_IMAGE = '/assets/images/birthday_dinner_toast_1794746308453.jpg';
+export const INDIAN_BABY_PALNA_CLOSED_IMAGE = '/assets/images/indian_baby_palna_closed_1794747023027.jpg';
+export const INDIAN_BABY_COURTYARD_OPEN_IMAGE = '/assets/images/indian_baby_courtyard_open_1794747023396.jpg';
+export const CHANDA_MAMA_NIGHT_CLOSED_IMAGE = '/assets/images/chanda_mama_night_closed_1794747024642.jpg';
+export const CHANDA_MAMA_COURTYARD_OPEN_IMAGE = '/assets/images/chanda_mama_courtyard_open_1794747025614.jpg';
+export const INDIAN_BABY_KATHPUTLI_IMAGE = '/assets/images/indian_baby_kathputli_party_1794747025762.jpg';
+export const INDIAN_BABY_CAKE_MAKHAN_IMAGE = '/assets/images/indian_baby_cake_makhan_1794747025476.jpg';
 export const BAAL_GOPAL_CLOSED_IMAGE = '/assets/covers/murlidhar-leela-cover-poster.jpg';
 export const BAAL_GOPAL_OPEN_IMAGE = '/assets/covers/murlidhar-leela-card-open.jpg';
 export const SHUBH_AARTI_CLOSED_IMAGE = '/assets/covers/kalash-pravesh-cover-poster.jpg?v=2';
 export const SHUBH_AARTI_OPEN_IMAGE = '/assets/covers/kalash-pravesh-card-open.jpg?v=2';
 export const RANGOLI_UTSAV_CLOSED_IMAGE = '/assets/covers/alpana-utsav-cover-poster.jpg';
-export const RANGOLI_UTSAV_OPEN_IMAGE = '/src/assets/images/rangoli_utsav_open_1794749385367.jpg';
-export const HINDU_PUJA_AARTI_THALI_IMAGE = '/src/assets/images/hindu_puja_aarti_thali_1794749385049.jpg';
-export const HINDU_MITHAI_BHOJ_IMAGE = '/src/assets/images/hindu_mithai_bhoj_1794749386077.jpg';
+export const RANGOLI_UTSAV_OPEN_IMAGE = '/assets/images/rangoli_utsav_open_1794749385367.jpg';
+export const HINDU_PUJA_AARTI_THALI_IMAGE = '/assets/images/hindu_puja_aarti_thali_1794749385049.jpg';
+export const HINDU_MITHAI_BHOJ_IMAGE = '/assets/images/hindu_mithai_bhoj_1794749386077.jpg';
 export const LADLI_KANYA_CLOSED_IMAGE = '/assets/covers/nandini-jhula-cover-poster.jpg';
 export const LADLI_KANYA_OPEN_IMAGE = '/assets/covers/nandini-jhula-card-open.jpg';
 export const DEVI_KUMKUM_CLOSED_IMAGE = '/assets/covers/kumkum-kanya-cover-poster.jpg';
@@ -124,13 +124,13 @@ export const KANHA_MAKHAN_CLOSED_IMAGE = '/assets/covers/gokul-matki-cover-poste
 export const KANHA_MAKHAN_OPEN_IMAGE = '/assets/covers/gokul-matki-card-open.jpg';
 export const VEER_BALAK_CLOSED_IMAGE = '/assets/covers/suryavanshi-tilak-cover-poster.jpg';
 export const VEER_BALAK_OPEN_IMAGE = '/assets/covers/suryavanshi-tilak-card-open.jpg';
-export const GANESH_AASHISH_CLOSED_IMAGE = '/src/assets/images/ganesh_aashish_closed_1794749900687.jpg';
-export const GANESH_AASHISH_OPEN_IMAGE = '/src/assets/images/temple_sanctum_open_1794744613883.jpg';
-export const HINDU_GIRL_PAYAL_MEHNDI_IMAGE = '/src/assets/images/hindu_girl_payal_mehndi_1794749901576.jpg';
-export const PAITHANI_ANTARPAT_CLOSED_IMAGE = '/src/assets/images/paithani_antarpat_cover_1794751701706.jpg';
-export const PAITHANI_COURTYARD_OPEN_IMAGE = '/src/assets/images/paithani_wada_courtyard_1794751701047.jpg';
-export const KOHINOOR_CLOSED_IMAGE = '/src/assets/images/kohinoor_seal_closed_1794831319288.jpg';
-export const KOHINOOR_OPEN_IMAGE = '/src/assets/images/kohinoor_darbar_open_1794831320409.jpg';
+export const GANESH_AASHISH_CLOSED_IMAGE = '/assets/images/ganesh_aashish_closed_1794749900687.jpg';
+export const GANESH_AASHISH_OPEN_IMAGE = '/assets/images/temple_sanctum_open_1794744613883.jpg';
+export const HINDU_GIRL_PAYAL_MEHNDI_IMAGE = '/assets/images/hindu_girl_payal_mehndi_1794749901576.jpg';
+export const PAITHANI_ANTARPAT_CLOSED_IMAGE = '/assets/images/paithani_antarpat_cover_1794751701706.jpg';
+export const PAITHANI_COURTYARD_OPEN_IMAGE = '/assets/images/paithani_wada_courtyard_1794751701047.jpg';
+export const KOHINOOR_CLOSED_IMAGE = '/assets/images/kohinoor_seal_closed_1794831319288.jpg';
+export const KOHINOOR_OPEN_IMAGE = '/assets/images/kohinoor_darbar_open_1794831320409.jpg';
 export const VRINDAVAN_CLOSED_IMAGE = '/assets/covers/braj-madhurima-cover-poster.jpg';
 export const VRINDAVAN_OPEN_IMAGE = '/assets/covers/braj-madhurima-card-open.jpg';
 export const KESARIYA_CLOSED_IMAGE = '/assets/covers/bandhani-saanjh-cover-poster.jpg';
@@ -142,18 +142,18 @@ export const MEHR_OPEN_IMAGE = '/assets/covers/noor-e-charbagh-card-open.jpg';
 export const KALGI_CLOSED_IMAGE = '/assets/covers/amrit-anand-cover-poster.jpg';
 export const KALGI_OPEN_IMAGE = '/assets/covers/amrit-anand-card-open.jpg';
 export const SAGE_BUNNY_CLOSED_IMAGE = '/assets/covers/sage-green-birthday-cover-poster.jpg';
-export const SAGE_BUNNY_OPEN_IMAGE = '/src/assets/images/van_upvan_garden_hero_1794943970118.jpg';
+export const SAGE_BUNNY_OPEN_IMAGE = '/assets/images/van_upvan_garden_hero_1794943970118.jpg';
 export const BURGUNDY_PAISLEY_CLOSED_IMAGE = '/assets/covers/burgundy-gold-cover-poster.jpg';
-export const BURGUNDY_PAISLEY_OPEN_IMAGE = '/src/assets/images/burgundy_paisley_darbar_open_1794908679060.jpg';
+export const BURGUNDY_PAISLEY_OPEN_IMAGE = '/assets/images/burgundy_paisley_darbar_open_1794908679060.jpg';
 export const MAROON_RAJHANS_CLOSED_IMAGE = '/assets/covers/opulent-maroon-ganesha-cover-poster.jpg';
-export const MAROON_RAJHANS_OPEN_IMAGE = '/src/assets/images/maroon_rajhans_mandap_open_1794908680505.jpg';
+export const MAROON_RAJHANS_OPEN_IMAGE = '/assets/images/maroon_rajhans_mandap_open_1794908680505.jpg';
 export const PURPLE_FILIGREE_CLOSED_IMAGE = '/assets/covers/ornate-gold-ganesha-cover-poster.jpg';
-export const PURPLE_FILIGREE_OPEN_IMAGE = '/src/assets/images/purple_filigree_palace_open_1794908682793.jpg';
+export const PURPLE_FILIGREE_OPEN_IMAGE = '/assets/images/purple_filigree_palace_open_1794908682793.jpg';
 export const NAVY_SILVER_CLOSED_IMAGE = '/assets/covers/elegant-navy-ganesha-cover-poster.jpg';
-export const NAVY_SILVER_OPEN_IMAGE = '/src/assets/images/navy_silver_sangeet_open_1794908684870.jpg';
-export const SHEESH_MAHAL_UNLIT_DOME_IMAGE = '/src/assets/images/sheesh_mahal_unlit_1795031594306.jpg';
-export const SHEESH_MAHAL_PLUM_DOME_IMAGE = '/src/assets/images/sheesh_mahal_plum_dome_1794986067708.jpg';
-export const SHEESH_MAHAL_COUPLE_ARCH_IMAGE = '/src/assets/images/sheesh_mahal_couple_arch_1794986067429.jpg';
+export const NAVY_SILVER_OPEN_IMAGE = '/assets/images/navy_silver_sangeet_open_1794908684870.jpg';
+export const SHEESH_MAHAL_UNLIT_DOME_IMAGE = '/assets/images/sheesh_mahal_unlit_1795031594306.jpg';
+export const SHEESH_MAHAL_PLUM_DOME_IMAGE = '/assets/images/sheesh_mahal_plum_dome_1794986067708.jpg';
+export const SHEESH_MAHAL_COUPLE_ARCH_IMAGE = '/assets/images/sheesh_mahal_couple_arch_1794986067429.jpg';
 
 export const CEREMONIES: CeremonyItem[] = [
   {
@@ -185,7 +185,7 @@ export const CEREMONIES: CeremonyItem[] = [
       hi: 'पीला, केसरिया एवं हाथीदांत सूती रेशम परिधान',
     },
     accentHex: '#C88A2B',
-    image: '/src/assets/images/mehendi_haldi_painting_1794564897730.jpg',
+    image: '/assets/images/mehendi_haldi_painting_1794564897730.jpg',
     imageAlt: 'Mewar miniature painting of a sunlit palace courtyard prepared with turmeric bowls and marigold garlands',
     rituals: [
       {
@@ -244,7 +244,7 @@ export const CEREMONIES: CeremonyItem[] = [
       hi: 'पन्ना हरा, लहरिया सिल्क एवं राजस्थानी बंधेज',
     },
     accentHex: '#2F6B4F',
-    image: '/src/assets/images/jharokha_courtyard_dusk_1794564897495.jpg',
+    image: '/assets/images/jharokha_courtyard_dusk_1794564897495.jpg',
     imageAlt: 'Sandstone palace courtyard at dusk glowing with brass oil diyas and marigold garlands',
     rituals: [
       {
@@ -303,7 +303,7 @@ export const CEREMONIES: CeremonyItem[] = [
       hi: 'रात्रि नीला, सुनहरा एवं राजसी पारंपरिक परिधान',
     },
     accentHex: '#233559',
-    image: '/src/assets/images/sangeet_palace_night_1794564898780.jpg',
+    image: '/assets/images/sangeet_palace_night_1794564898780.jpg',
     imageAlt: 'Lakeside Rajasthani palace terrace at night illuminated by hanging brass lanterns and floating candles',
     rituals: [
       {
@@ -362,7 +362,7 @@ export const CEREMONIES: CeremonyItem[] = [
       hi: 'सिंदूरी लाल, बनारसी एवं सुनहरा पारंपरिक परिधान',
     },
     accentHex: '#9E2A2B',
-    image: '/src/assets/images/mandap_pheras_courtyard_1794564899328.jpg',
+    image: '/assets/images/mandap_pheras_courtyard_1794564899328.jpg',
     imageAlt: 'Grand Rajasthani sandstone wedding mandap adorned with crimson roses, marigolds, and flickering oil lamps',
     rituals: [
       {
