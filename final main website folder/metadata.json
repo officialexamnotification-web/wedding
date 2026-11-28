@@ -1,6 +1,0 @@
-{
-  "name": "Jharokha — Royal Rajasthani Wedding Invitation",
-  "description": "An interactive Rajasthani heritage wedding invitation featuring carved haveli doors, a twilight diya courtyard, 3D flippable Mewar ceremony cards, bilingual English/Hindi support, and function-by-function RSVP.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

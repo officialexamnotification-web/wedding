@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45.11" stroke="currentColor" stroke-width="0.9" stroke-dasharray="4.5 3" opacity="0.45"/><rect x="10" y="10" width="80" height="80" rx="13" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/><g transform="scale(0.98) translate(1, 1)"><g stroke="currentColor" fill="currentColor">
-      <ellipse cx="50" cy="72" rx="38" ry="12" fill-opacity="0.18" stroke-width="2.2"/>
-      <polygon points="36,26 58,68 16,68" fill-opacity="0.28" stroke-width="2.2" stroke-linejoin="round"/>
-      <polygon points="62,30 82,68 44,68" fill-opacity="0.34" stroke-width="2.2" stroke-linejoin="round"/>
-      <circle cx="50" cy="72" r="8" fill-opacity="0.5" stroke-width="1.8"/>
-    </g></g></svg>

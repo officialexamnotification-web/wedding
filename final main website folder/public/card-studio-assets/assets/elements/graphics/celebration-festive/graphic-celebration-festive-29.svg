@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="42.74" stroke="currentColor" stroke-width="0.9" stroke-dasharray="4 1.6" opacity="0.45"/><g stroke="currentColor" fill="currentColor">
-      <circle cx="50" cy="64" r="20" fill-opacity="0.26" stroke-width="2.2"/>
-      <path d="M44 44 L47 16 H53 L56 44 Z" fill-opacity="0.35" stroke-width="2"/>
-      <circle cx="50" cy="12" r="4"/>
-      <rect x="34" y="84" width="32" height="6" rx="2"/>
-      <polygon points="50,54 58,64 50,74 42,64" fill-opacity="0.4"/>
-    </g></svg>

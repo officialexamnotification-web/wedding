@@ -1,2 +1,0 @@
-export { offlineTranslateInviteFields } from './offlineTranslate';
-
