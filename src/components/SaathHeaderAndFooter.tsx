@@ -141,7 +141,7 @@ export const SaathHeader: React.FC<SaathHeaderProps> = ({
         <nav
           aria-label="Primary"
           onMouseLeave={() => setTemplatesOpen(false)}
-          className="hidden lg:flex items-center gap-7"
+          className="hidden xl:flex items-center gap-4"
         >
           {/* Templates + Editorial Category Dropdown */}
           <div
@@ -245,6 +245,13 @@ export const SaathHeader: React.FC<SaathHeaderProps> = ({
           >
             {studioLinkLabel}
           </a>
+
+          <a
+            href="/card-studio/jyotish-studio/"
+            className={`${navLinkBase} text-[#5C4649] hover:text-[#231416] after:bg-[#C89B4F] after:scale-x-0 hover:after:scale-x-100`}
+          >
+            Vedic Astrology
+          </a>
         </nav>
 
         {/* Zone 3: Single Primary Action + Mobile Menu Trigger */}
@@ -267,7 +274,7 @@ export const SaathHeader: React.FC<SaathHeaderProps> = ({
             onClick={() => setMobileMenuOpen((v) => !v)}
             aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileMenuOpen}
-            className="grid size-10 place-items-center rounded-full border border-[#E2D3BC] bg-white/85 text-[#231416] hover:border-[#8F1D21]/45 transition-colors lg:hidden cursor-pointer"
+            className="grid size-10 place-items-center rounded-full border border-[#E2D3BC] bg-white/85 text-[#231416] hover:border-[#8F1D21]/45 transition-colors xl:hidden cursor-pointer"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -276,7 +283,7 @@ export const SaathHeader: React.FC<SaathHeaderProps> = ({
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="border-t border-[#EAE0D0] bg-[#FCF9F4]/98 backdrop-blur-lg shadow-[0_24px_48px_-16px_rgba(35,20,22,0.2)] lg:hidden">
+        <div className="border-t border-[#EAE0D0] bg-[#FCF9F4]/98 backdrop-blur-lg shadow-[0_24px_48px_-16px_rgba(35,20,22,0.2)] xl:hidden">
           <div className="mx-auto max-w-[1280px] px-5 py-4 space-y-4">
             <div className="flex flex-col gap-1 text-[15px] font-medium text-[#231416]">
               <button
@@ -323,6 +330,13 @@ export const SaathHeader: React.FC<SaathHeaderProps> = ({
                 className="flex min-h-[44px] items-center rounded-xl px-3.5 py-2.5 hover:bg-[#F3E9DB] transition-colors"
               >
                 {studioLinkLabel}
+              </a>
+              <a
+                href="/card-studio/jyotish-studio/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex min-h-[44px] items-center rounded-xl px-3.5 py-2.5 hover:bg-[#F3E9DB] transition-colors"
+              >
+                Vedic Astrology
               </a>
             </div>
 
