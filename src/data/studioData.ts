@@ -300,7 +300,7 @@ export const STUDIO_THEMES: InviteTheme[] = [
     panoramicBgHex: '#170C1D',
     panoramicBorderHex: '#C99C88',
     panoramicLightText: true,
-    image: '/src/assets/images/sheesh_mahal_unlit_1795031594306.jpg',
+    image: '/assets/images/sheesh_mahal_unlit_1795031594306.jpg',
     imageAlt:
       'Wedding invitation design: a moonlit Rajasthani Sheesh Mahal mirror palace dome in plum and rose gold with an unlit brass diya resting on the sill',
     deliverables: [
@@ -580,7 +580,7 @@ export const STUDIO_THEMES: InviteTheme[] = [
     panoramicBgHex: '#1D142B',
     panoramicBorderHex: '#C9932A',
     panoramicLightText: true,
-    image: '/src/assets/images/paithani_antarpat_cover_1794751701706.jpg',
+    image: '/assets/images/paithani_antarpat_cover_1794751701706.jpg',
     imageAlt: 'Maharashtrian wada courtyard with lotus-motif Paithani silk Antarpat, rangoli, brass bell and twilight drapes',
     deliverables: [
       'Multi-Fold Silk Antarpat Drop & Live Akshata Rain',
@@ -611,7 +611,7 @@ export const STUDIO_THEMES: InviteTheme[] = [
     panoramicBgHex: '#F9EAC6',
     panoramicBorderHex: '#F29F05',
     panoramicLightText: false,
-    image: '/src/assets/images/genda_curtain_closed_1794743950096.jpg',
+    image: '/assets/images/genda_curtain_closed_1794743950096.jpg',
     imageAlt: 'Rajasthani sandstone doorway completely curtained in vertical strands of bright marigold garlands and mango-leaf toran',
     deliverables: [
       'Parting Marigold Curtain & Petals Reveal + Panoramic Mode',
@@ -1069,7 +1069,7 @@ export const STUDIO_THEMES: InviteTheme[] = [
     panoramicBgHex: '#340912',
     panoramicBorderHex: '#E5B966',
     panoramicLightText: true,
-    image: '/src/assets/images/kohinoor_seal_closed_1794831319288.jpg',
+    image: '/assets/images/kohinoor_seal_closed_1794831319288.jpg',
     imageAlt: 'Deep sindoori maroon raw silk wedding stationery with embossed antique gold wax seal',
     deliverables: [
       'Antique Gold Wax-Crest Unseal & Silk Folio Reveal',
