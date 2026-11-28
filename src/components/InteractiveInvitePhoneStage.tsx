@@ -1469,6 +1469,68 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
     };
   }, [bodyOpen, stageLang, theme.id]);
 
+  // Some mobile in-app browsers do not forward vertical swipes to a nested
+  // overflow scroller when the invitation is shown inside the fixed phone
+  // preview. Preserve native scrolling, with a touch-drag fallback for those
+  // WebViews; interactive controls keep their own gestures.
+  useEffect(() => {
+    if (!bodyOpen) return;
+    const rootEl = scrollContainerRef.current;
+    if (!rootEl) return;
+
+    let startX: number | null = null;
+    let startY: number | null = null;
+    let startScrollTop = 0;
+
+    const onTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1) {
+        startX = startY = null;
+        return;
+      }
+
+      const target = event.target instanceof Element ? event.target : null;
+      if (
+        target?.closest(
+          'button, a, input, textarea, select, canvas, video, audio, [role="button"], [style*="touch-action: none"], [style*="touch-action:none"]'
+        )
+      ) {
+        startX = startY = null;
+        return;
+      }
+
+      startX = event.touches[0].clientX;
+      startY = event.touches[0].clientY;
+      startScrollTop = rootEl.scrollTop;
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (startX === null || startY === null || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      const deltaX = touch.clientX - startX;
+      const deltaY = touch.clientY - startY;
+      if (Math.abs(deltaY) < 8 || Math.abs(deltaY) <= Math.abs(deltaX)) return;
+
+      if (!event.cancelable) return;
+      event.preventDefault();
+      rootEl.scrollTop = startScrollTop - deltaY;
+    };
+
+    const resetTouch = () => {
+      startX = startY = null;
+    };
+
+    rootEl.addEventListener('touchstart', onTouchStart, { passive: true });
+    rootEl.addEventListener('touchmove', onTouchMove, { passive: false });
+    rootEl.addEventListener('touchend', resetTouch, { passive: true });
+    rootEl.addEventListener('touchcancel', resetTouch, { passive: true });
+    return () => {
+      rootEl.removeEventListener('touchstart', onTouchStart);
+      rootEl.removeEventListener('touchmove', onTouchMove);
+      rootEl.removeEventListener('touchend', resetTouch);
+      rootEl.removeEventListener('touchcancel', resetTouch);
+    };
+  }, [bodyOpen]);
+
   const hasCustom = Boolean(customization);
   const rawGroom = hasCustom
     ? (isBirthday && !isGirlHindu ? customization?.primaryName : isBirthday ? groomName : customization?.primaryName)?.trim() ?? ''

@@ -70,57 +70,34 @@ export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-[radial-gradient(circle_at_center,#251917_0%,#110A0A_78%)] sm:p-5 backdrop-blur-sm"
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-[radial-gradient(circle_at_center,#251917_0%,#110A0A_78%)] p-3 sm:p-5 backdrop-blur-sm"
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close card preview"
-          className="fixed top-3.5 left-3.5 sm:left-auto sm:top-5 sm:right-5 z-[110] grid size-9 sm:size-10 place-items-center rounded-full bg-[#160E0A]/75 sm:bg-white/10 text-[#F5D68A] sm:text-white/90 border border-[#E6B86A]/35 sm:border-white/15 backdrop-blur-md hover:bg-[#9E2A2B] hover:text-white transition-colors cursor-pointer shadow-lg"
+          className="fixed top-3.5 right-3.5 sm:top-5 sm:right-5 z-[110] grid size-9 sm:size-10 place-items-center rounded-full bg-[#160E0A]/75 sm:bg-white/10 text-[#F5D68A] sm:text-white/90 border border-[#E6B86A]/35 sm:border-white/15 backdrop-blur-md hover:bg-[#9E2A2B] hover:text-white transition-colors cursor-pointer shadow-lg"
         >
           <X className="h-4 w-4" />
         </button>
 
-        {/* Realistic Titanium iPhone Mockup on Desktop/Tablet (matching Template Page Phone); Full-Height Clean Screen on Small Mobile */}
+        {/* Use the same 300px mobile / 380px desktop phone chassis as the template page. */}
         <motion.div
           initial={{ scale: 0.96, opacity: 0, y: 14 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.96, opacity: 0, y: 14 }}
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full h-dvh sm:h-auto sm:w-[min(390px,calc(90dvh*0.445),90vw)]"
+          className="relative w-[min(300px,calc(90dvh*0.445),90vw)] sm:w-[min(380px,calc(90dvh*0.445),90vw)]"
         >
-          {/* Mobile Full-Viewport Screen */}
-          <div
-            className={`relative h-full w-full overflow-hidden ${
-              matchMainSiteCard ? 'bg-[#F3EAE3]' : 'bg-[#120D0A]'
-            } sm:hidden`}
-          >
-            <InteractiveInvitePhoneStage
-              theme={theme}
-              lang={lang}
-              groomName={customization?.primaryName || groomName}
-              brideName={customization?.partnerName || brideName}
-              weddingDateLabel={customization?.dateLabel || weddingDateLabel}
-              cityLabel={customization?.cityLabel || cityLabel}
-              compact={matchMainSiteCard}
-              fullPreview={theme.id === 'sheesh-mahal'}
-              customization={customization}
-              guestFamilyGreeting={guestFamilyGreeting}
-              allowedEventIds={allowedEventIds}
-              onSubmitRsvp={onSubmitRsvp}
-            />
-          </div>
-
-          {/* Desktop / Tablet Realistic Titanium iPhone Chassis */}
-          <div className="hidden sm:block @container relative w-full">
+          <div className="@container relative w-full">
             <div
               className="relative rounded-[15.8cqw] p-[0.85cqw]"
               style={{
                 background:
                   'linear-gradient(160deg, #6b6b70 0%, #3a3a3d 18%, #1d1d20 46%, #3a3a3d 70%, #6b6b70 100%)',
                 boxShadow:
-                  'inset 0 0 0 0.2cqw #6b6b7066, inset 0 0.35cqw 0.5cqw rgba(255,255,255,0.22), 0 28px 80px -12px rgba(0,0,0,0.85), 0 0 60px rgba(230,184,106,0.12)',
+                  'inset 0 0 0 0.2cqw #6b6b7066, inset 0 0.35cqw 0.5cqw rgba(255,255,255,0.18), 0 2.2cqw 4.5cqw -1cqw rgba(42,19,22,0.42), 0 7cqw 14cqw -3cqw rgba(42,19,22,0.28)',
               }}
             >
               {/* Side Hardware Buttons */}
@@ -176,7 +153,7 @@ export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
               />
 
               {/* Black Inner Bezel */}
-              <div className="rounded-[14.95cqw] bg-black p-[1.75cqw] shadow-[inset_0_0_0_0.15cqw_rgba(255,255,255,0.08)]">
+              <div className="rounded-[14.95cqw] bg-black p-[1.75cqw] shadow-[inset_0_0_0_0.15cqw_rgba(255,255,255,0.07)]">
                 <div className="relative overflow-hidden rounded-[13.2cqw] bg-black">
                   {/* Exact 390:844 Live Interactive Phone Screen */}
                   <div
