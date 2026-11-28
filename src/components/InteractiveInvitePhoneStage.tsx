@@ -1258,13 +1258,13 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                   ? 5150
                   : theme.id === 'kalgi'
                     ? 4950
-                    : theme.id === 'shubh-aarti' || theme.id === 'vrindavan' || theme.id === 'jharokha' || theme.id === 'devi-kumkum'
+                    : theme.id === 'shubh-aarti' || theme.id === 'vrindavan' || theme.id === 'jharokha'
                       ? 4900
                       : theme.id === 'confetti-garden' || theme.id === 'ladli-kanya'
                         ? 4850
                         : theme.id === 'veer-balak'
                           ? 4800
-                          : theme.id === 'kesariya'
+                          : theme.id === 'devi-kumkum' || theme.id === 'kesariya'
                             ? 4750
                             : theme.id === 'pattu-zari'
                               ? 4650
@@ -3171,7 +3171,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[7%] pb-[5%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11.5%]' : 'pt-[7.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -3278,7 +3278,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[7%] pb-[4.5%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11.5%]' : 'pt-[7%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -3385,7 +3385,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[7%] pb-[4.5%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11%]' : 'pt-[7%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -3425,15 +3425,15 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
             <span className="size-1.5 rotate-45 bg-[#FFE39E] shadow-[0_1px_6px_rgba(0,0,0,0.95)]" />
             <span className="h-px w-10 bg-[#F4B844]/85 shadow-[0_1px_6px_rgba(0,0,0,0.95)]" />
           </div>
-          {dateCityLine && (
+          {cityDisplay && (
             <p
-              className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-[#FFFFFF]"
+              className="mt-1.5 text-[10.5px] font-bold uppercase tracking-[0.24em] text-[#FFFFFF]"
               style={{
                 textShadow:
                   '0 2px 4px rgba(0,0,0,1), 0 4px 14px rgba(0,0,0,0.98), 0 0 22px rgba(0,0,0,0.95)',
               }}
             >
-              {dateCityLine}
+              {cityDisplay}
             </p>
           )}
           <p
@@ -3492,7 +3492,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14%]' : 'pt-[13.5%]'
+          compact ? 'pt-[9%]' : 'pt-[5.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -3602,7 +3602,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11%]' : 'pt-[7%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -3712,7 +3712,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[10.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -3810,7 +3810,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[10.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -3908,7 +3908,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[10.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -4016,7 +4016,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[10.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -4114,7 +4114,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -4212,7 +4212,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -4320,7 +4320,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -4428,7 +4428,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -4536,7 +4536,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -4634,7 +4634,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -4742,7 +4742,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -4850,7 +4850,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
 
       <div
         className={`relative z-10 flex h-full flex-col items-center justify-between px-[8%] pb-[4%] text-center ${
-          compact ? 'pt-[14.5%]' : 'pt-[14%]'
+          compact ? 'pt-[11.5%]' : 'pt-[6.5%]'
         }`}
       >
         <div className="flex flex-col items-center">
@@ -6659,7 +6659,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
       )}
 
       {/* 5. SHEESH MAHAL: CLEAN TOUCH-THE-DIYA COVER (NO TOP CORNER ORNAMENTS OR TINY SHAPES) */}
-      {theme.id === 'sheesh-mahal' && !theme.coverVideoUrl && (
+      {theme.id === 'sheesh-mahal' && (
         <div
           onClick={(e) => triggerOpenGate(e)}
           className={`absolute inset-0 z-20 overflow-hidden bg-[#120A18] transition-opacity duration-700 ${
@@ -9234,7 +9234,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
           <video
             ref={videoCoverRef}
             src={theme.coverVideoUrl}
-            poster={theme.coverPosterUrl || theme.image}
+            poster={theme.image}
             muted
             playsInline
             preload="auto"
@@ -9265,13 +9265,13 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                       ? 5.15
                       : theme.id === 'kalgi'
                         ? 4.95
-                        : theme.id === 'shubh-aarti' || theme.id === 'vrindavan' || theme.id === 'jharokha' || theme.id === 'devi-kumkum'
+                        : theme.id === 'shubh-aarti' || theme.id === 'vrindavan' || theme.id === 'jharokha'
                           ? 4.9
                           : theme.id === 'confetti-garden' || theme.id === 'ladli-kanya'
                             ? 4.85
                             : theme.id === 'veer-balak'
                               ? 4.8
-                              : theme.id === 'kesariya'
+                              : theme.id === 'devi-kumkum' || theme.id === 'kesariya'
                                 ? 4.75
                                 : theme.id === 'pattu-zari'
                                   ? 4.65
@@ -9304,7 +9304,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
           {/* Frame-Locked Resting Envelope Poster while closed so the Wax Seal is 100% aligned before video seek */}
           {!isOpened && (
             <img
-              src={theme.coverPosterUrl || theme.image}
+              src={theme.image}
               alt={theme.imageAlt}
               draggable={false}
               className={`pointer-events-none absolute inset-0 h-full w-full object-cover select-none ${
@@ -9360,7 +9360,6 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
           {(theme.id === 'jashn-birthday' ||
             theme.id === 'kanha-makhan' ||
             theme.id === 'devi-kumkum' ||
-            theme.id === 'ladli-kanya' ||
             theme.id === 'roshni' ||
             theme.id === 'shubh-aarti' ||
             theme.id === 'rangoli-utsav' ||
@@ -9375,7 +9374,6 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                 theme.id === 'temple' ||
                 theme.id === 'jharokha' ||
                 theme.id === 'baal-gopal' ||
-                theme.id === 'ladli-kanya' ||
                 theme.id === 'deepotsav'
                   ? 'h-[30%]'
                   : 'h-[35%]'
@@ -9398,11 +9396,9 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                               ? 'radial-gradient(ellipse 76% 64% at 50% 24%, rgba(7, 41, 38, 0.88) 0%, rgba(7, 41, 38, 0.62) 55%, transparent 100%), linear-gradient(180deg, rgba(7, 41, 38, 0.88) 0%, rgba(7, 41, 38, 0.52) 48%, transparent 100%)'
                               : theme.id === 'deepotsav'
                                 ? 'radial-gradient(ellipse 76% 64% at 50% 22%, rgba(11, 17, 32, 0.82) 0%, rgba(11, 17, 32, 0.48) 55%, transparent 100%), linear-gradient(180deg, rgba(11, 17, 32, 0.82) 0%, rgba(11, 17, 32, 0.42) 48%, transparent 100%)'
-                                : theme.id === 'ladli-kanya'
-                                  ? 'radial-gradient(ellipse 76% 62% at 50% 22%, rgba(52, 12, 26, 0.88) 0%, rgba(52, 12, 26, 0.6) 54%, transparent 100%), linear-gradient(180deg, rgba(52, 12, 26, 0.88) 0%, rgba(52, 12, 26, 0.5) 48%, transparent 100%)'
-                                  : theme.id === 'devi-kumkum' || theme.id === 'roshni'
-                                    ? 'radial-gradient(ellipse 74% 58% at 50% 22%, rgba(36, 6, 16, 0.88) 0%, rgba(36, 6, 16, 0.62) 52%, transparent 100%), linear-gradient(180deg, rgba(36, 6, 16, 0.88) 0%, rgba(36, 6, 16, 0.54) 48%, transparent 100%)'
-                                    : 'radial-gradient(ellipse 72% 60% at 50% 28%, rgba(8, 5, 12, 0.88) 0%, rgba(8, 5, 12, 0.65) 52%, transparent 100%), linear-gradient(180deg, rgba(8, 5, 12, 0.86) 0%, rgba(8, 5, 12, 0.58) 48%, transparent 100%)',
+                                : theme.id === 'devi-kumkum' || theme.id === 'roshni'
+                                  ? 'radial-gradient(ellipse 74% 58% at 50% 22%, rgba(36, 6, 16, 0.88) 0%, rgba(36, 6, 16, 0.62) 52%, transparent 100%), linear-gradient(180deg, rgba(36, 6, 16, 0.88) 0%, rgba(36, 6, 16, 0.54) 48%, transparent 100%)'
+                                  : 'radial-gradient(ellipse 72% 60% at 50% 28%, rgba(8, 5, 12, 0.88) 0%, rgba(8, 5, 12, 0.65) 52%, transparent 100%), linear-gradient(180deg, rgba(8, 5, 12, 0.86) 0%, rgba(8, 5, 12, 0.58) 48%, transparent 100%)',
               }}
             />
           )}
@@ -9474,13 +9470,28 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
           ) : (
           <div
             className={`pointer-events-none absolute inset-x-0 top-0 z-25 flex flex-col items-center text-center transition-opacity duration-350 ${
-              compact ? 'px-10 pt-[14.5%]' : 'px-11 pt-[14%]'
+              theme.id === 'rangoli-utsav' ||
+              theme.id === 'gulab-baisa' ||
+              theme.id === 'veer-balak' ||
+              theme.id === 'temple' ||
+              theme.id === 'jharokha' ||
+              theme.id === 'pattu-zari' ||
+              theme.id === 'baal-gopal' ||
+              theme.id === 'kesariya' ||
+              theme.id === 'kalgi' ||
+              theme.id === 'deepotsav' ||
+              theme.id === 'jashn-birthday'
+                ? compact
+                  ? 'px-11 pt-12'
+                  : 'px-12 pt-11'
+                : compact
+                  ? 'px-11 pt-10'
+                  : 'px-12 pt-9'
             } ${isOpened ? 'opacity-0' : 'opacity-100'}`}
           >
             {theme.id === 'jashn-birthday' ||
             theme.id === 'kanha-makhan' ||
             theme.id === 'devi-kumkum' ||
-            theme.id === 'ladli-kanya' ||
             theme.id === 'roshni' ||
             theme.id === 'shubh-aarti' ||
             theme.id === 'rangoli-utsav' ||
@@ -9508,41 +9519,37 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                       ? stageLang === 'en'
                         ? '॥ Kumkum Kanya · Shubh Janmotsav ॥'
                         : '॥ कुमकुम कन्या · शुभ जन्मोत्सव ॥'
-                      : theme.id === 'ladli-kanya'
+                      : theme.id === 'roshni'
                         ? stageLang === 'en'
-                          ? '॥ Nandini Jhula · Shubh Janmotsav ॥'
-                          : '॥ नंदिनी झूला · शुभ जन्मोत्सव ॥'
-                        : theme.id === 'roshni'
+                          ? '॥ Chiraag Mandap · Ivory Jaali ॥'
+                          : '॥ चिराग़ मंडप · शाही निमंत्रण ॥'
+                        : theme.id === 'shubh-aarti'
                           ? stageLang === 'en'
-                            ? '॥ Chiraag Mandap · Ivory Jaali ॥'
-                            : '॥ चिराग़ मंडप · शाही निमंत्रण ॥'
-                          : theme.id === 'shubh-aarti'
+                            ? '॥ Ayushman Bhava · Kalash Pravesh ॥'
+                            : '॥ आयुष्मान् भव · कलश प्रवेश ॥'
+                          : theme.id === 'rangoli-utsav'
                             ? stageLang === 'en'
-                              ? '॥ Ayushman Bhava · Kalash Pravesh ॥'
-                              : '॥ आयुष्मान् भव · कलश प्रवेश ॥'
-                            : theme.id === 'rangoli-utsav'
+                              ? '॥ Alpana Utsav · Shubh Janmotsav ॥'
+                              : '॥ अल्पना उत्सव · शुभ जन्मोत्सव ॥'
+                            : theme.id === 'temple'
                               ? stageLang === 'en'
-                                ? '॥ Alpana Utsav · Shubh Janmotsav ॥'
-                                : '॥ अल्पना उत्सव · शुभ जन्मोत्सव ॥'
-                              : theme.id === 'temple'
+                                ? '॥ Devasthan Kovil · Shubh Vivah ॥'
+                                : '॥ देवस्थान कोविल · शुभ विवाह ॥'
+                              : theme.id === 'jharokha'
                                 ? stageLang === 'en'
-                                  ? '॥ Devasthan Kovil · Shubh Vivah ॥'
-                                  : '॥ देवस्थान कोविल · शुभ विवाह ॥'
-                                : theme.id === 'jharokha'
+                                  ? '॥ Padharo Mhare Des · Rajwada Aagman ॥'
+                                  : '॥ पधारो म्हारे देश · राजवाड़ा आगमन ॥'
+                                : theme.id === 'baal-gopal'
                                   ? stageLang === 'en'
-                                    ? '॥ Padharo Mhare Des · Rajwada Aagman ॥'
-                                    : '॥ पधारो म्हारे देश · राजवाड़ा आगमन ॥'
-                                  : theme.id === 'baal-gopal'
+                                    ? '॥ Murlidhar Leela · Shubh Janmotsav ॥'
+                                    : '॥ मुरलीधर लीला · शुभ जन्मोत्सव ॥'
+                                  : theme.id === 'deepotsav'
                                     ? stageLang === 'en'
-                                      ? '॥ Murlidhar Leela · Shubh Janmotsav ॥'
-                                      : '॥ मुरलीधर लीला · शुभ जन्मोत्सव ॥'
-                                    : theme.id === 'deepotsav'
-                                      ? stageLang === 'en'
-                                        ? '॥ Ghat Deepmala · Shubh Vivah ॥'
-                                        : '॥ घाट दीपमाला · शुभ विवाह ॥'
-                                      : stageLang === 'en'
-                                        ? 'Candlelight Birthday Soirée'
-                                        : 'शमा महोत्सव · जन्मदिन संध्या'}
+                                      ? '॥ Ghat Deepmala · Shubh Vivah ॥'
+                                      : '॥ घाट दीपमाला · शुभ विवाह ॥'
+                                    : stageLang === 'en'
+                                      ? 'Tap to Ignite the Candles'
+                                      : 'मोमबत्तियाँ जलाने के लिए टैप करें'}
                 </p>
                 {theme.id === 'roshni' || theme.id === 'temple' || theme.id === 'jharokha' || theme.id === 'deepotsav' ? (
                   stageLang === 'en' ? (
@@ -9730,13 +9737,9 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                   triggerOpenGate(e);
                 }}
                 aria-label={
-                  theme.id === 'sheesh-mahal'
-                    ? 'Tap the brass diya to light the Sheesh Mahal and open invitation'
-                    : theme.id === 'deepotsav'
+                  theme.id === 'deepotsav'
                     ? 'Tap to light the hanging lamp and open invitation'
-                    : theme.id === 'jashn-birthday'
-                      ? 'Tap to ignite the candles and open invitation'
-                      : `Tap ${theme.sealConfig.sealNameEn} to unseal and open invitation`
+                    : `Tap ${theme.sealConfig.sealNameEn} to unseal and open invitation`
                 }
                 className={`group/seal relative h-full w-full rounded-full cursor-pointer focus:outline-none transition-transform duration-200 hover:scale-105 active:scale-95 ${
                   sealNudge
@@ -9754,9 +9757,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
               {/* Floating Seal/Bow Callout Pill anchored to the Hotspot */}
               <span
                 className={`pointer-events-none absolute whitespace-nowrap rounded-full border px-3 py-1 text-[10px] font-semibold tracking-[0.06em] shadow-xl backdrop-blur-md transition-all duration-200 ${
-                  theme.id === 'sheesh-mahal'
-                    ? 'left-1/2 bottom-[110%] -translate-x-1/2'
-                    : theme.id === 'deepotsav'
+                  theme.id === 'deepotsav'
                     ? 'left-[114%] top-1/2 -translate-y-1/2'
                     : 'left-1/2 top-[110%] -translate-x-1/2'
                 } ${
@@ -9811,15 +9812,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                                                                   : 'border-[#E8C56B]/85 bg-[#1B070B]/92 text-[#FAF0DD]'
                 }`}
               >
-                {theme.id === 'sheesh-mahal'
-                  ? sealNudge
-                    ? stageLang === 'en'
-                      ? '✦ Tap ONLY the diya to light the palace ✦'
-                      : '✦ महल को रोशन करने के लिए दीपक छुएँ ✦'
-                    : stageLang === 'en'
-                      ? 'Tap the diya to light the palace'
-                      : 'महल को रोशन करने के लिए दीपक छुएँ'
-                  : theme.id === 'deepotsav'
+                {theme.id === 'deepotsav'
                   ? sealNudge
                     ? stageLang === 'en'
                       ? '← Tap ONLY this Lamp to Light'
@@ -9827,21 +9820,13 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                     : stageLang === 'en'
                       ? '← Tap to Light Lamp'
                       : '← यह दीप जलाएँ'
-                  : theme.id === 'jashn-birthday'
-                    ? sealNudge
-                      ? stageLang === 'en'
-                        ? '✦ TAP ONLY THE CANDLES TO IGNITE ✦'
-                        : '✦ खोलने के लिए सिर्फ मोमबत्तियों पर टैप करें ✦'
-                      : stageLang === 'en'
-                        ? 'TAP TO IGNITE THE CANDLES'
-                        : 'मोमबत्तियाँ जलाने के लिए टैप करें'
-                    : sealNudge
-                      ? stageLang === 'en'
-                        ? `✦ Tap ONLY this ${theme.sealConfig.sealNameEn} to Open ✦`
-                        : `✦ खोलने के लिए सिर्फ इस ${theme.sealConfig.sealNameHi} पर टैप करें ✦`
-                      : stageLang === 'en'
-                        ? `Tap ${theme.sealConfig.sealNameEn} to Open`
-                        : `${theme.sealConfig.sealNameHi} पर टैप करें`}
+                  : sealNudge
+                    ? stageLang === 'en'
+                      ? `✦ Tap ONLY this ${theme.sealConfig.sealNameEn} to Open ✦`
+                      : `✦ खोलने के लिए सिर्फ इस ${theme.sealConfig.sealNameHi} पर टैप करें ✦`
+                    : stageLang === 'en'
+                      ? `Tap ${theme.sealConfig.sealNameEn} to Open`
+                      : `${theme.sealConfig.sealNameHi} पर टैप करें`}
               </span>
             </div>
           )}

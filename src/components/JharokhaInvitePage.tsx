@@ -71,35 +71,35 @@ const MATCHING_PIECES: StationeryPiece[] = [
     label: 'Save-the-date',
     dimensions: '1080×1350',
     aspectClass: 'aspect-[1080/1350]',
-    image: '/assets/images/haveli_carved_doors_1794564897457.jpg',
+    image: '/src/assets/images/haveli_carved_doors_1794564897457.jpg',
   },
   {
     id: 'invite',
     label: 'The printed invitation',
     dimensions: '576×864',
     aspectClass: 'aspect-[576/864]',
-    image: '/assets/images/mandap_pheras_courtyard_1794564899328.jpg',
+    image: '/src/assets/images/mandap_pheras_courtyard_1794564899328.jpg',
   },
   {
     id: 'haldi',
     label: 'Haldi card',
     dimensions: '1080×1350',
     aspectClass: 'aspect-[1080/1350]',
-    image: '/assets/images/mehendi_haldi_painting_1794564897730.jpg',
+    image: '/src/assets/images/mehendi_haldi_painting_1794564897730.jpg',
   },
   {
     id: 'sangeet',
     label: 'Sangeet card',
     dimensions: '1080×1350',
     aspectClass: 'aspect-[1080/1350]',
-    image: '/assets/images/sangeet_palace_night_1794564898780.jpg',
+    image: '/src/assets/images/sangeet_palace_night_1794564898780.jpg',
   },
   {
     id: 'story',
     label: 'Instagram story',
     dimensions: '1080×1920',
     aspectClass: 'aspect-[1080/1920]',
-    image: '/assets/images/jharokha_courtyard_dusk_1794564897495.jpg',
+    image: '/src/assets/images/jharokha_courtyard_dusk_1794564897495.jpg',
   },
 ];
 
@@ -449,7 +449,7 @@ export const JharokhaInvitePage: React.FC<JharokhaInvitePageProps> = ({
             <button
               type="button"
               onClick={handleCreateInviteClick}
-              className="btn btn-primary !h-12 !w-[216px] !px-3 whitespace-nowrap shrink-0"
+              className="btn btn-primary whitespace-nowrap shrink-0"
             >
               Create Free Invite (₹0)
             </button>
@@ -457,7 +457,7 @@ export const JharokhaInvitePage: React.FC<JharokhaInvitePageProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenShareSuite(activeTheme)}
-                className="chip !h-12 !w-[216px] !px-3 gap-1.5 !bg-[#1F6E4A] !text-white hover:!bg-[#18593c] whitespace-nowrap shrink-0"
+                className="chip gap-1.5 !bg-[#1F6E4A] !text-white hover:!bg-[#18593c] whitespace-nowrap shrink-0"
               >
                 <Share2 className="h-3.5 w-3.5" />
                 <span>Publish &amp; Share Free →</span>

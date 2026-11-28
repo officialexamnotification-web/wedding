@@ -24,8 +24,33 @@ const NimantranCrest: React.FC<{ className?: string }> = ({ className = 'h-7 w-7
     aria-hidden="true"
     className={className}
   >
-    <rect x="1.5" y="1.5" width="29" height="29" rx="7" fill="#8F1D21" stroke="#C89B4F" strokeWidth="1.2" />
-    <text x="16" y="17" textAnchor="middle" dominantBaseline="central" fill="#FFF6E8" fontFamily="Tiro Devanagari Hindi, Nirmala UI, serif" fontSize="18" fontWeight="700">नि</text>
+    <rect
+      x="16"
+      y="2.2"
+      width="19.5"
+      height="19.5"
+      rx="3.2"
+      transform="rotate(45 16 2.2)"
+      fill="#8F1D21"
+      stroke="#C89B4F"
+      strokeWidth="1.25"
+    />
+    <rect
+      x="16"
+      y="6.2"
+      width="13.85"
+      height="13.85"
+      rx="1.8"
+      transform="rotate(45 16 6.2)"
+      stroke="#F3D9A4"
+      strokeOpacity="0.65"
+      strokeWidth="0.9"
+    />
+    <path
+      d="M16 9.8C17.3 12.1 19.3 13.7 21.8 16C19.3 18.3 17.3 19.9 16 22.2C14.7 19.9 12.7 18.3 10.2 16C12.7 13.7 14.7 12.1 16 9.8Z"
+      fill="#F7E3B5"
+    />
+    <circle cx="16" cy="16" r="1.8" fill="#8F1D21" />
   </svg>
 );
 
@@ -112,11 +137,11 @@ export const SaathHeader: React.FC<SaathHeaderProps> = ({
           </span>
         </button>
 
-        {/* Zone 2: Clean Single-Line Navigation Links */}
+        {/* Zone 2: 5 Clean Single-Line Navigation Links */}
         <nav
           aria-label="Primary"
           onMouseLeave={() => setTemplatesOpen(false)}
-          className="hidden xl:flex items-center gap-4"
+          className="hidden lg:flex items-center gap-7"
         >
           {/* Templates + Editorial Category Dropdown */}
           <div
@@ -220,13 +245,6 @@ export const SaathHeader: React.FC<SaathHeaderProps> = ({
           >
             {studioLinkLabel}
           </a>
-
-          <a
-            href="/card-studio/jyotish-studio/"
-            className={`${navLinkBase} text-[#5C4649] hover:text-[#231416] after:bg-[#C89B4F] after:scale-x-0 hover:after:scale-x-100`}
-          >
-            Vedic Astrology
-          </a>
         </nav>
 
         {/* Zone 3: Single Primary Action + Mobile Menu Trigger */}
@@ -249,7 +267,7 @@ export const SaathHeader: React.FC<SaathHeaderProps> = ({
             onClick={() => setMobileMenuOpen((v) => !v)}
             aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileMenuOpen}
-            className="grid size-10 place-items-center rounded-full border border-[#E2D3BC] bg-white/85 text-[#231416] hover:border-[#8F1D21]/45 transition-colors xl:hidden cursor-pointer"
+            className="grid size-10 place-items-center rounded-full border border-[#E2D3BC] bg-white/85 text-[#231416] hover:border-[#8F1D21]/45 transition-colors lg:hidden cursor-pointer"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -258,7 +276,7 @@ export const SaathHeader: React.FC<SaathHeaderProps> = ({
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="border-t border-[#EAE0D0] bg-[#FCF9F4]/98 backdrop-blur-lg shadow-[0_24px_48px_-16px_rgba(35,20,22,0.2)] xl:hidden">
+        <div className="border-t border-[#EAE0D0] bg-[#FCF9F4]/98 backdrop-blur-lg shadow-[0_24px_48px_-16px_rgba(35,20,22,0.2)] lg:hidden">
           <div className="mx-auto max-w-[1280px] px-5 py-4 space-y-4">
             <div className="flex flex-col gap-1 text-[15px] font-medium text-[#231416]">
               <button
@@ -305,13 +323,6 @@ export const SaathHeader: React.FC<SaathHeaderProps> = ({
                 className="flex min-h-[44px] items-center rounded-xl px-3.5 py-2.5 hover:bg-[#F3E9DB] transition-colors"
               >
                 {studioLinkLabel}
-              </a>
-              <a
-                href="/card-studio/jyotish-studio/"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex min-h-[44px] items-center rounded-xl px-3.5 py-2.5 hover:bg-[#F3E9DB] transition-colors"
-              >
-                Vedic Astrology
               </a>
             </div>
 

@@ -181,7 +181,7 @@ export const VenueStaySection: React.FC<VenueStaySectionProps> = ({ language }) 
           <div className="lg:col-span-5">
             <div className="relative h-full min-h-[380px] overflow-hidden rounded-t-[180px] rounded-b-xl border border-[#C88A2B]/50 bg-[#1B130E] shadow-lg">
               <img
-                src="/assets/images/sangeet_palace_night_1794564898780.jpg"
+                src="/src/assets/images/sangeet_palace_night_1794564898780.jpg"
                 alt="Jagmandir Island Palace on Lake Pichola lit by lanterns at night"
                 referrerPolicy="no-referrer"
                 className="h-full w-full object-cover"

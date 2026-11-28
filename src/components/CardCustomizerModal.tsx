@@ -20,7 +20,9 @@ import {
   Upload,
   Share2,
   Languages,
+  RefreshCw,
   Loader2,
+  AlertCircle,
   MapPin,
   Search,
   Navigation,
@@ -51,7 +53,9 @@ import {
   storeCustomAudio,
 } from '../utils/mediaUpload';
 import {
+  isBrowserOffline,
   offlineTranslateInviteFields,
+  translateInviteFields,
 } from '../utils/translateInvite';
 import {
   buildDirectGoogleMapsUrl,
@@ -239,8 +243,10 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
     customization?.cardLangMode === 'hi' ? 'hi' : 'en'
   );
   const [inputLang, setInputLang] = useState<Language>(customization?.editorInputLang || 'en');
-  const showBothManual = false;
-  const [translateStatus, setTranslateStatus] = useState<'idle' | 'fallback'>('idle');
+  const [showBothManual, setShowBothManual] = useState(false);
+  const [translating, setTranslating] = useState(false);
+  const [translateStatus, setTranslateStatus] = useState<'idle' | 'synced' | 'offline' | 'error'>('idle');
+  const [translateError, setTranslateError] = useState<string | null>(null);
   const [mobileShowPreview, setMobileShowPreview] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [shareUrlPreview, setShareUrlPreview] = useState<string | null>(null);
@@ -262,6 +268,9 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
   const testAudioRef = useRef<HTMLAudioElement | null>(null);
   const latestCustomRef = useRef<CardCustomization | null>(customization);
   const latestThemeRef = useRef<InviteTheme | null>(theme);
+  const pendingFieldsRef = useRef<Map<string, { sourceLang: Language; value: string }>>(new Map());
+  const debounceTimerRef = useRef<number | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const locationTimerRef = useRef<number | null>(null);
   const locationAbortRef = useRef<AbortController | null>(null);
 
@@ -276,6 +285,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
     setMediaNotice(null);
     setTestingSong(false);
     setTranslateStatus('idle');
+    setTranslateError(null);
     setLocationQuery('');
     setLocationSuggestions([]);
     setLocationFeedback(null);
@@ -284,6 +294,15 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
     setResolvingMapLink(false);
     setInputLang(customization?.editorInputLang || 'en');
     setPreviewLang(customization?.cardLangMode === 'hi' ? 'hi' : 'en');
+    pendingFieldsRef.current.clear();
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     if (locationTimerRef.current) {
       window.clearTimeout(locationTimerRef.current);
       locationTimerRef.current = null;
@@ -301,6 +320,12 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
 
   useEffect(() => {
     return () => {
+      if (debounceTimerRef.current) {
+        window.clearTimeout(debounceTimerRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
       if (locationTimerRef.current) {
         window.clearTimeout(locationTimerRef.current);
       }
@@ -327,6 +352,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
   const isBoyHindu = theme.birthdayFlavor === 'hindu' && theme.birthdayGender === 'boy';
   const isBaby = theme.birthdayFlavor === 'baby';
   const cardLangMode: CardLanguageMode = customization.cardLangMode || 'both';
+  const otherLang: Language = inputLang === 'en' ? 'hi' : 'en';
 
   const primaryNameLabelEn = isGirlHindu
     ? "Girl's Name"
@@ -370,8 +396,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
   const applyTranslatedMap = (
     targetLang: Language,
     translated: Record<string, string>,
-    sentSnapshot: Map<string, string>,
-    nextCardLangMode?: CardLanguageMode
+    sentSnapshot: Map<string, string>
   ) => {
     const current = latestCustomRef.current;
     const currentTheme = latestThemeRef.current;
@@ -405,17 +430,20 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
         (next as unknown as Record<string, unknown>)[targetProp] = convertedVal;
       }
 
+      const pendingEntry = pendingFieldsRef.current.get(key);
+      if (pendingEntry && pendingEntry.value === sentSnapshot.get(key)) {
+        pendingFieldsRef.current.delete(key);
+      }
     }
 
     if (eventsPatched) {
       next = { ...next, events: nextEvents };
     }
-    if (nextCardLangMode) next.cardLangMode = nextCardLangMode;
     next.updatedAt = Date.now();
     onUpdate(currentTheme.id, next);
   };
 
-  const collectFieldsForOfflineTranslation = (current: CardCustomization, source: Language) => {
+  const collectAllFieldsForSync = (current: CardCustomization, source: Language) => {
     const fieldsToConvert: Record<string, string> = {};
     const sentSnapshot = new Map<string, string>();
     for (const [pairKey, pair] of Object.entries(TOP_FIELD_PAIRS)) {
@@ -460,21 +488,183 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
     return { fieldsToConvert, sentSnapshot };
   };
 
+  const flushPendingTranslations = async (explicitSource?: Language) => {
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+
+    const current = latestCustomRef.current;
+    const currentTheme = latestThemeRef.current;
+    if (!current || !currentTheme) return;
+
+    const mode = current.cardLangMode || 'both';
+    const source = explicitSource || inputLang;
+    const target: Language = source === 'en' ? 'hi' : 'en';
+
+    // Skip work if the card is locked strictly to the exact language the user is typing in
+    if ((mode === 'en' && source === 'en') || (mode === 'hi' && source === 'hi')) {
+      pendingFieldsRef.current.clear();
+      return;
+    }
+
+    const batch: Record<string, string> = {};
+    const sentSnapshot = new Map<string, string>();
+    pendingFieldsRef.current.forEach((entry, key) => {
+      if (entry.sourceLang === source && entry.value.trim()) {
+        batch[key] = entry.value;
+        sentSnapshot.set(key, entry.value);
+      }
+    });
+
+    if (Object.keys(batch).length === 0) return;
+
+    // Instant deterministic local converter when browser is offline
+    if (isBrowserOffline()) {
+      const localConverted = offlineTranslateInviteFields({
+        sourceLang: source,
+        targetLang: target,
+        fields: batch,
+      });
+      applyTranslatedMap(target, localConverted, sentSnapshot);
+      setTranslateStatus('offline');
+      setTranslateError(null);
+      return;
+    }
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setTranslating(true);
+    setTranslateError(null);
+    try {
+      const translated = await translateInviteFields({
+        sourceLang: source,
+        targetLang: target,
+        isBirthday: currentTheme.celebrationType === 'birthday',
+        fields: batch,
+        signal: controller.signal,
+      });
+      if (controller.signal.aborted) return;
+      applyTranslatedMap(target, translated, sentSnapshot);
+      setTranslateStatus('synced');
+    } catch (err) {
+      if (controller.signal.aborted) return;
+      setTranslateStatus('error');
+      setTranslateError(
+        err instanceof Error ? err.message : 'Auto-conversion failed. Retry online or use Convert Offline.'
+      );
+    } finally {
+      if (!controller.signal.aborted) {
+        setTranslating(false);
+      }
+    }
+  };
+
+  const queueAutoTranslate = (key: string, sourceLang: Language, value: string) => {
+    const mode = latestCustomRef.current?.cardLangMode || 'both';
+    if ((mode === 'en' && sourceLang === 'en') || (mode === 'hi' && sourceLang === 'hi')) {
+      return;
+    }
+    if (!value.trim()) {
+      pendingFieldsRef.current.delete(key);
+      return;
+    }
+    pendingFieldsRef.current.set(key, { sourceLang, value });
+    setTranslateStatus('idle');
+    setTranslateError(null);
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = window.setTimeout(() => {
+      void flushPendingTranslations(sourceLang);
+    }, isBrowserOffline() ? 350 : 900);
+  };
+
   const handleConvertOfflineNow = (sourceOverride?: Language) => {
     const current = latestCustomRef.current;
     if (!current) return;
     const source = sourceOverride || inputLang;
     const target: Language = source === 'en' ? 'hi' : 'en';
-    const { fieldsToConvert, sentSnapshot } = collectFieldsForOfflineTranslation(current, source);
+    const { fieldsToConvert, sentSnapshot } = collectAllFieldsForSync(current, source);
     if (Object.keys(fieldsToConvert).length === 0) return;
 
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     const converted = offlineTranslateInviteFields({
       sourceLang: source,
       targetLang: target,
       fields: fieldsToConvert,
     });
-    applyTranslatedMap(target, converted, sentSnapshot, 'both');
-    setTranslateStatus('fallback');
+    applyTranslatedMap(target, converted, sentSnapshot);
+    pendingFieldsRef.current.clear();
+    setTranslating(false);
+    setTranslateError(null);
+    setTranslateStatus('offline');
+  };
+
+  const handleSyncAllNow = async (sourceOverride?: Language) => {
+    const current = latestCustomRef.current;
+    const currentTheme = latestThemeRef.current;
+    if (!current || !currentTheme) return;
+
+    const source = sourceOverride || inputLang;
+    const target: Language = source === 'en' ? 'hi' : 'en';
+    const { fieldsToConvert, sentSnapshot } = collectAllFieldsForSync(current, source);
+
+    if (Object.keys(fieldsToConvert).length === 0) return;
+
+    if (isBrowserOffline()) {
+      handleConvertOfflineNow(source);
+      return;
+    }
+
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setTranslating(true);
+    setTranslateError(null);
+    try {
+      const translated = await translateInviteFields({
+        sourceLang: source,
+        targetLang: target,
+        isBirthday: currentTheme.celebrationType === 'birthday',
+        fields: fieldsToConvert,
+        signal: controller.signal,
+      });
+      if (controller.signal.aborted) return;
+      applyTranslatedMap(target, translated, sentSnapshot);
+      pendingFieldsRef.current.clear();
+      setTranslateStatus('synced');
+    } catch (err) {
+      if (controller.signal.aborted) return;
+      setTranslateStatus('error');
+      setTranslateError(
+        err instanceof Error
+          ? err.message
+          : 'Online sync failed. Click Retry Online or Convert Offline Now.'
+      );
+    } finally {
+      if (!controller.signal.aborted) {
+        setTranslating(false);
+      }
+    }
   };
 
   const applyResolvedLocation = (loc: ResolvedLocationResult) => {
@@ -487,12 +677,28 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
     const nextDirections = loc.fullAddress?.trim() || current.directionsNote;
     const nextMapUrl = loc.mapUrl?.trim() || current.venueMapUrl || '';
 
+    const nextFields: Record<string, string> = {};
+    if (nextVenue) nextFields.venueName = nextVenue;
+    if (nextCity) nextFields.cityLabel = nextCity;
+    if (nextDirections) nextFields.directionsNote = nextDirections;
+
+    // Immediately convert Hindi counterparts locally so Hindi card updates without delay,
+    // then also queue online refinement if online and bilingual/Hindi mode is active.
+    const localHi = offlineTranslateInviteFields({
+      sourceLang: 'en',
+      targetLang: 'hi',
+      fields: nextFields,
+    });
+
     const nextCustom: CardCustomization = {
       ...current,
       venueName: nextVenue,
       cityLabel: nextCity,
       directionsNote: nextDirections,
       venueMapUrl: nextMapUrl,
+      ...(localHi.venueName ? { venueNameHi: localHi.venueName } : {}),
+      ...(localHi.cityLabel ? { cityLabelHi: localHi.cityLabel } : {}),
+      ...(localHi.directionsNote ? { directionsNoteHi: localHi.directionsNote } : {}),
       updatedAt: Date.now(),
     };
     onUpdate(currentTheme.id, nextCustom);
@@ -504,6 +710,17 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
       text: `Auto-filled Venue${nextCity ? ', City' : ''}${nextDirections ? ', Address' : ''} & Map Pin!`,
     });
 
+    if (!isBrowserOffline() && (current.cardLangMode || 'both') !== 'en') {
+      Object.entries(nextFields).forEach(([k, v]) => {
+        pendingFieldsRef.current.set(k, { sourceLang: 'en', value: v });
+      });
+      if (debounceTimerRef.current) {
+        window.clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = window.setTimeout(() => {
+        void flushPendingTranslations('en');
+      }, 450);
+    }
   };
 
   const handleSelectLocationSuggestion = (item: ResolvedLocationResult) => {
@@ -669,21 +886,40 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
     onUpdate(theme.id, {
       ...customization,
       ...patch,
-      cardLangMode: lang,
       updatedAt: Date.now(),
     });
+    if (lang === inputLang) {
+      queueAutoTranslate(String(pairKey), lang, value);
+    }
   };
 
   const handleChangeInputLang = (nextLang: Language) => {
     if (nextLang === inputLang) return;
+    void flushPendingTranslations(inputLang);
     setInputLang(nextLang);
-    setPreviewLang(nextLang);
+    updateField('editorInputLang', nextLang);
+    if (cardLangMode === 'both') {
+      setPreviewLang(nextLang);
+    }
+  };
+
+  const handleChangeCardLangMode = (nextMode: CardLanguageMode) => {
     onUpdate(theme.id, {
       ...customization,
-      editorInputLang: nextLang,
-      cardLangMode: nextLang,
+      cardLangMode: nextMode,
       updatedAt: Date.now(),
     });
+    if (nextMode === 'hi') {
+      setPreviewLang('hi');
+      if (inputLang === 'en' && pendingFieldsRef.current.size > 0) {
+        void flushPendingTranslations('en');
+      }
+    } else if (nextMode === 'en') {
+      setPreviewLang('en');
+      if (inputLang === 'hi' && pendingFieldsRef.current.size > 0) {
+        void flushPendingTranslations('hi');
+      }
+    }
   };
 
   const toggleSection = (key: CardSectionKey) => {
@@ -753,16 +989,12 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
     const nextEvents = customization.events.map((ev, i) =>
       i === idx ? { ...ev, ...patch } : ev
     );
-    onUpdate(theme.id, {
-      ...customization,
-      events: nextEvents,
-      cardLangMode: inputLang,
-      updatedAt: Date.now(),
-    });
+    updateField('events', nextEvents);
   };
 
   const updateEventBilingualField = (
     idx: number,
+    evId: string,
     field: 'title' | 'date' | 'venue' | 'attire',
     lang: Language,
     value: string
@@ -782,6 +1014,9 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
       (patch as Record<string, unknown>)[mirrorKey] = '';
     }
     updateEvent(idx, patch);
+    if (lang === inputLang) {
+      queueAutoTranslate(`ev:${evId}:${field}`, lang, value);
+    }
   };
 
   const removeEvent = (idx: number) => {
@@ -826,6 +1061,9 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
   };
 
   const handleCopyShareLink = async () => {
+    if (pendingFieldsRef.current.size > 0) {
+      await flushPendingTranslations(inputLang);
+    }
     const url = encodeShareUrl(theme, latestCustomRef.current || customization);
     setShareUrlPreview(url);
     try {
@@ -1165,36 +1403,139 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
                         </div>
                       </div>
 
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[11px] font-medium text-[#5C4B3D]">Card View:</span>
+                        <div className="inline-flex rounded-lg border border-[#D8C8AA] bg-[#F5EFE2] p-0.5">
+                          {(
+                            [
+                              { id: 'both', label: 'EN + हिन्दी' },
+                              { id: 'en', label: 'EN Only' },
+                              { id: 'hi', label: 'हिन्दी Only' },
+                            ] as const
+                          ).map((opt) => (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              onClick={() => handleChangeCardLangMode(opt.id)}
+                              className={`rounded-md px-2 py-1 text-[10.5px] font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+                                cardLangMode === opt.id
+                                  ? 'bg-[#231B15] text-[#FAF6EE]'
+                                  : 'text-[#5C4B3D] hover:text-[#231B15]'
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
                     <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#EFE5D3]">
                       <div className="flex items-center gap-2 text-[11px] text-[#5C4B3D] min-w-0">
-                        {translateStatus === 'fallback' ? (
+                        {translating ? (
+                          <span className="inline-flex items-center gap-1.5 font-medium text-[#9E2A2B]">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+                            <span>
+                              {otherLang === 'hi'
+                                ? 'Converting details to शुद्ध हिन्दी...'
+                                : 'Converting details to English...'}
+                            </span>
+                          </span>
+                        ) : translateStatus === 'synced' ? (
+                          <span className="inline-flex items-center gap-1 font-medium text-emerald-700">
+                            <Check className="h-3.5 w-3.5 shrink-0" />
+                            <span>
+                              {otherLang === 'hi'
+                                ? 'शुद्ध हिन्दी auto-synced across names, dates, venue & events'
+                                : 'English auto-synced across names, dates, venue & events'}
+                            </span>
+                          </span>
+                        ) : translateStatus === 'offline' ? (
                           <span className="inline-flex items-center gap-1 font-medium text-amber-800">
                             <WifiOff className="h-3.5 w-3.5 shrink-0" />
-                            <span>Basic Offline glossary applied. Review names and wording.</span>
+                            <span>
+                              {otherLang === 'hi'
+                                ? 'Converted offline locally to शुद्ध हिन्दी (works without internet)'
+                                : 'Converted offline locally to English (works without internet)'}
+                            </span>
                           </span>
                         ) : (
                           <span>
-                            {inputLang === 'en'
-                              ? 'Enter details in English, or switch to हिन्दी to fill them directly.'
-                              : 'विवरण सीधे हिन्दी में भरें, या English चुनकर अंग्रेज़ी में लिखें।'}
+                            {cardLangMode === inputLang
+                              ? inputLang === 'en'
+                                ? 'Card locked to English Only — single-language editing active.'
+                                : 'कार्ड केवल हिन्दी मोड में है — सीधे हिन्दी में भरें।'
+                              : inputLang === 'en'
+                                ? 'Type once in English — शुद्ध हिन्दी auto-converts automatically (works online & offline).'
+                                : 'सिर्फ़ हिन्दी में लिखें — English अपने-आप तैयार हो जाएगी (ऑनलाइन व ऑफलाइन दोनों में)।'}
                           </span>
                         )}
                       </div>
 
                       <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                        {cardLangMode !== inputLang && (
+                          <>
+                            <button
+                              type="button"
+                              disabled={translating}
+                              onClick={() => void handleSyncAllNow(inputLang)}
+                              className="inline-flex items-center gap-1 rounded-md border border-[#C88A2B]/60 bg-[#FDF5E4] px-2.5 py-1 text-[11px] font-semibold text-[#7A4C10] hover:bg-[#F7E7C6] disabled:opacity-60 cursor-pointer whitespace-nowrap"
+                            >
+                              <RefreshCw className={`h-3 w-3 ${translating ? 'animate-spin' : ''}`} />
+                              <span>
+                                {otherLang === 'hi' ? 'Sync to हिन्दी' : 'Sync to English'}
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              disabled={translating}
+                              onClick={() => handleConvertOfflineNow(inputLang)}
+                              title="Instant local offline conversion without internet"
+                              className="inline-flex items-center gap-1 rounded-md border border-[#D8C8AA] bg-[#FAF6EE] px-2 py-1 text-[10.5px] font-medium text-[#5C4B3D] hover:bg-[#EDE2CE] disabled:opacity-60 cursor-pointer whitespace-nowrap"
+                            >
+                              <WifiOff className="h-3 w-3" />
+                              <span>Offline Convert</span>
+                            </button>
+                          </>
+                        )}
                         <button
                           type="button"
-                          onClick={() => handleConvertOfflineNow(inputLang)}
-                          title="Quick glossary conversion; review names and sentence meaning. No API or model download."
-                          className="inline-flex items-center gap-1 rounded-md border border-[#D8C8AA] bg-[#FAF6EE] px-2.5 py-1 text-[11px] font-semibold text-[#5C4B3D] hover:bg-[#EDE2CE] cursor-pointer whitespace-nowrap"
+                          onClick={() => setShowBothManual((v) => !v)}
+                          className={`rounded-md border px-2.5 py-1 text-[11px] font-medium cursor-pointer whitespace-nowrap transition-colors ${
+                            showBothManual
+                              ? 'border-[#9E2A2B] bg-[#FBE7EB] text-[#9E2A2B]'
+                              : 'border-[#D8C8AA] bg-white text-[#4A3B2F] hover:bg-[#F5EFE2]'
+                          }`}
                         >
-                          <WifiOff className="h-3 w-3" />
-                          <span>Basic Offline</span>
+                          {showBothManual ? 'Single-Language View' : 'Review / Edit Both'}
                         </button>
                       </div>
                     </div>
+
+                    {translateError && (
+                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] text-red-800">
+                        <span className="inline-flex items-center gap-1.5">
+                          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                          <span>{translateError}</span>
+                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => void handleSyncAllNow(inputLang)}
+                            className="font-semibold text-red-900 underline cursor-pointer"
+                          >
+                            Retry Online
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleConvertOfflineNow(inputLang)}
+                            className="rounded-md bg-[#9E2A2B] px-2 py-0.5 text-[10.5px] font-semibold text-white hover:bg-[#7f2021] cursor-pointer"
+                          >
+                            Convert Offline Now
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1677,7 +2018,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
                         <p className="text-[11px] text-[#5C4B3D] mt-0.5">
                           {isBirthday
                             ? 'Optional: Leave blank if not needed — empty names and their headings automatically hide from the card.'
-                            : 'Fill details in the selected language. Use Basic Offline if you want a rough glossary conversion.'}
+                            : 'Fill once in your chosen language — the other language converts automatically.'}
                         </p>
                       </div>
 
@@ -2469,7 +2810,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
                                         type="text"
                                         value={ev.titleEn}
                                         onChange={(e) =>
-                                          updateEventBilingualField(idx, 'title', 'en', e.target.value)
+                                          updateEventBilingualField(idx, ev.id, 'title', 'en', e.target.value)
                                         }
                                         className="w-full rounded-lg border border-[#C8B493] bg-[#FAF6EE] px-2.5 py-1.5 text-xs text-[#231B15]"
                                       />
@@ -2484,7 +2825,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
                                         type="text"
                                         value={ev.titleHi}
                                         onChange={(e) =>
-                                          updateEventBilingualField(idx, 'title', 'hi', e.target.value)
+                                          updateEventBilingualField(idx, ev.id, 'title', 'hi', e.target.value)
                                         }
                                         className="font-hindi w-full rounded-lg border border-[#C8B493] bg-[#FAF6EE] px-2.5 py-1.5 text-xs text-[#231B15]"
                                       />
@@ -2499,7 +2840,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
                                         type="text"
                                         value={ev.dateEn}
                                         onChange={(e) =>
-                                          updateEventBilingualField(idx, 'date', 'en', e.target.value)
+                                          updateEventBilingualField(idx, ev.id, 'date', 'en', e.target.value)
                                         }
                                         className="w-full rounded-lg border border-[#C8B493] bg-[#FAF6EE] px-2.5 py-1.5 text-xs text-[#231B15]"
                                       />
@@ -2514,7 +2855,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
                                         type="text"
                                         value={ev.dateHi}
                                         onChange={(e) =>
-                                          updateEventBilingualField(idx, 'date', 'hi', e.target.value)
+                                          updateEventBilingualField(idx, ev.id, 'date', 'hi', e.target.value)
                                         }
                                         className="font-hindi w-full rounded-lg border border-[#C8B493] bg-[#FAF6EE] px-2.5 py-1.5 text-xs text-[#231B15]"
                                       />
@@ -2544,7 +2885,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
                                         type="text"
                                         value={ev.venueEn}
                                         onChange={(e) =>
-                                          updateEventBilingualField(idx, 'venue', 'en', e.target.value)
+                                          updateEventBilingualField(idx, ev.id, 'venue', 'en', e.target.value)
                                         }
                                         className="w-full rounded-lg border border-[#C8B493] bg-[#FAF6EE] px-2.5 py-1.5 text-xs text-[#231B15]"
                                       />
@@ -2559,7 +2900,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
                                         type="text"
                                         value={ev.venueHi}
                                         onChange={(e) =>
-                                          updateEventBilingualField(idx, 'venue', 'hi', e.target.value)
+                                          updateEventBilingualField(idx, ev.id, 'venue', 'hi', e.target.value)
                                         }
                                         className="font-hindi w-full rounded-lg border border-[#C8B493] bg-[#FAF6EE] px-2.5 py-1.5 text-xs text-[#231B15]"
                                       />
@@ -2574,7 +2915,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
                                         type="text"
                                         value={ev.attireEn}
                                         onChange={(e) =>
-                                          updateEventBilingualField(idx, 'attire', 'en', e.target.value)
+                                          updateEventBilingualField(idx, ev.id, 'attire', 'en', e.target.value)
                                         }
                                         className="w-full rounded-lg border border-[#C8B493] bg-[#FAF6EE] px-2.5 py-1.5 text-xs text-[#231B15]"
                                       />
@@ -2589,7 +2930,7 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
                                         type="text"
                                         value={ev.attireHi}
                                         onChange={(e) =>
-                                          updateEventBilingualField(idx, 'attire', 'hi', e.target.value)
+                                          updateEventBilingualField(idx, ev.id, 'attire', 'hi', e.target.value)
                                         }
                                         className="font-hindi w-full rounded-lg border border-[#C8B493] bg-[#FAF6EE] px-2.5 py-1.5 text-xs text-[#231B15]"
                                       />
@@ -2679,6 +3020,9 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
                     type="button"
                     onClick={() => {
                       const nextLang: Language = previewLang === 'en' ? 'hi' : 'en';
+                      if (pendingFieldsRef.current.size > 0) {
+                        void flushPendingTranslations(inputLang);
+                      }
                       setPreviewLang(nextLang);
                     }}
                     className="inline-flex items-center gap-1 rounded-full border border-[#E6B86A]/40 bg-[#2C211A] px-2.5 py-1 text-[11px] text-[#FAF6EE] hover:bg-[#3A2B22] cursor-pointer whitespace-nowrap"
@@ -2742,7 +3086,12 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
             <div className="flex items-center gap-2.5 shrink-0">
               <button
                 type="button"
-                onClick={onClose}
+                onClick={async () => {
+                  if (pendingFieldsRef.current.size > 0) {
+                    await flushPendingTranslations(inputLang);
+                  }
+                  onClose();
+                }}
                 className="min-h-10 rounded-lg border border-[#C8B493] bg-[#FAF6EE] px-4 py-2 text-xs font-medium text-[#231B15] hover:bg-[#EDE2CE] cursor-pointer whitespace-nowrap shrink-0"
               >
                 Done Editing
@@ -2750,7 +3099,12 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
               {onOpenShareSuite && (
                 <button
                   type="button"
-                  onClick={() => onOpenShareSuite(theme)}
+                  onClick={async () => {
+                    if (pendingFieldsRef.current.size > 0) {
+                      await flushPendingTranslations(inputLang);
+                    }
+                    onOpenShareSuite(theme);
+                  }}
                   className="inline-flex items-center gap-1.5 min-h-10 rounded-lg bg-[#1F6E4A] px-4 py-2 text-xs font-medium text-white hover:bg-[#18593c] cursor-pointer whitespace-nowrap shrink-0"
                 >
                   <Share2 className="h-3.5 w-3.5" />
@@ -2759,7 +3113,12 @@ export const CardCustomizerModal: React.FC<CardCustomizerModalProps> = ({
               )}
               <button
                 type="button"
-                onClick={() => onSaveAndPreview(theme)}
+                onClick={async () => {
+                  if (pendingFieldsRef.current.size > 0) {
+                    await flushPendingTranslations(inputLang);
+                  }
+                  onSaveAndPreview(theme);
+                }}
                 className="inline-flex items-center gap-1.5 min-h-10 rounded-lg bg-[#9E2A2B] px-4 py-2 text-xs font-medium text-[#FAF6EE] hover:bg-[#822021] cursor-pointer whitespace-nowrap shrink-0"
               >
                 <Play className="h-3.5 w-3.5 fill-current" />
