@@ -24,33 +24,8 @@ const NimantranCrest: React.FC<{ className?: string }> = ({ className = 'h-7 w-7
     aria-hidden="true"
     className={className}
   >
-    <rect
-      x="16"
-      y="2.2"
-      width="19.5"
-      height="19.5"
-      rx="3.2"
-      transform="rotate(45 16 2.2)"
-      fill="#8F1D21"
-      stroke="#C89B4F"
-      strokeWidth="1.25"
-    />
-    <rect
-      x="16"
-      y="6.2"
-      width="13.85"
-      height="13.85"
-      rx="1.8"
-      transform="rotate(45 16 6.2)"
-      stroke="#F3D9A4"
-      strokeOpacity="0.65"
-      strokeWidth="0.9"
-    />
-    <path
-      d="M16 9.8C17.3 12.1 19.3 13.7 21.8 16C19.3 18.3 17.3 19.9 16 22.2C14.7 19.9 12.7 18.3 10.2 16C12.7 13.7 14.7 12.1 16 9.8Z"
-      fill="#F7E3B5"
-    />
-    <circle cx="16" cy="16" r="1.8" fill="#8F1D21" />
+    <rect x="1.5" y="1.5" width="29" height="29" rx="7" fill="#8F1D21" stroke="#C89B4F" strokeWidth="1.2" />
+    <text x="16" y="16.5" textAnchor="middle" dominantBaseline="central" fill="#FFF6E8" fontFamily="Tiro Devanagari Hindi, Nirmala UI, serif" fontSize="18" fontWeight="700">नि</text>
   </svg>
 );
 
