@@ -115,6 +115,7 @@ export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
                 cityLabel={customization?.cityLabel || cityLabel}
                 compact={matchMainSiteCard}
                 fullPreview={theme.id === 'sheesh-mahal'}
+                mobileWebViewScroll={fullScreenOnMobile}
                 customization={customization}
                 guestFamilyGreeting={guestFamilyGreeting}
                 allowedEventIds={allowedEventIds}

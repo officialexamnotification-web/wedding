@@ -137,6 +137,7 @@ interface InteractiveInvitePhoneStageProps {
   cityLabel?: string;
   compact?: boolean;
   fullPreview?: boolean;
+  mobileWebViewScroll?: boolean;
   onOpenFullPreview?: () => void;
   onCloseInline?: () => void;
   externalOpenSignal?: number;
@@ -860,6 +861,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
   cityLabel,
   compact = false,
   fullPreview = false,
+  mobileWebViewScroll = false,
   onOpenFullPreview,
   onCloseInline,
   externalOpenSignal = 0,
@@ -1468,6 +1470,124 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
       rsvpIo?.disconnect();
     };
   }, [bodyOpen, stageLang, theme.id]);
+
+  // WhatsApp's in-app browser can swallow native scrolling inside a fixed
+  // full-screen invite. Use a small, inertial drag scroller only on shared-card
+  // links; regular website previews continue to use the browser's native scroll.
+  useEffect(() => {
+    if (!mobileWebViewScroll || !bodyOpen) return;
+    const rootEl = scrollContainerRef.current;
+    if (!rootEl) return;
+
+    let startX: number | null = null;
+    let startY: number | null = null;
+    let lastY = 0;
+    let lastTime = 0;
+    let startScrollTop = 0;
+    let velocity = 0;
+    let verticalDrag = false;
+    let pendingScrollTop: number | null = null;
+    let scrollFrame = 0;
+    let momentumFrame = 0;
+
+    const stopMomentum = () => {
+      if (momentumFrame) cancelAnimationFrame(momentumFrame);
+      momentumFrame = 0;
+    };
+
+    const onTouchStart = (event: TouchEvent) => {
+      stopMomentum();
+      if (scrollFrame) cancelAnimationFrame(scrollFrame);
+      scrollFrame = 0;
+      verticalDrag = false;
+      pendingScrollTop = null;
+      if (event.touches.length !== 1) {
+        startX = startY = null;
+        return;
+      }
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest('button, a, input, textarea, select, canvas, video, audio, [role="button"]')) {
+        startX = startY = null;
+        return;
+      }
+
+      startX = event.touches[0].clientX;
+      startY = lastY = event.touches[0].clientY;
+      startScrollTop = rootEl.scrollTop;
+      lastTime = performance.now();
+      velocity = 0;
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (startY === null || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      const deltaY = touch.clientY - startY;
+      if (!verticalDrag) {
+        const deltaX = touch.clientX - (startX ?? touch.clientX);
+        if (Math.abs(deltaY) < 7) return;
+        // Allow horizontal controls and gestures to keep their native behavior.
+        if (Math.abs(deltaY) <= Math.abs(deltaX)) return;
+        verticalDrag = true;
+      }
+      if (event.cancelable) event.preventDefault();
+
+      const now = performance.now();
+      const dt = Math.max(8, Math.min(50, now - lastTime));
+      const instantVelocity = (lastY - touch.clientY) / dt;
+      velocity = velocity * 0.65 + instantVelocity * 0.35;
+      lastY = touch.clientY;
+      lastTime = now;
+      pendingScrollTop = startScrollTop - deltaY;
+
+      if (!scrollFrame) {
+        scrollFrame = requestAnimationFrame(() => {
+          if (pendingScrollTop !== null) rootEl.scrollTop = pendingScrollTop;
+          pendingScrollTop = null;
+          scrollFrame = 0;
+        });
+      }
+    };
+
+    const onTouchEnd = () => {
+      startX = startY = null;
+      if (scrollFrame) {
+        cancelAnimationFrame(scrollFrame);
+        scrollFrame = 0;
+      }
+      if (pendingScrollTop !== null) rootEl.scrollTop = pendingScrollTop;
+      pendingScrollTop = null;
+      if (!verticalDrag || Math.abs(velocity) < 0.025) return;
+
+      let previousFrameTime = performance.now();
+      const coast = (time: number) => {
+        const dt = Math.min(32, time - previousFrameTime);
+        previousFrameTime = time;
+        const maxScrollTop = rootEl.scrollHeight - rootEl.clientHeight;
+        const nextScrollTop = Math.max(0, Math.min(maxScrollTop, rootEl.scrollTop + velocity * dt));
+        rootEl.scrollTop = nextScrollTop;
+        velocity *= Math.exp(-dt / 360);
+        if (nextScrollTop > 0 && nextScrollTop < maxScrollTop && Math.abs(velocity) >= 0.025) {
+          momentumFrame = requestAnimationFrame(coast);
+        } else {
+          momentumFrame = 0;
+        }
+      };
+      momentumFrame = requestAnimationFrame(coast);
+    };
+
+    rootEl.addEventListener('touchstart', onTouchStart, { passive: true });
+    rootEl.addEventListener('touchmove', onTouchMove, { passive: false });
+    rootEl.addEventListener('touchend', onTouchEnd, { passive: true });
+    rootEl.addEventListener('touchcancel', onTouchEnd, { passive: true });
+    return () => {
+      stopMomentum();
+      if (scrollFrame) cancelAnimationFrame(scrollFrame);
+      rootEl.removeEventListener('touchstart', onTouchStart);
+      rootEl.removeEventListener('touchmove', onTouchMove);
+      rootEl.removeEventListener('touchend', onTouchEnd);
+      rootEl.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, [bodyOpen, mobileWebViewScroll]);
 
   const hasCustom = Boolean(customization);
   const rawGroom = hasCustom
