@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><g fill="currentColor" opacity="0.55"><path d="M12.5 7.5 Q12.5 12.5 17.5 12.5 Q12.5 12.5 12.5 17.5 Q12.5 12.5 7.5 12.5 Q12.5 12.5 12.5 7.5 Z"/><path d="M87.5 7.5 Q87.5 12.5 92.5 12.5 Q87.5 12.5 87.5 17.5 Q87.5 12.5 82.5 12.5 Q87.5 12.5 87.5 7.5 Z"/></g><g stroke="currentColor" fill="currentColor">
+      <polygon points="36,24 60,44 36,64 12,44" fill-opacity="0.24" stroke-width="2.2"/>
+      <polygon points="64,24 88,44 64,64 40,44" fill-opacity="0.24" stroke-width="2.2"/>
+      <polygon points="50,38 76,60 50,82 24,60" fill-opacity="0.36" stroke-width="2.4"/>
+      <polygon points="50,48 62,58 50,68 38,58" fill="#FFFBEB" fill-opacity="0.6" stroke="none"/>
+    </g></svg>

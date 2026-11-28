@@ -1,46 +1,8 @@
-# prod
-dist/
-
-# dev
-.yarn/
-!.yarn/releases
-.vscode/*
-!.vscode/launch.json
-!.vscode/*.code-snippets
-.idea/workspace.xml
-.idea/usage.statistics.xml
-.idea/shelf
-
-# deps
 node_modules/
-.npm-cache/
-.wrangler
-
-# Original high-resolution inputs; optimized WebP assets are stored in public/templates/imported-wedding/
-/new template/
-
-# Original Ganesha wedding art inputs; optimized website copies live in public/templates/new-wedding/
-/Elegant Navy Ganesha Wedding Invitation/
-/Luxury Purple and Gold Ganesha Invitation/
-/Opulent Maroon Ganesha Wedding Invitation/
-/Ornate Gold Ganesha Wedding Invitation/
-/Ornate Maroon Ganesha Wedding/
-/Purple and Gold Ganesha Invitation/
-/template/
-
-# env
-.env
-.env.production
-.dev.vars
-
-# logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# misc
+build/
+dist/
+coverage/
 .DS_Store
+*.log
+.env*
+!.env.example

@@ -1,14 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/admin", "destination": "/index.html" },
-    { "source": "/admin/", "destination": "/index.html" },
-    { "source": "/jyotish-studio", "destination": "/index.html" },
-    { "source": "/jyotish-studio/", "destination": "/index.html" }
+    { "source": "/card-studio", "destination": "/card-studio/index.html" },
+    { "source": "/card-studio/", "destination": "/card-studio/index.html" },
+    { "source": "/card-studio/admin", "destination": "/card-studio/index.html" },
+    { "source": "/card-studio/admin/(.*)", "destination": "/card-studio/index.html" },
+    { "source": "/card-studio/jyotish-studio", "destination": "/card-studio/index.html" },
+    { "source": "/card-studio/jyotish-studio/(.*)", "destination": "/card-studio/index.html" }
   ],
   "headers": [
     {
-      "source": "/admin(.*)",
+      "source": "/card-studio/admin(.*)",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
         { "key": "X-Frame-Options", "value": "DENY" },

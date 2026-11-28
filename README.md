@@ -1,24 +1,19 @@
-# Nimantran — Digital Invitation Maker
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-Nimantran is a React and TypeScript editor for Indian wedding invitations and celebration cards. It includes a canvas editor, wedding artwork library, editable templates, and export options.
+# Run and deploy your AI Studio app
 
-## Current highlights
+This contains everything you need to run your app locally.
 
-- Wedding element browser with separate collections for torans, flowers, celebration motifs, flourishes, and badges.
-- Fourteen original wedding motifs and ten toran designs available as separate canvas elements.
-- Eight new portrait invitation templates with editable text over original artwork.
-- Existing editor support for photos, frames, shapes, text, and other interactive design elements.
-- Multipage PDF export for card decks.
+View your app in AI Studio: https://ai.studio/apps/1ca7bb0e-a77c-464e-86c7-7fefd2d9c6df
 
-## Development
+## Run Locally
 
-```sh
-npm install
-npm run dev
-```
+**Prerequisites:**  Node.js
 
-Create a production build with `npm run build`.
 
-## Deployment
-
-The project uses React, TypeScript, Vite, Tailwind CSS v4, and Cloudflare Pages. Use the configured deployment workflow for the target Cloudflare Pages project.
+1. Install dependencies:
+   `npm install`
+2. Run the app:
+   `npm run dev`
