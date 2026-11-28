@@ -22,6 +22,7 @@ interface CardOpenPreviewModalProps {
   allowedEventIds?: string[];
   onSubmitRsvp?: (input: RsvpSubmissionInput) => Promise<RsvpRecord>;
   matchMainSiteCard?: boolean;
+  fullScreenOnMobile?: boolean;
 }
 
 export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
@@ -37,6 +38,7 @@ export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
   allowedEventIds,
   onSubmitRsvp,
   matchMainSiteCard = true,
+  fullScreenOnMobile = false,
 }) => {
   const [lang, setLang] = useState<Language>(initialLang);
 
@@ -70,13 +72,17 @@ export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-[radial-gradient(circle_at_center,#251917_0%,#110A0A_78%)] p-3 sm:p-5 backdrop-blur-sm"
+        className={`fixed inset-0 z-[100] flex items-center justify-center bg-[radial-gradient(circle_at_center,#251917_0%,#110A0A_78%)] ${
+          fullScreenOnMobile ? 'sm:p-5' : 'p-3 sm:p-5'
+        } backdrop-blur-sm`}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close card preview"
-          className="fixed top-3.5 right-3.5 sm:top-5 sm:right-5 z-[110] grid size-9 sm:size-10 place-items-center rounded-full bg-[#160E0A]/75 sm:bg-white/10 text-[#F5D68A] sm:text-white/90 border border-[#E6B86A]/35 sm:border-white/15 backdrop-blur-md hover:bg-[#9E2A2B] hover:text-white transition-colors cursor-pointer shadow-lg"
+          className={`fixed top-3.5 sm:top-5 z-[110] grid size-9 sm:size-10 place-items-center rounded-full bg-[#160E0A]/75 sm:bg-white/10 text-[#F5D68A] sm:text-white/90 border border-[#E6B86A]/35 sm:border-white/15 backdrop-blur-md hover:bg-[#9E2A2B] hover:text-white transition-colors cursor-pointer shadow-lg ${
+            fullScreenOnMobile ? 'left-3.5 sm:left-auto sm:right-5' : 'right-3.5 sm:right-5'
+          }`}
         >
           <X className="h-4 w-4" />
         </button>
@@ -88,9 +94,38 @@ export const CardOpenPreviewModal: React.FC<CardOpenPreviewModalProps> = ({
           exit={{ scale: 0.96, opacity: 0, y: 14 }}
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-[min(300px,calc(90dvh*0.445),90vw)] sm:w-[min(380px,calc(90dvh*0.445),90vw)]"
+          className={
+            fullScreenOnMobile
+              ? 'relative h-dvh w-full sm:h-auto sm:w-[min(380px,calc(90dvh*0.445),90vw)]'
+              : 'relative w-[min(300px,calc(90dvh*0.445),90vw)] sm:w-[min(380px,calc(90dvh*0.445),90vw)]'
+          }
         >
-          <div className="@container relative w-full">
+          {fullScreenOnMobile && (
+            <div
+              className={`relative h-full w-full overflow-hidden ${
+                matchMainSiteCard ? 'bg-[#F3EAE3]' : 'bg-[#120D0A]'
+              } sm:hidden`}
+            >
+              <InteractiveInvitePhoneStage
+                theme={theme}
+                lang={lang}
+                groomName={customization?.primaryName || groomName}
+                brideName={customization?.partnerName || brideName}
+                weddingDateLabel={customization?.dateLabel || weddingDateLabel}
+                cityLabel={customization?.cityLabel || cityLabel}
+                compact={matchMainSiteCard}
+                fullPreview={theme.id === 'sheesh-mahal'}
+                customization={customization}
+                guestFamilyGreeting={guestFamilyGreeting}
+                allowedEventIds={allowedEventIds}
+                onSubmitRsvp={onSubmitRsvp}
+              />
+            </div>
+          )}
+
+          <div
+            className={`${fullScreenOnMobile ? 'hidden sm:block' : 'block'} @container relative w-full`}
+          >
             <div
               className="relative rounded-[15.8cqw] p-[0.85cqw]"
               style={{

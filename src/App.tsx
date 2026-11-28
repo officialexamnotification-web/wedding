@@ -303,6 +303,7 @@ export default function App() {
             guestFamilyGreeting={guestFamilyGreeting}
             allowedEventIds={allowedEventIds}
             matchMainSiteCard
+            fullScreenOnMobile
             onSubmitRsvp={(input) => handleSubmitRsvp(pageTheme.id, input)}
           />
         </Suspense>
