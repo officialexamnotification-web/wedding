@@ -944,6 +944,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
   );
   const [isOpened, setIsOpened] = useState(false);
   const [bodyOpen, setBodyOpen] = useState(false);
+  const [sheeshVideoFinished, setSheeshVideoFinished] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [songPlaying, setSongPlaying] = useState(false);
   const [resolvedAudioUrl, setResolvedAudioUrl] = useState<string>('');
@@ -1035,6 +1036,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
     setRsvpTouched({});
     setSealNudge(false);
     setIvoryCardExtracted(false);
+    setSheeshVideoFinished(false);
     if (sealNudgeTimerRef.current) {
       window.clearTimeout(sealNudgeTimerRef.current);
       sealNudgeTimerRef.current = null;
@@ -1043,10 +1045,10 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
       customAudioElRef.current.pause();
       customAudioElRef.current.currentTime = 0;
     }
-    if (videoCoverRef.current && theme.sealConfig) {
+    if (videoCoverRef.current && (theme.sealConfig || theme.id === 'sheesh-mahal')) {
       videoCoverRef.current.pause();
       try {
-        videoCoverRef.current.currentTime = theme.sealConfig.pauseAtSec;
+        videoCoverRef.current.currentTime = theme.sealConfig?.pauseAtSec ?? 0;
       } catch {
         // Ignore if metadata not loaded yet
       }
@@ -1054,7 +1056,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
-  }, [theme.id, theme.sealConfig]);
+  }, [theme.id, theme.sealConfig, theme.coverVideoUrl]);
 
   // Subtle synthesized temple chime / water harp chord (supports custom preset)
   const playTempleChime = useCallback(() => {
@@ -1186,6 +1188,28 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
         setSongPlaying(true);
       } else {
         playTempleChime();
+      }
+
+      if (theme.id === 'sheesh-mahal' && theme.coverVideoUrl) {
+        setSheeshVideoFinished(false);
+        const video = videoCoverRef.current;
+        if (video) {
+          try {
+            video.currentTime = 0;
+          } catch {
+            // The first frame is already the default before metadata has loaded.
+          }
+          video.play().catch(() => {
+            setSheeshVideoFinished(true);
+            const revealTimer = window.setTimeout(() => setBodyOpen(true), 1200);
+            openTimerRef.current.push(revealTimer);
+          });
+        } else {
+          setSheeshVideoFinished(true);
+          const revealTimer = window.setTimeout(() => setBodyOpen(true), 1200);
+          openTimerRef.current.push(revealTimer);
+        }
+        return;
       }
 
       if (theme.coverVideoUrl && theme.sealConfig) {
@@ -1348,7 +1372,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
       const t = window.setTimeout(() => setBodyOpen(true), 1300);
       openTimerRef.current.push(t);
     },
-    [isOpened, playTempleChime, resolvedAudioUrl, soundEnabled, theme.id]
+    [isOpened, playTempleChime, resolvedAudioUrl, soundEnabled, theme.id, theme.coverVideoUrl]
   );
 
   const handleReplay = useCallback(() => {
@@ -1360,10 +1384,11 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
     setHideFloatingBar(false);
     setSealNudge(false);
     setIvoryCardExtracted(false);
-    if (videoCoverRef.current && theme.sealConfig) {
+    setSheeshVideoFinished(false);
+    if (videoCoverRef.current && (theme.sealConfig || theme.id === 'sheesh-mahal')) {
       videoCoverRef.current.pause();
       try {
-        videoCoverRef.current.currentTime = theme.sealConfig.pauseAtSec;
+        videoCoverRef.current.currentTime = theme.sealConfig?.pauseAtSec ?? 0;
       } catch {
         // Ignore
       }
@@ -1371,7 +1396,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({ top: 0, behavior: 'auto' });
     }
-  }, [theme.sealConfig]);
+  }, [theme.id, theme.sealConfig]);
 
   const stageMotionMode: StageMotionMode =
     theme.id === 'paithani' || theme.id === 'pattu-zari' || theme.id === 'mehr'
@@ -6661,10 +6686,9 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
       {/* 5. SHEESH MAHAL: CLEAN TOUCH-THE-DIYA COVER (NO TOP CORNER ORNAMENTS OR TINY SHAPES) */}
       {theme.id === 'sheesh-mahal' && (
         <div
-          onClick={(e) => triggerOpenGate(e)}
           className={`absolute inset-0 z-20 overflow-hidden bg-[#120A18] transition-opacity duration-700 ${
             bodyOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
-          } ${!isOpened ? 'cursor-pointer' : 'pointer-events-none'}`}
+          }`}
         >
           {/* Base Unlit Moonlit Sheesh Mahal Dome (Zero Fire Initially) */}
           <img
@@ -6679,14 +6703,32 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
             }}
           />
 
-          {/* Lit Golden Mirror Palace Crossfade Overlay (Revealed ONLY on Diya Tap) */}
+          {theme.coverVideoUrl && (
+            <video
+              ref={videoCoverRef}
+              src={theme.coverVideoUrl}
+              poster={SHEESH_MAHAL_UNLIT_DOME_IMAGE}
+              muted
+              playsInline
+              preload="auto"
+              onEnded={() => {
+                setSheeshVideoFinished(true);
+                const revealTimer = window.setTimeout(() => setBodyOpen(true), 1350);
+                openTimerRef.current.push(revealTimer);
+              }}
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300"
+              style={{ opacity: isOpened && !sheeshVideoFinished ? 1 : 0 }}
+            />
+          )}
+
+          {/* Static illuminated palace image holds after the cover video finishes. */}
           <img
             src={SHEESH_MAHAL_PLUM_DOME_IMAGE}
             alt={theme.imageAlt}
             referrerPolicy="no-referrer"
             className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center transition-all duration-[1100ms] ease-out"
             style={{
-              opacity: isOpened ? 0.98 : 0,
+              opacity: sheeshVideoFinished ? 0.98 : 0,
               filter: 'brightness(1.14) contrast(1.05)',
               transform: isOpened ? 'scale(1.03)' : 'scale(1)',
             }}
@@ -6697,9 +6739,11 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 transition-all duration-[1100ms]"
             style={{
-              background: isOpened
+              background: sheeshVideoFinished
                 ? 'radial-gradient(circle at 50% 48%, rgba(243, 184, 96, 0.36) 0%, rgba(18, 10, 24, 0.52) 75%)'
-                : 'linear-gradient(to bottom, rgba(14, 10, 22, 0.68) 0%, rgba(18, 12, 28, 0.24) 48%, rgba(14, 10, 22, 0.78) 100%)',
+                : isOpened
+                  ? 'linear-gradient(to bottom, rgba(14, 10, 22, 0.18) 0%, rgba(18, 12, 28, 0.04) 48%, rgba(14, 10, 22, 0.18) 100%)'
+                  : 'linear-gradient(to bottom, rgba(14, 10, 22, 0.68) 0%, rgba(18, 12, 28, 0.24) 48%, rgba(14, 10, 22, 0.78) 100%)',
             }}
           />
 
@@ -6739,7 +6783,7 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
           <div
             className={`relative z-20 flex h-full flex-col items-center justify-between text-center ${
               compact ? 'px-5 pt-14 pb-12' : 'px-6 pt-14 pb-12'
-            }`}
+            } transition-opacity duration-500 ${isOpened ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
           >
             <div>
               <p className="font-tiro text-[11.5px] tracking-[0.14em] text-[#F5D68A] drop-shadow">
@@ -6955,14 +6999,14 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
                 }`}
               />
 
-              <div className="mt-2.5 flex flex-col items-center text-center">
+              <div className="absolute left-1/2 top-[66%] flex -translate-x-1/2 flex-col items-center text-center">
                 <p className="font-bodoni italic text-[19px] text-[#f6f2f7] drop-shadow-[0_0_12px_rgba(23,12,29,0.95)]">
-                  {stageLang === 'en' ? 'Touch the diya' : 'दीपक को छुएँ'}
+                  {stageLang === 'en' ? 'Tap the diya to light the palace' : 'महल रोशन करने के लिए दीपक छुएँ'}
                 </p>
                 <span className="mt-0.5 text-[10px] uppercase tracking-[0.24em] text-[#e2b8a4]">
                   {stageLang === 'en'
-                    ? 'One flame wakes a thousand mirrors'
-                    : 'एक लौ से जगमगा उठेंगे हज़ारों दर्पण'}
+                    ? 'Watch the mirrors awaken'
+                    : 'दर्पणों को जगमगाते देखें'}
                 </span>
               </div>
             </div>

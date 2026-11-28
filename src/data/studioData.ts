@@ -291,7 +291,7 @@ export const STUDIO_THEMES: InviteTheme[] = [
     tier: 'Royal Studio',
     originalPrice: '₹2,499',
     priceNote: 'FREE · 100% Free Forever',
-    gestureLabel: 'Touch the diya · One flame wakes 1,000 mirrors & writes your names in light',
+    gestureLabel: 'Tap the brass diya to light the palace · Watch the mirrors awaken',
     tagline:
       'A mirror palace dome in deep plum and rose gold: touch the brass diya, one flame wakes a thousand convex mirrors and your names are written in light.',
     description:
@@ -303,6 +303,7 @@ export const STUDIO_THEMES: InviteTheme[] = [
     image: '/assets/images/sheesh_mahal_unlit_1795031594306.jpg',
     imageAlt:
       'Wedding invitation design: a moonlit Rajasthani Sheesh Mahal mirror palace dome in plum and rose gold with an unlit brass diya resting on the sill',
+    coverVideoUrl: '/assets/videos/sheesh-mahal-cover.mp4',
     deliverables: [
       'Touch-the-Diya 1,000-Mirror Canvas Wavefront Ignition',
       'Light-Written Couple Names with Golden Gleam Mask',

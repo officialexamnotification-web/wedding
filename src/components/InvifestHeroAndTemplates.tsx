@@ -736,7 +736,7 @@ export const InvifestHeroAndTemplates: React.FC<InvifestHeroAndTemplatesProps> =
                         {theme.coverVideoUrl && (
                           <span className="pointer-events-none absolute top-2.5 left-2 z-30 inline-flex items-center gap-1 rounded-full border border-[#D8C8AA] bg-[#9E2A2B]/95 px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[#FAF6EE] shadow-[0_4px_12px_rgba(35,27,21,0.16)]">
                             <span className="text-[#F2D899]">✦</span>
-                            <span>Seal-Only Video</span>
+                            <span>{theme.id === 'sheesh-mahal' ? 'Diya-Lit Video' : 'Seal-Only Video'}</span>
                           </span>
                         )}
 
