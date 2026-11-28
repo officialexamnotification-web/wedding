@@ -119,6 +119,7 @@ import {
 } from '../utils/rsvpValidation';
 import { CardCustomization, CardSectionKey } from '../data/cardCustomization';
 import { loadCustomAudioUrl } from '../utils/mediaUpload';
+import { getThemeMusicUrl } from '../data/themeMusic';
 import {
   AttendanceStatus,
   DietaryPreference,
@@ -1006,7 +1007,8 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
     setRsvpEvents(activeEvents.map((e) => e.id));
   }, [theme.id, activeEvents.length]);
 
-  // Resolve custom uploaded audio (IndexedDB) or external MP3 URL
+  // Prefer a guest's custom MP3; otherwise play the Card Studio soundtrack
+  // assigned to this invitation theme.
   useEffect(() => {
     let active = true;
     const directUrl = customization?.songUrl?.trim() || '';
@@ -1014,17 +1016,18 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
       setResolvedAudioUrl(directUrl);
       return;
     }
+    const themeMusicUrl = getThemeMusicUrl(theme.id);
     if (customization?.songAudioKey) {
       loadCustomAudioUrl(customization.songAudioKey).then((url) => {
-        if (active) setResolvedAudioUrl(url || '');
+        if (active) setResolvedAudioUrl(url || themeMusicUrl);
       });
     } else {
-      setResolvedAudioUrl('');
+      setResolvedAudioUrl(themeMusicUrl);
     }
     return () => {
       active = false;
     };
-  }, [customization?.songUrl, customization?.songAudioKey]);
+  }, [customization?.songUrl, customization?.songAudioKey, theme.id]);
 
   // Reset opening state when theme changes
   useEffect(() => {
