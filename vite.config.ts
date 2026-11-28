@@ -26,7 +26,7 @@ const cardStudioRouteFallback: Plugin = {
 export default defineConfig(() => {
   return {
     plugins: [cardStudioRouteFallback, react(), tailwindcss()],
-    publicDir: path.resolve(projectRoot, 'public'),
+    publicDir: path.resolve(projectRoot, 'card-studio/public'),
     resolve: {
       alias: {
         '@': projectRoot,

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <g id="abstract-composition-bauhaus-striped-sun">
+    <circle cx="330" cy="175" r="82" fill="#E4A344"/>
+    <path d="M 289.01 111 H 370.99 M 274.57 123 H 385.43 M 265.38 135 H 394.62 M 259.35 147 H 400.65 M 255.7 159 H 404.3 M 254.11 171 H 405.89 M 254.42 183 H 405.58 M 256.68 195 H 403.32 M 261.07 207 H 398.93 M 268.03 219 H 391.97 M 278.62 231 H 381.38" stroke="#BC563B" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <g id="abstract-composition-terracotta-monolith-arch">
+    <path fill="#BC563B" d="M 105 420 V 230 C 105 166, 156 115, 220 115 C 284 115, 335 166, 335 230 V 420 Z"/>
+    <path fill="none" stroke="#E4A344" stroke-width="4" d="M 190 420 V 250 A 30 30 0 0 1 250 250 V 420 M 176 420 V 250 A 44 44 0 0 1 264 250 V 420 M 162 420 V 250 A 58 58 0 0 1 278 250 V 420 M 148 420 V 250 A 72 72 0 0 1 292 250 V 420 M 134 420 V 250 A 86 86 0 0 1 306 250 V 420 M 120 420 V 250 A 100 100 0 0 1 320 250 V 420 M 106 420 V 250 A 114 114 0 0 1 334 250 V 420"/>
+  </g>
+  <g id="abstract-composition-olive-intersecting-geometry">
+    <path fill="#5B6E52" fill-rule="evenodd" d="M 235 420 C 235 320, 315 240, 415 240 V 420 Z M 275 395 C 275 340, 320 295, 385 295 V 395 Z"/>
+    <path fill="#252928" d="M 70 420 V 360 H 105 V 325 H 140 V 290 H 175 V 420 Z"/>
+  </g>
+  <g id="abstract-composition-balance-orbs-and-accents">
+    <circle cx="295" cy="245" r="34" fill="#252928"/>
+    <circle cx="295" cy="245" r="14" fill="#E4A344"/>
+    <path fill="#252928" d="M 167 130 Q 147.49 132.49 145 160 Q 142.51 132.49 123 130 Q 142.51 127.51 145 100 Q 147.49 127.51 167 130 Z"/>
+    <line x1="60" y1="420" x2="440" y2="420" stroke="#252928" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>

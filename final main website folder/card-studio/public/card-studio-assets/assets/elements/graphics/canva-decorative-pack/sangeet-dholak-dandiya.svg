@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <g id="sangeet-dholak-dandiya-musical-swara-waves">
+    <path fill="none" stroke="#00897B" stroke-width="4" stroke-dasharray="10 8" stroke-linecap="round" d="M 48 165 C 125 85, 375 85, 452 165 M 65 365 C 155 445, 345 445, 435 365"/>
+    <path fill="#FFB300" d="M 110 120 Q 90.49 122.49 88 142 Q 85.51 122.49 66 120 Q 85.51 117.51 88 98 Q 90.49 117.51 110 120 Z M 434 120 Q 414.49 122.49 412 142 Q 409.51 122.49 390 120 Q 409.51 117.51 412 98 Q 414.49 117.51 434 120 Z M 278 68 Q 253.17 71.17 250 96 Q 246.83 71.17 222 68 Q 246.83 64.83 250 40 Q 253.17 64.83 278 68 Z"/>
+  </g>
+  <g id="sangeet-dholak-dandiya-crossed-dandiya-sticks">
+    <g transform="rotate(-38 250 250)">
+      <rect x="45" y="238" width="410" height="24" rx="12" fill="#00897B" stroke="#2D0C28" stroke-width="3.2"/>
+      <path fill="none" stroke="#FFB300" stroke-width="5" d="M 95 238 L 115 262 M 145 238 L 165 262 M 195 238 L 215 262 M 285 238 L 305 262 M 335 238 L 355 262 M 385 238 L 405 262"/>
+      <circle cx="45" cy="250" r="14" fill="#D81B60" stroke="#2D0C28" stroke-width="3"/>
+      <circle cx="455" cy="250" r="14" fill="#D81B60" stroke="#2D0C28" stroke-width="3"/>
+    </g>
+    <g transform="rotate(38 250 250)">
+      <rect x="45" y="238" width="410" height="24" rx="12" fill="#00897B" stroke="#2D0C28" stroke-width="3.2"/>
+      <path fill="none" stroke="#FFB300" stroke-width="5" d="M 95 238 L 115 262 M 145 238 L 165 262 M 195 238 L 215 262 M 285 238 L 305 262 M 335 238 L 355 262 M 385 238 L 405 262"/>
+      <circle cx="45" cy="250" r="14" fill="#D81B60" stroke="#2D0C28" stroke-width="3"/>
+      <circle cx="455" cy="250" r="14" fill="#D81B60" stroke="#2D0C28" stroke-width="3"/>
+    </g>
+  </g>
+  <g id="sangeet-dholak-dandiya-festive-dholak-drum" transform="rotate(-12 250 250)">
+    <path fill="#D81B60" stroke="#2D0C28" stroke-width="4" stroke-linejoin="round" d="M 122 178 C 205 142, 295 142, 378 178 L 378 322 C 295 358, 205 358, 122 322 Z"/>
+    <path fill="#00897B" stroke="#2D0C28" stroke-width="2.5" d="M 226 154 C 242 152, 258 152, 274 154 V 346 C 258 348, 242 348, 226 346 Z"/>
+    <ellipse cx="122" cy="250" rx="28" ry="72" fill="#FFB300" stroke="#2D0C28" stroke-width="4"/>
+    <ellipse cx="122" cy="250" rx="14" ry="38" fill="#2D0C28"/>
+    <ellipse cx="378" cy="250" rx="28" ry="72" fill="#FFB300" stroke="#2D0C28" stroke-width="4"/>
+    <ellipse cx="378" cy="250" rx="16" ry="42" fill="#00897B" stroke="#2D0C28" stroke-width="2.5"/>
+    <path fill="none" stroke="#FFB300" stroke-width="3.8" stroke-linejoin="round" d="M 142 176 L 195 332 L 250 154 L 305 332 L 358 176 M 142 324 L 195 168 L 250 346 L 305 168 L 358 324"/>
+    <circle cx="168" cy="250" r="8" fill="none" stroke="#2D0C28" stroke-width="3.5"/>
+    <circle cx="222" cy="250" r="8" fill="none" stroke="#2D0C28" stroke-width="3.5"/>
+    <circle cx="278" cy="250" r="8" fill="none" stroke="#2D0C28" stroke-width="3.5"/>
+    <circle cx="332" cy="250" r="8" fill="none" stroke="#2D0C28" stroke-width="3.5"/>
+  </g>
+  <g id="sangeet-dholak-dandiya-hanging-ghungroo-tassels">
+    <path fill="none" stroke="#D81B60" stroke-width="3" d="M 105 345 V 415 M 395 155 V 225"/>
+    <circle cx="96" cy="418" r="8" fill="#FFB300" stroke="#2D0C28" stroke-width="2.5"/>
+    <circle cx="114" cy="418" r="8" fill="#FFB300" stroke="#2D0C28" stroke-width="2.5"/>
+    <circle cx="105" cy="430" r="9" fill="#FFB300" stroke="#2D0C28" stroke-width="2.5"/>
+    <circle cx="386" cy="228" r="8" fill="#FFB300" stroke="#2D0C28" stroke-width="2.5"/>
+    <circle cx="404" cy="228" r="8" fill="#FFB300" stroke="#2D0C28" stroke-width="2.5"/>
+    <circle cx="395" cy="240" r="9" fill="#FFB300" stroke="#2D0C28" stroke-width="2.5"/>
+  </g>
+</svg>
