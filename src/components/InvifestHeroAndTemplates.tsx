@@ -734,8 +734,9 @@ export const InvifestHeroAndTemplates: React.FC<InvifestHeroAndTemplatesProps> =
 
                         {/* Top-Left Wax Seal Video Badge when template has coverVideoUrl */}
                         {theme.coverVideoUrl && (
-                          <span className="pointer-events-none absolute top-2.5 left-2 z-30 inline-flex items-center gap-1 rounded-full border border-[#E5B95C]/65 bg-[#1B070B]/92 px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[#FDE68A] shadow-sm">
-                            <span>✦ Seal-Only Video</span>
+                          <span className="pointer-events-none absolute top-2.5 left-2 z-30 inline-flex items-center gap-1 rounded-full border border-[#D8C8AA] bg-[#9E2A2B]/95 px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[#FAF6EE] shadow-[0_4px_12px_rgba(35,27,21,0.16)]">
+                            <span className="text-[#F2D899]">✦</span>
+                            <span>Seal-Only Video</span>
                           </span>
                         )}
 
@@ -746,9 +747,9 @@ export const InvifestHeroAndTemplates: React.FC<InvifestHeroAndTemplatesProps> =
                             e.stopPropagation();
                             onLaunchPreview(theme);
                           }}
-                          className="absolute top-2.5 right-2 z-30 inline-flex items-center gap-1 rounded-full bg-[#111315]/90 px-2.5 py-1 text-[10.5px] font-medium text-white shadow-sm hover:bg-black transition-colors cursor-pointer whitespace-nowrap"
+                          className="absolute top-2.5 right-2 z-30 inline-flex items-center gap-1 rounded-full border border-[#D8C8AA] bg-[#FAF6EE]/95 px-2.5 py-1 text-[10.5px] font-medium text-[#231B15] shadow-[0_4px_12px_rgba(35,27,21,0.12)] transition-colors hover:bg-[#F2EAD9] cursor-pointer whitespace-nowrap"
                         >
-                          <Play className="h-2.5 w-2.5 fill-current text-[#4ade80]" />
+                          <Play className="h-2.5 w-2.5 fill-current text-[#9E2A2B]" />
                           <span>Live Demo</span>
                         </button>
                       </div>
