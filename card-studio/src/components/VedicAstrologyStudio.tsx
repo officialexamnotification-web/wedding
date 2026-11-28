@@ -259,6 +259,8 @@ function CompatibilityReport({groom,bride,match,language}:{groom:BirthChart;brid
 
 export function VedicAstrologyStudio({ onBack }: { onBack:()=>void }) {
   const [tab,setTab] = useState<Tab>('kundali');
+  const [guideTab,setGuideTab] = useState<Tab>('kundali');
+  const [guideTypingProgress,setGuideTypingProgress] = useState(0);
   const [language,setLanguage] = useState<ResultLanguage>('en');
   const [printDocument,setPrintDocument] = useState<PrintDocument|null>(null);
   const [birth,setBirth] = useState(()=>initialBirth());
@@ -273,6 +275,70 @@ export function VedicAstrologyStudio({ onBack }: { onBack:()=>void }) {
   const stone = lagnaLord ? GEMSTONES[lagnaLord] : undefined;
   const button = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-300 px-5 py-3 text-sm font-semibold text-[#241507] shadow-lg shadow-amber-950/30 transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200';
   const heading = useMemo(()=>tabs.find((item)=>item.id===tab)!,[tab]);
+  const guide = {
+    kundali: {
+      title: language==='hi'?'जन्म कुंडली':'Birth chart',
+      input: language==='hi'?'जन्म तिथि, सही स्थानीय समय और जन्म स्थान':'Birth date, recorded local time and birth place',
+      intro: language==='hi'?'दर्ज जन्म विवरण से पारंपरिक साइडेरियल कुंडली की गणना होती है।':'Your entered birth details are used to calculate a traditional sidereal chart.',
+      rows: language==='hi'?['लग्न और राशि कुंडली','ग्रहों की राशि और भाव स्थिति','जन्म नक्षत्र और चरण','जन्म समय का पंचांग']:['Ascendant and Rashi chart','Planetary signs and houses','Janma Nakshatra and pada','Panchanga at birth'],
+    },
+    matching: {
+      title: language==='hi'?'कुंडली मिलान':'Kundali match',
+      input: language==='hi'?'वर और वधू—दोनों की जन्म तिथि, समय और स्थान':'Birth date, time and place for both people',
+      intro: language==='hi'?'दोनों की कुंडलियों से पारंपरिक अष्टकूट मिलान निकाला जाता है।':'Both charts are compared through the traditional Ashtakoota method.',
+      rows: language==='hi'?['अष्टकूट के आठ गुण','36 में से पारंपरिक अंक','दोनों की राशि कुंडली','गणना के आधार और सीमाएँ']:['Eight Ashtakoota factors','Traditional score out of 36','Both birth charts','Calculation basis and limitations'],
+    },
+    numerology: {
+      title: language==='hi'?'अंक ज्योतिष':'Numerology',
+      input: language==='hi'?'जन्म तिथि और नाम (नामांक के लिए Latin अक्षर)':'Birth date and name (Latin letters for name number)',
+      intro: language==='hi'?'तारीख और नाम के अक्षरों से पारंपरिक अंक निकाले जाते हैं।':'Traditional numbers are calculated from the date and name spelling.',
+      rows: language==='hi'?['जन्म दिन से मूलांक','जन्म तिथि से भाग्यांक','नाम की Chaldean spelling से नामांक','हर अंक का calculation breakdown']:['Mulank from birth day','Bhagyank from full birth date','Naamank from Chaldean name spelling','Calculation breakdown for each number'],
+    },
+    gemstones: {
+      title: language==='hi'?'रत्न संबंध':'Gemstones',
+      input: language==='hi'?'लग्न निकालने के लिए जन्म तिथि, समय और स्थान':'Birth date, time and place to calculate the ascendant',
+      intro: language==='hi'?'गणना किए गए लग्न-स्वामी से एक सामान्य पारंपरिक संबंध दिखता है।':'A general traditional association is shown from the calculated ascendant lord.',
+      rows: language==='hi'?['गणना किया गया लग्न और स्वामी','परंपरा में जुड़ा सामान्य रत्न','वैकल्पिक हिंदी नाम','परंपराओं में भिन्नता और स्पष्ट सावधानी']:['Calculated ascendant and its lord','General stone associated in a tradition','Hindi name where available','Tradition caveat and clear caution'],
+    },
+  }[guideTab];
+  const demoFields = useMemo(() => {
+    if (guideTab==='matching') return language==='hi' ? [
+      {label:'वर',value:'Aarav Sharma · जयपुर'},
+      {label:'जन्म विवरण',value:'14 दिसंबर 1996 · सुबह 9:30'},
+      {label:'वधू',value:'Meera Joshi · उदयपुर'},
+      {label:'जन्म विवरण',value:'8 मई 1998 · सुबह 6:15'},
+    ] : [
+      {label:'Groom',value:'Aarav Sharma · Jaipur'},
+      {label:'Birth details',value:'14 Dec 1996 · 9:30 AM'},
+      {label:'Bride',value:'Meera Joshi · Udaipur'},
+      {label:'Birth details',value:'8 May 1998 · 6:15 AM'},
+    ];
+    if (guideTab==='numerology') return language==='hi' ? [
+      {label:'नाम',value:'Aarav Sharma'},
+      {label:'जन्म तिथि',value:'14 दिसंबर 1996'},
+    ] : [
+      {label:'Name',value:'Aarav Sharma'},
+      {label:'Date of birth',value:'14 Dec 1996'},
+    ];
+    return language==='hi' ? [
+      {label:'नाम',value:'Aarav Sharma'},
+      {label:'जन्म तिथि',value:'14 दिसंबर 1996'},
+      {label:'जन्म समय',value:'सुबह 9:30'},
+      {label:'जन्म स्थान',value:'जयपुर, राजस्थान'},
+    ] : [
+      {label:'Name',value:'Aarav Sharma'},
+      {label:'Date of birth',value:'14 Dec 1996'},
+      {label:'Birth time',value:'9:30 AM'},
+      {label:'Birth place',value:'Jaipur, Rajasthan'},
+    ];
+  },[guideTab,language]);
+  const demoCharacterCount = demoFields.reduce((total,field)=>total+field.value.length,0);
+  const guideDemoReady = guideTypingProgress >= demoCharacterCount;
+  useEffect(()=>{
+    setGuideTypingProgress(0);
+    const timer=window.setInterval(()=>setGuideTypingProgress((progress)=>progress>=demoCharacterCount+16?0:progress+1),65);
+    return()=>window.clearInterval(timer);
+  },[guideTab,language,demoCharacterCount]);
   const run = (action:()=>void) => { setError(''); try { action(); } catch (cause) { setError(cause instanceof Error ? cause.message : 'Please check the entered details and try again.'); } };
   const openPdf = (document:PrintDocument) => { setPrintDocument(document); window.setTimeout(()=>window.print(),180); };
   useEffect(()=>{const clear=()=>setPrintDocument(null);window.addEventListener('afterprint',clear);return()=>window.removeEventListener('afterprint',clear);},[]);
@@ -326,7 +392,53 @@ export function VedicAstrologyStudio({ onBack }: { onBack:()=>void }) {
         <div className="jyotish-hero-copy relative z-10 max-w-3xl"><div className="inline-flex items-center gap-2 rounded-full border border-amber-200/20 bg-black/20 px-3 py-1.5 text-[10px] uppercase tracking-[.2em] text-amber-200"><Sun size={13}/> Vedic traditions · made personal</div><h1 className="mt-5 font-cormorant text-4xl font-semibold leading-tight text-[#fff4e3] sm:text-6xl">Wisdom in the <span className="text-amber-300">stars.</span></h1><p className="jyotish-hero-description mt-4 max-w-2xl text-sm leading-6 text-neutral-300 sm:text-base sm:leading-7">Explore your birth chart, compare kundalis, and discover traditional numerology and gemstone associations in one calm, private space.</p><div className="mt-5 inline-flex items-center gap-2 text-xs text-emerald-200/80"><LockKeyhole size={14}/> Chart details stay on this device; place and time-zone lookup use online services.</div></div>
       </section>
       <section className="mt-7 grid gap-2 sm:grid-cols-2 lg:grid-cols-4" aria-label="Astrology tools">{tabs.map((item)=>{const Icon=item.icon;return <button key={item.id} onClick={()=>{setTab(item.id);setError('');}} className={`rounded-2xl border px-4 py-4 text-left transition ${tab===item.id?'border-amber-300/40 bg-amber-300/[.09] shadow-[0_8px_28px_rgba(187,126,34,.08)]':'border-white/[.08] bg-white/[.025] hover:border-amber-200/20 hover:bg-white/[.045]'}`}><div className="flex items-center justify-between"><Icon size={18} className={tab===item.id?'text-amber-300':'text-neutral-500'}/>{tab===item.id&&<span className="h-1.5 w-1.5 rounded-full bg-amber-300"/>}</div><div className="mt-3 text-sm font-semibold text-neutral-100">{item.label}</div><div className="mt-1 text-[11px] text-neutral-500">{item.helper}</div></button>})}</section>
-      <section className="mt-5 rounded-[26px] border border-white/[.09] bg-[#100d10] p-5 shadow-2xl shadow-black/20 sm:p-8">
+      <section className="mt-5 rounded-[26px] border border-amber-200/30 bg-[#fffaf4] p-5 shadow-sm sm:p-7" aria-labelledby="jyotish-how-title">
+        <div className="max-w-2xl">
+          <p className="text-[10px] font-semibold uppercase tracking-[.2em] text-[#98212a]">{language==='hi'?'आपकी जानकारी, आपका पारंपरिक पाठ':'A simple guide to your reading'}</p>
+          <h2 id="jyotish-how-title" className="mt-2 font-cormorant text-2xl font-semibold leading-tight text-[#231416] sm:text-3xl">{language==='hi'?'जन्म विवरण से उपयोगी ज्योतिष रिपोर्ट तक — ऐसे काम करता है':'From birth details to a clear Vedic reading — here’s how it works'}</h2>
+          <p className="mt-2 text-sm leading-6 text-[#76635d]">{language==='hi'?'नीचे कोई विकल्प चुनें; चरण 2 और 3 चुने गए टूल के अनुसार बदलेंगे।':'Choose a tool below. Steps 2 and 3 update to explain exactly what that reading uses and shows.'}</p>
+        </div>
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <article className="flex min-h-[238px] flex-col rounded-2xl border border-[#eadbd0] bg-white p-4 sm:p-5">
+            <div className="flex h-[132px] flex-col justify-center gap-2 rounded-xl bg-[#fbf5ef] p-3">
+              <div className="grid grid-cols-2 gap-1.5">
+                {demoFields.map((field,index)=>{
+                  const offset=demoFields.slice(0,index).reduce((total,item)=>total+item.value.length,0);
+                  const typedLength=Math.max(0,Math.min(field.value.length,guideTypingProgress-offset));
+                  const isTyping=guideTypingProgress>=offset&&guideTypingProgress<offset+field.value.length;
+                  return <div key={`${field.label}-${index}`} className="min-w-0 rounded-lg border border-[#eee1d7] bg-white px-2.5 py-1.5">
+                    <div className="truncate text-[9px] text-[#8a7770]">{field.label}</div>
+                    <div className="flex min-h-4 items-center truncate text-[10px] font-medium text-[#332424]" aria-label={`${field.label}: ${typedLength?field.value.slice(0,typedLength):''}`}>
+                      <span className="truncate">{field.value.slice(0,typedLength)}</span>{isTyping&&<span aria-hidden="true" className="ml-0.5 h-3 w-px shrink-0 animate-pulse bg-[#98212a]"/>}
+                    </div>
+                  </div>;
+                })}
+              </div>
+              <div className="flex items-center justify-between gap-2 px-1 text-[9px] text-[#76635d]"><span className="flex min-w-0 items-center gap-1.5"><MapPin size={11} className="shrink-0 text-[#98212a]"/><span className="truncate">{guide.input}</span></span><span className="shrink-0 text-[#8a7770]">{language==='hi'?'डेमो':'Sample'}</span></div>
+            </div>
+            <h3 className="mt-4 font-semibold text-[#231416]"><span className="mr-1.5 text-[#a77a32]">01</span>{language==='hi'?'जन्म विवरण भरें':'Enter birth details'}</h3>
+            <p className="mt-1 text-xs leading-5 text-[#76635d]">{language==='hi'?'सही स्थानीय जन्म समय और चुना हुआ शहर लग्न तथा ग्रह स्थिति के लिए जरूरी हैं।':'Accurate local birth time and a selected city are needed for the ascendant and planetary positions.'}</p>
+          </article>
+          <article className="flex min-h-[238px] flex-col rounded-2xl border border-[#eadbd0] bg-white p-4 sm:p-5">
+            <div className="flex min-h-[132px] flex-wrap content-center gap-2 rounded-xl bg-[#fbf5ef] p-3" role="group" aria-label={language==='hi'?'ज्योतिष टूल चुनें':'Choose an astrology tool'}>
+              {tabs.map((item)=>{const Icon=item.icon;return <button key={item.id} type="button" onClick={()=>setGuideTab(item.id)} aria-pressed={guideTab===item.id} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] transition ${guideTab===item.id?'border-[#98212a] bg-[#98212a] text-white shadow-sm':'border-[#e7d7cc] bg-white text-[#453332] hover:border-[#bd8e64]'}`}><Icon size={13}/>{language==='hi'?({kundali:'जन्म कुंडली',matching:'कुंडली मिलान',numerology:'अंक ज्योतिष',gemstones:'रत्न'}[item.id]):item.label}</button>})}
+              <p className="w-full px-1 pt-1 text-xs leading-5 text-[#76635d]">{guide.intro}</p>
+            </div>
+            <h3 className="mt-4 font-semibold text-[#231416]"><span className="mr-1.5 text-[#a77a32]">02</span>{language==='hi'?'अपना टूल चुनें':'Choose your reading'} <span className="text-[#98212a]">· {guide.title}</span></h3>
+            <p className="mt-1 text-xs leading-5 text-[#76635d]">{language==='hi'?'चुना हुआ विकल्प रिपोर्ट की जानकारी और गणना का तरीका दिखाता है।':'The selected option updates the report preview and the calculation details.'}</p>
+          </article>
+          <article className="flex min-h-[238px] flex-col rounded-2xl border border-[#eadbd0] bg-white p-4 sm:p-5">
+            <div className="min-h-[132px] rounded-xl bg-[#fbf5ef] p-3">
+              <div className="flex items-center justify-between border-b border-[#eadbd0] pb-2"><span className="text-xs font-semibold text-[#231416]">{guide.title}</span><span className={`inline-flex items-center gap-1 text-[9px] ${guideDemoReady?'text-[#24734d]':'text-[#8a7770]'}`}><span className={`h-1.5 w-1.5 rounded-full ${guideDemoReady?'bg-[#24734d]':'animate-pulse bg-[#a77a32]'}`}/>{guideDemoReady?(language==='hi'?'विवरण भरे':'Details filled'):(language==='hi'?'भर रहा है…':'Filling details…')}</span></div>
+              <ul className="mt-2 space-y-1.5">{guide.rows.map((row)=><li key={row} className="flex items-start gap-2 text-[10px] leading-4 text-[#574644]"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#98212a]"/>{row}</li>)}</ul>
+            </div>
+            <h3 className="mt-4 font-semibold text-[#231416]"><span className="mr-1.5 text-[#a77a32]">03</span>{language==='hi'?'अपनी रिपोर्ट देखें':'Review your report'}</h3>
+            <p className="mt-1 text-xs leading-5 text-[#76635d]">{language==='hi'?'यह sample केवल form भरने का walkthrough है; असली परिणाम नीचे अपने विवरण submit करने पर बनेंगे।':'This is a sample form walkthrough. Your actual results are calculated after you submit your own details below.'}</p>
+            <button type="button" onClick={()=>{setTab(guideTab);setError('');document.getElementById('jyotish-calculator')?.scrollIntoView({behavior:'smooth',block:'start'});}} className="mt-4 inline-flex min-h-10 items-center justify-center self-start rounded-full bg-[#98212a] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#7c1720]">{language==='hi'?`${guide.title} खोलें`:`Open ${guide.title}`} <ArrowLeft className="ml-2 rotate-180" size={13}/></button>
+          </article>
+        </div>
+      </section>
+      <section id="jyotish-calculator" className="mt-5 scroll-mt-24 rounded-[26px] border border-white/[.09] bg-[#100d10] p-5 shadow-2xl shadow-black/20 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/[.08] pb-5"><div className="flex items-start gap-3"><div className="rounded-xl border border-amber-300/15 bg-amber-300/[.07] p-2.5 text-amber-200"><heading.icon size={19}/></div><div><h2 className="font-cormorant text-2xl font-semibold text-[#fff2dc] sm:text-3xl">{heading.label}</h2><p className="mt-1 text-xs text-neutral-500">{tab==='kundali'?'A sidereal birth chart with Rashi, houses, Nakshatra and Panchanga.':tab==='matching'?'A traditional 36-point Ashtakoota comparison using both birth charts.':tab==='numerology'?'Explore birth, destiny and name numbers through traditional numerology.':'View a traditional Lagna-lord association from your calculated birth chart.'}</p></div></div><div className="flex items-center gap-1 rounded-xl border border-white/10 p-1" role="group" aria-label="Result language"><button type="button" onClick={()=>setLanguage('en')} aria-pressed={language==='en'} className={`rounded-lg px-3 py-1.5 text-xs ${language==='en'?'bg-amber-300/15 text-amber-100':'text-neutral-400'}`}>English</button><button type="button" onClick={()=>setLanguage('hi')} aria-pressed={language==='hi'} className={`rounded-lg px-3 py-1.5 text-xs ${language==='hi'?'bg-amber-300/15 text-amber-100':'text-neutral-400'}`}>हिंदी</button></div></div>
         {tab==='kundali'&&<div className="pt-5"><BirthFields value={birth} onChange={(next)=>{setBirth(next);setChart(null);}}/><div className="mt-5 flex flex-wrap items-center gap-3"><button className={button} onClick={calculateChart}><Compass size={16}/> Calculate birth chart</button><span className="text-xs text-neutral-500">For an exact ascendant, use the recorded local birth time.</span></div>{chart&&<ChartResult chart={chart} language={language} onDownloadPdf={()=>downloadChartPdf(chart)}/>}</div>}
         {tab==='matching'&&<div className="pt-5"><div className="grid gap-7 lg:grid-cols-2"><div><h3 className="mb-4 text-sm font-semibold text-amber-100">{language==='hi'?'वर का जन्म विवरण':'Groom’s birth details'}</h3><BirthFields value={groom} onChange={(next)=>{setGroom(next);setMatch(null);setMatchedCharts(null);}} compact/></div><div><h3 className="mb-4 text-sm font-semibold text-amber-100">{language==='hi'?'वधू का जन्म विवरण':'Bride’s birth details'}</h3><BirthFields value={bride} onChange={(next)=>{setBride(next);setMatch(null);setMatchedCharts(null);}} compact/></div></div><button className={`${button} mt-5`} onClick={calculateMatch}><HeartHandshake size={16}/>{language==='hi'?'कुंडली मिलाएँ':'Compare kundalis'}</button>{match&&matchedCharts&&<><div className="mt-5 flex justify-end"><PdfButton language={language} onClick={()=>downloadMatchPdf(matchedCharts.groom,matchedCharts.bride,match)}/></div><CompatibilityReport groom={matchedCharts.groom} bride={matchedCharts.bride} match={match} language={language}/></>}</div>}
