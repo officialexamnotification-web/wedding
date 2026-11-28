@@ -101,6 +101,19 @@ export default function App() {
     Record<string, Partial<CardCustomization>>
   >(() => loadStoredCustomizations());
 
+  const handleCloseCardOnlyInvite = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+
+    // Shared invites often open as a top-level WhatsApp in-app browser tab.
+    // Close that tab when allowed; otherwise leave the invite on a blank page,
+    // never route guests to the NIMANTRAN homepage.
+    window.close();
+    window.location.replace('about:blank');
+  };
+
   // Hydrate shared card link (?custom=..., ?guest=..., ?events=..., /invites/<slug>) on mount
   useEffect(() => {
     const loc = initialLocation.current;
@@ -282,7 +295,7 @@ export default function App() {
         <Suspense fallback={<div className="min-h-dvh bg-[#110A0A]" />}>
           <CardOpenPreviewModal
             theme={pageTheme}
-            onClose={() => window.location.replace('/')}
+            onClose={handleCloseCardOnlyInvite}
             groomName={groomName}
             brideName={brideName}
             initialLang="en"

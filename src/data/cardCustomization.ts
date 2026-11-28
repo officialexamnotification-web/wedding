@@ -785,7 +785,8 @@ export function encodeShareUrl(
     url.searchParams.set('view', 'card');
     return url.toString();
   } catch {
-    return getTemplateCanonicalUrl(theme, isSharePage);
+    const fallbackUrl = getTemplateCanonicalUrl(theme, isSharePage);
+    return `${fallbackUrl}${fallbackUrl.includes('?') ? '&' : '?'}view=card`;
   }
 }
 

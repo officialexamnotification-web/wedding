@@ -5014,9 +5014,10 @@ export const InteractiveInvitePhoneStage: React.FC<InteractiveInvitePhoneStagePr
       {/* ==================== STAGE 2: REVEALED SCROLLABLE THEME INVITATION ==================== */}
       <div
         ref={scrollContainerRef}
-        className={`relative h-full w-full overflow-y-auto overflow-x-hidden no-scrollbar scroll-smooth ${
+        className={`relative h-full w-full overflow-y-auto overflow-x-hidden overscroll-y-contain touch-pan-y no-scrollbar scroll-smooth ${
           bodyOpen ? 'pointer-events-auto' : 'pointer-events-none'
         } ${skin.paperClass}`}
+        style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
       >
         {/* 0. WALK-IN HERO */}
         <section
